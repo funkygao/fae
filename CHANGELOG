@@ -15,5 +15,7 @@ Release Notes - fxi - Version v0.0.1.dev
     . becon 
     . graceful degrade
     . memcache and mongodb backend
+      auto sharding
+      stats sampling logging
 
 ----
