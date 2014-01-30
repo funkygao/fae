@@ -1,0 +1,13 @@
+{
+    fproxy: {
+        listen: "unix:(/var/run/fproxy.sock)"
+        logfile: "/var/log/fproxy.log"
+        loglevel: "info"
+    }
+
+    mongodb: {
+    }
+
+    memcached: {
+    }
+}
