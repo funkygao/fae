@@ -33,7 +33,8 @@ func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 	this.user = section.String("user", "")
 	this.pass = section.String("pass", "")
 	this.replicaSet = section.String("replicaSet", "")
-	if this.host == "" || this.port == 0 ||
+	if this.host == "" ||
+		this.port == 0 ||
 		this.replicaSet == "" {
 		panic("required filed")
 	}
@@ -94,5 +95,7 @@ func (this *Engine) doLoadConfig() {
 		cf.loadConfig(section)
 		this.conf.memcaches = append(this.conf.memcaches, cf)
 	}
+
+	log.Debug("config %+v", *this.conf)
 
 }
