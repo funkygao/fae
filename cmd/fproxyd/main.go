@@ -25,6 +25,10 @@ func init() {
 		}
 		locking.LockInstance(options.lockFile)
 	}
+
+	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
+		shutdown()
+	})
 }
 
 func main() {
@@ -36,10 +40,6 @@ func main() {
 			debug.PrintStack()
 		}
 	}()
-
-	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
-		shutdown()
-	})
 
 	setupLogging(options.logLevel, options.logFile)
 	setupProfiler()
