@@ -20,7 +20,7 @@ func (this *ConfigRpc) loadConfig(section *conf.Conf) {
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
 
-	log.Debug("rpc: %v", *this)
+	log.Debug("rpc: %+v", *this)
 }
 
 type ConfigMemcache struct {
@@ -35,7 +35,7 @@ func (this *ConfigMemcache) loadConfig(section *conf.Conf) {
 		panic("required filed")
 	}
 
-	log.Debug("memcache: %v", *this)
+	log.Debug("memcache: %+v", *this)
 }
 
 type ConfigMongodb struct {
@@ -49,16 +49,18 @@ type ConfigMongodb struct {
 func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 	this.host = section.String("host", "")
 	this.port = section.Int("port", 0)
+	this.db = section.String("db", "")
 	this.user = section.String("user", "")
 	this.pass = section.String("pass", "")
 	this.replicaSet = section.String("replicaSet", "")
 	if this.host == "" ||
 		this.port == 0 ||
+		this.db == "" ||
 		this.replicaSet == "" {
 		panic("required filed")
 	}
 
-	log.Debug("mongo: %v", *this)
+	log.Debug("mongo: %+v", *this)
 }
 
 type Config struct {
@@ -71,12 +73,12 @@ type Config struct {
 	memcaches []*ConfigMemcache
 }
 
-func (this *Engine) LoadConfigFile(fn string) *Engine {
-	log.Debug("Loading config file %s", fn)
+func (this *Engine) LoadConfigFile() *Engine {
+	log.Debug("Loading config file %s", this.configFile)
 
 	config := new(Config)
 	var err error
-	config.Conf, err = conf.Load(fn)
+	config.Conf, err = conf.Load(this.configFile)
 	if err != nil {
 		panic(err)
 	}
@@ -120,6 +122,4 @@ func (this *Engine) doLoadConfig() {
 		cf.loadConfig(section)
 		this.conf.memcaches = append(this.conf.memcaches, cf)
 	}
-
-	log.Debug("config %+v", *this.conf)
 }

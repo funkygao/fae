@@ -48,8 +48,8 @@ func main() {
 	go runWatchdog(ticker)
 	defer ticker.Stop()
 
-	engine.NewEngine().
-		LoadConfigFile(options.configFile).
+	engine.NewEngine(options.configFile).
+		LoadConfigFile().
 		ServeForever()
 
 	shutdown()

@@ -12,7 +12,8 @@ import (
 type Engine struct {
 	conf *Config
 
-	StartedAt time.Time
+	configFile string
+	StartedAt  time.Time
 
 	httpListener net.Listener
 	httpServer   *http.Server
@@ -26,8 +27,9 @@ type Engine struct {
 	hostname string
 }
 
-func NewEngine() (this *Engine) {
+func NewEngine(fn string) (this *Engine) {
 	this = new(Engine)
+	this.configFile = fn
 	this.stats = newEngineStats(this)
 	this.rpcProcessor = rpc.NewFunServantProcessor(servant.NewFunServant())
 	return

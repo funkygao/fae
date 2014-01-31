@@ -6,6 +6,7 @@
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
+        // framed: false
     }
 
     dlog: {
