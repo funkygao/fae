@@ -12,7 +12,7 @@ import (
 func parseFlags() {
 	flag.StringVar(&options.logLevel, "loglevel", "info", "log level")
 	flag.StringVar(&options.logFile, "log", "stdout", "log file")
-	flag.StringVar(&options.configFile, "conf", "etc/fxi.cf", "config file")
+	flag.StringVar(&options.configFile, "conf", "etc/fproxyd.cf", "config file")
 	flag.StringVar(&options.lockFile, "lockfile", "var/fxi.lock", "lockfile path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
 	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")

@@ -1,0 +1,22 @@
+{
+    listen_addr: "unix:(/var/run/fproxy.sock)"
+
+    dlog: {
+    }
+
+    mongodb: [
+        {
+            host: "172.31.11.121"
+            port: 27017
+            db: "royal_log"
+            replicaSet: "sgn0"
+        }
+    ]
+
+    memcached: [
+        {
+            host: "172.31.11.241"
+            port: 11211
+        }
+    ]
+}
