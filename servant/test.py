@@ -23,4 +23,4 @@ client = FunServant.Client(protocol)
 #=====
 r = client.ping()
 delta = datetime.datetime.now() - t1
-print '[Client] received from rpc server:', r, delta.microseconds
+print '[Client] received from rpc server:', r, delta.microseconds, 'us'

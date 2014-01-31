@@ -6,13 +6,13 @@ import (
 	conf "github.com/daviddengcn/go-ljson-conf"
 )
 
-type ConfigRpc struct {
+type configRpc struct {
 	listenAddr string
 	framed     bool
 	protocol   string
 }
 
-func (this *ConfigRpc) loadConfig(section *conf.Conf) {
+func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.listenAddr = section.String("listen_addr", "")
 	if this.listenAddr == "" {
 		panic("Empty listen_addr")
@@ -23,22 +23,48 @@ func (this *ConfigRpc) loadConfig(section *conf.Conf) {
 	log.Debug("rpc: %+v", *this)
 }
 
-type ConfigMemcache struct {
+type configMemcacheServer struct {
 	host string
 	port int
 }
 
-func (this *ConfigMemcache) loadConfig(section *conf.Conf) {
+func (this *configMemcacheServer) loadConfig(section *conf.Conf) {
 	this.host = section.String("host", "")
+	if this.host == "" {
+		panic("Empty memcache server host")
+	}
 	this.port = section.Int("port", 0)
-	if this.host == "" || this.port == 0 {
-		panic("required filed")
+	if this.port == 0 {
+		panic("Empty memcache server port")
+	}
+
+	log.Debug("memcache server: %+v", *this)
+}
+
+type configMemcache struct {
+	hashStrategy string
+	hashFunction string
+	servers      []*configMemcacheServer
+}
+
+func (this *configMemcache) loadConfig(cf *conf.Conf) {
+	this.hashStrategy = cf.String("hash_strategy", "standard")
+	this.hashFunction = cf.String("hash_function", "crc32")
+	for i := 0; i < len(cf.List("servers", nil)); i++ {
+		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
+		if err != nil {
+			panic(err)
+		}
+
+		server := new(configMemcacheServer)
+		server.loadConfig(section)
+		this.servers = append(this.servers, server)
 	}
 
 	log.Debug("memcache: %+v", *this)
 }
 
-type ConfigMongodb struct {
+type configMongodbServer struct {
 	host       string
 	port       int
 	user, pass string
@@ -46,7 +72,7 @@ type ConfigMongodb struct {
 	replicaSet string
 }
 
-func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
+func (this *configMongodbServer) loadConfig(section *conf.Conf) {
 	this.host = section.String("host", "")
 	this.port = section.Int("port", 0)
 	this.db = section.String("db", "")
@@ -60,23 +86,42 @@ func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 		panic("required filed")
 	}
 
-	log.Debug("mongo: %+v", *this)
+	log.Debug("mongodb server: %+v", *this)
 }
 
-type Config struct {
+type configMongodb struct {
+	servers []*configMongodbServer
+}
+
+func (this *configMongodb) loadConfig(cf *conf.Conf) {
+	for i := 0; i < len(cf.List("servers", nil)); i++ {
+		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
+		if err != nil {
+			panic(err)
+		}
+
+		server := new(configMongodbServer)
+		server.loadConfig(section)
+		this.servers = append(this.servers, server)
+	}
+
+	log.Debug("mongodb: %+v", *this)
+}
+
+type engineConfig struct {
 	*conf.Conf
 
 	httpListenAddr string
 
-	rpc       *ConfigRpc
-	mongos    []*ConfigMongodb
-	memcaches []*ConfigMemcache
+	rpc      *configRpc
+	mongodb  *configMongodb
+	memcache *configMemcache
 }
 
 func (this *Engine) LoadConfigFile() *Engine {
 	log.Debug("Loading config file %s", this.configFile)
 
-	config := new(Config)
+	config := new(engineConfig)
 	var err error
 	config.Conf, err = conf.Load(this.configFile)
 	if err != nil {
@@ -93,7 +138,7 @@ func (this *Engine) doLoadConfig() {
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 
 	// rpc section
-	this.conf.rpc = new(ConfigRpc)
+	this.conf.rpc = new(configRpc)
 	section, err := this.conf.Section("rpc")
 	if err != nil {
 		panic(err)
@@ -101,28 +146,18 @@ func (this *Engine) doLoadConfig() {
 	this.conf.rpc.loadConfig(section)
 
 	// mongodb section
-	this.conf.mongos = make([]*ConfigMongodb, 0)
-	this.conf.memcaches = make([]*ConfigMemcache, 0)
-	for i := 0; i < len(this.conf.List("mongodb", nil)); i++ {
-		section, err := this.conf.Section(fmt.Sprintf("mongodb[%d]", i))
-		if err != nil {
-			panic(err)
-		}
-
-		cf := new(ConfigMongodb)
-		cf.loadConfig(section)
-		this.conf.mongos = append(this.conf.mongos, cf)
+	this.conf.mongodb = new(configMongodb)
+	section, err = this.conf.Section("mongodb")
+	if err != nil {
+		panic(err)
 	}
+	this.conf.mongodb.loadConfig(section)
 
 	// memcached section
-	for i := 0; i < len(this.conf.List("memcached", nil)); i++ {
-		section, err := this.conf.Section(fmt.Sprintf("memcached[%d]", i))
-		if err != nil {
-			panic(err)
-		}
-
-		cf := new(ConfigMemcache)
-		cf.loadConfig(section)
-		this.conf.memcaches = append(this.conf.memcaches, cf)
+	this.conf.memcache = new(configMemcache)
+	section, err = this.conf.Section("memcache")
+	if err != nil {
+		panic(err)
 	}
+	this.conf.memcache.loadConfig(section)
 }

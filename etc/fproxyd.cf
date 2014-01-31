@@ -12,19 +12,26 @@
     dlog: {
     }
 
-    mongodb: [
-        {
-            host: "172.31.11.121"
-            port: 27017
-            db: "royal_log"
-            replicaSet: "sgn0"
-        }
-    ]
+    mongodb: {
+        servers: [
+            {
+                host: "172.31.11.121"
+                port: 27017
+                db: "royal_log"
+                replicaSet: "sgn0"
+            }
+        ]
+    }
 
-    memcached: [
-        {
-            host: "172.31.11.241"
-            port: 11211
-        }
-    ]
+    memcache: {
+        hash_strategy: "standard"
+        hash_function: "crc32"
+        servers: [
+            {
+                host: "172.31.11.241"
+                port: 11211
+            }
+        ]
+    }
+
 }

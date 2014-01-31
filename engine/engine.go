@@ -10,7 +10,7 @@ import (
 )
 
 type Engine struct {
-	conf *Config
+	conf *engineConfig
 
 	configFile string
 	StartedAt  time.Time
