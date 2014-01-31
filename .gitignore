@@ -20,5 +20,7 @@ _testmain.go
 
 *.exe
 
-fproxy
 fproxyd
+gen-go/
+go-php/
+var/

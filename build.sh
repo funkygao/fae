@@ -1,4 +1,4 @@
-#! /bin/bash -e
+#!/bin/bash -e
 
 cd $(dirname $0)
 ID=$(git rev-parse HEAD | cut -c1-7)
