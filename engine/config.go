@@ -97,5 +97,4 @@ func (this *Engine) doLoadConfig() {
 	}
 
 	log.Debug("config %+v", *this.conf)
-
 }
