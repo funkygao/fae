@@ -15,10 +15,22 @@
     mongodb: {
         servers: [
             {
-                host: "172.31.11.121"
+                shard_name: "log"
+                host: "127.0.0.1"
                 port: 27017
-                db: "royal_log"
-                replicaSet: "sgn0"
+                db: "qa_royal_log"
+            }
+            {
+                shard_name: "default"
+                host: "127.0.0.1"
+                port: 27017
+                db: "qa_royal_0"
+            }
+            {
+                shard_name: "db1"
+                host: "127.0.0.1"
+                port: 27017
+                db: "qa_royal_1"
             }
         ]
     }
@@ -28,8 +40,8 @@
         hash_function: "crc32"
         servers: [
             {
-                host: "172.31.11.241"
-                port: 11211
+                host: "127.0.0.1"
+                port: "11211"
             }
         ]
     }

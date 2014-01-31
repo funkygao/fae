@@ -56,3 +56,10 @@ func BenchmarkMemcacheClientSet(b *testing.B) {
 	}
 
 }
+
+func BenchmarkHash(b *testing.B) {
+	key := "user:23424"
+	for i := 0; i < b.N; i++ {
+		findServer(key)
+	}
+}

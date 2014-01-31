@@ -25,7 +25,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 
 type configMemcacheServer struct {
 	host string
-	port int
+	port string
 }
 
 func (this *configMemcacheServer) loadConfig(section *conf.Conf) {
@@ -33,8 +33,8 @@ func (this *configMemcacheServer) loadConfig(section *conf.Conf) {
 	if this.host == "" {
 		panic("Empty memcache server host")
 	}
-	this.port = section.Int("port", 0)
-	if this.port == 0 {
+	this.port = section.String("port", "")
+	if this.port == "" {
 		panic("Empty memcache server port")
 	}
 
@@ -44,10 +44,11 @@ func (this *configMemcacheServer) loadConfig(section *conf.Conf) {
 type configMemcache struct {
 	hashStrategy string
 	hashFunction string
-	servers      []*configMemcacheServer
+	servers      map[string]*configMemcacheServer // key is host:port
 }
 
 func (this *configMemcache) loadConfig(cf *conf.Conf) {
+	this.servers = make(map[string]*configMemcacheServer)
 	this.hashStrategy = cf.String("hash_strategy", "standard")
 	this.hashFunction = cf.String("hash_function", "crc32")
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
@@ -58,13 +59,14 @@ func (this *configMemcache) loadConfig(cf *conf.Conf) {
 
 		server := new(configMemcacheServer)
 		server.loadConfig(section)
-		this.servers = append(this.servers, server)
+		this.servers[server.host+":"+server.port] = server
 	}
 
 	log.Debug("memcache: %+v", *this)
 }
 
 type configMongodbServer struct {
+	shardName  string
 	host       string
 	port       int
 	user, pass string
@@ -73,6 +75,7 @@ type configMongodbServer struct {
 }
 
 func (this *configMongodbServer) loadConfig(section *conf.Conf) {
+	this.shardName = section.String("shard_name", "")
 	this.host = section.String("host", "")
 	this.port = section.Int("port", 0)
 	this.db = section.String("db", "")
@@ -81,8 +84,8 @@ func (this *configMongodbServer) loadConfig(section *conf.Conf) {
 	this.replicaSet = section.String("replicaSet", "")
 	if this.host == "" ||
 		this.port == 0 ||
-		this.db == "" ||
-		this.replicaSet == "" {
+		this.shardName == "" ||
+		this.db == "" {
 		panic("required filed")
 	}
 
@@ -90,10 +93,11 @@ func (this *configMongodbServer) loadConfig(section *conf.Conf) {
 }
 
 type configMongodb struct {
-	servers []*configMongodbServer
+	servers map[string]*configMongodbServer // key is shardName
 }
 
 func (this *configMongodb) loadConfig(cf *conf.Conf) {
+	this.servers = make(map[string]*configMongodbServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
 		if err != nil {
@@ -102,7 +106,7 @@ func (this *configMongodb) loadConfig(cf *conf.Conf) {
 
 		server := new(configMongodbServer)
 		server.loadConfig(section)
-		this.servers = append(this.servers, server)
+		this.servers[server.shardName] = server
 	}
 
 	log.Debug("mongodb: %+v", *this)
