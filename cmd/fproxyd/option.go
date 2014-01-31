@@ -4,8 +4,6 @@ import (
 	log "code.google.com/p/log4go"
 	"flag"
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
@@ -41,12 +39,13 @@ func setupProfiler() {
 			panic(err)
 		}
 
-		globals.Printf("CPU profiler %s enabled\n", options.cpuprof)
 		pprof.StartCPUProfile(f)
+
+		log.Info("CPU profiler [%s] enabled\n", options.cpuprof)
 	}
 
 	if options.memprof != "" {
-		globals.Printf("MEM profiler %s enabled\n", options.memprof)
+		log.Info("MEM profiler [%s] enabled\n", options.memprof)
 	}
 }
 

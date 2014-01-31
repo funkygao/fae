@@ -12,7 +12,7 @@ import (
 func init() {
 	parseFlags()
 
-	if options.showversion {
+	if options.showVersion {
 		showVersionAndExit()
 	}
 

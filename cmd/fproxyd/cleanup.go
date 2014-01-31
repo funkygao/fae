@@ -2,11 +2,9 @@ package main
 
 import (
 	log "code.google.com/p/log4go"
-	"github.com/funkygao/dpipe/engine"
 	"github.com/funkygao/golib/locking"
 	"os"
 	"runtime/pprof"
-	"time"
 )
 
 func cleanup() {

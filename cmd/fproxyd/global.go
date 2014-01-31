@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/funkygao/fxi/engine"
-)
-
 var (
 	BuildID = "unknown" // git version id, passed in from shell
 
