@@ -2,6 +2,7 @@ package memcache
 
 import (
 	"github.com/funkygao/assert"
+	"hash/crc32"
 	"os/exec"
 	"testing"
 	"time"

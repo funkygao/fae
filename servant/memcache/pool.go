@@ -2,12 +2,21 @@ package memcache
 
 import (
 	"github.com/funkygao/fxi/config"
+	"sync"
 )
 
 type MemcachePool struct {
+	*sync.RWMutex
+
 	findServer FindServer
 
-	servers map[string]*MemcacheClient
+	servers map[uint32]*MemcacheClient // hash -> client
+}
+
+func newMemcachePool() (this *MemcachePool) {
+	this = new(MemcachePool)
+	this.RWMutex = new(sync.RWMutex)
+	return
 }
 
 func (this *MemcachePool) Init(cf *config.ConfigMemcache) {
@@ -22,10 +31,5 @@ func (this *MemcachePool) Init(cf *config.ConfigMemcache) {
 		panic("Invalid hash_strategy: " + cf.HashStrategy)
 	}
 
-	this.servers = make(map[string]*MemcacheClient)
-	for addr, _ := range cf.Servers {
-		this.servers[addr] = newMemcacheClient()
-		this.servers[addr].Connect(addr)
-	}
-
+	this.servers = make(map[uint32]*MemcacheClient)
 }
