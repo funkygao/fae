@@ -92,6 +92,7 @@ func (this *Engine) LoadConfigFile() *Engine {
 func (this *Engine) doLoadConfig() {
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 
+	// rpc section
 	this.conf.rpc = new(ConfigRpc)
 	section, err := this.conf.Section("rpc")
 	if err != nil {
@@ -99,6 +100,7 @@ func (this *Engine) doLoadConfig() {
 	}
 	this.conf.rpc.loadConfig(section)
 
+	// mongodb section
 	this.conf.mongos = make([]*ConfigMongodb, 0)
 	this.conf.memcaches = make([]*ConfigMemcache, 0)
 	for i := 0; i < len(this.conf.List("mongodb", nil)); i++ {
@@ -112,6 +114,7 @@ func (this *Engine) doLoadConfig() {
 		this.conf.mongos = append(this.conf.mongos, cf)
 	}
 
+	// memcached section
 	for i := 0; i < len(this.conf.List("memcached", nil)); i++ {
 		section, err := this.conf.Section(fmt.Sprintf("memcached[%d]", i))
 		if err != nil {
