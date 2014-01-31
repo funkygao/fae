@@ -11,7 +11,7 @@ type Engine struct {
 	conf *Config
 
 	StartedAt time.Time
-	stats     *EngineStats
+	stats     *engineStats
 
 	listener   net.Listener
 	httpServer *http.Server
