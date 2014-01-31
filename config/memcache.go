@@ -7,27 +7,32 @@ import (
 )
 
 type ConfigMemcacheServer struct {
-	Host string
-	Port string
+	host string
+	hort string
 }
 
 func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
-	this.Host = section.String("host", "")
-	if this.Host == "" {
+	this.host = section.String("host", "")
+	if this.host == "" {
 		panic("Empty memcache server host")
 	}
-	this.Port = section.String("port", "")
-	if this.Port == "" {
+	this.hort = section.String("port", "")
+	if this.hort == "" {
 		panic("Empty memcache server port")
 	}
 
 	log.Debug("memcache server: %+v", *this)
 }
 
+func (this *ConfigMemcacheServer) Server() string {
+	return this.host + ":" + this.hort
+}
+
 type ConfigMemcache struct {
 	HashStrategy string
 	HashFunction string
-	Servers      map[string]*ConfigMemcacheServer // key is host:port
+
+	Servers map[string]*ConfigMemcacheServer // key is host:port(addr)
 }
 
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
@@ -42,7 +47,7 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 
 		server := new(ConfigMemcacheServer)
 		server.loadConfig(section)
-		this.Servers[server.Host+":"+server.Port] = server
+		this.Servers[server.Server()] = server
 	}
 
 	log.Debug("memcache: %+v", *this)

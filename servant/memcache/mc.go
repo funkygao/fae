@@ -16,7 +16,9 @@ const (
 	MAX_VALUE_SIZE = 1000000
 )
 
-type Memcache struct {
+type MemcacheClient struct {
+	addr string
+
 	conn   net.Conn
 	buffer bufio.ReadWriter
 }
@@ -28,7 +30,11 @@ type Result struct {
 	Cas   uint64
 }
 
-func Connect(addr string) (mc *Memcache, err error) {
+func newMemcacheClient() *MemcacheClient {
+	return &MemcacheClient{}
+}
+
+func (this *MemcacheClient) Connect(addr string) (err error) {
 	var network string
 	if strings.Contains(addr, "/") {
 		network = "unix"
@@ -36,83 +42,79 @@ func Connect(addr string) (mc *Memcache, err error) {
 		network = "tcp"
 	}
 
-	var nc net.Conn
-	nc, err = net.Dial(network, addr)
+	var conn net.Conn
+	conn, err = net.Dial(network, addr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return newMemcache(nc), nil
-}
-
-func newMemcache(nc net.Conn) *Memcache {
-	return &Memcache{
-		conn: nc,
-		buffer: bufio.ReadWriter{
-			Reader: bufio.NewReader(nc),
-			Writer: bufio.NewWriter(nc),
-		},
+	this.conn = conn
+	this.buffer = bufio.ReadWriter{
+		Reader: bufio.NewReader(this.conn),
+		Writer: bufio.NewWriter(this.conn),
 	}
+
+	return nil
 }
 
-func (this *Memcache) Close() {
+func (this *MemcacheClient) Close() {
 	this.conn.Close()
 	this.conn = nil
 }
 
-func (this *Memcache) IsClosed() bool {
+func (this *MemcacheClient) IsClosed() bool {
 	return this.conn == nil
 }
 
-func (this *Memcache) Get(keys ...string) (results []Result, err error) {
+func (this *MemcacheClient) Get(keys ...string) (results []Result, err error) {
 	defer handleError(&err)
 	results = this.get("get", keys)
 	return
 }
 
-func (this *Memcache) Gets(keys ...string) (results []Result, err error) {
+func (this *MemcacheClient) Gets(keys ...string) (results []Result, err error) {
 	defer handleError(&err)
 	results = this.get("gets", keys)
 	return
 }
 
-func (this *Memcache) Set(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Set(key string, flags uint16, timeout uint64,
 	value []byte) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("set", key, flags, timeout, value, 0), nil
 }
 
-func (this *Memcache) Add(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Add(key string, flags uint16, timeout uint64,
 	value []byte) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("add", key, flags, timeout, value, 0), nil
 }
 
-func (this *Memcache) Replace(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Replace(key string, flags uint16, timeout uint64,
 	value []byte) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("replace", key, flags, timeout, value, 0), nil
 }
 
-func (this *Memcache) Append(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Append(key string, flags uint16, timeout uint64,
 	value []byte) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("append", key, flags, timeout, value, 0), nil
 }
 
-func (this *Memcache) Prepend(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Prepend(key string, flags uint16, timeout uint64,
 	value []byte) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("prepend", key, flags, timeout, value, 0), nil
 }
 
-func (this *Memcache) Cas(key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) Cas(key string, flags uint16, timeout uint64,
 	value []byte, cas uint64) (stored bool, err error) {
 	defer handleError(&err)
 	return this.store("cas", key, flags, timeout, value, cas), nil
 }
 
-func (this *Memcache) Delete(key string) (deleted bool, err error) {
+func (this *MemcacheClient) Delete(key string) (deleted bool, err error) {
 	defer handleError(&err)
 	// delete <key> [<time>] [noreply]\r\n
 	this.writeStrings("delete", key, "\r\n")
@@ -124,7 +126,7 @@ func (this *Memcache) Delete(key string) (deleted bool, err error) {
 	return strings.HasPrefix(reply, "DELETED"), nil
 }
 
-func (this *Memcache) get(cmd string, keys []string) (results []Result) {
+func (this *MemcacheClient) get(cmd string, keys []string) (results []Result) {
 	results = make([]Result, 0, len(keys))
 	if len(keys) == 0 {
 		return
@@ -176,7 +178,7 @@ func (this *Memcache) get(cmd string, keys []string) (results []Result) {
 	return
 }
 
-func (this *Memcache) store(cmd string, key string, flags uint16, timeout uint64,
+func (this *MemcacheClient) store(cmd string, key string, flags uint16, timeout uint64,
 	value []byte, cas uint64) (stored bool) {
 	if len(value) > MAX_VALUE_SIZE {
 		return false
@@ -207,31 +209,31 @@ func (this *Memcache) store(cmd string, key string, flags uint16, timeout uint64
 	return strings.HasPrefix(reply, "STORED")
 }
 
-func (this *Memcache) writeString(s string) {
+func (this *MemcacheClient) writeString(s string) {
 	if _, err := this.buffer.WriteString(s); err != nil {
 		panic(newMemcacheError("%s", err))
 	}
 }
 
-func (this *Memcache) writeStrings(strs ...string) {
+func (this *MemcacheClient) writeStrings(strs ...string) {
 	for _, s := range strs {
 		this.writeString(s)
 	}
 }
 
-func (this *Memcache) write(b []byte) {
+func (this *MemcacheClient) write(b []byte) {
 	if _, err := this.buffer.Write(b); err != nil {
 		panic(newMemcacheError("%s", err))
 	}
 }
 
-func (this *Memcache) flush() {
+func (this *MemcacheClient) flush() {
 	if err := this.buffer.Flush(); err != nil {
 		panic(newMemcacheError("%s", err))
 	}
 }
 
-func (this *Memcache) readline() string {
+func (this *MemcacheClient) readline() string {
 	this.flush()
 	line, isPrefix, err := this.buffer.ReadLine()
 	if isPrefix || err != nil {
@@ -241,7 +243,7 @@ func (this *Memcache) readline() string {
 	return string(line)
 }
 
-func (this *Memcache) read(count int) []byte {
+func (this *MemcacheClient) read(count int) []byte {
 	this.flush()
 	buf := make([]byte, count)
 	if _, err := io.ReadFull(this.buffer, buf); err != nil {

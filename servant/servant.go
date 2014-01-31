@@ -1,9 +1,11 @@
+/*
+Basically it's a plugin framework
+*/
 package servant
 
 import (
-
-//	"github.com/funkygao/fxi/servant/memcache"
-//	"github.com/funkygao/fxi/servant/mongo"
+	_ "github.com/funkygao/fxi/servant/memcache" // register memcache pool
+	_ "github.com/funkygao/fxi/servant/mongo"    // register mongodb pool
 )
 
 type FunServantImpl struct {

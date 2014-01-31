@@ -5,32 +5,32 @@ import (
 )
 
 var (
-	servantConfig *ConfigServant
+	Servants *ConfigServant
 )
 
 type ConfigServant struct {
-	mongodb  *ConfigMongodb
-	memcache *ConfigMemcache
+	Mongodb  *ConfigMongodb
+	Memcache *ConfigMemcache
 }
 
 func init() {
-	servantConfig = new(ConfigServant)
+	Servants = new(ConfigServant)
 }
 
 func LoadServants(cf *conf.Conf) {
 	// mongodb section
-	servantConfig.mongodb = new(ConfigMongodb)
+	Servants.Mongodb = new(ConfigMongodb)
 	section, err := cf.Section("mongodb")
 	if err != nil {
 		panic(err)
 	}
-	servantConfig.mongodb.loadConfig(section)
+	Servants.Mongodb.loadConfig(section)
 
 	// memcached section
-	servantConfig.memcache = new(ConfigMemcache)
+	Servants.Memcache = new(ConfigMemcache)
 	section, err = cf.Section("memcache")
 	if err != nil {
 		panic(err)
 	}
-	servantConfig.memcache.loadConfig(section)
+	Servants.Memcache.loadConfig(section)
 }

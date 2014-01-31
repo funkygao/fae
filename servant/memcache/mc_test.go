@@ -15,7 +15,8 @@ func TestMemcacheClient(t *testing.T) {
 	defer cmd.Process.Kill()
 	time.Sleep(time.Second)
 
-	mc, err := Connect("localhost:11211")
+	mc := newMemcacheClient()
+	err := mc.Connect("localhost:11211")
 	if err != nil {
 		t.Fatalf("Connect: %v", err)
 	}
@@ -40,7 +41,8 @@ func BenchmarkMemcacheClientSet(b *testing.B) {
 	defer cmd.Process.Kill()
 	time.Sleep(time.Second)
 
-	mc, err := Connect("localhost:11211")
+	mc := newMemcacheClient()
+	err := mc.Connect("localhost:11211")
 	if err != nil {
 		b.Fatalf("Connect: %v", err)
 	}
