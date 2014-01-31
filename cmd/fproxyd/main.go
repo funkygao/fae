@@ -23,8 +23,6 @@ func init() {
 		}
 		locking.LockInstance(options.lockFile)
 	}
-
-	setupLogging(options.logLevel, options.logFile)
 }
 
 func main() {
@@ -37,6 +35,7 @@ func main() {
 		}
 	}()
 
+	setupLogging(options.logLevel, options.logFile)
 	setupProfiler()
 
 	ticker := time.NewTicker(time.Second * time.Duration(options.tick))
