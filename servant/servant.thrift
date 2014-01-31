@@ -1,5 +1,5 @@
-namespace go  fun.servant
-namespace php fun.servant
+namespace go  fun.rpc
+namespace php fun.rpc
 
 service FunServant {
 }

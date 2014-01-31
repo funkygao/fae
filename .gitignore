@@ -20,6 +20,5 @@ _testmain.go
 
 *.exe
 
-gen-go/
 go-php/
 var/

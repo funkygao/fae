@@ -41,6 +41,8 @@ func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 type Config struct {
 	*conf.Conf
 
+	listenAddr string
+
 	mongos    []*ConfigMongodb
 	memcaches []*ConfigMemcache
 }
@@ -60,7 +62,8 @@ func (this *Engine) LoadConfigFile(fn string) *Engine {
 }
 
 func (this *Engine) doLoadConfig() {
-	if this.conf.String("listen_addr", "") == "" {
+	this.conf.listenAddr = this.conf.String("listen_addr", "")
+	if this.conf.listenAddr == "" {
 		panic("listen_addr empty")
 	}
 
