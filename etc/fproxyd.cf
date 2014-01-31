@@ -1,5 +1,6 @@
 {
-    listen_addr: "unix:(/var/run/fproxy.sock)"
+    //listen_addr: "unix:(/var/run/fproxy.sock)"
+    listen_addr: ":9001"
 
     dlog: {
     }

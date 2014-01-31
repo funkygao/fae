@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/funkygao/fxi/engine"
 	"github.com/funkygao/golib/locking"
+	"github.com/funkygao/golib/signal"
 	"os"
 	"runtime/debug"
+	"syscall"
 	"time"
 )
 
@@ -34,6 +36,10 @@ func main() {
 			debug.PrintStack()
 		}
 	}()
+
+	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
+		shutdown()
+	})
 
 	setupLogging(options.logLevel, options.logFile)
 	setupProfiler()

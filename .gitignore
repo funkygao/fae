@@ -22,3 +22,4 @@ _testmain.go
 
 go-php/
 var/
+cmd/fproxyd/fproxyd

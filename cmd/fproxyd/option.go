@@ -13,7 +13,7 @@ func parseFlags() {
 	flag.StringVar(&options.logLevel, "loglevel", "info", "log level")
 	flag.StringVar(&options.logFile, "log", "stdout", "log file")
 	flag.StringVar(&options.configFile, "conf", "etc/fproxyd.cf", "config file")
-	flag.StringVar(&options.lockFile, "lockfile", "var/fxi.lock", "lockfile path")
+	flag.StringVar(&options.lockFile, "lockfile", "var/fproxyd.lock", "lockfile path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
 	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")
 	flag.StringVar(&options.cpuprof, "cpuprof", "", "cpu profiling file")
@@ -64,7 +64,7 @@ func setupLogging(loggingLevel, logFile string) {
 		filter.Level = level
 	}
 
-	if logFile == "stdout" || logFile == "" {
+	if logFile == "stdout" {
 		log.AddFilter("stdout", level, log.NewConsoleLogWriter())
 	} else {
 		logDir := filepath.Dir(logFile)

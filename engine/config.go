@@ -1,6 +1,7 @@
 package engine
 
 import (
+	log "code.google.com/p/log4go"
 	"fmt"
 	conf "github.com/daviddengcn/go-ljson-conf"
 )
@@ -48,6 +49,8 @@ type Config struct {
 }
 
 func (this *Engine) LoadConfigFile(fn string) *Engine {
+	log.Debug("Loading config file %s", fn)
+
 	config := new(Config)
 	var err error
 	config.Conf, err = conf.Load(fn)

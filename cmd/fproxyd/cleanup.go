@@ -10,6 +10,7 @@ import (
 func cleanup() {
 	if options.lockFile != "" {
 		locking.UnlockInstance(options.lockFile)
+		log.Debug("Cleanup lock %s", options.lockFile)
 	}
 
 	if options.cpuprof != "" {
