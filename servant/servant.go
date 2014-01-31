@@ -14,6 +14,10 @@ func NewFunServant() (this *FunServantImpl) {
 	return
 }
 
+func (this *FunServantImpl) Ping() (r string, err error) {
+	return "pong", nil
+}
+
 func init() {
 
 }

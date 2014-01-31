@@ -1,7 +1,12 @@
 {
-    //listen_addr: "unix:(/var/run/fproxy.sock)"
-    rpc_listen_addr: ":9001"
     http_listen_addr: ":9002"
+
+    rpc: {
+        //listen_addr: "unix:(/var/run/fproxy.sock)"
+        listen_addr: ":9001"
+        // protocol: binary | json | simplejson | compact
+        protocol: "binary"
+    }
 
     dlog: {
     }

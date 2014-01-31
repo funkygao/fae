@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"github.com/funkygao/fxi/servant"
+	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
 	"github.com/gorilla/mux"
 	"net"
 	"net/http"
@@ -17,6 +19,8 @@ type Engine struct {
 	httpRouter *mux.Router
 	httpPaths  []string
 
+	rpcProcessor *rpc.FunServantProcessor
+
 	stats    *engineStats
 	pid      int
 	hostname string
@@ -25,5 +29,6 @@ type Engine struct {
 func NewEngine() (this *Engine) {
 	this = new(Engine)
 	this.stats = newEngineStats(this)
+	this.rpcProcessor = rpc.NewFunServantProcessor(servant.NewFunServant())
 	return
 }

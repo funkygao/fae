@@ -17,7 +17,7 @@ func (this *Engine) launchHttpServ() {
 		return
 	}
 
-	log.Debug("HTTP server ready at %s", this.conf.httpListenAddr)
+	log.Info("HTTP server ready at %s", this.conf.httpListenAddr)
 
 	this.httpRouter = mux.NewRouter()
 	this.httpServer = &http.Server{Addr: this.conf.httpListenAddr,

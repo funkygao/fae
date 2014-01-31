@@ -6,6 +6,23 @@ import (
 	conf "github.com/daviddengcn/go-ljson-conf"
 )
 
+type ConfigRpc struct {
+	listenAddr string
+	framed     bool
+	protocol   string
+}
+
+func (this *ConfigRpc) loadConfig(section *conf.Conf) {
+	this.listenAddr = section.String("listen_addr", "")
+	if this.listenAddr == "" {
+		panic("Empty listen_addr")
+	}
+	this.framed = section.Bool("framed", false)
+	this.protocol = section.String("protocol", "binary")
+
+	log.Debug("rpc: %v", *this)
+}
+
 type ConfigMemcache struct {
 	host string
 	port int
@@ -17,6 +34,8 @@ func (this *ConfigMemcache) loadConfig(section *conf.Conf) {
 	if this.host == "" || this.port == 0 {
 		panic("required filed")
 	}
+
+	log.Debug("memcache: %v", *this)
 }
 
 type ConfigMongodb struct {
@@ -38,14 +57,16 @@ func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 		this.replicaSet == "" {
 		panic("required filed")
 	}
+
+	log.Debug("mongo: %v", *this)
 }
 
 type Config struct {
 	*conf.Conf
 
-	rpcListenAddr  string
 	httpListenAddr string
 
+	rpc       *ConfigRpc
 	mongos    []*ConfigMongodb
 	memcaches []*ConfigMemcache
 }
@@ -68,14 +89,16 @@ func (this *Engine) LoadConfigFile(fn string) *Engine {
 
 func (this *Engine) doLoadConfig() {
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
-	this.conf.rpcListenAddr = this.conf.String("rpc_listen_addr", "")
-	if this.conf.rpcListenAddr == "" {
-		panic("rpc_listen_addr empty")
+
+	this.conf.rpc = new(ConfigRpc)
+	section, err := this.conf.Section("rpc")
+	if err != nil {
+		panic(err)
 	}
+	this.conf.rpc.loadConfig(section)
 
 	this.conf.mongos = make([]*ConfigMongodb, 0)
 	this.conf.memcaches = make([]*ConfigMemcache, 0)
-
 	for i := 0; i < len(this.conf.List("mongodb", nil)); i++ {
 		section, err := this.conf.Section(fmt.Sprintf("mongodb[%d]", i))
 		if err != nil {
