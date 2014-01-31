@@ -4,7 +4,9 @@ import (
 	log "code.google.com/p/log4go"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/golib/signal"
 	"os"
+	"syscall"
 	"time"
 )
 
@@ -12,6 +14,11 @@ func (this *Engine) ServeForever() {
 	this.StartedAt = time.Now()
 	this.hostname, _ = os.Hostname()
 	this.pid = os.Getpid()
+
+	// reload on HUP
+	signal.RegisterSignalHandler(syscall.SIGHUP, func(sig os.Signal) {
+		this.LoadConfigFile()
+	})
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()
