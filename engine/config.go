@@ -43,7 +43,8 @@ func (this *ConfigMongodb) loadConfig(section *conf.Conf) {
 type Config struct {
 	*conf.Conf
 
-	listenAddr string
+	rpcListenAddr  string
+	httpListenAddr string
 
 	mongos    []*ConfigMongodb
 	memcaches []*ConfigMemcache
@@ -66,9 +67,10 @@ func (this *Engine) LoadConfigFile(fn string) *Engine {
 }
 
 func (this *Engine) doLoadConfig() {
-	this.conf.listenAddr = this.conf.String("listen_addr", "")
-	if this.conf.listenAddr == "" {
-		panic("listen_addr empty")
+	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
+	this.conf.rpcListenAddr = this.conf.String("rpc_listen_addr", "")
+	if this.conf.rpcListenAddr == "" {
+		panic("rpc_listen_addr empty")
 	}
 
 	this.conf.mongos = make([]*ConfigMongodb, 0)

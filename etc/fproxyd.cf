@@ -1,6 +1,7 @@
 {
     //listen_addr: "unix:(/var/run/fproxy.sock)"
-    listen_addr: ":9001"
+    rpc_listen_addr: ":9001"
+    http_listen_addr: ":9002"
 
     dlog: {
     }

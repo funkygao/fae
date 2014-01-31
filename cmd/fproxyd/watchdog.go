@@ -14,7 +14,7 @@ func runWatchdog(ticker *time.Ticker) {
 	for _ = range ticker.C {
 		runtime.ReadMemStats(ms)
 
-		log.Info("ver:%s, tick:%ds goroutine:%d, mem:%s, elapsed:%s\n",
+		log.Info("ver:%s, tick:%ds goroutine:%d, mem:%s, elapsed:%s",
 			BuildID,
 			options.tick,
 			runtime.NumGoroutine(),

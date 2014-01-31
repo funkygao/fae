@@ -1,5 +1,11 @@
 package servant
 
+import (
+
+//	"github.com/funkygao/fxi/servant/memcache"
+//	"github.com/funkygao/fxi/servant/mongo"
+)
+
 type FunServantImpl struct {
 }
 
