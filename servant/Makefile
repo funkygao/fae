@@ -8,3 +8,4 @@ gen:
 clean:
 	rm -rf gen-go
 	rm -rf gen-php
+	rm -rf gen-py

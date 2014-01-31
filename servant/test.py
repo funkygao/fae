@@ -20,6 +20,7 @@ protocol = TBinaryProtocol.TBinaryProtocol(sock)
 client = FunServant.Client(protocol)
 
 # ping
+#=====
 r = client.ping()
 delta = datetime.datetime.now() - t1
 print '[Client] received from rpc server:', r, delta.microseconds
