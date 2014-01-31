@@ -11,13 +11,13 @@ type Engine struct {
 	conf *Config
 
 	StartedAt time.Time
-	stats     *engineStats
 
 	listener   net.Listener
 	httpServer *http.Server
 	httpRouter *mux.Router
 	httpPaths  []string
 
+	stats    *engineStats
 	pid      int
 	hostname string
 }
