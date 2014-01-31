@@ -149,6 +149,6 @@ func (this *Engine) stopHttpServ() {
 	if this.httpListener != nil {
 		this.httpListener.Close()
 
-		log.Info("Http stopped")
+		log.Info("HTTP server stopped")
 	}
 }
