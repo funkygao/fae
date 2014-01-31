@@ -14,10 +14,10 @@ type Engine struct {
 
 	StartedAt time.Time
 
-	listener   net.Listener
-	httpServer *http.Server
-	httpRouter *mux.Router
-	httpPaths  []string
+	httpListener net.Listener
+	httpServer   *http.Server
+	httpRouter   *mux.Router
+	httpPaths    []string
 
 	rpcProcessor *rpc.FunServantProcessor
 
