@@ -20,6 +20,8 @@ _testmain.go
 
 *.exe
 
-go-php/
+servant/gen-php/
+servant/gen-go/
+servant/gen-py/
 var/
 cmd/fproxyd/fproxyd
