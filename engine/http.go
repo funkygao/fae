@@ -17,8 +17,6 @@ func (this *Engine) launchHttpServ() {
 		return
 	}
 
-	log.Info("HTTP server ready at %s", this.conf.httpListenAddr)
-
 	this.httpRouter = mux.NewRouter()
 	this.httpServer = &http.Server{Addr: this.conf.httpListenAddr,
 		Handler: this.httpRouter}
@@ -34,6 +32,8 @@ func (this *Engine) launchHttpServ() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info("HTTP server ready at %s", this.conf.httpListenAddr)
 
 	go this.httpServer.Serve(this.httpListener)
 }
