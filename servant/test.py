@@ -27,4 +27,12 @@ print '[Client] received from rpc server:', r, delta.microseconds, 'us'
 
 print client.mc_set('hello', 'world 世界', 120)
 print client.mc_get('hello')
-print client.mc_get('hello-non-exist')
+
+try:
+    #print client.mc_get('hello-non-exist')
+    print 'ha'
+except:
+    pass
+
+print client.lc_set('error_tag', 'abcdefg')
+print client.lc_get('error_tag')
