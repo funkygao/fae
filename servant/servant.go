@@ -47,7 +47,9 @@ func (this *FunServantImpl) McGet(key string) (r []byte, err error) {
 	this.t1 = time.Now()
 	var it *memcache.Item
 	it, err = this.mc.Get(key)
-	r = it.Value
+	if err == nil {
+		r = it.Value
+	}
 
 	log.Debug("mc_get key:%s %s", key, time.Since(this.t1))
 	return

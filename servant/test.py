@@ -27,3 +27,4 @@ print '[Client] received from rpc server:', r, delta.microseconds, 'us'
 
 print client.mc_set('hello', 'world', 120)
 print client.mc_get('hello')
+print client.mc_get('hello-non-exist')
