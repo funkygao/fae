@@ -3,6 +3,14 @@ fproxy
 
 funplus middleware layer which keeps long connection pool with backend and serves local php through unix domain socket
 
+### Why?
+
+*   Seperation of concerns
+*   Reuse common code as service and transparently reuse infrastructure
+*   Centralized best practice
+*   Centralized monitoring and auditting
+*   Scale
+
 ### Roles and Benefits
 
 *   auditting for backend service
