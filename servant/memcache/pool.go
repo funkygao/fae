@@ -8,9 +8,9 @@ import (
 type MemcachePool struct {
 	*sync.RWMutex
 
-	findServer FindServer
+	hash Hash
 
-	servers map[uint32]*MemcacheClient // hash -> client
+	buckets map[uint32]*MemcacheClient // hash -> client
 }
 
 func newMemcachePool() (this *MemcachePool) {
@@ -19,17 +19,24 @@ func newMemcachePool() (this *MemcachePool) {
 	return
 }
 
+func (this *MemcachePool) BucketCount() int {
+	return len(this.buckets)
+}
+
 func (this *MemcachePool) Init(cf *config.ConfigMemcache) {
 	switch cf.HashStrategy {
 	case "standard":
-		this.findServer = standardFindServer
+		this.hash = new(StandardHash)
 
 	case "consistent":
-		this.findServer = consistentFindServer
 
 	default:
 		panic("Invalid hash_strategy: " + cf.HashStrategy)
 	}
 
-	this.servers = make(map[uint32]*MemcacheClient)
+	this.buckets = make(map[uint32]*MemcacheClient)
+}
+
+func (this *MemcachePool) AddServer(addr string) {
+
 }

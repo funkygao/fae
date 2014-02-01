@@ -60,9 +60,11 @@ func BenchmarkMemcacheClientSet(b *testing.B) {
 
 }
 
-func BenchmarkHash(b *testing.B) {
+func BenchmarkCrc32(b *testing.B) {
 	key := "user:23424"
 	for i := 0; i < b.N; i++ {
-		findServer(key)
+		h := crc32.NewIEEE()
+		h.Write([]byte(key))
+		h.Sum32()
 	}
 }

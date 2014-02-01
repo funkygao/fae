@@ -24,7 +24,7 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 	log.Debug("memcache server: %+v", *this)
 }
 
-func (this *ConfigMemcacheServer) Server() string {
+func (this *ConfigMemcacheServer) Address() string {
 	return this.host + ":" + this.hort
 }
 
@@ -47,7 +47,7 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 
 		server := new(ConfigMemcacheServer)
 		server.loadConfig(section)
-		this.Servers[server.Server()] = server
+		this.Servers[server.Address()] = server
 	}
 
 	log.Debug("memcache: %+v", *this)
