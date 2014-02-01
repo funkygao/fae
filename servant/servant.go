@@ -1,18 +1,24 @@
-/*
-Basically it's a plugin framework
-*/
 package servant
 
 import (
-	_ "github.com/funkygao/fxi/servant/memcache" // register memcache pool
-	_ "github.com/funkygao/fxi/servant/mongo"    // register mongodb pool
+	log "code.google.com/p/log4go"
+	"github.com/funkygao/fxi/config"
+	"github.com/funkygao/fxi/servant/memcache" // register memcache pool
+	_ "github.com/funkygao/fxi/servant/mongo"  // register mongodb pool
 )
 
 type FunServantImpl struct {
+	conf *config.ConfigServant
+
+	mc *memcache.Client
 }
 
-func NewFunServant() (this *FunServantImpl) {
-	this = new(FunServantImpl)
+func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
+	this = &FunServantImpl{conf: cf}
+	memcacheServers := this.conf.Memcache.ServerList()
+	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
+
+	log.Debug("memcache servers %v", memcacheServers)
 	return
 }
 

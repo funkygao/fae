@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"github.com/funkygao/fxi/servant"
 	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
 	"github.com/gorilla/mux"
 	"net"
@@ -31,6 +30,6 @@ func NewEngine(fn string) (this *Engine) {
 	this = new(Engine)
 	this.configFile = fn
 	this.stats = newEngineStats(this)
-	this.rpcProcessor = rpc.NewFunServantProcessor(servant.NewFunServant())
+
 	return
 }

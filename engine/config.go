@@ -3,6 +3,8 @@ package engine
 import (
 	log "code.google.com/p/log4go"
 	"github.com/funkygao/fxi/config"
+	"github.com/funkygao/fxi/servant"
+	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
 )
 
@@ -35,15 +37,18 @@ type engineConfig struct {
 func (this *Engine) LoadConfigFile() *Engine {
 	log.Debug("Loading config file %s", this.configFile)
 
-	config := new(engineConfig)
+	cf := new(engineConfig)
 	var err error
-	config.Conf, err = conf.Load(this.configFile)
+	cf.Conf, err = conf.Load(this.configFile)
 	if err != nil {
 		panic(err)
 	}
 
-	this.conf = config
+	this.conf = cf
 	this.doLoadConfig()
+
+	// when config loaded, create the servants
+	this.rpcProcessor = rpc.NewFunServantProcessor(servant.NewFunServant(config.Servants))
 
 	return this
 }

@@ -35,6 +35,17 @@ type ConfigMemcache struct {
 	Servers map[string]*ConfigMemcacheServer // key is host:port(addr)
 }
 
+func (this *ConfigMemcache) ServerList() []string {
+	servers := make([]string, len(this.Servers))
+	i := 0
+	for addr, _ := range this.Servers {
+		servers[i] = addr
+		i += 1
+	}
+
+	return servers
+}
+
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
