@@ -34,6 +34,10 @@
             ]
         }
 
+        lcache: {
+            lru_max_items: 1073741824
+        }
+
         memcache: {
             hash_strategy: "standard"
             hash_function: "crc32"
@@ -44,9 +48,6 @@
                 }
             ]
         }
-    }
-
-    dlog: {
     }
 
 }

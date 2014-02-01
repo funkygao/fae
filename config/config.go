@@ -11,6 +11,7 @@ var (
 type ConfigServant struct {
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
+	Lcache   *ConfigLcache
 }
 
 func init() {
@@ -33,4 +34,12 @@ func LoadServants(cf *conf.Conf) {
 		panic(err)
 	}
 	Servants.Memcache.loadConfig(section)
+
+	// lcache section
+	Servants.Lcache = new(ConfigLcache)
+	section, err = cf.Section("lcache")
+	if err != nil {
+		panic(err)
+	}
+	Servants.Lcache.loadConfig(section)
 }
