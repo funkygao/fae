@@ -40,7 +40,6 @@
 
         memcache: {
             hash_strategy: "standard"
-            hash_function: "crc32"
             servers: [
                 {
                     host: "127.0.0.1"
