@@ -1,23 +1,27 @@
 package memcache
 
 import (
-	"fmt"
+	"errors"
+	"net"
 )
 
-type MemcacheError struct {
-	Message string
+var (
+	ErrCacheMiss    = errors.New("memcache: cache miss")
+	ErrCASConflict  = errors.New("memcache: compare-and-swap conflict")
+	ErrNotStored    = errors.New("memcache: item not stored")
+	ErrServerError  = errors.New("memcache: server error")
+	ErrNoStats      = errors.New("memcache: no statistics available")
+	ErrMalformedKey = errors.New("malformed: key is too long or contains invalid characters")
+	ErrNoServers    = errors.New("memcache: no servers configured or available")
+)
+
+// ConnectTimeoutError is the error type used when it takes
+// too long to connect to the desired host. This level of
+// detail can generally be ignored.
+type ConnectTimeoutError struct {
+	Addr net.Addr
 }
 
-func handleError(err *error) {
-	if x := recover(); x != nil {
-		*err = x.(MemcacheError)
-	}
-}
-
-func newMemcacheError(format string, args ...interface{}) MemcacheError {
-	return MemcacheError{Message: fmt.Sprintf(format, args...)}
-}
-
-func (this MemcacheError) Error() string {
-	return this.Message
+func (this *ConnectTimeoutError) Error() string {
+	return "memcache: connect timeout to " + this.Addr.String()
 }
