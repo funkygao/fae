@@ -25,7 +25,3 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 func (this *FunServantImpl) Ping() (r string, err error) {
 	return "pong", nil
 }
-
-func init() {
-
-}

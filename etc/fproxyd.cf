@@ -11,6 +11,7 @@
 
     servants: {
         mongodb: {
+            shard_base_num: 100000
             servers: [
                 {
                     shard_name: "log"
