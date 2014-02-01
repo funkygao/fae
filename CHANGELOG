@@ -2,12 +2,17 @@ Release Notes - fxi - Version v0.0.1.dev
 
 ** New Feature
 
-    . 
+    . lcache(local cache shared among processes)
+    . memcache backend
+    . dlog(distributed log)
 
 ** Improvement
 
+    . source code was greatly refactored and better organized
 
 ** Bug
+
+    . when memcache key missed, exception thrown on client side
 
 
 ** Todo
