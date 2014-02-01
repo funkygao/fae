@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (this *Engine) launchHttpServ() {
+func (this *Engine) setupHttpServ() {
 	if this.conf.httpListenAddr == "" {
 		return
 	}
@@ -26,7 +26,9 @@ func (this *Engine) launchHttpServ() {
 			params map[string]interface{}) (interface{}, error) {
 			return this.handleHttpQuery(w, req, params)
 		}).Methods("GET")
+}
 
+func (this *Engine) launchHttpServ() {
 	var err error
 	this.httpListener, err = net.Listen("tcp", this.httpServer.Addr)
 	if err != nil {
