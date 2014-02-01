@@ -24,5 +24,6 @@ Release Notes - fxi - Version v0.0.1.dev
     . memcache/mongodb/dlog backend
       auto sharding
       stats sampling logging
+    . self monitoring and peers
 
 ----

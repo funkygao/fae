@@ -1,7 +1,7 @@
-fproxy
-======
+fre
+===
 
-funplus middleware layer which keeps long connection pool with backend and serves local php through unix domain socket
+Funplus RPC Engine
 
 ### Why?
 
