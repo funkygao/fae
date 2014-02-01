@@ -10,7 +10,7 @@ import (
 )
 
 func parseFlags() {
-	flag.StringVar(&options.logLevel, "level", "info", "log level")
+	flag.StringVar(&options.logLevel, "level", "debug", "log level")
 	flag.StringVar(&options.logFile, "log", "stdout", "log file")
 	flag.StringVar(&options.configFile, "conf", "etc/fproxyd.cf", "config file")
 	flag.StringVar(&options.lockFile, "lockfile", "var/fproxyd.lock", "lockfile path")
