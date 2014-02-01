@@ -1,6 +1,28 @@
 namespace go  fun.rpc
 namespace php fun.rpc
 
+struct req_ctx {
+    /**
+     * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
+     */
+    1:string caller
+
+    /**
+     * Where the request originated.
+     */
+    11:optional string host
+
+    /**
+     * Remote user IP address.
+     */
+    12:optional string ip
+
+    /**
+     * Session id.
+     */
+    13:optional string sid
+}
+
 /**
  * Thrift don't support service multiplex, so we have to bury all
  * services into the giant FunServant.
@@ -40,16 +62,21 @@ service FunServant {
     /**
      * Set
      *
+     * @param req_ctx ctx - Request context info.
      * @param string key -
      * @param binary value -
      * @param i32 expiration - in seconds: either a relative time from now (up to 1 month), or 
      *     an absolute Unix epoch time. Zero means the Item has no expiration time.
      */
-    bool mc_set(1: string key, 2: binary value, 3: i32 expiration),
+    bool mc_set(1: req_ctx ctx, 2: string key, 3: binary value, 4: i32 expiration),
 
     /**
      * Get
+     *
+     * @param req_ctx ctx - Request context info.
+     * @param string key -
+     * @return binary - Value of the key
      */
-    binary mc_get(1: string key),
+    binary mc_get(1: req_ctx ctx, 2: string key),
 
 }

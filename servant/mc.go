@@ -2,11 +2,13 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
+	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fxi/servant/memcache"
 	"time"
 )
 
-func (this *FunServantImpl) McSet(key string, value []byte, expiration int32) (r bool, err error) {
+func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
+	expiration int32) (r bool, err error) {
 	this.t1 = time.Now()
 	err = this.mc.Set(&memcache.Item{Key: key, Value: value, Expiration: expiration})
 	if err == nil {
@@ -19,7 +21,7 @@ func (this *FunServantImpl) McSet(key string, value []byte, expiration int32) (r
 	return
 }
 
-func (this *FunServantImpl) McGet(key string) (r []byte, err error) {
+func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte, err error) {
 	this.t1 = time.Now()
 	var it *memcache.Item
 	it, err = this.mc.Get(key)

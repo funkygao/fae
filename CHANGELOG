@@ -5,10 +5,12 @@ Release Notes - fxi - Version v0.0.1.dev
     . lcache(local cache shared among processes)
     . memcache backend
     . dlog(distributed log)
+    . query server version info through REST api
 
 ** Improvement
 
     . source code was greatly refactored and better organized
+    . request context added, so we can do auditting
 
 ** Bug
 
