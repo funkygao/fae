@@ -55,7 +55,6 @@ service FunServant {
     binary lc_get(1: string key),
     oneway void lc_del(1: string key),
 
-
     //=================
     // memcache section
     //=================
