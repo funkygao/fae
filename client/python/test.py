@@ -6,7 +6,7 @@ for quick debugging of fae
 
 import sys
 import datetime
-sys.path.append('gen-py')
+sys.path.append('../../servant/gen-py')
 sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages')
 from thrift.transport import TSocket
 from thrift.protocol import TBinaryProtocol
@@ -18,6 +18,7 @@ sock.open()
 protocol = TBinaryProtocol.TBinaryProtocol(sock)
 
 client = FunServant.Client(protocol)
+ctx = FunServant.req_ctx(caller='POST+/facebook/getPaymentRequestId/+34ca2cf6')
 
 # ping
 #=====
@@ -25,8 +26,8 @@ r = client.ping()
 delta = datetime.datetime.now() - t1
 print '[Client] received from rpc server:', r, delta.microseconds, 'us'
 
-print client.mc_set('hello', 'world 世界', 120)
-print client.mc_get('hello')
+print client.mc_set(ctx, 'hello', 'world 世界', 120)
+print client.mc_get(ctx, 'hello')
 
 try:
     #print client.mc_get('hello-non-exist')

@@ -15,7 +15,9 @@ func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
 		r = true
 	}
 
-	log.Debug("mc_set key:%s value:%s, expiration:%v %s", key, string(value), expiration,
+	log.Debug("ctx:%+v mc_set key:%s value:%s, expiration:%v %s",
+		*ctx,
+		key, string(value), expiration,
 		time.Since(this.t1))
 
 	return
@@ -29,6 +31,8 @@ func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte, err er
 		r = it.Value
 	}
 
-	log.Debug("mc_get key:%s %s", key, time.Since(this.t1))
+	log.Debug("ctx:%+v mc_get key:%s %s",
+		*ctx,
+		key, time.Since(this.t1))
 	return
 }
