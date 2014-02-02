@@ -2,8 +2,8 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
-	"github.com/funkygao/fxi/config"
-	"github.com/funkygao/fxi/servant/memcache"
+	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/golib/cache"
 	"time"
 )

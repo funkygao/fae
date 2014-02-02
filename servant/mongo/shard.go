@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"fmt"
-	"github.com/funkygao/fxi/config"
+	"github.com/funkygao/fae/config"
 )
 
 func lookupDbName(shardKey string, shardId int) string {

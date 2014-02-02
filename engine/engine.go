@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/gorilla/mux"
 	"net"
 	"net/http"

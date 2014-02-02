@@ -1,7 +1,9 @@
-fre
+fae
 ===
 
-Funplus RPC Engine
+Funplus App Engine
+
+It's middleware RPC engine.
 
 ### Why?
 
@@ -33,7 +35,7 @@ Funplus RPC Engine
                                     | unix domain socket
                                     |                        
                             +---------------+
-                            | fproxy daemon |
+                            |  faed daemon  |
                             +---------------+
                                     |                        
                                     | tcp long connection pool(keepalive)

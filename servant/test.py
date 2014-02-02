@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #encoding=utf-8
 '''
-for quick debugging of fxi
+for quick debugging of fae
 '''
 
 import sys

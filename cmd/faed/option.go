@@ -12,8 +12,8 @@ import (
 func parseFlags() {
 	flag.StringVar(&options.logLevel, "level", "debug", "log level")
 	flag.StringVar(&options.logFile, "log", "stdout", "log file")
-	flag.StringVar(&options.configFile, "conf", "etc/fproxyd.cf", "config file")
-	flag.StringVar(&options.lockFile, "lockfile", "fproxyd.lock", "lockfile path")
+	flag.StringVar(&options.configFile, "conf", "etc/faed.cf", "config file")
+	flag.StringVar(&options.lockFile, "lockfile", "faed.lock", "lockfile path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
 	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")
 	flag.StringVar(&options.cpuprof, "cpuprof", "", "cpu profiling file")

@@ -16,7 +16,7 @@ var (
 )
 
 const (
-	USAGE = `fxi - Funplus eXchange Interface
+	USAGE = `fae - Funplus App Engine
 
 Flags:
 `

@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	"github.com/funkygao/fxi/config"
+	"github.com/funkygao/fae/config"
 )
 
 type MongodbPool struct {

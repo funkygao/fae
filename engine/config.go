@@ -2,9 +2,9 @@ package engine
 
 import (
 	log "code.google.com/p/log4go"
-	"github.com/funkygao/fxi/config"
-	"github.com/funkygao/fxi/servant"
-	"github.com/funkygao/fxi/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
 )
 

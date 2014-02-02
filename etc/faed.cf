@@ -2,7 +2,7 @@
     http_listen_addr: ":9002"
 
     rpc: {
-        //listen_addr: "unix:(/var/run/fproxy.sock)"
+        //listen_addr: "unix:(/var/run/fae.sock)"
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
