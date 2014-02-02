@@ -2,7 +2,7 @@
 ID=$(git rev-parse HEAD | cut -c1-7)
 
 cd $(dirname $0)/servant; make
-cd ../cmd/faed
+cd ../daemon/faed
 
 go build -ldflags "-X main.BuildID $ID"
 

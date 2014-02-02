@@ -24,4 +24,4 @@ servant/gen-php/
 servant/gen-go/
 servant/gen-py/
 var/
-cmd/faed/faed
+daemon/faed/faed
