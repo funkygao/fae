@@ -15,19 +15,17 @@ It's middleware RPC engine.
 *   Seperation of concerns
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
-*   Centralized monitoring and auditting
+*   Centralized monitoring, auditting and profiling
+*   lesson tcp 3/4 way handshake overhead(conn pooling)
 *   Scale
 *   Polyglot development
 
-### Roles and Benefits
+### Features
 
-*   auditting for backend service
-*   backend server location transparent for php(auto routing)
-*   lesson tcp 3/4 way handshake overhead(conn pooling)
-*   local cache(LRU)
-*   profiler
-*   queue for failed requests(auto retry)
-
+*   local LRU cache shared among processes
+*   memcache servant
+*   mongodb servant
+*   distributed logger servant
 
 ### Architecture
 
