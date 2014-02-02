@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/gorilla/mux"
 	"net"
@@ -20,6 +21,7 @@ type Engine struct {
 	httpPaths    []string
 
 	rpcProcessor *rpc.FunServantProcessor
+	rpcServer    *thrift.TSimpleServer
 
 	stats    *engineStats
 	pid      int

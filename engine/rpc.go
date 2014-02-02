@@ -36,14 +36,14 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		panic(err)
 	}
 
-	rpcServer := thrift.NewTSimpleServer4(this.rpcProcessor,
+	this.rpcServer = thrift.NewTSimpleServer4(this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s", this.conf.rpc.listenAddr)
 
 	done = make(chan interface{})
 	go func() {
 		for {
-			err = rpcServer.Serve()
+			err = this.rpcServer.Serve()
 			if err != nil {
 				log.Error(err)
 				break

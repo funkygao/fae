@@ -25,5 +25,6 @@ Release Notes - fae - Version v0.0.1.dev
       auto sharding
       stats sampling logging
     . self monitoring and peers
+    . extend thrift to be able to trace request origin by extending TServerSocket
 
 ----

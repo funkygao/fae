@@ -62,6 +62,10 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		this.LoadConfigFile()
 		output["status"] = "ok"
 
+	case "stop":
+		this.rpcServer.Stop()
+		output["status"] = "stopped"
+
 	case "stat":
 		output["runtime"] = this.stats.Runtime()
 		output["started"] = this.StartedAt
