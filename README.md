@@ -12,6 +12,7 @@ It's middleware RPC engine.
 *   Centralized best practice
 *   Centralized monitoring and auditting
 *   Scale
+*   Polyglot development
 
 ### Roles and Benefits
 
