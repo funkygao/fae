@@ -16,7 +16,7 @@ It's middleware RPC engine.
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
 *   Centralized monitoring, auditting and profiling
-*   lesson tcp 3/4 way handshake overhead(conn pooling)
+*   lessen tcp 3/4 way handshake overhead(conn pooling)
 *   Scale
 *   Polyglot development
 
