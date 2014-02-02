@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
-func (this *FunServantImpl) Dlog(area string, json string) (err error) {
+func (this *FunServantImpl) Dlog(category string, tag string,
+	json string) (err error) {
 	this.t1 = time.Now()
-	syslogng.Printf("%s,%d,%s", area, time.Now().UTC().Unix(), json)
 
-	log.Debug("dlog area:%s %s", area, time.Since(this.t1))
+	// add newline and timestamp here
+	syslogng.Printf(":%s,%s,%d,%s\n", category, tag, time.Now().UTC().Unix(), json)
+
+	log.Debug("dlog tag:%s %s", tag, time.Since(this.t1))
 	return nil
 }
