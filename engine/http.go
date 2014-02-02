@@ -58,6 +58,10 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["result"] = "go to global logger to see result"
 		log.Info(string(stack[:stackSize]))
 
+	case "reload":
+		this.LoadConfigFile()
+		output["status"] = "ok"
+
 	case "stat":
 		output["runtime"] = this.stats.Runtime()
 		output["started"] = this.StartedAt
@@ -125,13 +129,19 @@ func (this *Engine) RegisterHttpApi(path string,
 	}
 
 	// path can't be duplicated
+	isDup := false
 	for _, p := range this.httpPaths {
 		if p == path {
-			panic(path + " already registered")
+			log.Error("REST[%s] already registered", path)
+			isDup = true
+			break
 		}
 	}
 
-	this.httpPaths = append(this.httpPaths, path)
+	if !isDup {
+		this.httpPaths = append(this.httpPaths, path)
+	}
+
 	return this.httpRouter.HandleFunc(path, wrappedFunc)
 }
 

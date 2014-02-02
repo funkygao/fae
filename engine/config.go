@@ -6,12 +6,14 @@ import (
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
+	"time"
 )
 
 type configRpc struct {
-	listenAddr string
-	framed     bool
-	protocol   string
+	listenAddr    string
+	clientTimeout time.Duration
+	framed        bool
+	protocol      string
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -20,6 +22,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 		panic("Empty listen_addr")
 	}
 
+	this.clientTimeout = time.Duration(section.Int("client_timeout", 0)) * time.Second
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
 

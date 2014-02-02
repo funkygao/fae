@@ -7,6 +7,7 @@
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         // framed: false
+        client_timeout: 10
     }
 
     servants: {
