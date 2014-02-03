@@ -35,5 +35,5 @@ try:
 except:
     pass
 
-print client.lc_set('error_tag', 'abcdefg')
-print client.lc_get('error_tag')
+print client.lc_set(ctx, 'error_tag', 'abcdefg')
+print client.lc_get(ctx, 'error_tag')
