@@ -23,6 +23,10 @@ func (this *Engine) ServeForever() {
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
+	if err := this.peer.Start(); err != nil {
+		log.Error(err)
+	}
+
 	<-this.launchRpcServe()
 
 	log.Info("Engine terminated")

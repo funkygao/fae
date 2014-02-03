@@ -1,4 +1,4 @@
-Release Notes - fae - Version v0.0.1.dev
+Release Notes - fae - Version v0.0.1.alpha
 
 ** New Feature
 
@@ -6,6 +6,8 @@ Release Notes - fae - Version v0.0.1.dev
     . memcache backend
     . dlog(distributed log)
     . query server version info through REST api
+    . auto discover peers like ES via multicast
+    . app level exception added for memcache miss
 
 ** Improvement
 
@@ -14,7 +16,7 @@ Release Notes - fae - Version v0.0.1.dev
 
 ** Bug
 
-    . when memcache key missed, exception thrown on client side
+    . 
 
 
 ** Todo
@@ -26,6 +28,5 @@ Release Notes - fae - Version v0.0.1.dev
       stats sampling logging
     . self monitoring and peers
     . extend thrift to be able to trace request origin by extending TServerSocket
-    . auto discover peers like ES
 
 ----

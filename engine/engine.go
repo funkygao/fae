@@ -23,6 +23,8 @@ type Engine struct {
 	rpcProcessor *rpc.FunServantProcessor
 	rpcServer    *thrift.TSimpleServer
 
+	peer *Peer
+
 	stats    *engineStats
 	pid      int
 	hostname string

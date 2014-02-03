@@ -6,9 +6,14 @@ import (
 )
 
 func TestEngineConfig(t *testing.T) {
-	e := NewEngine()
-	e.LoadConfigFile("../etc/faed.cf")
+	e := NewEngine("../etc/faed.cf")
+	e.LoadConfigFile()
 	assert.Equal(t, ":9001", e.conf.rpc.listenAddr)
-	assert.NotEqual(t, 0, len(e.conf.memcaches))
-	assert.NotEqual(t, 0, len(e.conf.mongos))
+}
+
+func TestPeerMessage(t *testing.T) {
+	var msg = peerMessage{}
+	msg["cmd"] = "ok"
+	data, _ := msg.marshal()
+	assert.Equal(t, `{"cmd":"ok"}`, string(data))
 }
