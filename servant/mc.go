@@ -58,7 +58,12 @@ func (this *FunServantImpl) McDelete(ctx *rpc.ReqCtx, key string) (r bool, err e
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.ReqCtx, key string, delta int32) (r int32, err error) {
 	var newVal uint64
-	newVal, err = this.mc.Increment(key, uint64(delta))
+	if delta > 0 {
+		newVal, err = this.mc.Increment(key, uint64(delta))
+	} else {
+		newVal, err = this.mc.Decrement(key, uint64(delta))
+	}
+
 	if err == nil {
 		r = int32(newVal)
 	}
