@@ -36,7 +36,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		panic(err)
 	}
 
-	this.rpcServer = thrift.NewTSimpleServer4(this.rpcProcessor,
+	this.rpcServer = NewTFunServer(this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s", this.conf.rpc.listenAddr)
 
