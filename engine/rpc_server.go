@@ -3,12 +3,14 @@ package engine
 import (
 	log "code.google.com/p/log4go"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"time"
 )
 
 // thrift.TServer implementation
 type TFunServer struct {
 	stopped bool
 
+	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
 	inputTransportFactory  thrift.TTransportFactory
@@ -17,11 +19,13 @@ type TFunServer struct {
 	outputProtocolFactory  thrift.TProtocolFactory
 }
 
-func NewTFunServer(processor thrift.TProcessor,
+func NewTFunServer(engine *Engine,
+	processor thrift.TProcessor,
 	serverTransport thrift.TServerTransport,
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory) *TFunServer {
 	return &TFunServer{
+		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,
 		inputTransportFactory:  transportFactory,
@@ -38,6 +42,10 @@ func (this *TFunServer) Serve() error {
 		return err
 	}
 
+	var (
+		t1      time.Time
+		elapsed time.Duration
+	)
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
 		if err != nil {
@@ -48,8 +56,15 @@ func (this *TFunServer) Serve() error {
 			//log.Debug("%+v", client.(thrift.TSocket).Conn().RemoteAddr())
 
 			go func() {
+				t1 = time.Now()
 				if err := this.processRequest(client); err != nil {
 					log.Error("error processing request:", err)
+				}
+
+				elapsed = time.Since(t1)
+				if elapsed.Seconds() > this.engine.conf.rpc.clientSlowThreshold {
+					// slow query
+					log.Debug("client closed after %s", elapsed)
 				}
 			}()
 		}
@@ -71,8 +86,20 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		defer outputTransport.Close()
 	}
 
+	var (
+		t1      time.Time
+		elapsed time.Duration
+	)
 	for {
+		t1 = time.Now()
 		ok, err := processor.Process(inputProtocol, outputProtocol)
+
+		elapsed = time.Since(t1)
+		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
+			// slow query
+			log.Debug("processed in %s", elapsed)
+		}
+
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			return nil

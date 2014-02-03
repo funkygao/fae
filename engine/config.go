@@ -10,10 +10,12 @@ import (
 )
 
 type configRpc struct {
-	listenAddr    string
-	clientTimeout time.Duration
-	framed        bool
-	protocol      string
+	clientSlowThreshold float64 // in seconds per connection
+	callSlowThreshold   float64 // in seconds per call
+	listenAddr          string
+	clientTimeout       time.Duration
+	framed              bool
+	protocol            string
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -22,6 +24,8 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 		panic("Empty listen_addr")
 	}
 
+	this.clientSlowThreshold = section.Float("client_slow_threshold", 5)
+	this.callSlowThreshold = section.Float("call_slow_threshold", 5)
 	this.clientTimeout = time.Duration(section.Int("client_timeout", 0)) * time.Second
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
