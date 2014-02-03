@@ -23,7 +23,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	memcacheServers := this.conf.Memcache.ServerList()
 	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
 
-	log.Debug("memcache servers %v", memcacheServers)
+	go this.runWatchdog()
+
 	return
 }
 
