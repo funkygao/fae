@@ -25,3 +25,4 @@ servant/gen-go/
 servant/gen-py/
 var/
 daemon/faed/faed
+faed.lock
