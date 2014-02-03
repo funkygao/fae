@@ -8,6 +8,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . query server version info through REST api
     . auto discover peers like ES via multicast
     . app level exception added for memcache miss
+    . golang servant client so that we can chain the call to distributed servers
 
 ** Improvement
 
