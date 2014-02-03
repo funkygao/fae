@@ -3,6 +3,7 @@ package engine
 import (
 	log "code.google.com/p/log4go"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"sync/atomic"
 	"time"
 )
 
@@ -49,6 +50,7 @@ func (this *TFunServer) Serve() error {
 		}
 
 		if client != nil {
+			atomic.AddInt64(&this.engine.stats.totalSessionCount, 1)
 			go this.processSession(client)
 		}
 	}
@@ -89,6 +91,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 	for {
 		t1 = time.Now()
 		ok, err := processor.Process(inputProtocol, outputProtocol)
+		atomic.AddInt64(&this.engine.stats.totalCallCount, 1)
 
 		elapsed = time.Since(t1)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {

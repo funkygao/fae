@@ -72,6 +72,8 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
+		output["total_session"] = this.stats.totalSessionCount
+		output["total_call"] = this.stats.totalCallCount
 
 	case "uris":
 		output["all"] = this.httpPaths

@@ -11,6 +11,9 @@ type engineStats struct {
 	startedAt time.Time
 	MemStats  *runtime.MemStats
 
+	totalSessionCount int64
+	totalCallCount    int64
+
 	totalRequests  map[string]int64 // key is client ip
 	periodRequests map[string]int64 // key is client ip
 }
