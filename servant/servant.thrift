@@ -32,6 +32,8 @@ struct req_ctx {
  */
 service FunServant {
     /**
+     * Ping.
+     *
      * @return string - always 'pong'
      */
     string ping(),
@@ -60,7 +62,7 @@ service FunServant {
     //=================
 
     /**
-     * Set
+     * Set.
      *
      * @param req_ctx ctx - Request context info.
      * @param string key -
@@ -71,12 +73,42 @@ service FunServant {
     bool mc_set(1: req_ctx ctx, 2: string key, 3: binary value, 4: i32 expiration),
 
     /**
-     * Get
+     * Get.
      *
      * @param req_ctx ctx - Request context info.
      * @param string key -
      * @return binary - Value of the key
      */
     binary mc_get(1: req_ctx ctx, 2: string key),
+
+    /**
+     * Add.
+     *
+     * @param req_ctx ctx - Request context info.
+     * @param string key -
+     * @param binary value - Value of the key
+     * @param i32 expiration -
+     * @return bool - False if the key already exists.
+     */
+    bool mc_add(1: req_ctx ctx, 2: string key, 3: binary value, 4: i32 expiration),
+
+    /**
+     * Delete.
+     *
+     * @param req_ctx ctx - Request context info.
+     * @param string key -
+     * @return bool - True if Success 
+     */
+    bool mc_delete(1: req_ctx ctx, 2: string key),
+
+    /**
+     * Increment.
+     *
+     * @param req_ctx ctx - Request context info.
+     * @param string key -
+     * @param i32 delta - If negative, means decrement
+     * @return binary - New value of the key
+     */
+    i32 mc_increment(1: req_ctx ctx, 2: string key, 3: i32 delta),
 
 }
