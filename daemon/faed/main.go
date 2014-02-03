@@ -5,7 +5,6 @@ import (
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/locking"
 	"github.com/funkygao/golib/signal"
-	"net/http"
 	"os"
 	"runtime/debug"
 	"syscall"
@@ -49,14 +48,9 @@ func main() {
 	go runWatchdog(ticker)
 	defer ticker.Stop()
 
-	e := engine.NewEngine(options.configFile).LoadConfigFile()
-	e.RegisterHttpApi("/ver", func(w http.ResponseWriter,
-		req *http.Request, params map[string]interface{}) (interface{}, error) {
-		output := make(map[string]interface{})
-		output["ver"] = BuildID
-		return output, nil
-	})
-	e.ServeForever()
+	engine.NewEngine(options.configFile).
+		LoadConfigFile().
+		ServeForever()
 
 	shutdown()
 }

@@ -1,8 +1,6 @@
 package main
 
 var (
-	BuildID = "unknown" // git version id, passed in from shell
-
 	options struct {
 		configFile  string
 		showVersion bool
@@ -16,7 +14,7 @@ var (
 )
 
 const (
-	USAGE = `fae - Funplus App Engine
+	USAGE = `fae - Fun App Engine
 
 Flags:
 `

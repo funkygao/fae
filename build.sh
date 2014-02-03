@@ -4,7 +4,7 @@ ID=$(git rev-parse HEAD | cut -c1-7)
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
-go build -ldflags "-X main.BuildID $ID"
+go build -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
 
 #---------
 # show ver
