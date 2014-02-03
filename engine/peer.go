@@ -109,7 +109,7 @@ func (this *Peer) Publish(msg peerMessage) (err error) {
 		return
 	}
 
-	log.Debug("publish %+v", msg)
+	log.Debug("publish to peer %+v", msg)
 
 	_, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
 	return
