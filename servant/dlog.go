@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-func (this *FunServantImpl) Dlog(ctx *rpc.ReqCtx, category string, tag string,
+func (this *FunServantImpl) Dlog(ctx *rpc.ReqCtx, ident string, tag string,
 	json string) (err error) {
 	this.t1 = time.Now()
 
 	// add newline and timestamp here
-	syslogng.Printf(":%s,%s,%d,%s\n", category, tag, time.Now().UTC().Unix(), json)
+	syslogng.Printf(":%s,%s,%d,%s\n", ident, tag, time.Now().UTC().Unix(), json)
 
 	log.Debug("dlog tag:%s %s", tag, time.Since(this.t1))
 	return nil
