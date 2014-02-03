@@ -4,6 +4,7 @@ import (
 	log "code.google.com/p/log4go"
 	"flag"
 	"fmt"
+	_log "log"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
@@ -80,4 +81,7 @@ func setupLogging(loggingLevel, logFile string) {
 		writer.SetRotateLines(0)
 		writer.SetRotateDaily(true)
 	}
+
+	// thrift lib use "log", so we also need to customize its behavior
+	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 }
