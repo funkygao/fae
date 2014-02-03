@@ -1,6 +1,12 @@
 #!/bin/bash -e
-ID=$(git rev-parse HEAD | cut -c1-7)
 
+if [[ $1 = "-loc" ]]; then
+    cd $(dirname $0)/servant; make clean; cd -
+    find . -name '*.go' | xargs wc -l
+    exit
+fi
+
+ID=$(git rev-parse HEAD | cut -c1-7)
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
