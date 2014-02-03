@@ -31,7 +31,7 @@ type Engine struct {
 func NewEngine(fn string) (this *Engine) {
 	this = new(Engine)
 	this.configFile = fn
-	this.stats = newEngineStats(this)
+	this.stats = newEngineStats()
 
 	return
 }

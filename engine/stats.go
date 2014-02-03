@@ -8,15 +8,18 @@ import (
 )
 
 type engineStats struct {
-	engine   *Engine
-	MemStats *runtime.MemStats
+	startedAt time.Time
+	MemStats  *runtime.MemStats
 }
 
-func newEngineStats(e *Engine) (this *engineStats) {
+func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
-	this.engine = e
 	this.MemStats = new(runtime.MemStats)
 	return
+}
+
+func (this engineStats) Start(t time.Time) {
+	this.startedAt = t
 }
 
 func (this *engineStats) Runtime() map[string]interface{} {
@@ -30,7 +33,7 @@ func (this *engineStats) Runtime() map[string]interface{} {
 	s["memory.last_gc"] = this.MemStats.LastGC
 	s["memory.gc.num"] = this.MemStats.NumGC
 	s["memory.gc.num_per_second"] = float64(this.MemStats.NumGC) / time.
-		Since(this.engine.StartedAt).Seconds()
+		Since(this.startedAt).Seconds()
 	s["memory.gc.total_pause"] = fmt.Sprintf("%dms",
 		this.MemStats.PauseTotalNs/uint64(time.Millisecond))
 	s["memory.heap.alloc"] = gofmt.ByteSize(this.MemStats.HeapAlloc).String()

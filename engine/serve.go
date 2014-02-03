@@ -14,6 +14,9 @@ func (this *Engine) ServeForever() {
 
 	signal.IgnoreSignal(syscall.SIGHUP)
 
+	// start the stats counter
+	this.stats.Start(this.StartedAt)
+
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
