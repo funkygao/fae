@@ -42,10 +42,6 @@ func (this *TFunServer) Serve() error {
 		return err
 	}
 
-	var (
-		t1      time.Time
-		elapsed time.Duration
-	)
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
 		if err != nil {
@@ -53,24 +49,24 @@ func (this *TFunServer) Serve() error {
 		}
 
 		if client != nil {
-			//log.Debug("%+v", client.(thrift.TSocket).Conn().RemoteAddr())
-
-			go func() {
-				t1 = time.Now()
-				if err := this.processRequest(client); err != nil {
-					log.Error("error processing request:", err)
-				}
-
-				elapsed = time.Since(t1)
-				if elapsed.Seconds() > this.engine.conf.rpc.clientSlowThreshold {
-					// slow query
-					log.Debug("client closed after %s", elapsed)
-				}
-			}()
+			go this.processSession(client)
 		}
 	}
 
 	return nil
+}
+
+func (this *TFunServer) processSession(client thrift.TTransport) {
+	t1 := time.Now()
+	if err := this.processRequest(client); err != nil {
+		log.Error("error processing request: ", err)
+	}
+
+	elapsed := time.Since(t1)
+	if elapsed.Seconds() > this.engine.conf.rpc.clientSlowThreshold {
+		// slow query
+		log.Warn("client closed after %s", elapsed)
+	}
 }
 
 func (this *TFunServer) processRequest(client thrift.TTransport) error {
@@ -97,7 +93,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		elapsed = time.Since(t1)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow query
-			log.Debug("processed in %s", elapsed)
+			log.Warn("processed in %s", elapsed)
 		}
 
 		if err, ok := err.(thrift.TTransportException); ok &&
