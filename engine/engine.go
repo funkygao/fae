@@ -2,7 +2,6 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/gorilla/mux"
 	"net"
 	"net/http"
@@ -20,8 +19,8 @@ type Engine struct {
 	httpRouter   *mux.Router
 	httpPaths    []string
 
-	rpcProcessor *rpc.FunServantProcessor
-	rpcServer    *thrift.TSimpleServer
+	rpcProcessor thrift.TProcessor
+	rpcServer    thrift.TServer
 
 	peer *Peer
 
