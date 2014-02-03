@@ -6,7 +6,7 @@ fae
          )__)    /(__)\    )__) 
         (__)    (__)(__)  (____)
                                
-Funplus App Engine
+Fun App Engine
 
 It's middleware RPC engine.
 
