@@ -30,10 +30,9 @@ print client.mc_set(ctx, 'hello', 'world 世界', 120)
 print client.mc_get(ctx, 'hello')
 
 try:
-    #print client.mc_get('hello-non-exist')
-    print 'ha'
-except:
-    pass
+    print 'hello-non-exist ->', client.mc_get(ctx, 'hello-non-exist')
+except Exception, e:
+    print e
 
 print client.lc_set(ctx, 'error_tag', 'abcdefg')
 print client.lc_get(ctx, 'error_tag')

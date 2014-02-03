@@ -2,6 +2,7 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
+	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/memcache"
 	"time"
@@ -23,12 +24,22 @@ func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
 	return
 }
 
-func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte, err error) {
+func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte,
+	miss *rpc.TMemcacheMissed, err error) {
 	this.t1 = time.Now()
 	var it *memcache.Item
 	it, err = this.mc.Get(key)
 	if err == nil {
+		// cache hit
 		r = it.Value
+	} else if err == memcache.ErrCacheMiss {
+		// cache miss
+		miss = rpc.NewTMemcacheMissed()
+		miss.Message = thrift.StringPtr(err.Error()) // optional
+
+		// err is Internal error instead of app error
+		// We should always set it nil on purpose
+		err = nil
 	}
 
 	log.Debug("ctx:%+v mc_get key:%s %s",

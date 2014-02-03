@@ -1,6 +1,10 @@
 namespace go  fun.rpc
 namespace php fun.rpc
 
+exception TMemcacheMissed {
+    11: optional string message
+}
+
 struct req_ctx {
     /**
      * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
@@ -106,6 +110,8 @@ service FunServant {
     binary mc_get(
         1: required req_ctx ctx, 
         2: required string key
+    ) throws (
+        1: TMemcacheMissed miss
     ),
 
     /**
