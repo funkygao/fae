@@ -29,6 +29,7 @@ type Peer struct {
 
 	localAddr         string
 	groupAddr         string
+	gaddr             *net.UDPAddr
 	heartbeatInterval int
 
 	neighbors map[string]bool
@@ -52,8 +53,8 @@ func (this *Peer) markNeighbor(ip string, alive bool) {
 
 func (this *Peer) Start() (err error) {
 	this.localAddr = ip.LocalIpv4Addrs()[0]
-	gaddr, _ := net.ResolveUDPAddr("udp4", this.groupAddr)
-	this.c, err = net.ListenMulticastUDP("udp4", nil, gaddr)
+	this.gaddr, _ = net.ResolveUDPAddr("udp4", this.groupAddr)
+	this.c, err = net.ListenMulticastUDP("udp4", nil, this.gaddr)
 	if err != nil {
 		return
 	}
@@ -108,7 +109,9 @@ func (this *Peer) Publish(msg peerMessage) (err error) {
 		return
 	}
 
-	_, err = this.c.Write(append(body, '\n'))
+	log.Debug("publish %+v", msg)
+
+	_, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
 	return
 }
 
@@ -117,8 +120,11 @@ func (this *Peer) runHeartbeat() {
 	defer t.Stop()
 
 	var msg = peerMessage{}
+	var err error
 	msg["ip"] = this.localAddr
 	for _ = range t.C {
-		this.Publish(msg)
+		if err = this.Publish(msg); err != nil {
+			log.Error(err)
+		}
 	}
 }
