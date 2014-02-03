@@ -1,10 +1,13 @@
-package main
+package engine
 
 import (
 	"fmt"
-	"github.com/funkygao/fae/engine"
 	"os"
 	"runtime"
+)
+
+var (
+	BuildID = "unknown" // git version id, passed in from shell
 )
 
 const (
@@ -12,9 +15,9 @@ const (
 	AUTHOR  = "funky.gao@gmail.com"
 )
 
-func showVersionAndExit() {
+func ShowVersionAndExit() {
 	fmt.Fprintf(os.Stderr, "%s %s (build: %s)\n", os.Args[0], VERSION,
-		engine.BuildID)
+		BuildID)
 	fmt.Fprintf(os.Stderr, "Built with %s %s for %s/%s\n",
 		runtime.Compiler, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	os.Exit(0)
