@@ -5,7 +5,7 @@ struct req_ctx {
     /**
      * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
      */
-    1:string caller
+    1:required string caller
 
     /**
      * Where the request originated.
@@ -47,15 +47,33 @@ service FunServant {
      * @param string tag -
      * @param string json - Client is responsible to jsonize
      */
-    oneway void dlog(1: req_ctx ctx, 2: string category, 3: string tag, 4: string json),
+    oneway void dlog(
+        /** request context */
+        1: required req_ctx ctx, 
+        2: required string category, 
+        3: required string tag, 
+        4: required string json
+    ),
 
     //=================
     // lcache section
     //=================
 
-    bool lc_set(1: req_ctx ctx, 2: string key, 3: binary value),
-    binary lc_get(1: req_ctx ctx, 2: string key),
-    oneway void lc_del(1: req_ctx ctx, 2: string key),
+    bool lc_set(
+        1: required req_ctx ctx, 
+        2: required string key, 
+        3: required binary value
+    ),
+
+    binary lc_get(
+        1: required req_ctx ctx, 
+        2: required string key
+    ),
+
+    oneway void lc_del(
+        1: required req_ctx ctx, 
+        2: required string key
+    ),
 
     //=================
     // memcache section
@@ -70,7 +88,12 @@ service FunServant {
      * @param i32 expiration - in seconds: either a relative time from now (up to 1 month), or 
      *     an absolute Unix epoch time. Zero means the Item has no expiration time.
      */
-    bool mc_set(1: req_ctx ctx, 2: string key, 3: binary value, 4: i32 expiration),
+    bool mc_set(
+        1: required req_ctx ctx, 
+        2: required string key, 
+        3: required binary value, 
+        4: required i32 expiration
+    ),
 
     /**
      * Get.
@@ -79,7 +102,10 @@ service FunServant {
      * @param string key -
      * @return binary - Value of the key
      */
-    binary mc_get(1: req_ctx ctx, 2: string key),
+    binary mc_get(
+        1: required req_ctx ctx, 
+        2: required string key
+    ),
 
     /**
      * Add.
@@ -90,7 +116,12 @@ service FunServant {
      * @param i32 expiration -
      * @return bool - False if the key already exists.
      */
-    bool mc_add(1: req_ctx ctx, 2: string key, 3: binary value, 4: i32 expiration),
+    bool mc_add(
+        1: required req_ctx ctx, 
+        2: required string key, 
+        3: required binary value, 
+        4: required i32 expiration
+    ),
 
     /**
      * Delete.
@@ -99,7 +130,10 @@ service FunServant {
      * @param string key -
      * @return bool - True if Success 
      */
-    bool mc_delete(1: req_ctx ctx, 2: string key),
+    bool mc_delete(
+        1: required req_ctx ctx, 
+        2: required string key
+    ),
 
     /**
      * Increment.
@@ -109,6 +143,10 @@ service FunServant {
      * @param i32 delta - If negative, means decrement
      * @return binary - New value of the key
      */
-    i32 mc_increment(1: req_ctx ctx, 2: string key, 3: i32 delta),
+    i32 mc_increment(
+        1: required req_ctx ctx, 
+        2: required string key, 
+        3: required i32 delta
+    ),
 
 }
