@@ -10,6 +10,9 @@ import (
 type engineStats struct {
 	startedAt time.Time
 	MemStats  *runtime.MemStats
+
+	totalRequests  map[string]int64 // key is client ip
+	periodRequests map[string]int64 // key is client ip
 }
 
 func newEngineStats() (this *engineStats) {
