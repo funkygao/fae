@@ -2,11 +2,12 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/syslogng"
 	"time"
 )
 
-func (this *FunServantImpl) Dlog(category string, tag string,
+func (this *FunServantImpl) Dlog(ctx *rpc.ReqCtx, category string, tag string,
 	json string) (err error) {
 	this.t1 = time.Now()
 

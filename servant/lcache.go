@@ -2,10 +2,12 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"time"
 )
 
-func (this *FunServantImpl) LcSet(key string, value []byte) (r bool, err error) {
+func (this *FunServantImpl) LcSet(ctx *rpc.ReqCtx,
+	key string, value []byte) (r bool, err error) {
 	this.t1 = time.Now()
 	this.lc.Set(key, value)
 	r = true
@@ -14,7 +16,7 @@ func (this *FunServantImpl) LcSet(key string, value []byte) (r bool, err error) 
 	return
 }
 
-func (this *FunServantImpl) LcGet(key string) (r []byte, err error) {
+func (this *FunServantImpl) LcGet(ctx *rpc.ReqCtx, key string) (r []byte, err error) {
 	this.t1 = time.Now()
 	result, ok := this.lc.Get(key)
 	if !ok {
@@ -27,7 +29,7 @@ func (this *FunServantImpl) LcGet(key string) (r []byte, err error) {
 	return
 }
 
-func (this *FunServantImpl) LcDel(key string) (err error) {
+func (this *FunServantImpl) LcDel(ctx *rpc.ReqCtx, key string) (err error) {
 	log.Debug("lc_delete key:%s", key)
 	this.lc.Del(key)
 	return

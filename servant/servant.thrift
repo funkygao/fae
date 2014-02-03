@@ -45,15 +45,15 @@ service FunServant {
      * @param string tag -
      * @param string json - Client is responsible to jsonize
      */
-    oneway void dlog(1: string category, 2: string tag, 3: string json),
+    oneway void dlog(1: req_ctx ctx, 2: string category, 3: string tag, 4: string json),
 
     //=================
     // lcache section
     //=================
 
-    bool lc_set(1: string key, 2: binary value),
-    binary lc_get(1: string key),
-    oneway void lc_del(1: string key),
+    bool lc_set(1: req_ctx ctx, 2: string key, 3: binary value),
+    binary lc_get(1: req_ctx ctx, 2: string key),
+    oneway void lc_del(1: req_ctx ctx, 2: string key),
 
     //=================
     // memcache section
