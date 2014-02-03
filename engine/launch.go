@@ -1,6 +1,7 @@
 package engine
 
 import (
+	log "code.google.com/p/log4go"
 	"github.com/funkygao/golib/signal"
 	"os"
 	"syscall"
@@ -14,6 +15,8 @@ func (this *Engine) ServeForever() {
 
 	signal.IgnoreSignal(syscall.SIGHUP)
 
+	log.Info("Launching Engine...")
+
 	// start the stats counter
 	this.stats.Start(this.StartedAt)
 
@@ -21,4 +24,6 @@ func (this *Engine) ServeForever() {
 	defer this.stopHttpServ()
 
 	<-this.launchRpcServe()
+
+	log.Info("Engine terminated")
 }
