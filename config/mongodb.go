@@ -36,8 +36,12 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 	log.Debug("mongodb server: %+v", *this)
 }
 
+// http://docs.mongodb.org/manual/reference/connection-string/
 func (this *ConfigMongodbServer) Address() string {
 	addr := "mongodb://" + this.Host + ":" + this.Port + "/"
+	if this.DbName != "" {
+		addr += this.DbName + "/"
+	}
 	if this.ReplicaSet != "" {
 		addr += "?replicaSet=" + this.ReplicaSet
 	}
