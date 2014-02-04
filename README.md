@@ -24,7 +24,7 @@ It's middleware RPC engine.
 
 *   local LRU cache shared among processes
 *   memcache servant
-*   mongodb servant
+*   mongodb servant with transaction support
 *   distributed logger servant
 
 ### Architecture
