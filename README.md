@@ -36,7 +36,7 @@ It's middleware RPC engine.
             |                       |                       |
              -----------------------------------------------
                                     |                        
-                                    | unix domain socket
+                                    | tcp/unix socket
                                     |                        
                             +---------------+
                             |  faed daemon  |
