@@ -193,8 +193,16 @@ service FunServant {
         3: i32 shardId,
         4: string table,
         5: binary query,
-        6: binary data,
-        7: bool upsert
+        6: binary change
+    ),
+
+    bool mg_upsert(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary query,
+        6: binary change
     ),
 
     bool mg_insert(
@@ -202,16 +210,7 @@ service FunServant {
         2: string kind,
         3: i32 shardId,
         4: string table,
-        5: binary data,
-        6: binary options
-    ),
-
-    bool mg_inserts(
-        1: required req_ctx ctx, 
-        2: string kind,
-        3: i32 shardId,
-        4: string table
-        5: binary data,
+        5: binary doc,
         6: binary options
     ),
 
