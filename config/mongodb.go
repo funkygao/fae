@@ -37,7 +37,11 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 }
 
 func (this *ConfigMongodbServer) Address() string {
-	return this.Host + ":" + this.Port
+	addr := "mongodb://" + this.Host + ":" + this.Port + "/"
+	if this.ReplicaSet != "" {
+		addr += "?replicaSet=" + this.ReplicaSet
+	}
+	return addr
 }
 
 type ConfigMongodb struct {
