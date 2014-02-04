@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"fmt"
-	"github.com/funkygao/fae/config"
 	"net"
 )
 
@@ -12,9 +11,14 @@ type ServerSelector interface {
 }
 
 type ShardServerSelector struct {
+	ShardBaseNum int
 }
 
-func (this *ShardServerSelector) lookupDbName(shardKey string, shardId int) string {
-	n := (shardId / config.Servants.Mongodb.ShardBaseNum) + 1
+func (this *ShardServerSelector) PickServer(shardKey string, shardId int) string {
+	n := (shardId / this.ShardBaseNum) + 1
 	return fmt.Sprintf("db%s", n)
+}
+
+func (this *ShardServerSelector) SetServers() error {
+	return nil
 }

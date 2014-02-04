@@ -8,16 +8,16 @@ import (
 
 func (this *FunServantImpl) LcSet(ctx *rpc.ReqCtx,
 	key string, value []byte) (r bool, err error) {
-	this.t1 = time.Now()
+	t1 := time.Now()
 	this.lc.Set(key, value)
 	r = true
 
-	log.Debug("lc_set key:%s value:%v %s", key, value, time.Since(this.t1))
+	log.Debug("lc_set key:%s value:%v %s", key, value, time.Since(t1))
 	return
 }
 
 func (this *FunServantImpl) LcGet(ctx *rpc.ReqCtx, key string) (r []byte, err error) {
-	this.t1 = time.Now()
+	t1 := time.Now()
 	result, ok := this.lc.Get(key)
 	if !ok {
 		err = errLcMissed
@@ -25,7 +25,7 @@ func (this *FunServantImpl) LcGet(ctx *rpc.ReqCtx, key string) (r []byte, err er
 		r = result.([]byte)
 	}
 
-	log.Debug("lc_get key:%s %s", key, time.Since(this.t1))
+	log.Debug("lc_get key:%s %s", key, time.Since(t1))
 	return
 }
 

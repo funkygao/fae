@@ -12,8 +12,6 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	t1 time.Time // timeit
-
 	mc *memcache.Client
 	mg *mongo.Client
 	lc *cache.LruCache

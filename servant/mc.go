@@ -10,7 +10,7 @@ import (
 
 func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
 	expiration int32) (r bool, err error) {
-	this.t1 = time.Now()
+	t1 := time.Now()
 	err = this.mc.Set(&memcache.Item{Key: key, Value: value, Expiration: expiration})
 	if err == nil {
 		r = true
@@ -19,14 +19,14 @@ func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
 	log.Debug("ctx:%+v mc_set key:%s value:%s, expiration:%v %s",
 		*ctx,
 		key, string(value), expiration,
-		time.Since(this.t1))
+		time.Since(t1))
 
 	return
 }
 
 func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte,
 	miss *rpc.TMemcacheMissed, err error) {
-	this.t1 = time.Now()
+	t1 := time.Now()
 	var it *memcache.Item
 	it, err = this.mc.Get(key)
 	if err == nil {
@@ -44,7 +44,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte,
 
 	log.Debug("ctx:%+v mc_get key:%s %s",
 		*ctx,
-		key, time.Since(this.t1))
+		key, time.Since(t1))
 	return
 }
 
