@@ -34,13 +34,16 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	var (
 		serverTransport thrift.TServerTransport
 		err             error
+		serverNetwork   string
 	)
 	switch {
 	case strings.Contains(this.conf.rpc.listenAddr, "/"):
+		serverNetwork = "unix"
 		serverTransport, err = NewTUnixSocketTimeout(
 			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
 
 	default:
+		serverNetwork = "tcp"
 		serverTransport, err = thrift.NewTServerSocketTimeout(
 			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
 	}
@@ -50,7 +53,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
-	log.Info("RPC server ready at %s", this.conf.rpc.listenAddr)
+	log.Info("RPC server ready at %s:%s", serverNetwork, this.conf.rpc.listenAddr)
 
 	done = make(chan interface{})
 	go func() {
