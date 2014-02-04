@@ -6,6 +6,9 @@ import (
 
 func (this *FunServantImpl) MgDelete(ctx *rpc.ReqCtx, kind string, shardId int32,
 	table string, query []byte) (r bool, err error) {
+	sess, _ := this.mg.Session(kind, shardId)
+	err = sess.DB().C(table).Remove(query)
+	sess.Recyle(&err)
 	return
 }
 
