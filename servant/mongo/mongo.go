@@ -1,12 +1,14 @@
 package mongo
 
 import (
+	"github.com/funkygao/fae/config"
 	"labix.org/v2/mgo"
 	"sync"
 	"time"
 )
 
 type Client struct {
+	conf    *config.ConfigMongodb
 	Timeout time.Duration
 
 	selector ServerSelector
@@ -15,7 +17,8 @@ type Client struct {
 	freeconn map[string][]*mgo.Session
 }
 
-func New() (this *Client) {
+func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
+	this.conf = cf
 	return
 }

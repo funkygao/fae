@@ -26,7 +26,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	memcacheServers := this.conf.Memcache.ServerList()
 	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
 
-	this.mg = mongo.New()
+	this.mg = mongo.New(this.conf.Mongodb)
 
 	go this.runWatchdog()
 
