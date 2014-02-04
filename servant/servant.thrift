@@ -1,7 +1,7 @@
 namespace go  fun.rpc
 namespace php fun.rpc
 
-exception TMemcacheMissed {
+exception TCacheMissed {
     11: optional string message
 }
 
@@ -75,6 +75,8 @@ service FunServant {
     binary lc_get(
         1: required req_ctx ctx, 
         2: required string key
+    ) throws (
+        1: TCacheMissed miss
     ),
 
     oneway void lc_del(
@@ -113,7 +115,7 @@ service FunServant {
         1: required req_ctx ctx, 
         2: required string key
     ) throws (
-        1: TMemcacheMissed miss
+        1: TCacheMissed miss
     ),
 
     /**

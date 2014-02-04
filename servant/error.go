@@ -1,9 +1,7 @@
 package servant
 
 import (
-	"errors"
+	_ "errors"
 )
 
-var (
-	errLcMissed = errors.New("local cache missed for the key")
-)
+var ()

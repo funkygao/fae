@@ -5,40 +5,40 @@ import (
 )
 
 func (this *FunServantImpl) MgDelete(ctx *rpc.ReqCtx, kind string, shardId int32,
-	table string, query []byte) (r bool, err error) {
+	table string, query []byte) (r bool, intError error) {
 	sess, _ := this.mg.Session(kind, shardId)
-	err = sess.DB().C(table).Remove(query)
+	err := sess.DB().C(table).Remove(query)
 	sess.Recyle(&err)
 	return
 }
 
 func (this *FunServantImpl) MgFindOne(ctx *rpc.ReqCtx, kind string, shardId int32,
-	table string, query []byte, fields []byte) (r []byte, err error) {
+	table string, query []byte, fields []byte) (r []byte, intError error) {
 	return
 }
 
 func (this *FunServantImpl) MgFindAll(ctx *rpc.ReqCtx, kind string, shardId int32,
 	table string, query []byte, fields []byte, limit []byte,
-	orderBy []byte) (r []byte, err error) {
+	orderBy []byte) (r []byte, intError error) {
 	return
 }
 
 func (this *FunServantImpl) MgUpdate(ctx *rpc.ReqCtx, kind string, shardId int32,
-	table string, query []byte, data []byte, upsert bool) (r bool, err error) {
+	table string, query []byte, data []byte, upsert bool) (r bool, intError error) {
 	return
 }
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.ReqCtx, kind string, shardId int32,
-	table string, data []byte, options []byte) (r bool, err error) {
+	table string, data []byte, options []byte) (r bool, intError error) {
 	return
 }
 
 func (this *FunServantImpl) MgInserts(ctx *rpc.ReqCtx, kind string, shardId int32,
-	table string, data []byte, options []byte) (r bool, err error) {
+	table string, data []byte, options []byte) (r bool, intError error) {
 	return
 }
 
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.ReqCtx, kind string,
-	shardId int32, table string, command []byte) (r []byte, err error) {
+	shardId int32, table string, command []byte) (r []byte, intError error) {
 	return
 }

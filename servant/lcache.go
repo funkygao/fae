@@ -1,36 +1,35 @@
+/*
+LCache key:string, value:[]byte.
+*/
 package servant
 
 import (
-	log "code.google.com/p/log4go"
+	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"time"
 )
 
 func (this *FunServantImpl) LcSet(ctx *rpc.ReqCtx,
-	key string, value []byte) (r bool, err error) {
-	t1 := time.Now()
+	key string, value []byte) (r bool, intError error) {
 	this.lc.Set(key, value)
 	r = true
 
-	log.Debug("lc_set key:%s value:%v %s", key, value, time.Since(t1))
 	return
 }
 
-func (this *FunServantImpl) LcGet(ctx *rpc.ReqCtx, key string) (r []byte, err error) {
-	t1 := time.Now()
+func (this *FunServantImpl) LcGet(ctx *rpc.ReqCtx, key string) (r []byte,
+	miss *rpc.TCacheMissed, intError error) {
 	result, ok := this.lc.Get(key)
 	if !ok {
-		err = errLcMissed
+		miss = rpc.NewTCacheMissed()
+		miss.Message = thrift.StringPtr("lcache missed: " + key) // optional
 	} else {
 		r = result.([]byte)
 	}
 
-	log.Debug("lc_get key:%s %s", key, time.Since(t1))
 	return
 }
 
-func (this *FunServantImpl) LcDel(ctx *rpc.ReqCtx, key string) (err error) {
-	log.Debug("lc_delete key:%s", key)
+func (this *FunServantImpl) LcDel(ctx *rpc.ReqCtx, key string) (intError error) {
 	this.lc.Del(key)
 	return
 }
