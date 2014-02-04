@@ -17,6 +17,7 @@ func (this *StandardServerSelector) SetServers(servers ...string) error {
 	if len(servers) == 0 {
 		return ErrNoServers
 	}
+
 	naddr := make([]net.Addr, len(servers))
 	for i, server := range servers {
 		if strings.Contains(server, "/") {
@@ -47,6 +48,8 @@ func (this *StandardServerSelector) PickServer(key string) (net.Addr, error) {
 		return nil, ErrNoServers
 	}
 
-	bucket := ((crc32.ChecksumIEEE([]byte(key)) >> 16) & 0x7fff) % uint32(len(this.addrs))
+	// compatible with php memcache extension
+	bucket := ((crc32.ChecksumIEEE([]byte(key)) >> 16) & 0x7fff) %
+		uint32(len(this.addrs))
 	return this.addrs[bucket], nil
 }

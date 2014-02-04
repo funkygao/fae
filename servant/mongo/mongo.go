@@ -20,5 +20,7 @@ type Client struct {
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
+	this.selector = NewStandardServerSelector(cf.ShardBaseNum)
+	this.selector.SetServers(cf.Servers)
 	return
 }
