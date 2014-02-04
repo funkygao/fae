@@ -22,19 +22,19 @@
             timeout: 30
             servers: [
                 {
-                    shard_name: "log"
+                    kind: "log"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_log"
                 }
                 {
-                    shard_name: "default"
+                    kind: "default"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_0"
                 }
                 {
-                    shard_name: "db1"
+                    kind: "db1"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_1"

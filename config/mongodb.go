@@ -7,7 +7,7 @@ import (
 )
 
 type ConfigMongodbServer struct {
-	ShardName  string
+	Kind       string
 	Host       string
 	Port       string
 	User       string
@@ -17,7 +17,7 @@ type ConfigMongodbServer struct {
 }
 
 func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
-	this.ShardName = section.String("shard_name", "")
+	this.Kind = section.String("kind", "")
 	this.Host = section.String("host", "")
 	this.Port = section.String("port", "27017")
 	this.DbName = section.String("db", "")
@@ -26,9 +26,9 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 	this.ReplicaSet = section.String("replicaSet", "")
 	if this.Host == "" ||
 		this.Port == "" ||
-		this.ShardName == "" ||
+		this.Kind == "" ||
 		this.DbName == "" {
-		panic("required filed")
+		panic("required field missing")
 	}
 
 	log.Debug("mongodb server: %+v", *this)
@@ -41,7 +41,7 @@ func (this *ConfigMongodbServer) Address() string {
 type ConfigMongodb struct {
 	ShardBaseNum int
 	Timeout      int
-	Servers      map[string]*ConfigMongodbServer // key is shardName
+	Servers      map[string]*ConfigMongodbServer // key is kind
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
@@ -56,7 +56,7 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 
 		server := new(ConfigMongodbServer)
 		server.loadConfig(section)
-		this.Servers[server.ShardName] = server
+		this.Servers[server.Kind] = server
 	}
 
 	log.Debug("mongodb: %+v", *this)
