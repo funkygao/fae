@@ -29,6 +29,12 @@ It's middleware RPC engine.
 
 ### Requirement
 
+flex
+
+    sudo apt-get install flex
+
+thrift
+
     git clone https://github.com/apache/thrift.git
     cd thrift
     ./bootstrap.sh
