@@ -29,11 +29,17 @@ It's middleware RPC engine.
 
 ### Requirement
 
+hg
+
+    sudo apt-get install mercurial
+
 flex
 
     sudo apt-get install flex
 
 thrift above 0.9.0
+
+    git.apache.org/thrift.git/lib/go/thrift
 
     git clone https://github.com/apache/thrift.git
     cd thrift
