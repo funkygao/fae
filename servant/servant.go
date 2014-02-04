@@ -27,7 +27,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
 
 	this.mg = mongo.New(this.conf.Mongodb)
-	this.mg.Timeout = time.Duration(this.conf.Mongodb.Timeout) * time.Second
 
 	go this.runWatchdog()
 

@@ -46,7 +46,8 @@ func (this *ConfigMongodbServer) Address() string {
 
 type ConfigMongodb struct {
 	ShardBaseNum          int
-	Timeout               int
+	ConnectTimeout        int
+	IoTimeout             int
 	MaxIdleConnsPerServer int
 	HeartbeatInterval     int
 	Servers               map[string]*ConfigMongodbServer // key is kind
@@ -54,7 +55,8 @@ type ConfigMongodb struct {
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
-	this.Timeout = cf.Int("timeout", 30)
+	this.ConnectTimeout = cf.Int("connect_timeout", 4)
+	this.IoTimeout = cf.Int("io_timeout", 30)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	this.Servers = make(map[string]*ConfigMongodbServer)

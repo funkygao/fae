@@ -19,7 +19,8 @@
 
         mongodb: {
             shard_base_num: 100000
-            timeout: 30
+            connect_timeout: 4
+            io_timeout: 30
             heartbeat_interval: 60
             max_idle_conns_per_server: 3
             servers: [
