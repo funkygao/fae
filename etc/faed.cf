@@ -4,7 +4,7 @@
     peer_heartbeat_interval: 10
 
     rpc: {
-        //listen_addr: "unix:(/var/run/fae.sock)"
+        //listen_addr: "/var/run/fae.sock"
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
         protocol: "binary"

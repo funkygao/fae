@@ -4,6 +4,7 @@ import (
 	log "code.google.com/p/log4go"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"strings"
 )
 
 func (this *Engine) launchRpcServe() (done chan interface{}) {
@@ -30,8 +31,19 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
 	}
 
-	serverTransport, err := thrift.NewTServerSocketTimeout(this.conf.rpc.listenAddr,
-		this.conf.rpc.clientTimeout)
+	var (
+		serverTransport thrift.TServerTransport
+		err             error
+	)
+	switch {
+	case strings.Contains(this.conf.rpc.listenAddr, "/"):
+		serverTransport, err = NewTUnixSocketTimeout(
+			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
+
+	default:
+		serverTransport, err = thrift.NewTServerSocketTimeout(
+			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
+	}
 	if err != nil {
 		panic(err)
 	}

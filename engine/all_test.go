@@ -17,3 +17,9 @@ func TestPeerMessage(t *testing.T) {
 	data, _ := msg.marshal()
 	assert.Equal(t, `{"cmd":"ok"}`, string(data))
 }
+
+func TestUnixSocket(t *testing.T) {
+	s, err := NewTUnixSocket("/var/run/faed.sock")
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "unix", s.addr.Network())
+}
