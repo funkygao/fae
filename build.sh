@@ -2,7 +2,7 @@
 
 if [[ $1 = "-loc" ]]; then
     cd $(dirname $0)/servant; make clean; cd -
-    find . -name '*.go' | xargs wc -l
+    find . -name '*.go' | xargs wc -l | sort -n
     exit
 fi
 
