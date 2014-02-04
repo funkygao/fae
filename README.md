@@ -33,7 +33,7 @@ flex
 
     sudo apt-get install flex
 
-thrift
+thrift above 0.9.0
 
     git clone https://github.com/apache/thrift.git
     cd thrift
