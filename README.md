@@ -41,6 +41,8 @@ It's middleware RPC engine.
                             +---------------+
                             |  faed daemon  |
                             +---------------+
+                            |  local cache  | 
+                            +---------------+
                                     |                        
                                     | tcp long connection pool(keepalive)
                                     |                        
