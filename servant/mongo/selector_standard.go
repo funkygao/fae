@@ -17,6 +17,8 @@ func NewStandardServerSelector(baseNum int) *StandardServerSelector {
 
 func (this *StandardServerSelector) PickServer(kind string,
 	shardId int) (addr string, err error) {
+	const SHARD_KIND_PREFIX = "db"
+
 	var bucket string
 	if !strings.HasPrefix(kind, SHARD_KIND_PREFIX) {
 		bucket = kind
