@@ -30,8 +30,8 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 	return
 }
 
-func (this *Client) Session(kind string, shardId int) (*Session, error) {
-	addr, err := this.selector.PickServer(kind, shardId)
+func (this *Client) Session(kind string, shardId int32) (*Session, error) {
+	addr, err := this.selector.PickServer(kind, int(shardId))
 	if err != nil {
 		return nil, err
 	}
