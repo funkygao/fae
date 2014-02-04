@@ -27,6 +27,17 @@ It's middleware RPC engine.
 *   mongodb servant with transaction support
 *   distributed logger servant
 
+### Requirement
+
+    git clone https://github.com/apache/thrift.git
+    cd thrift
+    ./bootstrap.sh
+    ./configure --prefix=/opt/app/thrift
+    make
+    make -k check
+    sh test/test.sh
+    make install
+
 ### Architecture
 
 
