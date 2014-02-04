@@ -18,10 +18,10 @@ func NewStandardServerSelector(baseNum int) *StandardServerSelector {
 func (this *StandardServerSelector) PickServer(kind string,
 	shardId int) (string, error) {
 	var bucket string
-	if !strings.HasPrefix(kind, SHARD_DB_PREFIX) {
+	if !strings.HasPrefix(kind, SHARD_KIND_PREFIX) {
 		bucket = kind
 	} else {
-		bucket = fmt.Sprintf("db%s", (shardId/this.ShardBaseNum)+1)
+		bucket = fmt.Sprintf("db%d", (shardId/this.ShardBaseNum)+1)
 	}
 
 	if server, present := this.Servers[bucket]; present {

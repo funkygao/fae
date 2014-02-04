@@ -1,7 +1,7 @@
 package mongo
 
 const (
-	SHARD_DB_PREFIX = "db"
+	SHARD_KIND_PREFIX = "db"
 )
 
 var ()
