@@ -47,8 +47,8 @@ It's middleware RPC engine.
                                     | tcp long connection pool(keepalive)
                                     |                        
              -----------------------------------------------
-            |                       |                       |
+            |                       |                       | hierarchy
         +----------------+  +----------------+  +----------------+
-        | mongodb servers|  |memcache servers|  | ... backends   |
+        | mongodb servers|  |memcache servers|  |   faed daemon  |
         +----------------+  +----------------+  +----------------+
 
