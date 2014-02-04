@@ -28,7 +28,7 @@ func (this *Session) Recyle(err *error) {
 
 func (this *Session) resumableError(err error) bool {
 	switch err {
-	case nil:
+	case nil, mgo.ErrNotFound:
 		return true
 	}
 
