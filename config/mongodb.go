@@ -48,6 +48,10 @@ func (this *ConfigMongodbServer) Address() string {
 	return addr
 }
 
+func (this *ConfigMongodbServer) Url() string {
+	return this.Address()
+}
+
 type ConfigMongodb struct {
 	ShardBaseNum          int
 	ConnectTimeout        int
