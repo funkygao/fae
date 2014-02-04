@@ -10,7 +10,7 @@ import (
 func main() {
 	t1 := time.Now()
 
-	client, transport := engine.Client(":9001")
+	client, transport := engine.Servant(":9001")
 	defer transport.Close()
 
 	ctx := rpc.NewReqCtx()
