@@ -9,6 +9,8 @@ var (
 )
 
 type ConfigServant struct {
+	WatchdogInterval int
+
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
@@ -19,6 +21,8 @@ func init() {
 }
 
 func LoadServants(cf *conf.Conf) {
+	Servants.WatchdogInterval = cf.Int("watchdog_interval", 60*10)
+
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
 	section, err := cf.Section("mongodb")
