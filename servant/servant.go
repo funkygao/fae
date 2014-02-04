@@ -11,9 +11,9 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
+	lc *cache.LruCache
 	mc *memcache.Client
 	mg *mongo.Client
-	lc *cache.LruCache
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
