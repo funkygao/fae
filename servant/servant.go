@@ -4,6 +4,7 @@ import (
 	log "code.google.com/p/log4go"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/memcache"
+	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
 	"time"
 )
@@ -14,14 +15,18 @@ type FunServantImpl struct {
 	t1 time.Time // timeit
 
 	mc *memcache.Client
+	mg *mongo.Client
 	lc *cache.LruCache
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
+
 	memcacheServers := this.conf.Memcache.ServerList()
 	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
+
+	this.mg = mongo.New()
 
 	go this.runWatchdog()
 
