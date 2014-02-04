@@ -21,7 +21,8 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $return = $client->ping();
+    $ctx = new req_ctx(array('caller' => "me"));
+    $return = $client->ping($ctx);
     echo $return;
 
     $transport->close();

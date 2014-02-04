@@ -22,7 +22,7 @@ ctx = FunServant.req_ctx(caller='POST+/facebook/getPaymentRequestId/+34ca2cf6')
 
 # ping
 #=====
-r = client.ping()
+r = client.ping(ctx)
 delta = datetime.datetime.now() - t1
 print '[Client] received from rpc server:', r, delta.microseconds, 'us'
 

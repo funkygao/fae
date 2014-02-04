@@ -40,7 +40,9 @@ service FunServant {
      *
      * @return string - always 'pong'
      */
-    string ping(),
+    string ping(
+        1: required req_ctx ctx
+    ),
 
     /**
      * Write a dlog event.
