@@ -68,14 +68,6 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 	return cn, true
 }
 
-func (this *Client) netTimeout() time.Duration {
-	if this.Timeout != 0 {
-		return this.Timeout
-	}
-
-	return defaultTimeout
-}
-
 func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	type connError struct {
 		cn  net.Conn
@@ -89,7 +81,7 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	select {
 	case ce := <-ch:
 		return ce.cn, ce.err
-	case <-time.After(this.netTimeout()):
+	case <-time.After(this.Timeout):
 		// Too slow. Fall through.
 	}
 	// Close the conn if it does end up finally coming in
