@@ -9,7 +9,7 @@ import (
 func main() {
 	t1 := time.Now()
 
-	client, transport := engine.GetClient(":9001")
+	client, transport := engine.Client(":9001")
 	defer transport.Close()
 
 	for i := 0; i < 10; i++ {

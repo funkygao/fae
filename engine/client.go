@@ -5,7 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 )
 
-func GetClient(serverAddr string) (*rpc.FunServantClient, thrift.TTransport) {
+func Client(serverAddr string) (*rpc.FunServantClient, thrift.TTransport) {
 	transportFactory := thrift.NewTTransportFactory()
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
