@@ -14,6 +14,7 @@ Release Notes - fae - Version v0.0.1.alpha
 
     . source code was greatly refactored and better organized
     . request context added, so we can do auditting
+    . recyleable mongodb pooling 
 
 ** Bug
 
