@@ -10,7 +10,7 @@ func (this *FunServantImpl) runWatchdog() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("lcache len: %d", this.lc.Len())
+		log.Debug("lcache len: %d", this.lc.Len())
 	}
 
 }

@@ -30,7 +30,8 @@ func New(hashStrategy string, servers ...string) *Client {
 }
 
 type Client struct {
-	Timeout time.Duration
+	MaxIdleConnsPerServer int
+	Timeout               time.Duration
 
 	selector ServerSelector
 
@@ -45,7 +46,7 @@ func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 		this.freeconn = make(map[string][]*conn)
 	}
 	freelist := this.freeconn[addr.String()]
-	if len(freelist) >= maxIdleConnsPerAddr {
+	if len(freelist) >= this.MaxIdleConnsPerServer {
 		cn.nc.Close()
 		return
 	}
@@ -67,14 +68,6 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 	return cn, true
 }
 
-func (this *Client) netTimeout() time.Duration {
-	if this.Timeout != 0 {
-		return this.Timeout
-	}
-
-	return defaultTimeout
-}
-
 func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	type connError struct {
 		cn  net.Conn
@@ -88,7 +81,7 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	select {
 	case ce := <-ch:
 		return ce.cn, ce.err
-	case <-time.After(this.netTimeout()):
+	case <-time.After(this.Timeout):
 		// Too slow. Fall through.
 	}
 	// Close the conn if it does end up finally coming in

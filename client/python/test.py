@@ -34,5 +34,5 @@ try:
 except Exception, e:
     print e
 
-print client.lc_set(ctx, 'error_tag', 'abcdefg')
-print client.lc_get(ctx, 'error_tag')
+print client.lc_set(ctx, 'lc_test_hello', 'abcdefg')
+print client.lc_get(ctx, 'lc_test_hello')

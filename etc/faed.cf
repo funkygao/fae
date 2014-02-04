@@ -19,22 +19,26 @@
 
         mongodb: {
             shard_base_num: 100000
-            timeout: 30
+            connect_timeout: 4
+            io_timeout: 30
+            heartbeat_interval: 60
+            max_idle_conns_per_server: 3
             servers: [
                 {
-                    shard_name: "log"
+                    kind: "log"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_log"
+                    replicaSet: ""
                 }
                 {
-                    shard_name: "default"
+                    kind: "default"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_0"
                 }
                 {
-                    shard_name: "db1"
+                    kind: "db1"
                     host: "127.0.0.1"
                     port: 27017
                     db: "qa_royal_1"

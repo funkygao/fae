@@ -7,46 +7,58 @@ import (
 )
 
 type ConfigMongodbServer struct {
-	ShardName  string
-	Host       string
-	Port       string
-	User       string
-	Pass       string
-	DbName     string
-	ReplicaSet string
+	Kind         string
+	Host         string
+	Port         string
+	User         string
+	Pass         string
+	DbName       string
+	ReplicaSet   string
+	ShardBaseNum int
 }
 
 func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
-	this.ShardName = section.String("shard_name", "")
+	this.Kind = section.String("kind", "")
 	this.Host = section.String("host", "")
 	this.Port = section.String("port", "27017")
 	this.DbName = section.String("db", "")
+	this.ShardBaseNum = section.Int("shard_base_num", this.ShardBaseNum)
 	this.User = section.String("user", "")
 	this.Pass = section.String("pass", "")
 	this.ReplicaSet = section.String("replicaSet", "")
 	if this.Host == "" ||
 		this.Port == "" ||
-		this.ShardName == "" ||
+		this.Kind == "" ||
 		this.DbName == "" {
-		panic("required filed")
+		panic("required field missing")
 	}
 
 	log.Debug("mongodb server: %+v", *this)
 }
 
 func (this *ConfigMongodbServer) Address() string {
-	return this.Host + ":" + this.Port
+	addr := "mongodb://" + this.Host + ":" + this.Port + "/"
+	if this.ReplicaSet != "" {
+		addr += "?replicaSet=" + this.ReplicaSet
+	}
+	return addr
 }
 
 type ConfigMongodb struct {
-	ShardBaseNum int
-	Timeout      int
-	Servers      map[string]*ConfigMongodbServer // key is shardName
+	ShardBaseNum          int
+	ConnectTimeout        int
+	IoTimeout             int
+	MaxIdleConnsPerServer int
+	HeartbeatInterval     int
+	Servers               map[string]*ConfigMongodbServer // key is kind
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
-	this.Timeout = cf.Int("timeout", 30)
+	this.ConnectTimeout = cf.Int("connect_timeout", 4)
+	this.IoTimeout = cf.Int("io_timeout", 30)
+	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
+	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	this.Servers = make(map[string]*ConfigMongodbServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
@@ -55,8 +67,9 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 		}
 
 		server := new(ConfigMongodbServer)
+		server.ShardBaseNum = this.ShardBaseNum
 		server.loadConfig(section)
-		this.Servers[server.ShardName] = server
+		this.Servers[server.Kind] = server
 	}
 
 	log.Debug("mongodb: %+v", *this)
