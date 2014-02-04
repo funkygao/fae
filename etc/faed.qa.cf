@@ -1,0 +1,65 @@
+{
+    http_listen_addr: ":9002"
+    peer_group_addr: "224.0.0.2:19850"
+    peer_heartbeat_interval: 10
+
+    rpc: {
+        //listen_addr: "/var/run/fae.sock"
+        listen_addr: ":9001"
+        // protocol: binary | json | simplejson | compact
+        protocol: "binary"
+        // framed: false
+        client_timeout: 10
+        client_slow_threshold: 8
+        call_slow_threshold: 5
+    }
+
+    servants: {
+        watchdog_interval: 60
+
+        mongodb: {
+            shard_base_num: 100000
+            connect_timeout: 4
+            io_timeout: 30
+            heartbeat_interval: 60
+            max_idle_conns_per_server: 3
+            servers: [
+                {
+                    kind: "log"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "qa_royal_log"
+                    replicaSet: ""
+                }
+                {
+                    kind: "default"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "qa_royal_0"
+                }
+                {
+                    kind: "db1"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "qa_royal_1"
+                }
+            ]
+        }
+
+        lcache: {
+            lru_max_items: 1073741824
+        }
+
+        memcache: {
+            hash_strategy: "standard"
+            timeout: 4
+            servers: [
+                {
+                    host: "127.0.0.1"
+                    port: "11211"
+                }
+            ]
+        }
+    }
+
+}
