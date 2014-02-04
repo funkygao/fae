@@ -30,7 +30,8 @@ func New(hashStrategy string, servers ...string) *Client {
 }
 
 type Client struct {
-	Timeout time.Duration
+	MaxIdleConnsPerServer int
+	Timeout               time.Duration
 
 	selector ServerSelector
 
@@ -45,7 +46,7 @@ func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 		this.freeconn = make(map[string][]*conn)
 	}
 	freelist := this.freeconn[addr.String()]
-	if len(freelist) >= maxIdleConnsPerAddr {
+	if len(freelist) >= this.MaxIdleConnsPerServer {
 		cn.nc.Close()
 		return
 	}
