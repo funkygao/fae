@@ -46,6 +46,8 @@ It's middleware RPC engine.
                                     |                        
                                     | tcp long connection pool(keepalive)
                                     |                        
+             -----------------------------------------------
+            |                       |                       |
         +----------------+  +----------------+  +----------------+
         | mongodb servers|  |memcache servers|  | ... backends   |
         +----------------+  +----------------+  +----------------+
