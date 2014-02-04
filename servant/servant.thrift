@@ -160,6 +160,73 @@ service FunServant {
 
     //=================
     // mongodb section
+    // use binary for 
+    // all bson codec
     //=================
+
+    binary mg_find_one(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        /** where condition */
+        5: binary query,
+        6: binary fields
+    ),
+
+    binary mg_find_all(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary query,
+        6: binary fields,
+        7: binary limit,
+        8: binary orderBy
+    ),
+
+    bool mg_update(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary query,
+        6: binary data,
+        7: bool upsert
+    ),
+
+    bool mg_insert(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary data,
+        6: binary options
+    ),
+
+    bool mg_inserts(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table
+        5: binary data,
+        6: binary options
+    ),
+
+    bool mg_delete(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary query
+    ),
+
+    binary mg_find_and_modify(
+        1: required req_ctx ctx, 
+        2: string kind,
+        3: i32 shardId,
+        4: string table,
+        5: binary command
+    ),
 
 }
