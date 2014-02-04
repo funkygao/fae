@@ -94,6 +94,8 @@ func (this *Peer) recvMessages() {
 }
 
 func (this *Peer) handleMessage(msg peerMessage) {
+	log.Debug("received peer: %+v", msg)
+
 	neighborIp, present := msg["ip"]
 	if !present {
 		return
