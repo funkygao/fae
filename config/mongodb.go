@@ -7,13 +7,14 @@ import (
 )
 
 type ConfigMongodbServer struct {
-	Kind       string
-	Host       string
-	Port       string
-	User       string
-	Pass       string
-	DbName     string
-	ReplicaSet string
+	Kind         string
+	Host         string
+	Port         string
+	User         string
+	Pass         string
+	DbName       string
+	ReplicaSet   string
+	ShardBaseNum int
 }
 
 func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
@@ -21,6 +22,7 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 	this.Host = section.String("host", "")
 	this.Port = section.String("port", "27017")
 	this.DbName = section.String("db", "")
+	this.ShardBaseNum = section.Int("shard_base_num", this.ShardBaseNum)
 	this.User = section.String("user", "")
 	this.Pass = section.String("pass", "")
 	this.ReplicaSet = section.String("replicaSet", "")
@@ -55,6 +57,7 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 		}
 
 		server := new(ConfigMongodbServer)
+		server.ShardBaseNum = this.ShardBaseNum
 		server.loadConfig(section)
 		this.Servers[server.Kind] = server
 	}
