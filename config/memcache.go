@@ -30,6 +30,7 @@ func (this *ConfigMemcacheServer) Address() string {
 
 type ConfigMemcache struct {
 	HashStrategy string
+	Timeout      int
 
 	Servers map[string]*ConfigMemcacheServer // key is host:port(addr)
 }
@@ -48,6 +49,7 @@ func (this *ConfigMemcache) ServerList() []string {
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
+	this.Timeout = cf.Int("timeout", 4)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
 		if err != nil {

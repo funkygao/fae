@@ -17,6 +17,7 @@
     servants: {
         mongodb: {
             shard_base_num: 100000
+            timeout: 30
             servers: [
                 {
                     shard_name: "log"
@@ -45,6 +46,7 @@
 
         memcache: {
             hash_strategy: "standard"
+            timeout: 4
             servers: [
                 {
                     host: "127.0.0.1"

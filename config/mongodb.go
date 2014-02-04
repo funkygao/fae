@@ -40,11 +40,13 @@ func (this *ConfigMongodbServer) Address() string {
 
 type ConfigMongodb struct {
 	ShardBaseNum int
+	Timeout      int
 	Servers      map[string]*ConfigMongodbServer // key is shardName
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
+	this.Timeout = cf.Int("timeout", 30)
 	this.Servers = make(map[string]*ConfigMongodbServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))

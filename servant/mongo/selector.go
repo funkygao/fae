@@ -11,7 +11,10 @@ type ServerSelector interface {
 	PickServer(key string) (net.Addr, error)
 }
 
-func (this *MongodbPool) lookupDbName(shardKey string, shardId int) string {
+type ShardServerSelector struct {
+}
+
+func (this *ShardServerSelector) lookupDbName(shardKey string, shardId int) string {
 	n := (shardId / config.Servants.Mongodb.ShardBaseNum) + 1
 	return fmt.Sprintf("db%s", n)
 }

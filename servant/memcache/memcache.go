@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func New(hashStrategy string, server ...string) *Client {
+func New(hashStrategy string, servers ...string) *Client {
 	var selector ServerSelector
 	switch hashStrategy {
 	case ConstistentHashStrategy:
@@ -22,7 +22,7 @@ func New(hashStrategy string, server ...string) *Client {
 		selector = new(StandardServerSelector)
 	}
 
-	if err := selector.SetServers(server...); err != nil {
+	if err := selector.SetServers(servers...); err != nil {
 		panic(err)
 	}
 
@@ -71,7 +71,8 @@ func (this *Client) netTimeout() time.Duration {
 	if this.Timeout != 0 {
 		return this.Timeout
 	}
-	return DefaultTimeout
+
+	return defaultTimeout
 }
 
 func (this *Client) dial(addr net.Addr) (net.Conn, error) {
