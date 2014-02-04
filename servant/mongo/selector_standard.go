@@ -16,7 +16,7 @@ func NewStandardServerSelector(baseNum int) *StandardServerSelector {
 }
 
 func (this *StandardServerSelector) PickServer(kind string,
-	shardId int) (string, error) {
+	shardId int) (addr string, err error) {
 	var bucket string
 	if !strings.HasPrefix(kind, SHARD_KIND_PREFIX) {
 		bucket = kind
@@ -25,10 +25,12 @@ func (this *StandardServerSelector) PickServer(kind string,
 	}
 
 	if server, present := this.Servers[bucket]; present {
-		return server.Address(), nil
+		addr = server.Address()
+	} else {
+		err = ErrServerNotFound
 	}
 
-	return "", ErrServerNotFound
+	return
 }
 
 func (this *StandardServerSelector) SetServers(servers map[string]*config.ConfigMongodbServer) {

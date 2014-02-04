@@ -6,5 +6,5 @@ import (
 
 type ServerSelector interface {
 	SetServers(servers map[string]*config.ConfigMongodbServer)
-	PickServer(kind string, shardId int) (string, error)
+	PickServer(kind string, shardId int) (addr string, err error)
 }
