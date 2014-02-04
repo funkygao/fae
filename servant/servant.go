@@ -1,7 +1,6 @@
 package servant
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
@@ -31,9 +30,4 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	go this.runWatchdog()
 
 	return
-}
-
-func (this *FunServantImpl) Ping() (r string, err error) {
-	log.Debug("ping")
-	return "pong", nil
 }
