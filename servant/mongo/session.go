@@ -1,14 +1,29 @@
 package mongo
 
 import (
+	"github.com/funkygao/fae/config"
 	"labix.org/v2/mgo"
 )
 
 type Session struct {
 	*mgo.Session
 
-	addr   string
+	server *config.ConfigMongodbServer
 	client *Client
+}
+
+func (this *Session) DB() *mgo.Database {
+	return this.Session.DB(this.server.DbName)
+}
+
+func (this *Session) Recyle(err *error) {
+	if err == nil || this.resumableError(*err) {
+		// reusable session(connection)
+		this.client.putFreeConn(this.server.Url(), this.Session)
+	} else {
+		// kill this session
+		this.Session.Close()
+	}
 }
 
 func (this *Session) resumableError(err error) bool {
@@ -18,12 +33,4 @@ func (this *Session) resumableError(err error) bool {
 	}
 
 	return false
-}
-
-func (this *Session) Recyle(err *error) {
-	if err == nil || this.resumableError(*err) {
-		this.client.putFreeConn(this.addr, this.Session)
-	} else {
-		this.Session.Close()
-	}
 }

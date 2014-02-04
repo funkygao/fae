@@ -31,27 +31,27 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 }
 
 func (this *Client) Session(kind string, shardId int32) (*Session, error) {
-	addr, err := this.selector.PickServer(kind, int(shardId))
+	server, err := this.selector.PickServer(kind, int(shardId))
 	if err != nil {
 		return nil, err
 	}
 
-	sess, err := this.getConn(addr)
+	sess, err := this.getConn(server.Url())
 	if err != nil {
 		return nil, err
 	}
 
-	return &Session{Session: sess, client: this, addr: addr}, nil
+	return &Session{Session: sess, client: this, server: server}, nil
 }
 
-func (this *Client) getConn(addr string) (*mgo.Session, error) {
-	sess, ok := this.getFreeConn(addr)
+func (this *Client) getConn(url string) (*mgo.Session, error) {
+	sess, ok := this.getFreeConn(url)
 	if ok {
 		return sess, nil
 	}
 
 	// create session on demand
-	sess, err := mgo.DialWithTimeout(addr, this.connectTimeout)
+	sess, err := mgo.DialWithTimeout(url, this.connectTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -61,33 +61,33 @@ func (this *Client) getConn(addr string) (*mgo.Session, error) {
 	return sess, nil
 }
 
-func (this *Client) putFreeConn(addr string, sess *mgo.Session) {
+func (this *Client) putFreeConn(url string, sess *mgo.Session) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	if this.freeconn == nil {
 		this.freeconn = make(map[string][]*mgo.Session)
 	}
-	freelist := this.freeconn[addr]
+	freelist := this.freeconn[url]
 	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		sess.Close()
 		return
 	}
-	this.freeconn[addr] = append(this.freeconn[addr], sess)
+	this.freeconn[url] = append(this.freeconn[url], sess)
 }
 
-func (this *Client) getFreeConn(addr string) (sess *mgo.Session, ok bool) {
+func (this *Client) getFreeConn(url string) (sess *mgo.Session, ok bool) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	if this.freeconn == nil {
 		return nil, false
 	}
-	freelist, present := this.freeconn[addr]
+	freelist, present := this.freeconn[url]
 	if !present || len(freelist) == 0 {
 		return nil, false
 	}
 
 	// it is no longer free
 	sess = freelist[len(freelist)-1] // last item
-	this.freeconn[addr] = freelist[:len(freelist)-1]
+	this.freeconn[url] = freelist[:len(freelist)-1]
 	return sess, true
 }
