@@ -53,7 +53,10 @@ func (this *Peer) markNeighbor(ip string, alive bool) {
 
 func (this *Peer) Start() (err error) {
 	this.localAddr = ip.LocalIpv4Addrs()[0]
-	this.gaddr, _ = net.ResolveUDPAddr("udp4", this.groupAddr)
+	this.gaddr, err = net.ResolveUDPAddr("udp4", this.groupAddr)
+	if err != nil {
+		return
+	}
 	this.c, err = net.ListenMulticastUDP("udp4", nil, this.gaddr)
 	if err != nil {
 		return
