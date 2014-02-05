@@ -36,3 +36,8 @@ func NewEngine(fn string) (this *Engine) {
 
 	return
 }
+
+// ip -> lastAccess
+func (this *Engine) Neighbors() *map[string]time.Time {
+	return this.peer.Neighbors()
+}

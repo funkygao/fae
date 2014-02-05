@@ -2,6 +2,7 @@
     http_listen_addr: ":9002"
     // multicast address in the range 224.0.0.0 through 239.255.255.255
     peer_group_addr: "239.255.255.250:1900"
+    peer_dead_threshold: 30
     peer_heartbeat_interval: 10
 
     rpc: {

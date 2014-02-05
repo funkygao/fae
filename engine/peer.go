@@ -31,24 +31,40 @@ type Peer struct {
 	groupAddr         string
 	gaddr             *net.UDPAddr
 	heartbeatInterval int
+	deadThreshold     float64
 
-	neighbors map[string]bool
+	neighbors map[string]time.Time
 }
 
-func newPeer(gaddr string, interval int) (this *Peer) {
+func newPeer(gaddr string, interval int, deadThreshold float64) (this *Peer) {
 	this = new(Peer)
 	this.RWMutex = new(sync.RWMutex)
 	this.groupAddr = gaddr
 	this.heartbeatInterval = interval
-	this.neighbors = make(map[string]bool)
+	this.deadThreshold = deadThreshold
+	this.neighbors = make(map[string]time.Time)
 	return
 }
 
-func (this *Peer) markNeighbor(ip string, alive bool) {
+func (this *Peer) Neighbors() *map[string]time.Time {
+	this.RLock()
+	defer this.RUnlock()
+	return &this.neighbors
+}
+
+func (this *Peer) killNeighbor(ip string) {
+	this.Lock()
+	defer this.Unlock()
+	delete(this.neighbors, ip)
+}
+
+func (this *Peer) refreshNeighbor(ip string) {
 	this.Lock()
 	defer this.Unlock()
 
-	this.neighbors[ip] = alive
+	this.neighbors[ip] = time.Now()
+
+	log.Debug("Neighbors: %+v", this.neighbors)
 }
 
 func (this *Peer) Start() (err error) {
@@ -88,7 +104,7 @@ func (this *Peer) recvMessages() {
 		}
 
 		if err := msg.unmarshal(line); err != nil {
-			log.Error(err)
+			log.Error("Peer message: %v", err)
 			continue
 		}
 
@@ -104,23 +120,17 @@ func (this *Peer) handleMessage(msg peerMessage) {
 		return
 	}
 
-	this.markNeighbor(neighborIp.(string), true)
+	this.refreshNeighbor(neighborIp.(string))
 }
 
 func (this *Peer) Publish(msg peerMessage) (err error) {
-	var (
-		body []byte
-		n    int
-	)
-
+	var body []byte
 	body, err = msg.marshal()
 	if err != nil {
 		return
 	}
 
-	n, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
-
-	log.Debug("publish %d bytes to peer %+v", n, msg)
+	_, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
 	return
 }
 
@@ -133,7 +143,15 @@ func (this *Peer) runHeartbeat() {
 	msg["ip"] = this.localAddr
 	for _ = range t.C {
 		if err = this.Publish(msg); err != nil {
-			log.Error(err)
+			log.Error("Publish fails: %v", err)
 		}
+
+		for ip, lastAccess := range this.neighbors {
+			if time.Since(lastAccess).Seconds() > this.deadThreshold {
+				// he is dead
+				this.killNeighbor(ip)
+			}
+		}
+
 	}
 }
