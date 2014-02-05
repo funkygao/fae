@@ -8,7 +8,14 @@ import (
 )
 
 func (this *Engine) launchRpcServe() (done chan interface{}) {
-	var protocolFactory thrift.TProtocolFactory
+	var (
+		protocolFactory  thrift.TProtocolFactory
+		serverTransport  thrift.TServerTransport
+		transportFactory thrift.TTransportFactory
+		err              error
+		serverNetwork    string
+	)
+
 	switch this.conf.rpc.protocol {
 	case "binary":
 		protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
@@ -26,16 +33,14 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		panic(fmt.Sprintf("Invalid protocol: %s", this.conf.rpc.protocol))
 	}
 
-	transportFactory := thrift.NewTTransportFactory()
-	if this.conf.rpc.framed {
+	switch {
+	case this.conf.rpc.framed:
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
+
+	default:
+		transportFactory = thrift.NewTTransportFactory()
 	}
 
-	var (
-		serverTransport thrift.TServerTransport
-		err             error
-		serverNetwork   string
-	)
 	switch {
 	case strings.Contains(this.conf.rpc.listenAddr, "/"):
 		serverNetwork = "unix"
