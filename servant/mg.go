@@ -8,7 +8,8 @@ import (
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.ReqCtx, kind string, shardId int32,
 	table string, doc []byte, options []byte) (r bool, intError error) {
-	log.Debug("%s %d %s %s %s", kind, shardId, table, string(doc), string(options))
+	log.Debug("%s %d %s %s %v %s", kind, shardId, table,
+		string(doc), doc, string(options))
 
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
@@ -19,6 +20,8 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.ReqCtx, kind string, shardId int32
 	err := sess.DB().C(table).Insert(doc)
 	if err == nil {
 		r = true
+	} else {
+		log.Error(err)
 	}
 	sess.Recyle(&err)
 
