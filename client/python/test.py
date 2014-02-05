@@ -10,7 +10,7 @@ sys.path.append('../../servant/gen-py')
 sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages')
 from thrift.transport import TSocket
 from thrift.protocol import TBinaryProtocol
-from servant import FunServant
+from fun.rpc import FunServant
 
 t1 = datetime.datetime.now()
 sock = TSocket.TSocket('localhost', 9001)

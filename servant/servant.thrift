@@ -1,4 +1,5 @@
 namespace go  fun.rpc
+namespace py  fun.rpc
 namespace php fun.rpc
 
 exception TCacheMissed {
