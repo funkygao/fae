@@ -23,6 +23,7 @@ _testmain.go
 servant/gen-php/
 servant/gen-go/
 servant/gen-py/
+servant/gen-java/
 var/
 daemon/faed/faed
 faed.lock
