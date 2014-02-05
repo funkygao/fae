@@ -50,6 +50,10 @@ thrift above 0.9.0
     sh test/test.sh
     make install
 
+php.ini
+
+    extension="thrift_protocol.so"
+
 ### Architecture
 
 
