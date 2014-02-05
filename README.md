@@ -8,16 +8,21 @@ fae
                                
 Fun App Engine
 
-It's middleware RPC engine.
+It's middleware RPC engine for enterprise SOA infrastructure.
 
-### Why?
+### Why SOA?
 
 *   Seperation of concerns
+*   Contract
+*   Context free
+*   Independently deployable
+*   Independently testable
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
 *   Centralized monitoring, auditting and profiling
 *   lessen tcp 3/4 way handshake overhead(conn pooling)
-*   Scale
+*   Scale easily
+*   Encapsulated - logically decoupled and not shared its internal state
 *   Polyglot development
 
 ### Features
