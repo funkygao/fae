@@ -2,8 +2,10 @@ package servant
 
 import (
 	log "code.google.com/p/log4go"
+	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
+	"labix.org/v2/mgo/bson"
 )
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.ReqCtx, kind string, shardId int32,
@@ -17,7 +19,11 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.ReqCtx, kind string, shardId int32
 		return
 	}
 
-	err := sess.DB().C(table).Insert(doc)
+	var bdoc = bson.M{}
+	json.Unmarshal(doc, &bdoc)
+	log.Debug("%+v", bdoc)
+
+	err := sess.DB().C(table).Insert(bdoc)
 	if err == nil {
 		r = true
 	} else {

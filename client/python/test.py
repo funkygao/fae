@@ -5,6 +5,7 @@ for quick debugging of fae
 '''
 
 import sys
+import json
 import datetime
 sys.path.append('../../servant/gen-py')
 sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages')
@@ -60,4 +61,14 @@ print '[Client] lc_get received:', client.lc_get(ctx, 'lc_test_hello'), elapsed(
 
 # mg
 #=====
-print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 123, 'user', '{id:444}', '{}'), elapsed()
+userDoc = {
+    "name": "funky.gao",
+    "gendar": "M",
+    "abtype": {
+        "payment": "a",
+        "tutorial": "b",
+    }
+}
+doc = json.dumps(userDoc)
+print 'doc:', doc
+print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 123, 'user', doc, '{}'), elapsed()
