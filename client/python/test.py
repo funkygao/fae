@@ -60,4 +60,4 @@ print '[Client] lc_get received:', client.lc_get(ctx, 'lc_test_hello'), elapsed(
 
 # mg
 #=====
-print '[Client] lc_set received:', client.mg_insert(ctx, 'db', 123, 'user', '{id:444}', '{}')
+print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 123, 'user', '{id:444}', '{}'), elapsed()
