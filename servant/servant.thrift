@@ -1,6 +1,7 @@
-namespace go  fun.rpc
-namespace py  fun.rpc
-namespace php fun.rpc
+namespace go   fun.rpc
+namespace py   fun.rpc
+namespace php  fun.rpc
+namespace java fun.rpc
 
 exception TCacheMissed {
     11: optional string message
