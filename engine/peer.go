@@ -108,15 +108,19 @@ func (this *Peer) handleMessage(msg peerMessage) {
 }
 
 func (this *Peer) Publish(msg peerMessage) (err error) {
-	var body []byte
+	var (
+		body []byte
+		n    int
+	)
+
 	body, err = msg.marshal()
 	if err != nil {
 		return
 	}
 
-	log.Debug("publish to peer %+v", msg)
+	n, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
 
-	_, err = this.c.(*net.UDPConn).WriteToUDP(append(body, '\n'), this.gaddr)
+	log.Debug("publish %d bytes to peer %+v", n, msg)
 	return
 }
 
