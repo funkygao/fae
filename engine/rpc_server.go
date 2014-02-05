@@ -49,6 +49,8 @@ func (this *TFunServer) Serve() error {
 			log.Error("Accept err: ", err)
 		}
 
+		log.Debug("new client %v", client.(*thrift.TSocket).Conn().RemoteAddr())
+
 		if client != nil {
 			atomic.AddInt64(&this.engine.stats.totalSessionCount, 1)
 			go this.processSession(client)
