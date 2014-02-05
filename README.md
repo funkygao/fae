@@ -53,6 +53,7 @@ thrift above 0.9.0
 php.ini
 
     extension="thrift_protocol.so"
+    extension="apc.so"
 
 ### Architecture
 
