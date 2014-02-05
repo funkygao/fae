@@ -55,7 +55,7 @@ service FunServant {
      * @param string tag -
      * @param string json - Client is responsible to jsonize
      */
-    oneway void dlog(
+    void dlog(
         /** request context */
         1: required req_ctx ctx, 
         2: required string ident, 
@@ -80,7 +80,7 @@ service FunServant {
         1: TCacheMissed miss
     ),
 
-    oneway void lc_del(
+    void lc_del(
         1: required req_ctx ctx, 
         2: required string key
     ),

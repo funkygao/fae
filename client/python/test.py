@@ -54,10 +54,15 @@ except TApplicationException, e:
 except Exception, e:
     print e, type(e)
 
+# dlog
+#=====
+print '[Client] dlog received:', client.dlog(ctx, 'error', 'us', '{hello: world}'), elapsed()
+
 # lc
 #=====
 print '[Client] lc_set received:', client.lc_set(ctx, 'lc_test_hello', 'abcdefg'), elapsed()
 print '[Client] lc_get received:', client.lc_get(ctx, 'lc_test_hello'), elapsed()
+print '[Client] lc_del received:', client.lc_del(ctx, 'lc_test_hello'), elapsed()
 
 # mg
 #=====
@@ -72,3 +77,4 @@ userDoc = {
 doc = json.dumps(userDoc)
 print 'doc:', doc
 print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 123, 'user', doc, '{}'), elapsed()
+
