@@ -31,7 +31,7 @@ Release Notes - fae - Version v0.0.1.alpha
       stats sampling logging
     . self monitoring and peers
     . extend thrift to be able to trace request origin by extending TServerSocket
-    . auto discover seems not to work well
+    . use framed transport for better performance 
     . user service with auto local caching
 
 ----
