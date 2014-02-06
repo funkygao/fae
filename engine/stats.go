@@ -4,8 +4,24 @@ import (
 	"fmt"
 	"github.com/funkygao/golib/gofmt"
 	"runtime"
+	"strconv"
+	"sync/atomic"
 	"time"
 )
+
+type AtomicInt int64
+
+func (this *AtomicInt) Add(n int64) {
+	atomic.AddInt64((*int64)(this), n)
+}
+
+func (this *AtomicInt) Get() int64 {
+	return atomic.LoadInt64((*int64)(this))
+}
+
+func (this *AtomicInt) String() string {
+	return strconv.FormatInt(this.Get(), 10)
+}
 
 type engineStats struct {
 	startedAt time.Time
