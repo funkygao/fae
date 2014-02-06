@@ -6,7 +6,12 @@ package servant
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/cache"
 )
+
+func (this *FunServantImpl) onLcLruEvicted(key cache.Key, value interface{}) {
+
+}
 
 func (this *FunServantImpl) LcSet(ctx *rpc.ReqCtx,
 	key string, value []byte) (r bool, intError error) {

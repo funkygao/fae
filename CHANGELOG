@@ -33,5 +33,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . extend thrift to be able to trace request origin by extending TServerSocket
     . use framed transport for better performance 
     . user service with auto local caching
+    . https://github.com/golang/glog
 
 ----
