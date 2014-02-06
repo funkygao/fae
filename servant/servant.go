@@ -19,6 +19,8 @@ type FunServantImpl struct {
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
+	this.lc.OnEvicted = func(key cache.Key, value interface{}) {
+	}
 
 	memcacheServers := this.conf.Memcache.ServerList()
 	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
