@@ -58,8 +58,12 @@ func (this *Peer) Neighbors() *map[string]time.Time {
 func (this *Peer) killNeighbor(ip string) {
 	this.Lock()
 	defer this.Unlock()
+
 	delete(this.neighbors, ip)
 	this.picker.DelPeer(ip)
+	log.Info("Peer[%s] killed", ip)
+
+	log.Debug("Neighbors: %+v", this.neighbors)
 }
 
 func (this *Peer) refreshNeighbor(ip string) {
