@@ -10,6 +10,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . app level exception added for memcache miss
     . golang servant client so that we can chain the call to distributed servers
     . unix domain socket rpc server transport
+    . auto discovery of peers and form a cluster to serve requests
 
 ** Improvement
 

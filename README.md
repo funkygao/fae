@@ -27,6 +27,7 @@ It's middleware RPC engine for enterprise SOA infrastructure.
 
 ### Features
 
+*   use multicast to auto discover fae peers for request hash
 *   local LRU cache shared among processes
 *   memcache servant
 *   mongodb servant with transaction support
@@ -82,6 +83,6 @@ php.ini
              -----------------------------------------------
             |                       |                       | hierarchy
         +----------------+  +----------------+  +----------------+
-        | mongodb servers|  |memcache servers|  |   faed daemon  |
+        | mongodb servers|  |memcache servers|  |   faed proxy   |
         +----------------+  +----------------+  +----------------+
 
