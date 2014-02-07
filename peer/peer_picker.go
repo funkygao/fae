@@ -1,4 +1,4 @@
-package engine
+package peer
 
 import (
 	"github.com/funkygao/golib/hash"

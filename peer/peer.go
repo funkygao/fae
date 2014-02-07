@@ -1,4 +1,4 @@
-package engine
+package peer
 
 import (
 	"bufio"
@@ -37,7 +37,7 @@ type Peer struct {
 	neighbors map[string]time.Time
 }
 
-func newPeer(gaddr string, interval int, deadThreshold float64) (this *Peer) {
+func NewPeer(gaddr string, interval int, deadThreshold float64) (this *Peer) {
 	this = new(Peer)
 	this.RWMutex = new(sync.RWMutex)
 	this.groupAddr = gaddr

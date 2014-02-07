@@ -2,6 +2,7 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/peer"
 	"github.com/gorilla/mux"
 	"net"
 	"net/http"
@@ -22,7 +23,7 @@ type Engine struct {
 	rpcProcessor thrift.TProcessor
 	rpcServer    thrift.TServer
 
-	peer *Peer
+	peer *peer.Peer
 
 	stats    *engineStats
 	pid      int
@@ -35,9 +36,4 @@ func NewEngine(fn string) (this *Engine) {
 	this.stats = newEngineStats()
 
 	return
-}
-
-// ip -> lastAccess
-func (this *Engine) Neighbors() *map[string]time.Time {
-	return this.peer.Neighbors()
 }
