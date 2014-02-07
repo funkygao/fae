@@ -25,9 +25,10 @@ func (this *peerMessage) unmarshal(data []byte) (err error) {
 type Peer struct {
 	*sync.RWMutex
 
-	c net.Conn
+	c      net.Conn
+	picker PeerPicker
 
-	localAddr         string
+	selfAddr          string
 	groupAddr         string
 	gaddr             *net.UDPAddr
 	heartbeatInterval int
@@ -40,6 +41,8 @@ func newPeer(gaddr string, interval int, deadThreshold float64) (this *Peer) {
 	this = new(Peer)
 	this.RWMutex = new(sync.RWMutex)
 	this.groupAddr = gaddr
+	this.selfAddr = ip.LocalIpv4Addrs()[0]
+	this.picker = newPeerPicker(this.selfAddr)
 	this.heartbeatInterval = interval
 	this.deadThreshold = deadThreshold
 	this.neighbors = make(map[string]time.Time)
@@ -62,13 +65,20 @@ func (this *Peer) refreshNeighbor(ip string) {
 	this.Lock()
 	defer this.Unlock()
 
+	if _, present := this.neighbors[ip]; !present {
+		this.picker.AddPeer(ip)
+	}
+
 	this.neighbors[ip] = time.Now()
 
 	log.Debug("Neighbors: %+v", this.neighbors)
 }
 
+func (this *Peer) PickServer(key string) (serverAddr string, ok bool) {
+	return this.picker.PickPeer(key)
+}
+
 func (this *Peer) Start() (err error) {
-	this.localAddr = ip.LocalIpv4Addrs()[0]
 	this.gaddr, err = net.ResolveUDPAddr("udp4", this.groupAddr)
 	if err != nil {
 		return
@@ -79,14 +89,14 @@ func (this *Peer) Start() (err error) {
 	}
 
 	go this.runHeartbeat()
-	go this.recvMessages()
+	go this.discoverPeers()
 
-	log.Info("Peer[%s] joined at %s", this.localAddr, this.groupAddr)
+	log.Info("Peer[%s] joined at %s", this.selfAddr, this.groupAddr)
 
 	return
 }
 
-func (this *Peer) recvMessages() {
+func (this *Peer) discoverPeers() {
 	defer func() {
 		this.c.Close() // leave the multicast group
 	}()
@@ -108,22 +118,19 @@ func (this *Peer) recvMessages() {
 			continue
 		}
 
-		this.handleMessage(msg)
+		log.Debug("received peer: %+v", msg)
+
+		neighborIp, present := msg["ip"]
+		if !present {
+			log.Info("Peer msg has no 'ip'")
+			continue
+		}
+
+		this.refreshNeighbor(neighborIp.(string))
 	}
 }
 
-func (this *Peer) handleMessage(msg peerMessage) {
-	log.Debug("received peer: %+v", msg)
-
-	neighborIp, present := msg["ip"]
-	if !present {
-		return
-	}
-
-	this.refreshNeighbor(neighborIp.(string))
-}
-
-func (this *Peer) Publish(msg peerMessage) (err error) {
+func (this *Peer) publish(msg peerMessage) (err error) {
 	var body []byte
 	body, err = msg.marshal()
 	if err != nil {
@@ -140,9 +147,9 @@ func (this *Peer) runHeartbeat() {
 
 	var msg = peerMessage{}
 	var err error
-	msg["ip"] = this.localAddr
+	msg["ip"] = this.selfAddr
 	for _ = range t.C {
-		if err = this.Publish(msg); err != nil {
+		if err = this.publish(msg); err != nil {
 			log.Error("Publish fails: %v", err)
 		}
 

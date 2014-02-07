@@ -8,6 +8,7 @@ import (
 // PeerPicker is the interface that must be implemented to locate
 // the peer that owns a specific key.
 type PeerPicker interface {
+	AddPeer(peers ...string)
 	PickPeer(key string) (serverAddr string, ok bool)
 }
 
