@@ -7,10 +7,9 @@ package proxy
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"io"
 )
 
-func Servant(serverAddr string) (*rpc.FunServantClient, io.Closer) {
+func Servant(serverAddr string) *rpc.FunServantClient {
 	transportFactory := thrift.NewTTransportFactory()
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
@@ -25,5 +24,5 @@ func Servant(serverAddr string) (*rpc.FunServantClient, io.Closer) {
 		panic(err)
 	}
 
-	return client, transport
+	return client
 }

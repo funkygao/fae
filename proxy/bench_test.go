@@ -6,11 +6,11 @@ import (
 )
 
 func BenchmarkServantPing(b *testing.B) {
-	servant, closer := Servant(":9001")
-	defer closer.Close()
+	servant := Servant(":9001")
+	defer servant.Transport.Close()
 
 	ctx := rpc.NewContext()
-	ctx.Caller = "me"
+	ctx.Caller = "bench"
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -21,11 +21,11 @@ func BenchmarkServantPing(b *testing.B) {
 }
 
 func BenchmarkServantMcSet(b *testing.B) {
-	servant, closer := Servant(":9001")
-	defer closer.Close()
+	servant := Servant(":9001")
+	defer servant.Transport.Close()
 
 	ctx := rpc.NewContext()
-	ctx.Caller = "me"
+	ctx.Caller = "bench"
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
