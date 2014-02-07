@@ -71,6 +71,7 @@ func (this *Peer) refreshNeighbor(ip string) {
 	defer this.Unlock()
 
 	if _, present := this.neighbors[ip]; !present {
+		log.Info("Peer[%s] joined", ip)
 		this.picker.AddPeer(ip)
 	}
 
