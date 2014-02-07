@@ -46,7 +46,7 @@ type engineConfig struct {
 }
 
 func (this *Engine) LoadConfigFile() *Engine {
-	log.Debug("Loading config file %s", this.configFile)
+	log.Info("Engine[%s] loading config file %s", BuildID, this.configFile)
 
 	cf := new(engineConfig)
 	var err error
