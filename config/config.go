@@ -11,6 +11,9 @@ var (
 type ConfigServant struct {
 	WatchdogInterval int
 
+	// distribute load accross servers
+	PeersCooperate bool
+
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
@@ -22,6 +25,7 @@ func init() {
 
 func LoadServants(cf *conf.Conf) {
 	Servants.WatchdogInterval = cf.Int("watchdog_interval", 60*10)
+	Servants.PeersCooperate = cf.Bool("peers_cooperate", false)
 
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
