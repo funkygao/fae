@@ -5,6 +5,7 @@ import (
 	log "code.google.com/p/log4go"
 	"encoding/json"
 	"github.com/funkygao/golib/ip"
+	"github.com/funkygao/golib/sampling"
 	"net"
 	"sync"
 	"time"
@@ -121,6 +122,10 @@ func (this *Peer) discoverPeers() {
 
 		if err := msg.unmarshal(line); err != nil {
 			// Not our protocol, it may be SSDP or else
+			if sampling.SampleRateSatisfied(2) {
+				// 2% sampling
+				log.Error("%s %v", string(line), err)
+			}
 			continue
 		}
 
