@@ -124,7 +124,7 @@ func (this *Peer) discoverPeers() {
 			// Not our protocol, it may be SSDP or else
 			if sampling.SampleRateSatisfied(2) {
 				// 2% sampling
-				log.Error("%s %v", string(line), err)
+				log.Error("%s -> %v", string(line), err)
 			}
 			continue
 		}
