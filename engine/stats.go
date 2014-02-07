@@ -27,16 +27,19 @@ type engineStats struct {
 	startedAt time.Time
 	MemStats  *runtime.MemStats
 
-	totalSessionCount int64
-	totalCallCount    int64
+	TotalSessions    AtomicInt
+	TotalCalls       AtomicInt
+	TotalFailedCalls AtomicInt
 
-	totalRequests  map[string]int64 // key is client ip
-	periodRequests map[string]int64 // key is client ip
+	TotalRequests  map[string]AtomicInt // key is client ip
+	PeriodRequests map[string]AtomicInt // key is client ip
 }
 
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.MemStats = new(runtime.MemStats)
+	this.TotalRequests = make(map[string]AtomicInt)
+	this.PeriodRequests = make(map[string]AtomicInt)
 	return
 }
 

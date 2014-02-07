@@ -115,7 +115,7 @@ func (this *Peer) discoverPeers() {
 		}
 
 		if err := msg.unmarshal(line); err != nil {
-			log.Error("Peer message: %v", err)
+			log.Error("Peer message: %v [%s]", err, string(line))
 			continue
 		}
 

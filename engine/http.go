@@ -67,13 +67,12 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["status"] = "stopped"
 
 	case "stat":
-		output["runtime"] = this.stats.Runtime()
 		output["started"] = this.StartedAt
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
-		output["total_session"] = this.stats.totalSessionCount
-		output["total_call"] = this.stats.totalCallCount
+		output["stats"] = this.stats
+		output["peers"] = this.peer.Neighbors()
 
 	case "uris":
 		output["all"] = this.httpPaths
