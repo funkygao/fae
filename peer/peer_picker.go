@@ -9,6 +9,7 @@ import (
 // the peer that owns a specific key.
 type PeerPicker interface {
 	AddPeer(peers ...string)
+	DelPeer(peers ...string)
 	PickPeer(key string) (serverAddr string, ok bool)
 }
 
@@ -21,6 +22,10 @@ type consistentPeerPicker struct {
 func newPeerPicker(self string) PeerPicker {
 	return &consistentPeerPicker{peers: hash.New(3, nil), Mutex: new(sync.Mutex),
 		self: self}
+}
+
+func (this *consistentPeerPicker) DelPeer(peers ...string) {
+	// TODO
 }
 
 func (this *consistentPeerPicker) AddPeer(peers ...string) {
