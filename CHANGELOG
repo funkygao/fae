@@ -16,6 +16,7 @@ Release Notes - fae - Version v0.0.1.alpha
 
     . source code was greatly refactored and better organized
     . request context added, so we can do auditting
+    . extend thrift to be able to trace request origin by extending TServerSocket
     . recyleable mongodb pooling 
 
 ** Bug
@@ -25,13 +26,7 @@ Release Notes - fae - Version v0.0.1.alpha
 
 ** Todo
 
-    . becon 
-    . graceful degrade
-    . memcache/mongodb/dlog backend
-      auto sharding
-      stats sampling logging
-    . self monitoring and peers
-    . extend thrift to be able to trace request origin by extending TServerSocket
+    . graceful degrade with Circuit Breaker
     . use framed transport for better performance 
     . user service with auto local caching
     . https://github.com/golang/glog
