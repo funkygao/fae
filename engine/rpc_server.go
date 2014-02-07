@@ -92,8 +92,8 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 	for {
 		t1 = time.Now()
 		ok, err := processor.Process(inputProtocol, outputProtocol)
-		this.engine.stats.TotalCalls.Add(1)
 
+		this.engine.stats.TotalCalls.Add(1)
 		elapsed = time.Since(t1)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow query
@@ -102,8 +102,10 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
+			// remote client closed tranport
 			return nil
 		} else if err != nil {
+			// err occurs
 			this.engine.stats.TotalFailedCalls.Add(1)
 			return err
 		}
