@@ -1,4 +1,8 @@
-package engine
+/*
+Proxy of remote servant so that we can distribute request
+to cluster instead of having to serve all by ourselves.
+*/
+package proxy
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
