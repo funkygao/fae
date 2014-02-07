@@ -5,7 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 )
 
-func (this *FunServantImpl) Ping(ctx *rpc.ReqCtx) (r string, intError error) {
+func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, intError error) {
 	log.Debug("ping from %+v", *ctx)
 	return "pong", nil
 }

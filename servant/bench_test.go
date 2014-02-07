@@ -18,7 +18,7 @@ func BenchmarkMcSet(b *testing.B) {
 	servant := setupServant()
 	b.ReportAllocs()
 
-	ctx := rpc.NewReqCtx()
+	ctx := rpc.NewContext()
 	ctx.Caller = "me"
 	for i := 0; i < b.N; i++ {
 		servant.McSet(ctx, "foo", []byte("bar"), 0)

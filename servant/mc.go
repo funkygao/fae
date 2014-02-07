@@ -10,7 +10,7 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 )
 
-func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
+func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
 	intError = this.mc.Set(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -23,7 +23,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.ReqCtx, key string, value []byte,
 	return
 }
 
-func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte,
+func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, intError error) {
 	it, err := this.mc.Get(key)
 	if err == nil {
@@ -41,7 +41,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.ReqCtx, key string) (r []byte,
 	return
 }
 
-func (this *FunServantImpl) McAdd(ctx *rpc.ReqCtx, key string, value []byte,
+func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
 	intError = this.mc.Add(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -54,7 +54,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.ReqCtx, key string, value []byte,
 	return
 }
 
-func (this *FunServantImpl) McDelete(ctx *rpc.ReqCtx, key string) (r bool,
+func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	intError error) {
 	intError = this.mc.Delete(key)
 	if intError == nil {
@@ -66,7 +66,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.ReqCtx, key string) (r bool,
 	return
 }
 
-func (this *FunServantImpl) McIncrement(ctx *rpc.ReqCtx, key string,
+func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, intError error) {
 	var (
 		newVal uint64

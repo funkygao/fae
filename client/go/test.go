@@ -13,7 +13,7 @@ func main() {
 	client, transport := engine.Servant(":9001")
 	defer transport.Close()
 
-	ctx := rpc.NewReqCtx()
+	ctx := rpc.NewContext()
 	ctx.Caller = "me"
 	for i := 0; i < 10; i++ {
 		r, _ := client.Ping(ctx)

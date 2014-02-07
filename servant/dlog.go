@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (this *FunServantImpl) Dlog(ctx *rpc.ReqCtx, ident string, tag string,
+func (this *FunServantImpl) Dlog(ctx *rpc.Context, ident string, tag string,
 	json string) (intError error) {
 	// add newline and timestamp here
 	// because signature is void, intError is ignored by client

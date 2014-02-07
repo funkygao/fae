@@ -26,7 +26,7 @@ except TTransportException, e:
 protocol = TBinaryProtocol.TBinaryProtocol(sock)
 
 client = FunServant.Client(protocol)
-ctx = FunServant.req_ctx(caller='POST+/facebook/getPaymentRequestId/+34ca2cf6')
+ctx = FunServant.Context(caller='POST+/facebook/getPaymentRequestId/+34ca2cf6')
 
 def elapsed():
     global t1

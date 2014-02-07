@@ -1,4 +1,4 @@
-package engine
+package proxy
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
@@ -9,7 +9,7 @@ func BenchmarkServantPing(b *testing.B) {
 	servant, transport := Servant(":9001")
 	defer transport.Close()
 
-	ctx := rpc.NewReqCtx()
+	ctx := rpc.NewContext()
 	ctx.Caller = "me"
 
 	b.ReportAllocs()
@@ -24,7 +24,7 @@ func BenchmarkServantMcSet(b *testing.B) {
 	servant, transport := Servant(":9001")
 	defer transport.Close()
 
-	ctx := rpc.NewReqCtx()
+	ctx := rpc.NewContext()
 	ctx.Caller = "me"
 
 	b.ReportAllocs()
