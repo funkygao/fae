@@ -18,9 +18,12 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 *   Centralized monitoring, auditting and profiling
 *   Context free
 *   Independently deployable/testable
-*   lessen tcp 3/4 way handshake overhead(long conn pooling)
+*   lessen tcp 3/4 way handshake overhead
+    - long conn pooling
 *   Scale easily
-*   Encapsulated - logically decoupled and not shared its internal state
+    - frontend(php) and middleware scale dependently
+*   Encapsulated 
+    - logically decoupled and not shared its internal state
 *   Polyglot development
 *   Most large scale site use SOA as infrastructure
 
