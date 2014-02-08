@@ -1,9 +1,9 @@
 package main
 
 import (
-	log "code.google.com/p/log4go"
 	"flag"
 	"fmt"
+	log "github.com/funkygao/log4go"
 	_log "log"
 	"os"
 	"path/filepath"

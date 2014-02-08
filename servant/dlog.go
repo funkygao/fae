@@ -1,9 +1,9 @@
 package servant
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/syslogng"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 

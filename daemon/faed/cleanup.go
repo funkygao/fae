@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/golib/locking"
+	log "github.com/funkygao/log4go"
 	"os"
 	"runtime/pprof"
 )

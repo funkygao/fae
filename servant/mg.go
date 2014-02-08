@@ -1,10 +1,10 @@
 package servant
 
 import (
-	log "code.google.com/p/log4go"
 	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
+	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo/bson"
 )
 

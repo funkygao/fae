@@ -1,8 +1,8 @@
 package engine
 
 import (
-	log "code.google.com/p/log4go"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 

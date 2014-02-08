@@ -1,9 +1,9 @@
 package engine
 
 import (
-	log "code.google.com/p/log4go"
 	"encoding/json"
 	"errors"
+	log "github.com/funkygao/log4go"
 	"github.com/gorilla/mux"
 	"io"
 	"net"

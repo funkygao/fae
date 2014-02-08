@@ -1,8 +1,8 @@
 package config
 
 import (
-	log "code.google.com/p/log4go"
 	conf "github.com/funkygao/jsconf"
+	log "github.com/funkygao/log4go"
 )
 
 type ConfigLcache struct {

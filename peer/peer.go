@@ -2,9 +2,9 @@ package peer
 
 import (
 	"bufio"
-	log "code.google.com/p/log4go"
 	"encoding/json"
 	"github.com/funkygao/golib/ip"
+	log "github.com/funkygao/log4go"
 	"net"
 	"sync"
 	"time"

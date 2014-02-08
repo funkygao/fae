@@ -1,12 +1,12 @@
 package engine
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/peer"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 

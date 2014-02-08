@@ -1,8 +1,8 @@
 package engine
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/golib/signal"
+	log "github.com/funkygao/log4go"
 	"os"
 	"syscall"
 	"time"

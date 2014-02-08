@@ -3,7 +3,7 @@
 package servant
 
 import (
-	log "code.google.com/p/log4go"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 

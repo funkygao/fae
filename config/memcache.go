@@ -1,9 +1,9 @@
 package config
 
 import (
-	log "code.google.com/p/log4go"
 	"fmt"
 	conf "github.com/funkygao/jsconf"
+	log "github.com/funkygao/log4go"
 )
 
 type ConfigMemcacheServer struct {

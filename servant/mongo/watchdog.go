@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	log "code.google.com/p/log4go"
+	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"sync"
 	"time"

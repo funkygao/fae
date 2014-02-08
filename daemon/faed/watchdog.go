@@ -1,9 +1,9 @@
 package main
 
 import (
-	log "code.google.com/p/log4go"
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/gofmt"
+	log "github.com/funkygao/log4go"
 	"runtime"
 	"time"
 )
