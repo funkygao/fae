@@ -24,3 +24,11 @@ func BenchmarkMcSet(b *testing.B) {
 		servant.McSet(ctx, "foo", []byte("bar"), 0)
 	}
 }
+
+func BenchmarkGoMap(b *testing.B) {
+	b.ReportAllocs()
+	var x map[int]bool = make(map[int]bool)
+	for i := 0; i < b.N; i++ {
+		x[i] = true
+	}
+}
