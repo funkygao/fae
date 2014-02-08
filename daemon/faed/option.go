@@ -75,7 +75,7 @@ func setupLogging(loggingLevel, logFile string) {
 
 		writer := log.NewFileLogWriter(logFile, false)
 		log.AddFilter("file", level, writer)
-		writer.SetFormat("[%D %t] [%L] (%S) %M")
+		writer.SetFormat("[%d %T] [%L] (%S) %M")
 		writer.SetRotate(true)
 		writer.SetRotateSize(0)
 		writer.SetRotateLines(0)
