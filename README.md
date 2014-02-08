@@ -1,7 +1,5 @@
-fae
-===
-Fun App Engine
-
+fae - Fun App Engine
+====================
 It's a middleware RPC engine for enterprise SOA infrastructure.
 
          ____      __      ____ 
