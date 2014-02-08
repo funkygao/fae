@@ -1,14 +1,14 @@
 fae
 ===
+Fun App Engine
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
          )__)    /(__)\    )__) 
         (__)    (__)(__)  (____)
                                
-Fun App Engine
 
-It's middleware RPC engine for enterprise SOA infrastructure.
+It's a middleware RPC engine for enterprise SOA infrastructure.
 
 ### Why SOA?
 
