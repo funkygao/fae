@@ -12,6 +12,9 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 ### Why SOA?
 
 *   Seperation of concerns
+    - make a standard to hire developers
+        - php frontend
+        - middleware backend
 *   Contract(IDL) based instead of language dependent servcie api
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
