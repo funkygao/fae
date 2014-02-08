@@ -13,10 +13,11 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 
 *   Seperation of concerns
     - make a standard to hire developers
-        - php frontend
-        - middleware backend
+        - php frontend(more)
+        - middleware backend(less)
 *   Contract(IDL) based instead of language dependent servcie api
     - each level developers have a common sense
+    - communicate by contract instead of direct call
 *   Reuse common code as service and transparently reuse infrastructure
     - refuse copy & paste bug
 *   Centralized best practice
