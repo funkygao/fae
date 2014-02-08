@@ -39,11 +39,9 @@ hg
 
     sudo apt-get install mercurial
 
-flex
+thrift above 0.9.0 which depends on flex
 
     sudo apt-get install flex
-
-thrift above 0.9.0
 
     git.apache.org/thrift.git/lib/go/thrift
 
