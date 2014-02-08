@@ -29,7 +29,7 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
     - can't have too much vital code
 *   lessen tcp 3/4 way handshake overhead
     - long conn pooling
-    - meke better use of mem
+    - make better use of mem
 *   Scale easily
     - frontend(php) and middleware scale dependently
     - middleware is in charge of performance while frontend is in charge of biz logic
