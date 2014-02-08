@@ -81,7 +81,7 @@ php.ini
                                     | tcp long connection pool(keepalive)
                                     |                        
              -----------------------------------------------
-            |                       |                       | hierarchy
+            |                       |                       | hierarchy proxy
         +----------------+  +----------------+  +----------------+
         | mongodb servers|  |memcache servers|  |   faed proxy   |
         +----------------+  +----------------+  +----------------+
