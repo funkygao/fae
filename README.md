@@ -2,14 +2,13 @@ fae
 ===
 Fun App Engine
 
+It's a middleware RPC engine for enterprise SOA infrastructure.
+
          ____      __      ____ 
         ( ___)    /__\    ( ___)
          )__)    /(__)\    )__) 
         (__)    (__)(__)  (____)
                                
-
-It's a middleware RPC engine for enterprise SOA infrastructure.
-
 ### Why SOA?
 
 *   Seperation of concerns
