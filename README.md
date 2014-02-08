@@ -29,7 +29,7 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 
 ### Features
 
-*   use multicast to auto discover fae peers for request hash
+*   use multicast to auto discover fae peers for delegation
 *   local LRU cache shared among processes
 *   memcache servant
 *   mongodb servant with transaction support
