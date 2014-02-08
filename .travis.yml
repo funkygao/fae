@@ -1,0 +1,12 @@
+language: go
+go:
+  - 1.1.2
+install:
+  - go get -u github.com/funkygao/fae
+script:
+  - pushd $TRAVIS_BUILD_DIR
+  - mkdir -p var
+  - go test ./... -v -race
+  - popd
+notifications:
+  email: false
