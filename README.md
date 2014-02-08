@@ -26,6 +26,7 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 *   Context free
 *   Independently deployable/testable
     - vital code should be more robust
+    - can't have too much vital code
 *   lessen tcp 3/4 way handshake overhead
     - long conn pooling
     - meke better use of mem
