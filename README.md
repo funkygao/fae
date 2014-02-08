@@ -12,7 +12,7 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 ### Why SOA?
 
 *   Seperation of concerns
-*   Contract based instead of language dependent servcie api
+*   Contract(IDL) based instead of language dependent servcie api
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
 *   Centralized monitoring, auditting and profiling
