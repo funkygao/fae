@@ -12,14 +12,13 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 ### Why SOA?
 
 *   Seperation of concerns
-*   Contract
-*   Context free
-*   Independently deployable
-*   Independently testable
+*   Contract based instead of language dependent servcie api
 *   Reuse common code as service and transparently reuse infrastructure
 *   Centralized best practice
 *   Centralized monitoring, auditting and profiling
-*   lessen tcp 3/4 way handshake overhead(conn pooling)
+*   Context free
+*   Independently deployable/testable
+*   lessen tcp 3/4 way handshake overhead(long conn pooling)
 *   Scale easily
 *   Encapsulated - logically decoupled and not shared its internal state
 *   Polyglot development
