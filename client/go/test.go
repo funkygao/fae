@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/funkygao/fae/engine"
+	"github.com/funkygao/fae/proxy"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"time"
 )
@@ -10,8 +10,8 @@ import (
 func main() {
 	t1 := time.Now()
 
-	client, transport := engine.Servant(":9001")
-	defer transport.Close()
+	client := proxy.Servant(":9001")
+	defer client.Transport.Close()
 
 	ctx := rpc.NewContext()
 	ctx.Caller = "me"
