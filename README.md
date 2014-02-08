@@ -22,6 +22,7 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
 *   Scale easily
 *   Encapsulated - logically decoupled and not shared its internal state
 *   Polyglot development
+*   Most large scale site use SOA as infrastructure
 
 ### Features
 
