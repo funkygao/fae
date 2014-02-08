@@ -8,6 +8,8 @@ It's a middleware RPC engine for enterprise SOA infrastructure.
         ( ___)    /__\    ( ___)
          )__)    /(__)\    )__) 
         (__)    (__)(__)  (____)
+
+[![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
                                
 ### Why SOA?
 
