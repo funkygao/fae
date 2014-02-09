@@ -31,5 +31,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . user service with auto local caching
     . https://github.com/golang/glog
     . proxy of servant pooling
+    . https://github.com/rcrowley/go-metrics
 
 ----
