@@ -1,5 +1,5 @@
 /*
-dlog ident:string tag:string json:json string
+dlog ident:string tag:string
 */
 package servant
 
@@ -13,10 +13,9 @@ import (
 func (this *FunServantImpl) Dlog(ctx *rpc.Context, ident string, tag string,
 	json string) (intError error) {
 	// add newline and timestamp here
-	// because signature is void, intError is ignored by client
 	if _, intError = syslogng.Printf(":%s,%s,%d,%s\n", ident, tag,
 		time.Now().UTC().Unix(), json); intError != nil {
-		log.Error(intError)
+		log.Error("dlog %v", intError)
 	}
 
 	return nil
