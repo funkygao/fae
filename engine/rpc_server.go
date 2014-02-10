@@ -48,10 +48,11 @@ func (this *TFunServer) Serve() error {
 			log.Error("Accept err: ", err)
 		}
 
-		log.Debug("new client %v", client.(*thrift.TSocket).Conn().RemoteAddr())
-
 		if client != nil {
+			log.Debug("new session from %v",
+				client.(*thrift.TSocket).Conn().RemoteAddr())
 			this.engine.stats.TotalSessions.Add(1)
+
 			go this.processSession(client)
 		}
 	}
