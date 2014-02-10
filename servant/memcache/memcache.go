@@ -39,6 +39,12 @@ func New(hashStrategy string, servers ...string) *Client {
 	return &Client{selector: selector}
 }
 
+func (this *Client) FreeConn() map[string][]*conn {
+	this.lk.Lock()
+	defer this.lk.Unlock()
+	return this.freeconn
+}
+
 func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 	this.lk.Lock()
 	defer this.lk.Unlock()

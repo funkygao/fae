@@ -13,8 +13,7 @@ func (this *Client) runWatchdog() {
 
 	var wg *sync.WaitGroup
 	for _ = range ticker.C {
-		log.Debug("mongo servers: %d", len(this.freeconn))
-
+		this.lk.Lock()
 		wg = new(sync.WaitGroup)
 		for _, sessions := range this.freeconn {
 			for _, sess := range sessions {
@@ -22,6 +21,7 @@ func (this *Client) runWatchdog() {
 				go this.checkServerStatus(wg, sess)
 			}
 		}
+		this.lk.Unlock()
 
 		wg.Wait()
 	}

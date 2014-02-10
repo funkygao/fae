@@ -30,6 +30,12 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 	return
 }
 
+func (this *Client) FreeConn() map[string][]*mgo.Session {
+	this.lk.Lock()
+	defer this.lk.Unlock()
+	return this.freeconn
+}
+
 func (this *Client) Session(kind string, shardId int32) (*Session, error) {
 	server, err := this.selector.PickServer(kind, int(shardId))
 	if err != nil {
