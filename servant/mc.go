@@ -52,10 +52,11 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		log.Error(err)
 	}
 
-	log.Debug("T=%s Q=mc.get %s {key^%s} {val^%s}",
+	log.Debug("T=%s Q=mc.get %s {key^%s} {%s}",
 		time.Since(t1),
 		this.callerInfo(ctx),
-		key, string(r))
+		key,
+		string(r))
 
 	return
 }
@@ -75,10 +76,10 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 		log.Error(intError)
 	}
 
-	log.Debug("T=%s Q=mc.add %s {key^%s val^%s} {%v}",
+	log.Debug("T=%s Q=mc.add %s {key^%s val^%s exp^%d} {%v}",
 		time.Since(t1),
 		this.callerInfo(ctx),
-		key, string(value),
+		key, string(value), expiration,
 		r)
 
 	return
