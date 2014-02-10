@@ -29,7 +29,7 @@ func LoadServants(cf *conf.Conf) {
 	Servants.WatchdogInterval = cf.Int("watchdog_interval", 60*10)
 	Servants.PeersCooperate = cf.Bool("peers_cooperate", false)
 	Servants.ProfilerMaxAnswerSize = cf.Int("prof_max_answer_size", 4<<10)
-	Servants.ProfilerRate = cf.Int("profiler_rate", 1)
+	Servants.ProfilerRate = cf.Int("profiler_rate", 1) // default 1/1000
 
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
