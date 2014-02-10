@@ -9,7 +9,8 @@ var (
 )
 
 type ConfigServant struct {
-	WatchdogInterval int
+	WatchdogInterval      int
+	ProfilerMaxAnswerSize int
 
 	// distribute load accross servers
 	PeersCooperate bool
@@ -26,6 +27,7 @@ func init() {
 func LoadServants(cf *conf.Conf) {
 	Servants.WatchdogInterval = cf.Int("watchdog_interval", 60*10)
 	Servants.PeersCooperate = cf.Bool("peers_cooperate", false)
+	Servants.ProfilerMaxAnswerSize = cf.Int("prof_max_answer_size", 4<<10)
 
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
