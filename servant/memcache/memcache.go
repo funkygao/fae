@@ -12,6 +12,16 @@ import (
 	"time"
 )
 
+type Client struct {
+	MaxIdleConnsPerServer int
+	Timeout               time.Duration
+
+	selector ServerSelector
+
+	lk       sync.Mutex
+	freeconn map[string][]*conn
+}
+
 func New(hashStrategy string, servers ...string) *Client {
 	var selector ServerSelector
 	switch hashStrategy {
@@ -27,16 +37,6 @@ func New(hashStrategy string, servers ...string) *Client {
 	}
 
 	return &Client{selector: selector}
-}
-
-type Client struct {
-	MaxIdleConnsPerServer int
-	Timeout               time.Duration
-
-	selector ServerSelector
-
-	lk       sync.Mutex
-	freeconn map[string][]*conn
 }
 
 func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
