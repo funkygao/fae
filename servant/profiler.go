@@ -14,11 +14,11 @@ type profiler struct {
 }
 
 func (this *FunServantImpl) profiler() profiler {
-	info := profiler{on: false}
-	info.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
-	info.t1 = time.Now()
+	p := profiler{on: false}
+	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
+	p.t1 = time.Now()
 
-	return info
+	return p
 }
 
 func (this *profiler) do(name string, ctx *rpc.Context, format interface{}, args ...interface{}) {
