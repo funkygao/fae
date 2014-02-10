@@ -28,7 +28,9 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	this.mg = mongo.New(this.conf.Mongodb)
 
-	go this.runWatchdog()
-
 	return
+}
+
+func (this *FunServantImpl) Start() {
+	go this.runWatchdog()
 }

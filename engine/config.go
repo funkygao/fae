@@ -62,7 +62,9 @@ func (this *Engine) LoadConfigFile() *Engine {
 	this.setupHttpServ()
 
 	// when config loaded, create the servants
-	this.rpcProcessor = rpc.NewFunServantProcessor(servant.NewFunServant(config.Servants))
+	svr := servant.NewFunServant(config.Servants)
+	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
+	svr.Start()
 
 	this.peer = peer.NewPeer(this.conf.peerGroupAddr,
 		this.conf.peerHeartbeatInterval, this.conf.peerDeadThreshold)
