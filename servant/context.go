@@ -23,7 +23,7 @@ func (this callerInfo) String() string {
 		return "Invalid Context"
 	}
 
-	s := fmt.Sprintf("X{C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
+	s := fmt.Sprintf("C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
 	if this.ctx.IsSetHost() {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}
@@ -34,7 +34,7 @@ func (this callerInfo) String() string {
 		s = fmt.Sprintf("%s S^%s", s, *this.ctx.Sid)
 	}
 
-	return s + "}"
+	return s
 }
 
 func (this *FunServantImpl) callerInfo(ctx *rpc.Context) (r callerInfo) {
