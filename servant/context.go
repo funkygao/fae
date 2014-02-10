@@ -23,7 +23,7 @@ func (this callerInfo) String() string {
 		return "Invalid"
 	}
 
-	s := fmt.Sprintf("X{CALLER^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
+	s := fmt.Sprintf("X{C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
 	if this.ctx.Host != nil {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}
