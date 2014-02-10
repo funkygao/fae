@@ -29,9 +29,9 @@ struct Context {
     13:optional string sid
 
     /**
-     * Sampling request rate.
+     * Profiling request rate.
      */
-    14:optional i16 sampleRate
+    14:optional i16 profRate
 }
 
 /**
