@@ -1,7 +1,6 @@
 package servant
 
 import (
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/sampling"
 	"time"
 )
@@ -11,14 +10,9 @@ type profilerInfo struct {
 	t1 time.Time
 }
 
-func (this *FunServantImpl) profilerInfo(ctx *rpc.Context) profilerInfo {
-	var sampleRate int16 = 1000
-	if ctx.IsSetProfRate() && false {
-		sampleRate = *ctx.ProfRate
-	}
-
+func (this *FunServantImpl) profilerInfo() profilerInfo {
 	info := profilerInfo{do: false}
-	info.do = sampling.SampleRateSatisfied(int(sampleRate))
+	info.do = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
 	if info.do {
 		info.t1 = time.Now()
 	}

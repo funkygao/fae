@@ -14,7 +14,7 @@ import (
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profilerInfo()
 
 	intError = this.mc.Set(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -37,7 +37,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 
 func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profilerInfo()
 
 	it, err := this.mc.Get(key)
 	if err == nil {
@@ -69,7 +69,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 
 func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profilerInfo()
 
 	intError = this.mc.Add(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -96,7 +96,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profilerInfo()
 
 	intError = this.mc.Delete(key)
 	if intError == nil {
@@ -121,7 +121,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profilerInfo()
 
 	var (
 		newVal uint64

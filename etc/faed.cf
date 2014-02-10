@@ -20,6 +20,7 @@
         prof_max_answer_size: 4096
         watchdog_interval: 60
         peers_cooperate: false
+        profiler_rate: 1
 
         mongodb: {
             shard_base_num: 100000
