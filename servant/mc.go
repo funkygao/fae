@@ -14,7 +14,8 @@ import (
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	t1 := time.Now()
+	profiler := this.profilerInfo(ctx)
+
 	intError = this.mc.Set(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
 	if intError == nil {
@@ -23,18 +24,21 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 		log.Error(intError)
 	}
 
-	log.Debug("T=%s Q=mc.set %s {key^%s val^%s exp^%d} {%v}",
-		time.Since(t1),
-		this.callerInfo(ctx),
-		key, value, expiration,
-		r)
+	if profiler.do {
+		log.Debug("T=%s Q=mc.set %s {key^%s val^%s exp^%d} {%v}",
+			time.Since(profiler.t1),
+			this.callerInfo(ctx),
+			key, value, expiration,
+			r)
+	}
 
 	return
 }
 
 func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, intError error) {
-	t1 := time.Now()
+	profiler := this.profilerInfo(ctx)
+
 	it, err := this.mc.Get(key)
 	if err == nil {
 		// cache hit
@@ -52,18 +56,21 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		log.Error(err)
 	}
 
-	log.Debug("T=%s Q=mc.get %s {key^%s} {%s}",
-		time.Since(t1),
-		this.callerInfo(ctx),
-		key,
-		string(r))
+	if profiler.do {
+		log.Debug("T=%s Q=mc.get %s {key^%s} {%s}",
+			time.Since(profiler.t1),
+			this.callerInfo(ctx),
+			key,
+			r)
+	}
 
 	return
 }
 
 func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	t1 := time.Now()
+	profiler := this.profilerInfo(ctx)
+
 	intError = this.mc.Add(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
 	if intError == nil {
@@ -76,17 +83,21 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 		log.Error(intError)
 	}
 
-	log.Debug("T=%s Q=mc.add %s {key^%s val^%s exp^%d} {%v}",
-		time.Since(t1),
-		this.callerInfo(ctx),
-		key, string(value), expiration,
-		r)
+	if profiler.do {
+		log.Debug("T=%s Q=mc.add %s {key^%s val^%s exp^%d} {%v}",
+			time.Since(profiler.t1),
+			this.callerInfo(ctx),
+			key, value, expiration,
+			r)
+	}
 
 	return
 }
 
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	intError error) {
+	profiler := this.profilerInfo(ctx)
+
 	intError = this.mc.Delete(key)
 	if intError == nil {
 		r = true
@@ -97,12 +108,21 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 		log.Error(intError)
 	}
 
+	if profiler.do {
+		log.Debug("T=%s Q=mc.del %s {key^%s} {%v}",
+			time.Since(profiler.t1),
+			this.callerInfo(ctx),
+			key,
+			r)
+	}
+
 	return
 }
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, intError error) {
-	t1 := time.Now()
+	profiler := this.profilerInfo(ctx)
+
 	var (
 		newVal uint64
 		err    error
@@ -117,11 +137,13 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 		r = int32(newVal)
 	}
 
-	log.Debug("T=%s Q=mc.inc %s {key^%s delta^%d} {%d}",
-		time.Since(t1),
-		this.callerInfo(ctx),
-		key, delta,
-		r)
+	if profiler.do {
+		log.Debug("T=%s Q=mc.inc %s {key^%s delta^%d} {%d}",
+			time.Since(profiler.t1),
+			this.callerInfo(ctx),
+			key, delta,
+			r)
+	}
 
 	return
 }
