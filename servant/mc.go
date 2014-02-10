@@ -28,7 +28,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 		log.Debug("T=%s Q=mc.set %s {key^%s val^%s exp^%d} {%v}",
 			time.Since(profiler.t1),
 			this.callerInfo(ctx),
-			key, value, expiration,
+			key, this.truncValue(value), expiration,
 			r)
 	}
 
@@ -61,7 +61,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 			time.Since(profiler.t1),
 			this.callerInfo(ctx),
 			key,
-			r)
+			this.truncValue(r))
 	}
 
 	return
@@ -87,7 +87,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 		log.Debug("T=%s Q=mc.add %s {key^%s val^%s exp^%d} {%v}",
 			time.Since(profiler.t1),
 			this.callerInfo(ctx),
-			key, value, expiration,
+			key, this.truncValue(value), expiration,
 			r)
 	}
 

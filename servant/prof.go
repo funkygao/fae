@@ -13,7 +13,7 @@ type profilerInfo struct {
 
 func (this *FunServantImpl) profilerInfo(ctx *rpc.Context) profilerInfo {
 	var sampleRate int16 = 1000
-	if ctx.IsSetProfRate() {
+	if ctx.IsSetProfRate() && false {
 		sampleRate = *ctx.ProfRate
 	}
 
@@ -24,4 +24,12 @@ func (this *FunServantImpl) profilerInfo(ctx *rpc.Context) profilerInfo {
 	}
 
 	return info
+}
+
+func (this *FunServantImpl) truncValue(val []byte) []byte {
+	if len(val) < this.conf.ProfilerMaxAnswerSize {
+		return val
+	}
+
+	return val[:this.conf.ProfilerMaxAnswerSize]
 }
