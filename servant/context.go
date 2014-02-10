@@ -23,18 +23,18 @@ func (this callerInfo) String() string {
 		return "Invalid"
 	}
 
-	s := fmt.Sprintf("%s[%s] %s", this.httpMethod, this.seqId, this.uri)
+	s := fmt.Sprintf("X{CALLER^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
 	if this.ctx.Host != nil {
-		s = fmt.Sprintf("%s <%s", s, *this.ctx.Host)
+		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}
 	if this.ctx.Ip != nil {
-		s = fmt.Sprintf("%s >%s", s, *this.ctx.Ip)
+		s = fmt.Sprintf("%s I^%s", s, *this.ctx.Ip)
 	}
 	if this.ctx.Sid != nil {
-		s = fmt.Sprintf("%s ^%s", s, *this.ctx.Sid)
+		s = fmt.Sprintf("%s S^%s", s, *this.ctx.Sid)
 	}
 
-	return s
+	return s + "}"
 }
 
 func (this *FunServantImpl) callerInfo(ctx *rpc.Context) (r callerInfo) {
