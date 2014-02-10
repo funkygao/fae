@@ -1,5 +1,5 @@
 /*
-MCache key:string, value:[]byte.
+memcache key:string, value:[]byte.
 */
 package servant
 
@@ -7,6 +7,7 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/memcache"
+	log "github.com/funkygao/log4go"
 )
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,

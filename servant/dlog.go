@@ -1,3 +1,6 @@
+/*
+dlog ident:string tag:string json:json string
+*/
 package servant
 
 import (
