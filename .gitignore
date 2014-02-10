@@ -25,5 +25,6 @@ servant/gen-go/
 servant/gen-py/
 servant/gen-java/
 var/
+log/
 daemon/faed/faed
 faed.lock
