@@ -69,7 +69,7 @@ try {
             "tutorial" => "b",
         )
     );
-    echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db', 123, 'user', 
+    echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db', 'user', 123, 
         json_encode($doc), json_encode(array())), "\n";
 
     $transport->close();
