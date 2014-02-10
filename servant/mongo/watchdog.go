@@ -28,12 +28,12 @@ func (this *Client) runWatchdog() {
 
 }
 
-// TODO
+// TODO remove dead session from freecon
 func (this *Client) checkServerStatus(wg *sync.WaitGroup, sess *mgo.Session) {
 	defer wg.Done()
 	err := sess.Ping()
 	if err != nil {
-		log.Error("mongodb: %s", err)
+		log.Error("mongodb err: %v %s", sess.LiveServers(), err)
 		sess.Close()
 	}
 }
