@@ -27,6 +27,11 @@ struct Context {
      * Session id.
      */
     13:optional string sid
+
+    /**
+     * Sampling request rate.
+     */
+    14:optional i16 sampleRate
 }
 
 /**
