@@ -16,16 +16,18 @@ type profiler struct {
 func (this *FunServantImpl) profiler() profiler {
 	info := profiler{on: false}
 	info.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
-	if info.on {
-		info.t1 = time.Now()
-	}
+	info.t1 = time.Now()
 
 	return info
 }
 
 func (this *profiler) do(name string, ctx *rpc.Context, format interface{}, args ...interface{}) {
-	if this.on {
-		elapsed := time.Since(this.t1)
+	elapsed := time.Since(this.t1)
+	if elapsed.Seconds() > 5.0 { // TODO config
+		// slow response
+		s := fmt.Sprintf("SLOW T=%s Q=%s X{%s} "+format, elapsed, name, this.contextInfo(ctx), args...)
+		log.Warn(s)
+	} else if this.on {
 		s := fmt.Sprintf("T=%s Q=%s X{%s} "+format, elapsed, name, this.contextInfo(ctx), args...)
 		log.Debug(s)
 	}
