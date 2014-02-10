@@ -26,7 +26,7 @@ func (this *FunServantImpl) profiler() profiler {
 func (this *profiler) do(name string, ctx *rpc.Context, format interface{}, args ...interface{}) {
 	if this.on {
 		elapsed := time.Since(this.t1)
-		s := fmt.Sprintf("T=%s Q=%s X{%s} "+format, elapsed, name, this.callerInfo(ctx), args...)
+		s := fmt.Sprintf("T=%s Q=%s X{%s} "+format, elapsed, name, this.contextInfo(ctx), args...)
 		log.Debug(s)
 	}
 }

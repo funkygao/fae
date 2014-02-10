@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type callerInfo struct {
+type contextInfo struct {
 	ctx *rpc.Context
 
 	httpMethod string
@@ -14,11 +14,11 @@ type callerInfo struct {
 	seqId      string
 }
 
-func (this *callerInfo) Valid() bool {
+func (this *contextInfo) Valid() bool {
 	return this.seqId != ""
 }
 
-func (this callerInfo) String() string {
+func (this contextInfo) String() string {
 	if !this.Valid() {
 		return "Invalid Context"
 	}
@@ -37,7 +37,7 @@ func (this callerInfo) String() string {
 	return s
 }
 
-func (this *FunServantImpl) callerInfo(ctx *rpc.Context) (r callerInfo) {
+func (this *FunServantImpl) contextInfo(ctx *rpc.Context) (r contextInfo) {
 	const N = 3
 	p := strings.SplitN(ctx.Caller, "+", N)
 	if len(p) != N {
