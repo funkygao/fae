@@ -8,6 +8,10 @@ import (
 )
 
 func (this *FunServantImpl) runWatchdog() {
+	if this.conf.WatchdogInterval == 0 {
+		return
+	}
+
 	ticker := time.NewTicker(time.Duration(this.conf.WatchdogInterval) * time.Second)
 	defer ticker.Stop()
 
