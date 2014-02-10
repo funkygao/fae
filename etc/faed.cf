@@ -17,6 +17,7 @@
     }
 
     servants: {
+        prof_max_answer_size: 4096
         watchdog_interval: 60
         peers_cooperate: false
 

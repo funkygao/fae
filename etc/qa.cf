@@ -16,6 +16,8 @@
 
     servants: {
         watchdog_interval: 60
+        prof_max_answer_size: 4096
+        peers_cooperate: false
 
         mongodb: {
             shard_base_num: 100000
