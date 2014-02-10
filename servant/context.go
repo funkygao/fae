@@ -33,9 +33,6 @@ func (this callerInfo) String() string {
 	if this.ctx.IsSetSid() {
 		s = fmt.Sprintf("%s S^%s", s, *this.ctx.Sid)
 	}
-	if this.ctx.IsSetProfRate() {
-		s = fmt.Sprintf("%s P^%d", s, *this.ctx.ProfRate)
-	}
 
 	return s + "}"
 }
