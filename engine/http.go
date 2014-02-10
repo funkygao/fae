@@ -74,6 +74,12 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["stats"] = this.stats
 		output["peers"] = this.peer.Neighbors()
 
+	case "runtime":
+		output["runtime"] = this.stats.Runtime()
+
+	case "mem":
+		output["mem"] = *this.stats.memStats
+
 	case "uris":
 		output["all"] = this.httpPaths
 

@@ -25,7 +25,7 @@ func (this *AtomicInt) String() string {
 
 type engineStats struct {
 	startedAt time.Time
-	MemStats  *runtime.MemStats
+	memStats  *runtime.MemStats
 
 	TotalSessions    AtomicInt
 	TotalCalls       AtomicInt
@@ -37,7 +37,7 @@ type engineStats struct {
 
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
-	this.MemStats = new(runtime.MemStats)
+	this.memStats = new(runtime.MemStats)
 	this.TotalRequests = make(map[string]AtomicInt)
 	this.PeriodRequests = make(map[string]AtomicInt)
 	return
@@ -52,23 +52,23 @@ func (this *engineStats) Runtime() map[string]interface{} {
 
 	s := make(map[string]interface{})
 	s["goroutines"] = runtime.NumGoroutine()
-	s["memory.allocated"] = gofmt.ByteSize(this.MemStats.Alloc).String()
-	s["memory.mallocs"] = gofmt.ByteSize(this.MemStats.Mallocs).String()
-	s["memory.frees"] = gofmt.ByteSize(this.MemStats.Frees).String()
-	s["memory.last_gc"] = this.MemStats.LastGC
-	s["memory.gc.num"] = this.MemStats.NumGC
-	s["memory.gc.num_per_second"] = float64(this.MemStats.NumGC) / time.
+	s["memory.allocated"] = gofmt.ByteSize(this.memStats.Alloc).String()
+	s["memory.mallocs"] = gofmt.ByteSize(this.memStats.Mallocs).String()
+	s["memory.frees"] = gofmt.ByteSize(this.memStats.Frees).String()
+	s["memory.last_gc"] = this.memStats.LastGC
+	s["memory.gc.num"] = this.memStats.NumGC
+	s["memory.gc.num_per_second"] = float64(this.memStats.NumGC) / time.
 		Since(this.startedAt).Seconds()
 	s["memory.gc.total_pause"] = fmt.Sprintf("%dms",
-		this.MemStats.PauseTotalNs/uint64(time.Millisecond))
-	s["memory.heap.alloc"] = gofmt.ByteSize(this.MemStats.HeapAlloc).String()
-	s["memory.heap.sys"] = gofmt.ByteSize(this.MemStats.HeapSys).String()
-	s["memory.heap.idle"] = gofmt.ByteSize(this.MemStats.HeapIdle).String()
-	s["memory.heap.released"] = gofmt.ByteSize(this.MemStats.HeapReleased).String()
-	s["memory.heap.objects"] = gofmt.Comma(int64(this.MemStats.HeapObjects))
-	s["memory.stack"] = gofmt.ByteSize(this.MemStats.StackInuse).String()
+		this.memStats.PauseTotalNs/uint64(time.Millisecond))
+	s["memory.heap.alloc"] = gofmt.ByteSize(this.memStats.HeapAlloc).String()
+	s["memory.heap.sys"] = gofmt.ByteSize(this.memStats.HeapSys).String()
+	s["memory.heap.idle"] = gofmt.ByteSize(this.memStats.HeapIdle).String()
+	s["memory.heap.released"] = gofmt.ByteSize(this.memStats.HeapReleased).String()
+	s["memory.heap.objects"] = gofmt.Comma(int64(this.memStats.HeapObjects))
+	s["memory.stack"] = gofmt.ByteSize(this.memStats.StackInuse).String()
 	gcPausesMs := make([]string, 0, 20)
-	for _, pauseNs := range this.MemStats.PauseNs {
+	for _, pauseNs := range this.memStats.PauseNs {
 		if pauseNs == 0 {
 			continue
 		}
@@ -87,5 +87,5 @@ func (this *engineStats) Runtime() map[string]interface{} {
 }
 
 func (this *engineStats) refreshMemStats() {
-	runtime.ReadMemStats(this.MemStats)
+	runtime.ReadMemStats(this.memStats)
 }
