@@ -20,18 +20,21 @@ func (this *callerInfo) Valid() bool {
 
 func (this callerInfo) String() string {
 	if !this.Valid() {
-		return "Invalid"
+		return "Invalid Context"
 	}
 
 	s := fmt.Sprintf("X{C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
-	if this.ctx.Host != nil {
+	if this.ctx.IsSetHost() {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}
-	if this.ctx.Ip != nil {
+	if this.ctx.IsSetIp() {
 		s = fmt.Sprintf("%s I^%s", s, *this.ctx.Ip)
 	}
-	if this.ctx.Sid != nil {
+	if this.ctx.IsSetSid() {
 		s = fmt.Sprintf("%s S^%s", s, *this.ctx.Sid)
+	}
+	if this.ctx.IsSetProfRate() {
+		s = fmt.Sprintf("%s P^%d", s, *this.ctx.ProfRate)
 	}
 
 	return s + "}"
