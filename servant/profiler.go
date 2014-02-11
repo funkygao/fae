@@ -9,6 +9,7 @@ import (
 )
 
 type profiler struct {
+	*FunServantImpl
 	on bool
 	t1 time.Time
 }
@@ -17,19 +18,25 @@ func (this *FunServantImpl) profiler() profiler {
 	p := profiler{on: false}
 	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
 	p.t1 = time.Now()
+	p.FunServantImpl = this
 
 	return p
 }
 
-func (this *profiler) do(name string, ctx *rpc.Context, format interface{}, args ...interface{}) {
+func (this *profiler) do(name string, ctx *rpc.Context, format string,
+	args ...interface{}) {
 	elapsed := time.Since(this.t1)
 	if elapsed.Seconds() > 5.0 { // TODO config
 		// slow response
-		s := fmt.Sprintf("SLOW T=%s Q=%s X{%s} "+format, elapsed, name, this.contextInfo(ctx), args...)
-		log.Warn(s)
+		body := fmt.Sprintf(format, args...)
+		header := fmt.Sprintf("SLOW T=%s Q=%s X{%s} ",
+			elapsed, name, this.contextInfo(ctx))
+		log.Warn(header + body)
 	} else if this.on {
-		s := fmt.Sprintf("T=%s Q=%s X{%s} "+format, elapsed, name, this.contextInfo(ctx), args...)
-		log.Debug(s)
+		body := fmt.Sprintf(format, args...)
+		header := fmt.Sprintf("T=%s Q=%s X{%s} ",
+			elapsed, name, this.contextInfo(ctx))
+		log.Debug(header + body)
 	}
 }
 
@@ -38,5 +45,5 @@ func (this *FunServantImpl) truncatedBytes(val []byte) []byte {
 		return val
 	}
 
-	return append(val[:this.conf.ProfilerMaxAnswerSize], []byte("..."))
+	return append(val[:this.conf.ProfilerMaxAnswerSize], '.')
 }
