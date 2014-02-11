@@ -14,6 +14,7 @@
         client_timeout: 10
         session_slow_threshold: 8
         call_slow_threshold: 5
+        debug_session: false
     }
 
     servants: {

@@ -50,8 +50,10 @@ func (this *TFunServer) Serve() error {
 
 		if client != nil {
 			this.engine.stats.TotalSessions.Add(1)
-			log.Debug("new session peer %s",
-				client.(*thrift.TSocket).Conn().RemoteAddr().String())
+			if this.engine.conf.rpc.debugSession {
+				log.Debug("accepted session peer %s",
+					client.(*thrift.TSocket).Conn().RemoteAddr().String())
+			}
 
 			go this.processSession(client)
 		}
@@ -66,6 +68,10 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	if err := this.processRequest(client); err != nil {
 		this.engine.stats.TotalFailedSessions.Add(1)
 		log.Error("session peer[%s] failed: %s", remoteAddr, err)
+	}
+
+	if this.engine.conf.rpc.debugSession {
+		log.Debug("session peer[%s] closed", remoteAddr)
 	}
 
 	elapsed := time.Since(t1)
