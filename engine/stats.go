@@ -27,9 +27,12 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	TotalSessions    AtomicInt
-	TotalCalls       AtomicInt
-	TotalFailedCalls AtomicInt
+	TotalSessions       AtomicInt
+	TotalCalls          AtomicInt
+	TotalFailedCalls    AtomicInt
+	TotalFailedSessions AtomicInt
+	TotalSlowSessions   AtomicInt
+	TotalSlowCalls      AtomicInt
 
 	TotalRequests  map[string]AtomicInt // key is client ip
 	PeriodRequests map[string]AtomicInt // key is client ip

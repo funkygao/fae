@@ -49,9 +49,9 @@ func (this *TFunServer) Serve() error {
 		}
 
 		if client != nil {
-			log.Debug("new session from %v",
-				client.(*thrift.TSocket).Conn().RemoteAddr())
 			this.engine.stats.TotalSessions.Add(1)
+			log.Debug("new session peer %s",
+				client.(*thrift.TSocket).Conn().RemoteAddr().String())
 
 			go this.processSession(client)
 		}
@@ -62,14 +62,17 @@ func (this *TFunServer) Serve() error {
 
 func (this *TFunServer) processSession(client thrift.TTransport) {
 	t1 := time.Now()
+	remoteAddr := client.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequest(client); err != nil {
-		log.Error("error processing request: ", err)
+		this.engine.stats.TotalFailedSessions.Add(1)
+		log.Error("session peer[%s] failed: %s", remoteAddr, err)
 	}
 
 	elapsed := time.Since(t1)
 	if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
-		// slow query
-		log.Warn("client closed after %s", elapsed)
+		// slow session
+		this.engine.stats.TotalSlowSessions.Add(1)
+		log.Warn("SLOW=%s session peer: %s", elapsed, remoteAddr)
 	}
 }
 
@@ -87,8 +90,9 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 	}
 
 	var (
-		t1      time.Time
-		elapsed time.Duration
+		t1         time.Time
+		elapsed    time.Duration
+		remoteAddr = client.(*thrift.TSocket).Conn().RemoteAddr().String()
 	)
 	for {
 		t1 = time.Now()
@@ -97,8 +101,9 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		this.engine.stats.TotalCalls.Add(1)
 		elapsed = time.Since(t1)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
-			// slow query
-			log.Warn("processed in %s", elapsed)
+			// slow call
+			this.engine.stats.TotalSlowCalls.Add(1)
+			log.Warn("SLOW=%s call peer: %s", elapsed, remoteAddr)
 		}
 
 		if err, ok := err.(thrift.TTransportException); ok &&
@@ -107,6 +112,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 			return nil
 		} else if err != nil {
 			// err occurs
+			log.Error("ERROR call peer: %s, %s", remoteAddr, err)
 			this.engine.stats.TotalFailedCalls.Add(1)
 			return err
 		}
