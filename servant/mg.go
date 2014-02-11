@@ -25,7 +25,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	var bdoc = bson.M{}
 	json.Unmarshal(doc, &bdoc)
-
 	err := sess.DB().C(table).Insert(bdoc)
 	if err == nil {
 		r = true
@@ -55,7 +54,9 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		return
 	}
 
-	err := sess.DB().C(table).Remove(query)
+	var bquery = bson.M{}
+	json.Unmarshal(query, &bquery)
+	err := sess.DB().C(table).Remove(bquery)
 	if err == nil {
 		r = true
 	}
@@ -80,6 +81,9 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		return
 	}
 
+	// TODO fields
+	var bquery = bson.M{}
+	json.Unmarshal(query, &bquery)
 	err := sess.DB().C(table).Find(query).One(&r)
 	sess.Recyle(&err)
 
@@ -96,6 +100,24 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, fields []byte, limit []byte,
 	orderBy []byte) (r []byte, intError error) {
+	profiler := this.profiler()
+
+	var sess *mongo.Session
+	sess, intError = this.mongoSession(kind, shardId)
+	if intError != nil {
+		return
+	}
+
+	var bquery = bson.M{}
+	json.Unmarshal(query, &bquery)
+	err := sess.DB().C(table).Find(query).All(&r)
+	sess.Recyle(&err)
+
+	profiler.do("mg.findAll", ctx,
+		"{kind^%s table^%s id^d query%s fields^%s} {%s}",
+		kind, table, shardId,
+		this.truncatedBytes(query), this.truncatedBytes(fields),
+		this.truncatedBytes(r))
 
 	return
 }
@@ -111,7 +133,11 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		return
 	}
 
-	err := sess.DB().C(table).Update(query, change)
+	var bquery = bson.M{}
+	json.Unmarshal(query, &bquery)
+	var bchange = bson.M{}
+	json.Unmarshal(change, &bchange)
+	err := sess.DB().C(table).Update(bquery, bchange)
 	if err == nil {
 		r = true
 	}
@@ -138,7 +164,11 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 		return
 	}
 
-	_, err := sess.DB().C(table).Upsert(query, change)
+	var bquery = bson.M{}
+	json.Unmarshal(query, &bquery)
+	var bchange = bson.M{}
+	json.Unmarshal(change, &bchange)
+	_, err := sess.DB().C(table).Upsert(bquery, bchange)
 	if err == nil {
 		r = true
 	}
