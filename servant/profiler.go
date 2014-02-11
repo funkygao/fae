@@ -29,7 +29,7 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	if elapsed.Seconds() > 5.0 { // TODO config
 		// slow response
 		body := fmt.Sprintf(format, args...)
-		header := fmt.Sprintf("SLOW T=%s Q=%s X{%s} ",
+		header := fmt.Sprintf("SLOW=%s Q=%s X{%s} ",
 			elapsed, name, this.contextInfo(ctx))
 		log.Warn(header + body)
 	} else if this.on {
@@ -45,5 +45,6 @@ func (this *FunServantImpl) truncatedBytes(val []byte) []byte {
 		return val
 	}
 
-	return append(val[:this.conf.ProfilerMaxAnswerSize], '.')
+	return append(val[:this.conf.ProfilerMaxAnswerSize],
+		[]byte{'.', '.', '.'}...)
 }
