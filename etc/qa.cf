@@ -10,7 +10,7 @@
         protocol: "binary"
         // framed: false
         client_timeout: 10
-        client_slow_threshold: 8
+        session_slow_threshold: 8
         call_slow_threshold: 5
     }
 

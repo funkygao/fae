@@ -12,7 +12,7 @@
         protocol: "binary"
         // framed: false
         client_timeout: 10
-        client_slow_threshold: 8
+        session_slow_threshold: 8
         call_slow_threshold: 5
     }
 
@@ -20,7 +20,7 @@
         prof_max_answer_size: 4096
         watchdog_interval: 600
         peers_cooperate: false
-        profiler_rate: 1
+        profiler_rate: 1000
 
         mongodb: {
             shard_base_num: 100000
