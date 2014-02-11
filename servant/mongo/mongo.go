@@ -69,6 +69,7 @@ func (this *Client) getConn(url string) (*mgo.Session, error) {
 	}
 
 	sess.SetSocketTimeout(this.ioTimeout)
+	sess.SetMode(mgo.Monotonic, true)
 
 	return sess, nil
 }
