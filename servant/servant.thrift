@@ -190,6 +190,14 @@ service FunServant {
         9: list<string> orderBy
     ),
 
+    binary mg_find_id(
+        1: required Context ctx,
+        2: string kind,
+        3: string table,
+        4: i32 shardId,
+        5: binary id
+    ),
+
     i32 mg_count(
         1: required Context ctx,
         2: string kind,
@@ -207,6 +215,15 @@ service FunServant {
         6: binary change
     ),
 
+    bool mg_update_id(
+        1: required Context ctx, 
+        2: string kind,
+        3: string table,
+        4: i32 shardId,
+        5: i32 id,
+        6: binary change
+    ),
+
     bool mg_upsert(
         1: required Context ctx, 
         2: string kind,
@@ -216,12 +233,30 @@ service FunServant {
         6: binary change
     ),
 
+    bool mg_upsert_id(
+        1: required Context ctx, 
+        2: string kind,
+        3: string table,
+        4: i32 shardId,
+        5: i32 id,
+        6: binary change
+    ),
+
     bool mg_insert(
         1: required Context ctx, 
         2: string kind,
         3: string table,
         4: i32 shardId,
         5: binary doc,
+        6: binary options
+    ),
+
+    bool mg_inserts(
+        1: required Context ctx, 
+        2: string kind,
+        3: string table,
+        4: i32 shardId,
+        5: list<binary> doc,
         6: binary options
     ),
 
