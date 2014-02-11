@@ -67,7 +67,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	}
 
 	elapsed := time.Since(t1)
-	if elapsed.Seconds() > this.engine.conf.rpc.clientSlowThreshold {
+	if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
 		// slow query
 		log.Warn("client closed after %s", elapsed)
 	}
