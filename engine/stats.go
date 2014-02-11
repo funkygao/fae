@@ -33,16 +33,11 @@ type engineStats struct {
 	TotalFailedSessions AtomicInt
 	TotalSlowSessions   AtomicInt
 	TotalSlowCalls      AtomicInt
-
-	TotalRequests  map[string]AtomicInt // key is client ip
-	PeriodRequests map[string]AtomicInt // key is client ip
 }
 
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.memStats = new(runtime.MemStats)
-	this.TotalRequests = make(map[string]AtomicInt)
-	this.PeriodRequests = make(map[string]AtomicInt)
 	return
 }
 
