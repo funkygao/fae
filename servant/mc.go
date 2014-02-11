@@ -1,5 +1,5 @@
 /*
-MCache key:string, value:[]byte.
+memcache key:string, value:[]byte.
 */
 package servant
 
@@ -7,14 +7,12 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/memcache"
-	"github.com/funkygao/golib/sampling"
 	log "github.com/funkygao/log4go"
-	"time"
 )
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profiler()
 
 	intError = this.mc.Set(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -24,20 +22,19 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 		log.Error(intError)
 	}
 
-	if profiler.do {
-		log.Debug("T=%s Q=mc.set %s {key^%s val^%s exp^%d} {%v}",
-			time.Since(profiler.t1),
-			this.callerInfo(ctx),
-			key, this.truncValue(value), expiration,
-			r)
-	}
+	profiler.do("mc.set", ctx,
+		"{key^%s val^%s exp^%d} {%v}",
+		key,
+		this.truncatedBytes(value),
+		expiration,
+		r)
 
 	return
 }
 
 func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profiler()
 
 	it, err := this.mc.Get(key)
 	if err == nil {
@@ -45,10 +42,6 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		r = it.Value
 	} else if err == memcache.ErrCacheMiss {
 		// cache miss
-		if sampling.SampleRateSatisfied(5) {
-			log.Debug("mc missed: %s", key)
-		}
-
 		miss = rpc.NewTCacheMissed()
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
@@ -56,20 +49,17 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		log.Error(err)
 	}
 
-	if profiler.do {
-		log.Debug("T=%s Q=mc.get %s {key^%s} {%s}",
-			time.Since(profiler.t1),
-			this.callerInfo(ctx),
-			key,
-			this.truncValue(r))
-	}
+	profiler.do("mc.get", ctx,
+		"{key^%s} {%s}",
+		key,
+		this.truncatedBytes(r))
 
 	return
 }
 
 func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profiler()
 
 	intError = this.mc.Add(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -83,20 +73,19 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 		log.Error(intError)
 	}
 
-	if profiler.do {
-		log.Debug("T=%s Q=mc.add %s {key^%s val^%s exp^%d} {%v}",
-			time.Since(profiler.t1),
-			this.callerInfo(ctx),
-			key, this.truncValue(value), expiration,
-			r)
-	}
+	profiler.do("mc.add", ctx,
+		"{key^%s val^%s exp^%d} {%v}",
+		key,
+		this.truncatedBytes(value),
+		expiration,
+		r)
 
 	return
 }
 
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profiler()
 
 	intError = this.mc.Delete(key)
 	if intError == nil {
@@ -108,20 +97,17 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 		log.Error(intError)
 	}
 
-	if profiler.do {
-		log.Debug("T=%s Q=mc.del %s {key^%s} {%v}",
-			time.Since(profiler.t1),
-			this.callerInfo(ctx),
-			key,
-			r)
-	}
+	profiler.do("mc.del", ctx,
+		"{key^%s} {%v}",
+		key,
+		r)
 
 	return
 }
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, intError error) {
-	profiler := this.profilerInfo(ctx)
+	profiler := this.profiler()
 
 	var (
 		newVal uint64
@@ -137,13 +123,11 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 		r = int32(newVal)
 	}
 
-	if profiler.do {
-		log.Debug("T=%s Q=mc.inc %s {key^%s delta^%d} {%d}",
-			time.Since(profiler.t1),
-			this.callerInfo(ctx),
-			key, delta,
-			r)
-	}
+	profiler.do("mc.inc", ctx,
+		"{key^%s delta^%d} {%d}",
+		key,
+		delta,
+		r)
 
 	return
 }

@@ -1,5 +1,5 @@
 /*
-LCache key:string, value:[]byte.
+local cache key:string, value:[]byte.
 */
 package servant
 

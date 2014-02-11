@@ -11,7 +11,7 @@ var (
 )
 
 const (
-	VERSION = "v0.0.1.alpha"
+	VERSION = "v0.0.1.beta"
 	AUTHOR  = "funky.gao@gmail.com"
 )
 

@@ -76,5 +76,5 @@ userDoc = {
 }
 doc = json.dumps(userDoc)
 print 'doc:', doc
-print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 123, 'user', doc, '{}'), elapsed()
+print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 'user', 123, doc, '{}'), elapsed()
 

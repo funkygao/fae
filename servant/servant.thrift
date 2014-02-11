@@ -27,11 +27,6 @@ struct Context {
      * Session id.
      */
     13:optional string sid
-
-    /**
-     * Profiling request rate.
-     */
-    14:optional i16 profRate
 }
 
 /**
@@ -176,8 +171,8 @@ service FunServant {
     binary mg_find_one(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         /** where condition */
         5: binary query,
         6: binary fields
@@ -186,8 +181,8 @@ service FunServant {
     binary mg_find_all(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary query,
         6: binary fields,
         7: binary limit,
@@ -197,8 +192,8 @@ service FunServant {
     bool mg_update(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary query,
         6: binary change
     ),
@@ -206,8 +201,8 @@ service FunServant {
     bool mg_upsert(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary query,
         6: binary change
     ),
@@ -215,8 +210,8 @@ service FunServant {
     bool mg_insert(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary doc,
         6: binary options
     ),
@@ -224,16 +219,16 @@ service FunServant {
     bool mg_delete(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary query
     ),
 
     binary mg_find_and_modify(
         1: required Context ctx, 
         2: string kind,
-        3: i32 shardId,
-        4: string table,
+        3: string table,
+        4: i32 shardId,
         5: binary command
     ),
 

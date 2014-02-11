@@ -1,3 +1,6 @@
+/*
+mongodb doc:json bytes
+*/
 package servant
 
 import (
@@ -8,8 +11,9 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-func (this *FunServantImpl) MgInsert(ctx *rpc.Context, kind string, shardId int32,
-	table string, doc []byte, options []byte) (r bool, intError error) {
+func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	doc []byte, options []byte) (r bool, intError error) {
 	log.Debug("%s %d %s %s %v %s", kind, shardId, table,
 		string(doc), doc, string(options))
 
@@ -34,8 +38,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context, kind string, shardId int3
 	return
 }
 
-func (this *FunServantImpl) MgDelete(ctx *rpc.Context, kind string, shardId int32,
-	table string, query []byte) (r bool, intError error) {
+func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte) (r bool, intError error) {
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -50,8 +55,9 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context, kind string, shardId int3
 	return
 }
 
-func (this *FunServantImpl) MgFindOne(ctx *rpc.Context, kind string, shardId int32,
-	table string, query []byte, fields []byte) (r []byte, intError error) {
+func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte, fields []byte) (r []byte, intError error) {
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -64,15 +70,17 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context, kind string, shardId int
 	return
 }
 
-func (this *FunServantImpl) MgFindAll(ctx *rpc.Context, kind string, shardId int32,
-	table string, query []byte, fields []byte, limit []byte,
+func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte, fields []byte, limit []byte,
 	orderBy []byte) (r []byte, intError error) {
 
 	return
 }
 
-func (this *FunServantImpl) MgUpdate(ctx *rpc.Context, kind string, shardId int32,
-	table string, query []byte, change []byte) (r bool, intError error) {
+func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte, change []byte) (r bool, intError error) {
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -88,8 +96,9 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context, kind string, shardId int3
 	return
 }
 
-func (this *FunServantImpl) MgUpsert(ctx *rpc.Context, kind string, shardId int32,
-	table string, query []byte, change []byte) (r bool, intError error) {
+func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte, change []byte) (r bool, intError error) {
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -105,14 +114,14 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context, kind string, shardId int3
 	return
 }
 
-func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context, kind string,
-	shardId int32, table string, command []byte) (r []byte, intError error) {
+func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	command []byte) (r []byte, intError error) {
 
 	return
 }
 
-func (this *FunServantImpl) mongoSession(kind string,
-	shardId int32) (*mongo.Session, error) {
+func (this *FunServantImpl) mongoSession(kind string, shardId int32) (*mongo.Session, error) {
 	sess, err := this.mg.Session(kind, shardId)
 	if err != nil {
 		log.Error(err)
