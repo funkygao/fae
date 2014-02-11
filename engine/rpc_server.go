@@ -106,15 +106,22 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 			log.Warn("SLOW=%s call peer: %s", elapsed, remoteAddr)
 		}
 
+		// check transport error
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
-			// remote client closed tranport
+			// remote client closed transport
 			return nil
 		} else if err != nil {
-			// err occurs
+			// non-EOF transport err
 			log.Error("ERROR call peer: %s, %s", remoteAddr, err)
 			this.engine.stats.TotalFailedCalls.Add(1)
 			return err
+		}
+
+		// it is servant generated TApplicationException
+		if err != nil {
+			this.engine.stats.TotalFailedCalls.Add(1)
+			log.Error("ERROR call peer: %s %s", remoteAddr, err)
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
