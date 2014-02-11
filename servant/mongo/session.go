@@ -16,6 +16,10 @@ func (this *Session) DB() *mgo.Database {
 	return this.Session.DB(this.server.DbName)
 }
 
+func (this *Session) DbName() string {
+	return this.server.DbName
+}
+
 func (this *Session) Recyle(err *error) {
 	if err == nil || this.resumableError(*err) {
 		// reusable session(connection)
