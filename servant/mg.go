@@ -88,7 +88,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	sess.Recyle(&err)
 
 	profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^d query%s fields^%s} {%s}",
+		"{kind^%s table^%s id^%d query^%s fields^%s} {%s}",
 		kind, table, shardId,
 		this.truncatedBytes(query), this.truncatedBytes(fields),
 		this.truncatedBytes(r))
@@ -114,7 +114,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	sess.Recyle(&err)
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^d query%s fields^%s} {%s}",
+		"{kind^%s table^%s id^%d query%s fields^%s} {%s}",
 		kind, table, shardId,
 		this.truncatedBytes(query), this.truncatedBytes(fields),
 		this.truncatedBytes(r))
