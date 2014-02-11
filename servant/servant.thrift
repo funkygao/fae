@@ -185,8 +185,17 @@ service FunServant {
         4: i32 shardId,
         5: binary query,
         6: binary fields,
-        7: binary limit,
-        8: binary orderBy
+        7: i32 limit,
+        8: i32 skip,
+        9: list<string> orderBy
+    ),
+
+    i32 mg_count(
+        1: required Context ctx,
+        2: string kind,
+        3: string table,
+        4: i32 shardId,
+        5: binary query
     ),
 
     bool mg_update(

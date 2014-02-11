@@ -184,6 +184,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	return
 }
 
+func (this *FunServantImpl) MgCount(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	query []byte) (n int, intErr error) {
+
+}
+
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	command []byte) (r []byte, intError error) {
