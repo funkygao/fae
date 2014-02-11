@@ -9,6 +9,7 @@ import (
 	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo/bson"
+	"strings"
 )
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
@@ -33,10 +34,11 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 	sess.Recyle(&err)
 
-	profiler.do("mg.ins", ctx,
+	profiler.do("mg.insert", ctx,
 		"{kind^%s table^%s id^%d doc^%s option^%s} {%v}",
 		kind, table, shardId,
-		doc, options,
+		this.truncatedBytes(doc),
+		this.truncatedBytes(options),
 		r)
 
 	return
@@ -60,8 +62,10 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	sess.Recyle(&err) // reuse this session, we should never forget this
 
 	profiler.do("mg.del", ctx,
-		"{kind^%s table^%s id^%d} {%v}",
-		kind, table, shardId, r)
+		"{kind^%s table^%s id^%d query^%s} {%v}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		r)
 	return
 }
 
@@ -82,7 +86,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	profiler.do("mg.findOne", ctx,
 		"{kind^%s table^%s id^d query%s fields^%s} {%s}",
 		kind, table, shardId,
-		query, fields,
+		this.truncatedBytes(query), this.truncatedBytes(fields),
 		this.truncatedBytes(r))
 
 	return
@@ -116,7 +120,8 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	profiler.do("mg.update", ctx,
 		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
 		kind, table, shardId,
-		query, change,
+		this.truncatedBytes(query),
+		this.truncatedBytes(change),
 		r)
 
 	return
@@ -142,7 +147,8 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	profiler.do("mg.upsert", ctx,
 		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
 		kind, table, shardId,
-		query, change,
+		this.truncatedBytes(query),
+		this.truncatedBytes(change),
 		r)
 
 	return
@@ -157,11 +163,26 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 
 func (this *FunServantImpl) mongoSession(kind string,
 	shardId int32) (*mongo.Session, error) {
+	kind = this.normalizedKind(kind)
 	sess, err := this.mg.Session(kind, shardId)
 	if err != nil {
-		log.Error(err)
+		log.Error("{kind^%s id^%d} %s", kind, shardId, err)
 		return nil, err
 	}
 
 	return sess, err
+}
+
+func (this *FunServantImpl) normalizedKind(kind string) string {
+	const (
+		N      = 2
+		PREFIX = "database."
+	)
+
+	p := strings.SplitN(kind, PREFIX, N)
+	if len(p) == 2 {
+		return p[1]
+	}
+
+	return kind
 }

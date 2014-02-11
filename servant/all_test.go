@@ -21,3 +21,10 @@ func TestContextInfo(t *testing.T) {
 	info = fun.contextInfo(ctx)
 	assert.Equal(t, false, info.Valid())
 }
+
+func TestNormalizedKind(t *testing.T) {
+	fun := FunServantImpl{}
+	assert.Equal(t, "log", fun.normalizedKind("database.log"))
+	assert.Equal(t, "db5", fun.normalizedKind("db5"))
+	assert.Equal(t, "db3", fun.normalizedKind("database.db3"))
+}
