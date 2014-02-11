@@ -54,6 +54,7 @@ func (this *ConfigMongodbServer) Url() string {
 
 type ConfigMongodb struct {
 	ShardBaseNum          int
+	ShardStrategy         string
 	ConnectTimeout        int
 	IoTimeout             int
 	MaxIdleConnsPerServer int
@@ -63,6 +64,7 @@ type ConfigMongodb struct {
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
+	this.ShardStrategy = cf.String("shard_strategy", "legacy")
 	this.ConnectTimeout = cf.Int("connect_timeout", 4)
 	this.IoTimeout = cf.Int("io_timeout", 30)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)

@@ -25,6 +25,7 @@
 
         mongodb: {
             shard_base_num: 100000
+            shard_strategy: "legacy"
             connect_timeout: 4
             io_timeout: 30
             heartbeat_interval: 60

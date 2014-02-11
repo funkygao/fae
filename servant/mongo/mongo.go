@@ -22,7 +22,13 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 	this.conf = cf
 	this.connectTimeout = time.Duration(this.conf.ConnectTimeout) * time.Second
 	this.ioTimeout = time.Duration(this.conf.IoTimeout) * time.Second
-	this.selector = NewLegacyServerSelector(cf.ShardBaseNum)
+	switch cf.ShardStrategy {
+	case "legacy":
+		this.selector = NewLegacyServerSelector(cf.ShardBaseNum)
+
+	default:
+		this.selector = NewStandardServerSelector(cf.ShardBaseNum)
+	}
 	this.selector.SetServers(cf.Servers)
 
 	go this.runWatchdog()
