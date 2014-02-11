@@ -18,10 +18,11 @@ Release Notes - fae - Version v0.0.1.alpha
     . request context added, so we can do auditting
     . extend thrift to be able to trace request origin by extending TServerSocket
     . recyleable mongodb pooling 
+    . profiler sampling rate feature added
 
 ** Bug
 
-    . 
+    . fixed race condition
 
 
 ** Todo
