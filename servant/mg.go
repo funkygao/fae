@@ -14,8 +14,7 @@ import (
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	doc []byte, options []byte) (r bool, intError error) {
-	log.Debug("%s %d %s %s %v %s", kind, shardId, table,
-		string(doc), doc, string(options))
+	profiler := this.profiler()
 
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
@@ -25,7 +24,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	var bdoc = bson.M{}
 	json.Unmarshal(doc, &bdoc)
-	log.Debug("%+v", bdoc)
 
 	err := sess.DB().C(table).Insert(bdoc)
 	if err == nil {
@@ -35,12 +33,20 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 	sess.Recyle(&err)
 
+	profiler.do("mg.ins", ctx,
+		"{kind^%s table^%s id^%d doc^%s option^%s} {%v}",
+		kind, table, shardId,
+		doc, options,
+		r)
+
 	return
 }
 
 func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte) (r bool, intError error) {
+	profiler := this.profiler()
+
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -52,12 +58,18 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		r = true
 	}
 	sess.Recyle(&err) // reuse this session, we should never forget this
+
+	profiler.do("mg.del", ctx,
+		"{kind^%s table^%s id^%d} {%v}",
+		kind, table, shardId, r)
 	return
 }
 
 func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, fields []byte) (r []byte, intError error) {
+	profiler := this.profiler()
+
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -66,6 +78,12 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	err := sess.DB().C(table).Find(query).One(&r)
 	sess.Recyle(&err)
+
+	profiler.do("mg.findOne", ctx,
+		"{kind^%s table^%s id^d query%s fields^%s} {%s}",
+		kind, table, shardId,
+		query, fields,
+		this.truncatedBytes(r))
 
 	return
 }
@@ -81,6 +99,8 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, change []byte) (r bool, intError error) {
+	profiler := this.profiler()
+
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -93,12 +113,20 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 	sess.Recyle(&err)
 
+	profiler.do("mg.update", ctx,
+		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
+		kind, table, shardId,
+		query, change,
+		r)
+
 	return
 }
 
 func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, change []byte) (r bool, intError error) {
+	profiler := this.profiler()
+
 	var sess *mongo.Session
 	sess, intError = this.mongoSession(kind, shardId)
 	if intError != nil {
@@ -111,6 +139,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 	sess.Recyle(&err)
 
+	profiler.do("mg.upsert", ctx,
+		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
+		kind, table, shardId,
+		query, change,
+		r)
+
 	return
 }
 
@@ -121,7 +155,8 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	return
 }
 
-func (this *FunServantImpl) mongoSession(kind string, shardId int32) (*mongo.Session, error) {
+func (this *FunServantImpl) mongoSession(kind string,
+	shardId int32) (*mongo.Session, error) {
 	sess, err := this.mg.Session(kind, shardId)
 	if err != nil {
 		log.Error(err)
