@@ -11,11 +11,11 @@ import (
 )
 
 func (this *FunServantImpl) Dlog(ctx *rpc.Context, ident string, tag string,
-	json string) (intError error) {
+	json string) (appErr error) {
 	// add newline and timestamp here
-	if _, intError = syslogng.Printf(":%s,%s,%d,%s\n", ident, tag,
-		time.Now().UTC().Unix(), json); intError != nil {
-		log.Error("dlog %v", intError)
+	if _, appErr = syslogng.Printf(":%s,%s,%d,%s\n", ident, tag,
+		time.Now().UTC().Unix(), json); appErr != nil {
+		log.Error("dlog %v", appErr)
 	}
 
 	return nil

@@ -14,7 +14,7 @@ func (this *FunServantImpl) onLcLruEvicted(key cache.Key, value interface{}) {
 }
 
 func (this *FunServantImpl) LcSet(ctx *rpc.Context,
-	key string, value []byte) (r bool, intError error) {
+	key string, value []byte) (r bool, appErr error) {
 	this.lc.Set(key, value)
 	r = true
 
@@ -22,7 +22,7 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
-	miss *rpc.TCacheMissed, intError error) {
+	miss *rpc.TCacheMissed, appErr error) {
 	result, ok := this.lc.Get(key)
 	if !ok {
 		miss = rpc.NewTCacheMissed()
@@ -34,7 +34,7 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	return
 }
 
-func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (intError error) {
+func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (appErr error) {
 	this.lc.Del(key)
 	return
 }

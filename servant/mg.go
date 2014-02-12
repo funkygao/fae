@@ -9,17 +9,16 @@ import (
 	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo/bson"
-	"strings"
 )
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	doc []byte, options []byte) (r bool, intError error) {
+	doc []byte, options []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -43,14 +42,20 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	return
 }
 
+func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	doc [][]byte, options []byte) (r bool, appErr error) {
+	return
+}
+
 func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte) (r bool, intError error) {
+	query []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -72,12 +77,12 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte, fields []byte) (r []byte, intError error) {
+	query []byte, fields []byte) (r []byte, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -98,13 +103,13 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte, fields []byte, limit []byte,
-	orderBy []byte) (r []byte, intError error) {
+	query []byte, fields []byte, limit int32, skip int32,
+	orderBy []string) (r []byte, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -124,12 +129,12 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte, change []byte) (r bool, intError error) {
+	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -153,14 +158,21 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	return
 }
 
+func (this *FunServantImpl) MgUpdateId(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	id int32, change []byte) (r bool, appErr error) {
+	appErr = ErrNotImplemented
+	return
+}
+
 func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte, change []byte) (r bool, intError error) {
+	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
-	sess, intError = this.mongoSession(kind, shardId)
-	if intError != nil {
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
 		return
 	}
 
@@ -184,15 +196,29 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	return
 }
 
+func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	id int32, change []byte) (r bool, appErr error) {
+	appErr = ErrNotImplemented
+	return
+}
+
 func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	query []byte) (n int, intErr error) {
-
+	query []byte) (n int32, appErr error) {
+	return
 }
 
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	command []byte) (r []byte, intError error) {
+	command []byte) (r []byte, appErr error) {
 
+	return
+}
+
+func (this *FunServantImpl) MgFindId(ctx *rpc.Context,
+	kind string, table string, shardId int32,
+	id []byte) (r []byte, appErr error) {
+	appErr = ErrNotImplemented
 	return
 }

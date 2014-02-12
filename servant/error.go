@@ -1,7 +1,9 @@
 package servant
 
 import (
-	_ "errors"
+	"errors"
 )
 
-var ()
+var (
+	ErrNotImplemented = errors.New("Not implemented")
+)

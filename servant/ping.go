@@ -5,7 +5,7 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, intError error) {
+func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
 	log.Debug("ping from %+v", *ctx)
 	return "pong", nil
 }
