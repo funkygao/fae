@@ -22,9 +22,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 		return
 	}
 
-	// unmarsal inbound param
+	// unmarshal inbound param
 	// client json_encode, server json_decode into internal bson.M struct
-	bsonDoc, err := this.unmarshalJson(doc)
+	bsonDoc, err := this.unmarshalIn(doc)
 	if err != nil {
 		appErr = err
 		return
@@ -67,7 +67,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	// client json_encode, server json_decode into internal bson.M struct
 	bsonDocs := make([]interface{}, len(docs))
 	for i, doc := range docs {
-		bsonDoc, err := this.unmarshalJson(doc)
+		bsonDoc, err := this.unmarshalIn(doc)
 		if err != nil {
 			appErr = err
 			return
@@ -107,7 +107,7 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
@@ -137,7 +137,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
@@ -145,7 +145,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	var bsonFields bson.M
 	if len(fields) > 5 {
 		log.Info("ha %d", len(fields))
-		bsonFields, err = this.unmarshalJson(fields)
+		bsonFields, err = this.unmarshalIn(fields)
 		if err != nil {
 			appErr = err
 			return
@@ -161,7 +161,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	}
 	sess.Recyle(&err)
 
-	r, _ = bson.Marshal(result)
+	r = this.marshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
 		"{kind^%s table^%s id^%d query^%s fields^%s} {%s}",
@@ -184,12 +184,12 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonFields, err := this.unmarshalJson(fields)
+	bsonFields, err := this.unmarshalIn(fields)
 	if err != nil {
 		appErr = err
 		return
@@ -208,7 +208,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	if appErr == nil {
 		r = make([][]byte, len(result))
 		for i, v := range result {
-			r[i], _ = bson.Marshal(v)
+			r[i] = this.marshalOut(v)
 		}
 	}
 
@@ -235,12 +235,12 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonChange, err := this.unmarshalJson(change)
+	bsonChange, err := this.unmarshalIn(change)
 	if err != nil {
 		appErr = err
 		return
@@ -280,12 +280,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonChange, err := this.unmarshalJson(change)
+	bsonChange, err := this.unmarshalIn(change)
 	if err != nil {
 		appErr = err
 		return
@@ -325,7 +325,7 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 		return
 	}
 
-	bsonQuery, err := this.unmarshalJson(query)
+	bsonQuery, err := this.unmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return

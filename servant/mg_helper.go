@@ -18,20 +18,22 @@ func (this *FunServantImpl) mongoSession(kind string,
 	return sess, err
 }
 
-func (this *FunServantImpl) unmarshalBson(d []byte) (v bson.M, err error) {
-	err = bson.Unmarshal(d, &v)
+// specs: inbound params use json
+func (this *FunServantImpl) unmarshalIn(d []byte) (v bson.M, err error) {
+	err = json.Unmarshal(d, &v)
 	if err != nil {
-		log.Error("unmarshalBson: %s -> %s", d, err)
+		log.Error("unmarshalIn error: %s -> %s", d, err)
 	}
 
 	return
 }
 
-func (this *FunServantImpl) unmarshalJson(d []byte) (v bson.M, err error) {
-	err = json.Unmarshal(d, &v)
+// specs: outbound data use bson
+func (this *FunServantImpl) marshalOut(d bson.M) []byte {
+	val, err := bson.Marshal(d)
 	if err != nil {
-		log.Error("unmarshalJson: %s -> %s", d, err)
+		// should never happen
+		log.Critical("marshalOut error: %+v -> %v", d, err)
 	}
-
-	return
+	return val
 }
