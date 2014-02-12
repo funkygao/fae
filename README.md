@@ -1,6 +1,6 @@
 fae - Fun App Engine
 ====================
-It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
+It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
@@ -39,13 +39,29 @@ It's a middleware polyglot RPC engine for enterprise SOA infrastructure.
     - some programs are not web based, e,g. batch, can be implemented as any language you like
 *   Most large scale site use SOA as infrastructure
 
-### Features
+### Highlights
 
-*   use multicast to auto discover fae peers for delegation
+*   Easy extending for more servants(RPC service)
+*   Cluster based servants that can delegate(proxyed) to remote servants based on dup consitent hash
+*   Use multicast to auto discover fae peers for delegation
+*   Highly usage of mem to improve latancy & throughput
+*   Merge recent requests to reduce backend service load
+*   Fallback to mem when backend storage fails
+    - requires session sticky to work
+    - mem as response, and auto retry backend storage
+    - when threshold retries reached, put to message queue for latter more retries
+*   Easy graceful degrade for OPS
+    - auto
+    - manual
+
+### Servants
+
 *   local LRU cache shared among processes
 *   memcache servant
 *   mongodb servant with transaction support
 *   distributed logger servant
+*   idmap servent...
+*   user account servant...
 
 ### Requirement
 
@@ -82,19 +98,20 @@ php.ini
             |                       |                       |
              -----------------------------------------------
                                     |                        
-                                    | tcp/unix socket
+                                    | tcp/unix socket           +---------------+
+                                    |                    +------|  faed daemon  |
+                            +---------------+            |      +---------------+
+                            |  faed daemon  |  proxy     |
+                            +---------------+ -----------|      +---------------+
+                            |  local cache  |  delegate  +------|  faed daemon  |
+                            +---------------+                   +---------------+
                                     |                        
-                            +---------------+
-                            |  faed daemon  |
-                            +---------------+
-                            |  local cache  | 
-                            +---------------+
                                     |                        
                                     | tcp long connection pool(keepalive)
                                     |                        
              -----------------------------------------------
-            |                       |                       | hierarchy proxy
+            |                       |                       | 
         +----------------+  +----------------+  +----------------+
-        | mongodb servers|  |memcache servers|  |   faed proxy   |
+        | mongodb servers|  |memcache servers|  |   more         |
         +----------------+  +----------------+  +----------------+
 
