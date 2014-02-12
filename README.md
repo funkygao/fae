@@ -22,7 +22,7 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
                                     |                        
                                     |                            +---------------+
                                     |                     +------|  faed daemon  |-------+
-                            +---------------+             |      +---------------+       |
+                            +---------------+  tcp        |      +---------------+       |
                             |  faed daemon  |  proxy      |                              |
                             +---------------+ ------------|      +---------------+       |
                             |  local cache  |  consitent  +------|  faed daemon  |       |
