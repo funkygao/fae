@@ -74,9 +74,11 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 *   engine
     - load config file
     - invoke servants
+    - export internal status through REST api
 *   peer
     - other fae daemon that can be auto discovered
     - can accept proxyed requests
+    - watchdog of health of peers
 *   servant
     - RPC server side implementation
 *   proxy
