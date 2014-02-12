@@ -21,7 +21,7 @@ func (this *FunServantImpl) mongoSession(kind string,
 func (this *FunServantImpl) unmarshalBson(d []byte) (v bson.M, err error) {
 	err = bson.Unmarshal(d, &v)
 	if err != nil {
-		log.Error("unmarshalBson: %s", err)
+		log.Error("unmarshalBson: %s -> %s", d, err)
 	}
 
 	return
@@ -30,7 +30,7 @@ func (this *FunServantImpl) unmarshalBson(d []byte) (v bson.M, err error) {
 func (this *FunServantImpl) unmarshalJson(d []byte) (v bson.M, err error) {
 	err = json.Unmarshal(d, &v)
 	if err != nil {
-		log.Error("unmarshalJson: %s", err)
+		log.Error("unmarshalJson: %s -> %s", d, err)
 	}
 
 	return
