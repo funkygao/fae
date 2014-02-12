@@ -12,11 +12,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	doc []byte) (r bool, appErr error) {
 	profiler := this.profiler()
-	defer profiler.do("mg.insert", ctx,
-		"{kind^%s table^%s id^%d doc^%s} {%v}",
-		kind, table, shardId,
-		this.truncatedBytes(doc),
-		r)
 
 	sess, err := this.mongoSession(kind, shardId)
 	if err != nil {
@@ -30,6 +25,13 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	bsonDoc, err := this.unmarshalIn(doc)
 	if err != nil {
 		appErr = err
+		profiler.do("mg.insert", ctx,
+			"{kind^%s table^%s id^%d doc^%s} {err^%v %v}",
+			kind, table, shardId,
+			this.truncatedBytes(doc),
+			appErr,
+			r)
+
 		return
 	}
 
@@ -42,6 +44,13 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 		r = true
 	}
 
+	profiler.do("mg.insert", ctx,
+		"{kind^%s table^%s id^%d doc^%s} {err^%v %v}",
+		kind, table, shardId,
+		this.truncatedBytes(doc),
+		appErr,
+		r)
+
 	return
 }
 
@@ -49,11 +58,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	docs [][]byte) (r bool, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.inserts", ctx,
-		"{kind^%s table^%s id^%d docs^%d} {%v}",
-		kind, table, shardId,
-		len(docs),
-		r)
 
 	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
@@ -85,6 +89,13 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 		r = true
 	}
 
+	profiler.do("mg.inserts", ctx,
+		"{kind^%s table^%s id^%d docs^%d} {err^%v %v}",
+		kind, table, shardId,
+		len(docs),
+		appErr,
+		r)
+
 	return
 }
 
@@ -92,11 +103,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte) (r bool, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.del", ctx,
-		"{kind^%s table^%s id^%d query^%s} {%v}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		r)
 
 	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
@@ -116,6 +122,13 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		r = true
 	}
 
+	profiler.do("mg.del", ctx,
+		"{kind^%s table^%s id^%d query^%s} {err^%v %v}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		appErr,
+		r)
+
 	return
 }
 
@@ -124,13 +137,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	query []byte, fields []byte) (r []byte,
 	miss *rpc.TMongoNotFound, appErr error) {
 	profiler := this.profiler()
-	defer profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^%d query^%s fields^%s} {hit^%s val^%s}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(fields),
-		*miss,
-		this.truncatedBytes(r))
 
 	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
@@ -175,6 +181,15 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	r = this.marshalOut(result)
 
+	profiler.do("mg.findOne", ctx,
+		"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%s}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		this.truncatedBytes(fields),
+		miss,
+		appErr,
+		this.truncatedBytes(r))
+
 	return
 }
 
@@ -183,12 +198,6 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	query []byte, fields []byte, limit int32, skip int32,
 	orderBy []string) (r [][]byte, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query%s fields^%s} {%d}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(fields),
-		len(r))
 
 	sess, err := this.mongoSession(kind, shardId)
 	if err != nil {
@@ -227,6 +236,14 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		appErr = err
 	}
 
+	profiler.do("mg.findAll", ctx,
+		"{kind^%s table^%s id^%d query%s fields^%s} {err^%v %d}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		this.truncatedBytes(fields),
+		appErr,
+		len(r))
+
 	return
 }
 
@@ -234,12 +251,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.update", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(change),
-		r)
 
 	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
@@ -265,6 +276,14 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		r = true
 	}
 
+	profiler.do("mg.update", ctx,
+		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v %v}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		this.truncatedBytes(change),
+		appErr,
+		r)
+
 	return
 }
 
@@ -279,14 +298,7 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.upsert", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(change),
-		r)
 
-	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
 	if err != nil {
 		appErr = err
@@ -310,6 +322,14 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 		r = true
 	}
 
+	profiler.do("mg.upsert", ctx,
+		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v %v}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		this.truncatedBytes(change),
+		appErr,
+		r)
+
 	return
 }
 
@@ -324,11 +344,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
 	profiler := this.profiler()
-	profiler.do("mg.count", ctx,
-		"{kind^%s table^%s id^%d query^%s} {%d}",
-		kind, table, shardId,
-		this.truncatedBytes(query),
-		n)
 
 	// get mongodb session
 	sess, err := this.mongoSession(kind, shardId)
@@ -347,6 +362,13 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	var r int
 	r, appErr = sess.DB().C(table).Find(bsonQuery).Count()
 	n = int32(r)
+
+	profiler.do("mg.count", ctx,
+		"{kind^%s table^%s id^%d query^%s} {err^%v %d}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		appErr,
+		n)
 
 	return
 }
