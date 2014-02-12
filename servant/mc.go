@@ -25,7 +25,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	profiler.do("mc.set", ctx,
 		"{key^%s val^%s exp^%d} {err^%s %v}",
 		key,
-		this.truncatedBytes(value),
+		value,
 		expiration,
 		appErr,
 		r)
@@ -54,7 +54,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		"{key^%s} {miss^%v val^%s} {err^%v}",
 		key,
 		miss,
-		this.truncatedBytes(r),
+		r,
 		appErr)
 
 	return
@@ -79,7 +79,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	profiler.do("mc.add", ctx,
 		"{key^%s val^%s exp^%d} {err^%v %v}",
 		key,
-		this.truncatedBytes(value),
+		value,
 		expiration,
 		appErr,
 		r)

@@ -26,9 +26,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	if err != nil {
 		appErr = err
 		profiler.do("mg.insert", ctx,
-			"{kind^%s table^%s id^%d doc^%s} {err^%v %v}",
+			"{kind^%s table^%s id^%d doc^%s} {err^%v r^%v}",
 			kind, table, shardId,
-			this.truncatedBytes(doc),
+			doc,
 			appErr,
 			r)
 
@@ -45,9 +45,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.insert", ctx,
-		"{kind^%s table^%s id^%d doc^%s} {err^%v %v}",
+		"{kind^%s table^%s id^%d doc^%s} {err^%v r^%v}",
 		kind, table, shardId,
-		this.truncatedBytes(doc),
+		doc,
 		appErr,
 		r)
 
@@ -90,7 +90,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.inserts", ctx,
-		"{kind^%s table^%s id^%d docs^%d} {err^%v %v}",
+		"{kind^%s table^%s id^%d docs^%d} {err^%v r^%v}",
 		kind, table, shardId,
 		len(docs),
 		appErr,
@@ -123,9 +123,9 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.del", ctx,
-		"{kind^%s table^%s id^%d query^%s} {err^%v %v}",
+		"{kind^%s table^%s id^%d query^%s} {err^%v r^%v}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
+		query,
 		appErr,
 		r)
 
@@ -172,6 +172,14 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		} else {
 			miss = rpc.NewTMongoNotFound()
 			miss.Message = thrift.StringPtr(err.Error())
+			profiler.do("mg.findOne", ctx,
+				"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%v}",
+				kind, table, shardId,
+				query,
+				fields,
+				miss,
+				appErr,
+				result)
 			return
 		}
 
@@ -182,13 +190,13 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	r = this.marshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%s}",
+		"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%v}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(fields),
+		query,
+		fields,
 		miss,
 		appErr,
-		this.truncatedBytes(r))
+		result)
 
 	return
 }
@@ -237,10 +245,10 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query%s fields^%s} {err^%v %d}",
+		"{kind^%s table^%s id^%d query%s fields^%s} {err^%v rl^%d}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(fields),
+		query,
+		fields,
 		appErr,
 		len(r))
 
@@ -277,10 +285,10 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.update", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v %v}",
+		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v r^%v}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(change),
+		query,
+		change,
 		appErr,
 		r)
 
@@ -323,10 +331,10 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.upsert", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v %v}",
+		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v r^%v}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
-		this.truncatedBytes(change),
+		query,
+		change,
 		appErr,
 		r)
 
@@ -364,9 +372,9 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	n = int32(r)
 
 	profiler.do("mg.count", ctx,
-		"{kind^%s table^%s id^%d query^%s} {err^%v %d}",
+		"{kind^%s table^%s id^%d query^%s} {err^%v r^%d}",
 		kind, table, shardId,
-		this.truncatedBytes(query),
+		query,
 		appErr,
 		n)
 

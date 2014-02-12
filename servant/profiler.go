@@ -31,20 +31,19 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 		body := fmt.Sprintf(format, args...)
 		header := fmt.Sprintf("SLOW=%s Q=%s X{%s} ",
 			elapsed, name, this.contextInfo(ctx))
-		log.Warn(header + body)
+		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
 		body := fmt.Sprintf(format, args...)
 		header := fmt.Sprintf("T=%s Q=%s X{%s} ",
 			elapsed, name, this.contextInfo(ctx))
-		log.Debug(header + body)
+		log.Debug(header + this.truncatedStr(body))
 	}
 }
 
-func (this *FunServantImpl) truncatedBytes(val []byte) []byte {
+func (this *FunServantImpl) truncatedStr(val string) string {
 	if len(val) < this.conf.ProfilerMaxAnswerSize {
 		return val
 	}
 
-	return append(val[:this.conf.ProfilerMaxAnswerSize],
-		[]byte{'.', '.', '.'}...)
+	return val[:this.conf.ProfilerMaxAnswerSize] + "..."
 }
