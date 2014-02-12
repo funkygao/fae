@@ -16,17 +16,3 @@ func (this *FunServantImpl) mongoSession(kind string,
 
 	return sess, err
 }
-
-func (this *FunServantImpl) normalizedKind(kind string) string {
-	const (
-		N      = 2
-		PREFIX = "database."
-	)
-
-	p := strings.SplitN(kind, PREFIX, N)
-	if len(p) == 2 {
-		return p[1]
-	}
-
-	return kind
-}
