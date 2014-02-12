@@ -9,6 +9,32 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 
 [![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
                                
+### Architecture
+
+
+        +----------------+  +----------------+  +----------------+
+        | php-fpm worker |  | php-fpm worker |  | php-fpm worker |
+        +----------------+  +----------------+  +----------------+
+            |                       |                       |
+             -----------------------------------------------
+                                    |                        
+                                    | tcp/unix socket           +---------------+
+                                    |                    +------|  faed daemon  |
+                            +---------------+            |      +---------------+
+                            |  faed daemon  |  proxy     |
+                            +---------------+ -----------|      +---------------+
+                            |  local cache  |  delegate  +------|  faed daemon  |
+                            +---------------+                   +---------------+
+                                    |                        
+                                    |                        
+                                    | tcp long connection pool(keepalive)
+                                    |                        
+             -----------------------------------------------
+            |                       |                       | 
+        +----------------+  +----------------+  +----------------+
+        | mongodb servers|  |memcache servers|  |   more         |
+        +----------------+  +----------------+  +----------------+
+
 ### Why SOA?
 
 *   Seperation of concerns
@@ -101,30 +127,4 @@ php.ini
 
     extension="thrift_protocol.so"
     extension="apc.so"
-
-### Architecture
-
-
-        +----------------+  +----------------+  +----------------+
-        | php-fpm worker |  | php-fpm worker |  | php-fpm worker |
-        +----------------+  +----------------+  +----------------+
-            |                       |                       |
-             -----------------------------------------------
-                                    |                        
-                                    | tcp/unix socket           +---------------+
-                                    |                    +------|  faed daemon  |
-                            +---------------+            |      +---------------+
-                            |  faed daemon  |  proxy     |
-                            +---------------+ -----------|      +---------------+
-                            |  local cache  |  delegate  +------|  faed daemon  |
-                            +---------------+                   +---------------+
-                                    |                        
-                                    |                        
-                                    | tcp long connection pool(keepalive)
-                                    |                        
-             -----------------------------------------------
-            |                       |                       | 
-        +----------------+  +----------------+  +----------------+
-        | mongodb servers|  |memcache servers|  |   more         |
-        +----------------+  +----------------+  +----------------+
 
