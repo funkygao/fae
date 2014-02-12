@@ -20,7 +20,7 @@ func (this *contextInfo) Valid() bool {
 
 func (this contextInfo) String() string {
 	if !this.Valid() {
-		return "Invalid Context"
+		return "Invalid"
 	}
 
 	s := fmt.Sprintf("C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
