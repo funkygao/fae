@@ -9,20 +9,20 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 )
 
-func Servant(serverAddr string) *rpc.FunServantClient {
+func (this *Proxy) connect(serverAddr string) (*rpc.FunServantClient, error) {
 	transportFactory := thrift.NewTTransportFactory()
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
 	transport, err := thrift.NewTSocket(serverAddr)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	useTransport := transportFactory.GetTransport(transport)
 	client := rpc.NewFunServantClientFactory(useTransport, protocolFactory)
 	if err := transport.Open(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return client
+	return client, nil
 }
