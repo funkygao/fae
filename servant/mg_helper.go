@@ -1,13 +1,12 @@
 package servant
 
 import (
+	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
-	"strings"
 )
 
 func (this *FunServantImpl) mongoSession(kind string,
 	shardId int32) (*mongo.Session, error) {
-	kind = this.normalizedKind(kind)
 	sess, err := this.mg.Session(kind, shardId)
 	if err != nil {
 		log.Error("{kind^%s id^%d} %s", kind, shardId, err)
