@@ -21,22 +21,22 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
                                     | short lived tcp/unix socket                        
                                     |                        
                                     |                           +---------------+
-                                    |                    +------|  faed daemon  |
-                            +---------------+            |      +---------------+
-                            |  faed daemon  |  proxy     |
-                            +---------------+ -----------|      +---------------+
-                            |  local cache  |  hash      +------|  faed daemon  |
-                            +---------------+                   +---------------+
-                                    |                        
-                                    |                        
-                                    | tcp long connection pool(keepalive)
+                                    |                    +------|  faed daemon  |-------
+                            +---------------+            |      +---------------+       |
+                            |  faed daemon  |  proxy     |                              |
+                            +---------------+ -----------|      +---------------+       |
+                            |  local cache  |  hash      +------|  faed daemon  |       |
+                            +---------------+                   +---------------+       |
+                                    |                                  |                |
+                                    |                                  |                |
+                                    |---------------------------------------------------
                                     |                        
              -----------------------------------------------
             |                       |                       | 
         +----------------+  +----------------+  +----------------+
         | mongodb servers|  |memcache servers|  |   more         |
         +----------------+  +----------------+  +----------------+
-
+tcp long connection pool(keepalive)
 ### Why SOA?
 
 *   Seperation of concerns
