@@ -119,7 +119,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 			return nil
 		} else if err != nil {
 			// non-EOF transport err
-			log.Error("ERROR transport, peer: %s, %s", remoteAddr, err)
+			log.Error("ERROR transport, peer(%s) %s", remoteAddr, err)
 			this.engine.stats.TotalFailedCalls.Add(1)
 			return err
 		}
@@ -127,7 +127,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		// it is servant generated TApplicationException
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Add(1)
-			log.Error("ERROR servant call, peer: %s %s", remoteAddr, err)
+			log.Error("ERROR servant call, peer(%s) %s", remoteAddr, err)
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
