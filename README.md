@@ -15,10 +15,12 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
         +----------------+  +----------------+  +----------------+
         | php-fpm worker |  | php-fpm worker |  | php-fpm worker |
         +----------------+  +----------------+  +----------------+
-            |                       | short conn            |
+            |                       |                       |
              -----------------------------------------------
                                     |                        
-                                    | tcp/unix socket           +---------------+
+                                    | short lived tcp/unix socket                        
+                                    |                        
+                                    |                           +---------------+
                                     |                    +------|  faed daemon  |
                             +---------------+            |      +---------------+
                             |  faed daemon  |  proxy     |
