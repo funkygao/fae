@@ -178,7 +178,7 @@ service FunServant {
         6: binary fields
     ),
 
-    binary mg_find_all(
+    list<binary> mg_find_all(
         1: required Context ctx, 
         2: string kind,
         3: string table,
