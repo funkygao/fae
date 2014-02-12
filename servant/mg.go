@@ -13,30 +13,39 @@ import (
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	doc []byte, options []byte) (r bool, appErr error) {
+	doc []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
+	// get mongodb session
 	var sess *mongo.Session
 	sess, appErr = this.mongoSession(kind, shardId)
 	if appErr != nil {
 		return
 	}
 
-	var bdoc = bson.M{}
-	json.Unmarshal(doc, &bdoc)
-	err := sess.DB().C(table).Insert(bdoc)
+	// unmarsal inbound param
+	// client json_encode, server json_decode into internal bson.M struct
+	bsonDoc, err := this.unmarshalJson(doc)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	// do insert and check error
+	err = sess.DB().C(table).Insert(bsonDoc)
 	if err == nil {
 		r = true
 	} else {
 		log.Error(err)
 	}
+
+	// recycle the mongodb session
 	sess.Recyle(&err)
 
 	profiler.do("mg.insert", ctx,
-		"{kind^%s table^%s id^%d doc^%s option^%s} {%v}",
+		"{kind^%s table^%s id^%d doc^%s} {%v}",
 		kind, table, shardId,
 		this.truncatedBytes(doc),
-		this.truncatedBytes(options),
 		r)
 
 	return
@@ -44,7 +53,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	doc [][]byte, options []byte) (r bool, appErr error) {
+	doc [][]byte) (r bool, appErr error) {
 	return
 }
 
@@ -89,8 +98,17 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	// TODO fields
 	var bquery = bson.M{}
 	json.Unmarshal(query, &bquery)
-	err := sess.DB().C(table).Find(query).One(&r)
+	var result bson.M
+	log.Info("%s %s %+v", sess.DB().Name, sess.DbName(), bquery)
+	err := sess.DB().C(table).Find(bquery).One(&result)
+	if err != nil {
+		log.Error(err)
+		appErr = err
+		return
+	}
 	sess.Recyle(&err)
+
+	r, _ = bson.Marshal(result)
 
 	profiler.do("mg.findOne", ctx,
 		"{kind^%s table^%s id^%d query^%s fields^%s} {%s}",

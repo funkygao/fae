@@ -247,8 +247,7 @@ service FunServant {
         2: string kind,
         3: string table,
         4: i32 shardId,
-        5: binary doc,
-        6: binary options
+        5: binary doc
     ),
 
     bool mg_inserts(
@@ -256,8 +255,7 @@ service FunServant {
         2: string kind,
         3: string table,
         4: i32 shardId,
-        5: list<binary> doc,
-        6: binary options
+        5: list<binary> doc
     ),
 
     bool mg_delete(
