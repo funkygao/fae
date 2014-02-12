@@ -4,7 +4,6 @@ mongodb doc:json bytes
 package servant
 
 import (
-	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
@@ -33,10 +32,11 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	// do insert and check error
 	err = sess.DB().C(table).Insert(bsonDoc)
-	if err == nil {
-		r = true
-	} else {
+	if err != nil {
+		// will not rais app error
 		log.Error(err)
+	} else {
+		r = true
 	}
 
 	// recycle the mongodb session
@@ -53,7 +53,46 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	doc [][]byte) (r bool, appErr error) {
+	docs [][]byte) (r bool, appErr error) {
+	profiler := this.profiler()
+
+	// get mongodb session
+	var sess *mongo.Session
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
+		return
+	}
+
+	// unmarsal inbound param
+	// client json_encode, server json_decode into internal bson.M struct
+	bsonDocs := make([]interface{}, len(docs))
+	for i, doc := range docs {
+		bsonDoc, err := this.unmarshalJson(doc)
+		if err != nil {
+			appErr = err
+			return
+		}
+
+		bsonDocs[i] = bsonDoc
+	}
+
+	// do insert and check error
+	err := sess.DB().C(table).Insert(bsonDocs...)
+	if err != nil {
+		// will not rais app error
+		log.Error(err)
+	} else {
+		r = true
+	}
+
+	// recycle the mongodb session
+	sess.Recyle(&err)
+
+	profiler.do("mg.inserts", ctx,
+		"{kind^%s table^%s id^%d docs^%d} {%v}",
+		kind, table, shardId,
+		len(docs),
+		r)
 	return
 }
 
@@ -68,9 +107,12 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		return
 	}
 
-	var bquery = bson.M{}
-	json.Unmarshal(query, &bquery)
-	err := sess.DB().C(table).Remove(bquery)
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	err = sess.DB().C(table).Remove(bsonQuery)
 	if err == nil {
 		r = true
 	}
@@ -95,12 +137,23 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		return
 	}
 
-	// TODO fields
-	var bquery = bson.M{}
-	json.Unmarshal(query, &bquery)
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	var bsonFields bson.M
+	if len(fields) > 5 {
+		log.Info("ha %d", len(fields))
+		bsonFields, err = this.unmarshalJson(fields)
+		if err != nil {
+			appErr = err
+			return
+		}
+	}
+
 	var result bson.M
-	log.Info("%s %s %+v", sess.DB().Name, sess.DbName(), bquery)
-	err := sess.DB().C(table).Find(bquery).One(&result)
+	err = sess.DB().C(table).Find(bsonQuery).Select(bsonFields).One(&result)
 	if err != nil {
 		log.Error(err)
 		appErr = err
@@ -122,7 +175,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte, fields []byte, limit int32, skip int32,
-	orderBy []string) (r []byte, appErr error) {
+	orderBy []string) (r [][]byte, appErr error) {
 	profiler := this.profiler()
 
 	var sess *mongo.Session
@@ -131,16 +184,42 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		return
 	}
 
-	var bquery = bson.M{}
-	json.Unmarshal(query, &bquery)
-	err := sess.DB().C(table).Find(query).All(&r)
-	sess.Recyle(&err)
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	bsonFields, err := this.unmarshalJson(fields)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	q := sess.DB().C(table).Find(bsonQuery).Select(bsonFields)
+	if limit > 0 {
+		q.Limit(int(limit))
+	}
+	if skip > 0 {
+		q.Skip(int(skip))
+	}
+	q.Sort(orderBy...)
+	var result []bson.M
+	appErr = q.All(&result)
+	if appErr == nil {
+		r = make([][]byte, len(result))
+		for i, v := range result {
+			r[i], _ = bson.Marshal(v)
+		}
+	}
+
+	sess.Recyle(&appErr)
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query%s fields^%s} {%s}",
+		"{kind^%s table^%s id^%d query%s fields^%s} {%d}",
 		kind, table, shardId,
-		this.truncatedBytes(query), this.truncatedBytes(fields),
-		this.truncatedBytes(r))
+		this.truncatedBytes(query),
+		this.truncatedBytes(fields),
+		len(r))
 
 	return
 }
@@ -156,15 +235,22 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		return
 	}
 
-	var bquery = bson.M{}
-	json.Unmarshal(query, &bquery)
-	var bchange = bson.M{}
-	json.Unmarshal(change, &bchange)
-	err := sess.DB().C(table).Update(bquery, bchange)
-	if err == nil {
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	bsonChange, err := this.unmarshalJson(change)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	appErr = sess.DB().C(table).Update(bsonQuery, bsonChange)
+	if appErr == nil {
 		r = true
 	}
-	sess.Recyle(&err)
+	sess.Recyle(&appErr)
 
 	profiler.do("mg.update", ctx,
 		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
@@ -194,15 +280,22 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 		return
 	}
 
-	var bquery = bson.M{}
-	json.Unmarshal(query, &bquery)
-	var bchange = bson.M{}
-	json.Unmarshal(change, &bchange)
-	_, err := sess.DB().C(table).Upsert(bquery, bchange)
-	if err == nil {
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	bsonChange, err := this.unmarshalJson(change)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	_, appErr = sess.DB().C(table).Upsert(bsonQuery, bsonChange)
+	if appErr == nil {
 		r = true
 	}
-	sess.Recyle(&err)
+	sess.Recyle(&appErr)
 
 	profiler.do("mg.upsert", ctx,
 		"{kind^%s table^%s id^%d query^%s chg^%s} {%v}",
@@ -224,6 +317,32 @@ func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
 func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	kind string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
+	profiler := this.profiler()
+
+	var sess *mongo.Session
+	sess, appErr = this.mongoSession(kind, shardId)
+	if appErr != nil {
+		return
+	}
+
+	bsonQuery, err := this.unmarshalJson(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	var r int
+	r, appErr = sess.DB().C(table).Find(bsonQuery).Count()
+	n = int32(r)
+
+	sess.Recyle(&err)
+
+	profiler.do("mg.count", ctx,
+		"{kind^%s table^%s id^%d query^%s} {%d}",
+		kind, table, shardId,
+		this.truncatedBytes(query),
+		n)
+
 	return
 }
 
