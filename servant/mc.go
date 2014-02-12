@@ -23,7 +23,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	}
 
 	profiler.do("mc.set", ctx,
-		"{key^%s val^%s exp^%d} {err^%s %v}",
+		"{key^%s val^%s exp^%d} {err^%v r^%v}",
 		key,
 		value,
 		expiration,
@@ -51,11 +51,10 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	}
 
 	profiler.do("mc.get", ctx,
-		"{key^%s} {miss^%v val^%s} {err^%v}",
+		"{key^%s} {miss^%v val^%s}",
 		key,
 		miss,
-		r,
-		appErr)
+		r)
 
 	return
 }
@@ -77,7 +76,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	}
 
 	profiler.do("mc.add", ctx,
-		"{key^%s val^%s exp^%d} {err^%v %v}",
+		"{key^%s val^%s exp^%d} {err^%v r^%v}",
 		key,
 		value,
 		expiration,
@@ -102,7 +101,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	}
 
 	profiler.do("mc.del", ctx,
-		"{key^%s} {err^%s %v}",
+		"{key^%s} {err^%s r^%v}",
 		key,
 		appErr,
 		r)
@@ -129,7 +128,7 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	}
 
 	profiler.do("mc.inc", ctx,
-		"{key^%s delta^%d} {err^%v %d}",
+		"{key^%s delta^%d} {err^%v r^%d}",
 		key,
 		delta,
 		appErr,
