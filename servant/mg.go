@@ -125,9 +125,11 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	miss *rpc.TMongoNotFound, appErr error) {
 	profiler := this.profiler()
 	defer profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^%d query^%s fields^%s} {%s}",
+		"{kind^%s table^%s id^%d query^%s fields^%s} {hit^%s val^%s}",
 		kind, table, shardId,
-		this.truncatedBytes(query), this.truncatedBytes(fields),
+		this.truncatedBytes(query),
+		this.truncatedBytes(fields),
+		*miss,
 		this.truncatedBytes(r))
 
 	// get mongodb session
@@ -144,7 +146,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		return
 	}
 	var bsonFields bson.M
-	if !this.fieldsIsNil(fields) {
+	if !this.mgFieldsIsNil(fields) {
 		bsonFields, err = this.unmarshalIn(fields)
 		if err != nil {
 			appErr = err
@@ -154,7 +156,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	var result bson.M
 	q := sess.DB().C(table).Find(bsonQuery)
-	if !this.fieldsIsNil(fields) {
+	if !this.mgFieldsIsNil(fields) {
 		q.Select(bsonFields)
 	}
 	err = q.One(&result)

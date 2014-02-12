@@ -35,8 +35,9 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, appErr error) {
 	profiler := this.profiler()
 	defer profiler.do("mc.get", ctx,
-		"{key^%s} {%s}",
+		"{key^%s} {hit^%s val^%s}",
 		key,
+		*miss,
 		this.truncatedBytes(r))
 
 	it, err := this.mc.Get(key)

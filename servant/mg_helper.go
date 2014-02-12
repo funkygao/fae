@@ -38,6 +38,6 @@ func (this *FunServantImpl) marshalOut(d bson.M) []byte {
 	return val
 }
 
-func (this *FunServantImpl) fieldsIsNil(fields []byte) bool {
+func (this *FunServantImpl) mgFieldsIsNil(fields []byte) bool {
 	return len(fields) <= 5
 }
