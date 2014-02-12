@@ -39,6 +39,19 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
     - some programs are not web based, e,g. batch, can be implemented as any language you like
 *   Most large scale site use SOA as infrastructure
 
+#### Terms
+
+*   engine
+    - load config file
+    - invoke servants
+*   peer
+    - other fae daemon that can be auto discovered
+    - can accept proxyed requests
+*   servant
+    - RPC server side implementation
+*   proxy
+    - stub of calling remote peers transparently
+
 ### Highlights
 
 *   Easy extending for more servants(RPC service)
