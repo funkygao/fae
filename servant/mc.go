@@ -13,6 +13,12 @@ import (
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, appErr error) {
 	profiler := this.profiler()
+	defer profiler.do("mc.set", ctx,
+		"{key^%s val^%s exp^%d} {%v}",
+		key,
+		this.truncatedBytes(value),
+		expiration,
+		r)
 
 	appErr = this.mc.Set(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -22,19 +28,16 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 		log.Error(appErr)
 	}
 
-	profiler.do("mc.set", ctx,
-		"{key^%s val^%s exp^%d} {%v}",
-		key,
-		this.truncatedBytes(value),
-		expiration,
-		r)
-
 	return
 }
 
 func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, appErr error) {
 	profiler := this.profiler()
+	defer profiler.do("mc.get", ctx,
+		"{key^%s} {%s}",
+		key,
+		this.truncatedBytes(r))
 
 	it, err := this.mc.Get(key)
 	if err == nil {
@@ -49,17 +52,18 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 		log.Error(err)
 	}
 
-	profiler.do("mc.get", ctx,
-		"{key^%s} {%s}",
-		key,
-		this.truncatedBytes(r))
-
 	return
 }
 
 func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 	expiration int32) (r bool, appErr error) {
 	profiler := this.profiler()
+	defer profiler.do("mc.add", ctx,
+		"{key^%s val^%s exp^%d} {%v}",
+		key,
+		this.truncatedBytes(value),
+		expiration,
+		r)
 
 	appErr = this.mc.Add(&memcache.Item{Key: key, Value: value,
 		Expiration: expiration})
@@ -73,19 +77,16 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
 		log.Error(appErr)
 	}
 
-	profiler.do("mc.add", ctx,
-		"{key^%s val^%s exp^%d} {%v}",
-		key,
-		this.truncatedBytes(value),
-		expiration,
-		r)
-
 	return
 }
 
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	appErr error) {
 	profiler := this.profiler()
+	defer profiler.do("mc.del", ctx,
+		"{key^%s} {%v}",
+		key,
+		r)
 
 	appErr = this.mc.Delete(key)
 	if appErr == nil {
@@ -97,17 +98,17 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 		log.Error(appErr)
 	}
 
-	profiler.do("mc.del", ctx,
-		"{key^%s} {%v}",
-		key,
-		r)
-
 	return
 }
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, appErr error) {
 	profiler := this.profiler()
+	defer profiler.do("mc.inc", ctx,
+		"{key^%s delta^%d} {%d}",
+		key,
+		delta,
+		r)
 
 	var (
 		newVal uint64
@@ -122,12 +123,6 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	if err == nil {
 		r = int32(newVal)
 	}
-
-	profiler.do("mc.inc", ctx,
-		"{key^%s delta^%d} {%d}",
-		key,
-		delta,
-		r)
 
 	return
 }

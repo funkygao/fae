@@ -7,6 +7,10 @@ exception TCacheMissed {
     11: optional string message
 }
 
+exception TMongoNotFound {
+    11: optional string message
+}
+
 struct Context {
     /**
      * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
@@ -176,6 +180,8 @@ service FunServant {
         /** where condition */
         5: binary query,
         6: binary fields
+    ) throws (
+        1: TMongoNotFound miss
     ),
 
     list<binary> mg_find_all(
