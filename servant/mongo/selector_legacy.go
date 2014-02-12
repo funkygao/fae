@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"github.com/funkygao/fae/config"
+	"strings"
 )
 
 // Sharding was done on client
