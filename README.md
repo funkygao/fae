@@ -101,6 +101,7 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 
 ### Servants
 
+*   idgen to generate global uniq id
 *   local LRU cache shared among processes
 *   memcache servant
 *   mongodb servant with transaction support

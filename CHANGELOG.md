@@ -11,6 +11,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . golang servant client so that we can chain the call to distributed servers
     . unix domain socket rpc server transport
     . auto discovery of peers and form a cluster to serve requests
+    . global uniq id generator servant added
 
 ** Improvement
 
@@ -19,6 +20,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . extend thrift to be able to trace request origin by extending TServerSocket
     . recyleable mongodb pooling 
     . profiler sampling rate feature added
+    . config tcp nodelay to turn on/off Nagle
 
 ** Bug
 
