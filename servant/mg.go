@@ -26,9 +26,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	if err != nil {
 		appErr = err
 		profiler.do("mg.insert", ctx,
-			"{kind^%s table^%s id^%d doc^%s} {err^%v r^%v}",
+			"{kind^%s table^%s id^%d doc^%v} {err^%v r^%v}",
 			kind, table, shardId,
-			doc,
+			bsonDoc,
 			appErr,
 			r)
 
@@ -45,9 +45,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.insert", ctx,
-		"{kind^%s table^%s id^%d doc^%s} {err^%v r^%v}",
+		"{kind^%s table^%s id^%d doc^%v} {err^%v r^%v}",
 		kind, table, shardId,
-		doc,
+		bsonDoc,
 		appErr,
 		r)
 
@@ -68,7 +68,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	defer sess.Recyle(&err)
 
 	// unmarsal inbound param
-	// client json_encode, server json_decode into internal bson.M struct
+	// client bson_encode, server bson_decode into internal bson.M struct
 	bsonDocs := make([]interface{}, len(docs))
 	for i, doc := range docs {
 		bsonDoc, err := this.unmarshalIn(doc)
@@ -84,7 +84,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	err = sess.DB().C(table).Insert(bsonDocs...)
 	if err != nil {
 		// will not rais app error
-		log.Error(err)
+		log.Error("mg.inserts: %v", err)
 	} else {
 		r = true
 	}
@@ -123,9 +123,9 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.del", ctx,
-		"{kind^%s table^%s id^%d query^%s} {err^%v r^%v}",
+		"{kind^%s table^%s id^%d query^%v} {err^%v r^%v}",
 		kind, table, shardId,
-		query,
+		bsonQuery,
 		appErr,
 		r)
 
@@ -173,10 +173,10 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 			miss = rpc.NewTMongoNotFound()
 			miss.Message = thrift.StringPtr(err.Error())
 			profiler.do("mg.findOne", ctx,
-				"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%v}",
+				"{kind^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
 				kind, table, shardId,
-				query,
-				fields,
+				bsonQuery,
+				bsonFields,
 				miss,
 				appErr,
 				result)
@@ -190,10 +190,10 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	r = this.marshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^%d query^%s fields^%s} {miss^%v err^%v val^%v}",
+		"{kind^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
 		kind, table, shardId,
-		query,
-		fields,
+		bsonQuery,
+		bsonFields,
 		miss,
 		appErr,
 		result)
@@ -245,10 +245,10 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query%s fields^%s} {err^%v rl^%d}",
+		"{kind^%s table^%s id^%d query%v fields^%v} {err^%v rl^%d}",
 		kind, table, shardId,
-		query,
-		fields,
+		bsonQuery,
+		bsonFields,
 		appErr,
 		len(r))
 
@@ -287,10 +287,10 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.update", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v r^%v}",
+		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
 		kind, table, shardId,
-		query,
-		change,
+		bsonQuery,
+		bsonChange,
 		appErr,
 		r)
 
@@ -333,10 +333,10 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.upsert", ctx,
-		"{kind^%s table^%s id^%d query^%s chg^%s} {err^%v r^%v}",
+		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
 		kind, table, shardId,
-		query,
-		change,
+		bsonQuery,
+		bsonChange,
 		appErr,
 		r)
 
@@ -374,9 +374,9 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	n = int32(r)
 
 	profiler.do("mg.count", ctx,
-		"{kind^%s table^%s id^%d query^%s} {err^%v r^%d}",
+		"{kind^%s table^%s id^%d query^%v} {err^%v r^%d}",
 		kind, table, shardId,
-		query,
+		bsonQuery,
 		appErr,
 		n)
 
