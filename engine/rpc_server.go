@@ -3,6 +3,7 @@ package engine
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	log "github.com/funkygao/log4go"
+	"net"
 	"time"
 )
 
@@ -50,6 +51,10 @@ func (this *TFunServer) Serve() error {
 
 		if client != nil {
 			this.engine.stats.TotalSessions.Add(1)
+			if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+				tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
+			}
+
 			if this.engine.conf.rpc.debugSession {
 				log.Debug("accepted session peer %s",
 					client.(*thrift.TSocket).Conn().RemoteAddr().String())

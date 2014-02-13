@@ -15,6 +15,7 @@
         session_slow_threshold: 8
         call_slow_threshold: 5
         debug_session: false
+        tcp_nodelay: true
     }
 
     servants: {

@@ -18,6 +18,7 @@ type configRpc struct {
 	framed               bool
 	protocol             string
 	debugSession         bool
+	tcpNoDelay           bool
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -31,6 +32,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.clientTimeout = time.Duration(section.Int("client_timeout", 0)) * time.Second
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
+	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
 	this.debugSession = section.Bool("debug_session", false)
 
 	log.Debug("rpc: %+v", *this)
