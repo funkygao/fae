@@ -282,6 +282,8 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	err = sess.DB().C(table).Update(bsonQuery, bsonChange)
 	if err == nil {
 		r = true
+	} else {
+		log.Error("mg.update %v", err)
 	}
 
 	profiler.do("mg.update", ctx,

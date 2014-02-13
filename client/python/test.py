@@ -5,7 +5,7 @@ for quick debugging of fae
 '''
 
 import sys
-import json
+import bson
 import datetime
 sys.path.append('../../servant/gen-py')
 sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages')
@@ -74,7 +74,7 @@ userDoc = {
         "tutorial": "b",
     }
 }
-doc = json.dumps(userDoc)
+doc = bson.dumps(userDoc)
 print 'doc:', doc
-print '[Client] mg_insert received:', client.mg_insert(ctx, 'db', 'user', 123, doc, '{}'), elapsed()
+print '[Client] mg_insert received:', client.mg_insert(ctx, 'db1', 'usertest', 0, doc), elapsed()
 

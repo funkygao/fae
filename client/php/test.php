@@ -3,7 +3,9 @@
 $GLOBALS['THRIFT_ROOT'] = '/opt/app/thrift/lib/php';
 $GLOBALS['SERVANT_ROOT'] = '../../servant/gen-php/fun/rpc';
 require_once $GLOBALS['THRIFT_ROOT'].'/Thrift.php';
+require_once $GLOBALS['THRIFT_ROOT'].'/Base/TBase.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TException.php';
+require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TApplicationException.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Protocol/TBinaryProtocol.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/StringFunc/TStringFunc.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/StringFunc/Core.php';
@@ -22,6 +24,7 @@ use Thrift\Protocol\TBinaryProtocol;
 use fun\rpc\FunServantClient;
 use fun\rpc\Context;
 use fun\rpc\TCacheMissed;
+use fun\rpc\TMongoMissed;
 
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
@@ -69,8 +72,15 @@ try {
             "tutorial" => "b",
         )
     );
-    echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db', 'user', 123, 
-        json_encode($doc), json_encode(array())), "\n";
+    echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
+        bson_encode($doc)), "\n";
+    try {
+        $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
+            bson_encode(array('snsid' => '100003391571259')), bson_encode(''));
+        print_r(bson_decode($idmap));
+    } catch (TMongoMissed $ex) {
+        echo $ex->getMessage(), "\n";
+    }
 
     $transport->close();
 } catch (TException $tx) {

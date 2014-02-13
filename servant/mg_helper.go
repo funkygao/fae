@@ -1,7 +1,6 @@
 package servant
 
 import (
-	"encoding/json"
 	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo/bson"
@@ -20,7 +19,7 @@ func (this *FunServantImpl) mongoSession(kind string,
 
 // specs: inbound params use json
 func (this *FunServantImpl) unmarshalIn(d []byte) (v bson.M, err error) {
-	err = json.Unmarshal(d, &v)
+	err = bson.Unmarshal(d, &v)
 	if err != nil {
 		log.Error("unmarshalIn error: %s -> %s", d, err)
 	}
