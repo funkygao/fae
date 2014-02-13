@@ -79,6 +79,13 @@ try {
     echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
         bson_encode($doc)), "\n";
 
+    // mg.inserts
+    $docs = array();
+    $docs[] = bson_encode($doc);
+    $docs[] = bson_encode($doc);
+    echo '[Client] mg_inserts received: ', $client->mg_inserts($ctx, 'db1', 'usertest2', 0, 
+        $docs), "\n";
+
     // mg.findOne
     try {
         $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
