@@ -245,7 +245,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query%v fields^%v} {err^%v rl^%d}",
+		"{kind^%s table^%s id^%d query^%v fields^%v} {err^%v rl^%d}",
 		kind, table, shardId,
 		bsonQuery,
 		bsonFields,
