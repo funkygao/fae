@@ -67,7 +67,7 @@ try {
     echo '[Client] lc_get received: ', $client->lc_get($ctx, 'hello-php-lc'), "\n";
     echo '[Client] lc_del received: ', $client->lc_del($ctx, 'hello-php-lc'), "\n";
 
-    // mg
+    // mg.insert
     $doc = array(
         "name" => "funky.php",
         "gendar" => "M",
@@ -79,7 +79,7 @@ try {
     echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
         bson_encode($doc)), "\n";
 
-    // findOne
+    // mg.findOne
     try {
         $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
             bson_encode(array('snsid' => '100003391571259')), bson_encode(''));
@@ -89,7 +89,13 @@ try {
         echo $ex->getMessage(), "\n";
     }
 
-    // findAll
+    // mg.count
+    echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
+        bson_encode(array('uid' => array('$gte' => 1)))), "\n";
+    echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
+        bson_encode(array('uid' => array('$gte' => 100000)))), "\n";
+
+    // mg.findAll
     echo "[Client] mg_find_all received: \n";
     try {
         $docs = $client->mg_find_all($ctx, 'default', 'idmap', 0,
