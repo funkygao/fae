@@ -117,6 +117,10 @@ try {
         print_r($ex);
     }
 
+    // id.next
+    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
+    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
+
     $transport->close();
 } catch (TException $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";

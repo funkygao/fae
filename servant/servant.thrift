@@ -54,7 +54,8 @@ service FunServant {
      *
      */
     string id_next(
-        1: i16 flag
+        1: required Context ctx
+        2: i16 flag
     ),
 
     /**
