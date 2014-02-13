@@ -90,7 +90,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.inserts", ctx,
-		"{kind^%s table^%s id^%d docs^%d} {err^%v r^%v}",
+		"{kind^%s table^%s id^%d docN^%d} {err^%v r^%v}",
 		kind, table, shardId,
 		len(docs),
 		appErr,
