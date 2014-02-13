@@ -5,6 +5,8 @@ $GLOBALS['SERVANT_ROOT'] = '../../servant/gen-php/fun/rpc';
 require_once $GLOBALS['THRIFT_ROOT'].'/Thrift.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Base/TBase.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TException.php';
+require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TTransportException.php';
+require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TProtocolException.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TApplicationException.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Protocol/TBinaryProtocol.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/StringFunc/TStringFunc.php';
@@ -21,6 +23,8 @@ require_once $GLOBALS['SERVANT_ROOT'].'/Types.php';
 use Thrift\Transport\TSocketPool;
 use Thrift\Transport\TBufferedTransport;
 use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Exception\TTransportException;
+use Thrift\Exception\TProtocolException;
 use fun\rpc\FunServantClient;
 use fun\rpc\Context;
 use fun\rpc\TCacheMissed;
@@ -74,12 +78,30 @@ try {
     );
     echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
         bson_encode($doc)), "\n";
+
+    // findOne
     try {
         $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
             bson_encode(array('snsid' => '100003391571259')), bson_encode(''));
+        echo "[Client] mg_find_one received: \n";
         print_r(bson_decode($idmap));
     } catch (TMongoMissed $ex) {
         echo $ex->getMessage(), "\n";
+    }
+
+    // findAll
+    echo "[Client] mg_find_all received: \n";
+    try {
+        $docs = $client->mg_find_all($ctx, 'default', 'idmap', 0,
+            bson_encode(array('uid' => array('$gte' => 1))), bson_encode(array()),
+            0, 0, array());
+        $r = array();
+        foreach ($docs as $doc) {
+            $r[] = bson_decode($doc);
+        }
+        print_r($r);
+    } catch (TProtocolException $ex) {
+        print_r($ex);
     }
 
     $transport->close();

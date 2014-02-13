@@ -219,20 +219,29 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		appErr = err
 		return
 	}
-	bsonFields, err := this.unmarshalIn(fields)
-	if err != nil {
-		appErr = err
-		return
+	var bsonFields bson.M
+	if !this.mgFieldsIsNil(fields) {
+		bsonFields, err = this.unmarshalIn(fields)
+		if err != nil {
+			appErr = err
+			return
+		}
 	}
 
-	q := sess.DB().C(table).Find(bsonQuery).Select(bsonFields)
+	q := sess.DB().C(table).Find(bsonQuery)
+	if !this.mgFieldsIsNil(fields) {
+		q.Select(bsonFields)
+	}
 	if limit > 0 {
 		q.Limit(int(limit))
 	}
 	if skip > 0 {
 		q.Skip(int(skip))
 	}
-	q.Sort(orderBy...)
+	if len(orderBy) > 0 {
+		q.Sort(orderBy...)
+	}
+
 	var result []bson.M
 	err = q.All(&result)
 	if err == nil {
@@ -245,7 +254,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query^%v fields^%v} {err^%v rl^%d}",
+		"{kind^%s table^%s id^%d query^%v fields^%v} {err^%v rN^%d}",
 		kind, table, shardId,
 		bsonQuery,
 		bsonFields,
