@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"sync"
 	"time"
 )
 
@@ -20,15 +21,24 @@ const (
 	twepoch = int64(1288834974657)
 )
 
-func (this *FunServantImpl) milliseconds() int64 {
+type IdGenerator struct {
+	mutex         sync.Mutex
+	seq           int64
+	lastTimestamp int64
+}
+
+func NewIdGenerator() (this *IdGenerator) {
+	this = new(IdGenerator)
+	return
+}
+
+func (this *IdGenerator) milliseconds() int64 {
 	return time.Now().UnixNano() / 1e6
 }
 
-// Ticket server
-func (this *FunServantImpl) IdNext(ctx *rpc.Context,
-	flag int16) (r int64, backwards *rpc.TIdTimeBackwards, appErr error) {
-	this.idgenMutex.Lock()
-	defer this.idgenMutex.Unlock()
+func (this *IdGenerator) Next() (int64, error) {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
 
 	var (
 		did int64 = 0 // datacenter id
@@ -36,28 +46,37 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 	)
 
 	ts := this.milliseconds()
-	if ts < this.idLastTimestamp {
-		backwards = rpc.NewTIdTimeBackwards()
-		return
+	if ts < this.lastTimestamp {
+		return 0, rpc.NewTIdTimeBackwards()
 	}
 
-	if this.idLastTimestamp == ts {
-		this.idSeq = (this.idSeq + 1) & sequenceMask
-		if this.idSeq == 0 {
-			for ts <= this.idLastTimestamp {
+	if this.lastTimestamp == ts {
+		this.seq = (this.seq + 1) & sequenceMask
+		if this.seq == 0 {
+			for ts <= this.lastTimestamp {
 				ts = this.milliseconds()
 			}
 		}
 	} else {
-		this.idSeq = 0
+		this.seq = 0
 	}
 
-	this.idLastTimestamp = ts
+	this.lastTimestamp = ts
 
-	r = ((ts - twepoch) << timestampLeftShift) |
+	r := ((ts - twepoch) << timestampLeftShift) |
 		(did << datacenterIdShift) |
 		(wid << workerIdShift) |
-		this.idSeq
+		this.seq
+	return r, nil
+}
 
+// Ticket server
+func (this *FunServantImpl) IdNext(ctx *rpc.Context,
+	flag int16) (r int64, backwards *rpc.TIdTimeBackwards, appErr error) {
+	r, appErr = this.idgen.Next()
+	if appErr != nil {
+		backwards = appErr.(*rpc.TIdTimeBackwards)
+		appErr = nil
+	}
 	return
 }

@@ -5,24 +5,21 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
-	"sync"
 	"time"
 )
 
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	idgenMutex      sync.Mutex
-	idSeq           int64
-	idLastTimestamp int64
-
-	lc *cache.LruCache
-	mc *memcache.Client
-	mg *mongo.Client
+	idgen *IdGenerator
+	lc    *cache.LruCache
+	mc    *memcache.Client
+	mg    *mongo.Client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
+	this.idgen = NewIdGenerator()
 	this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 	this.lc.OnEvicted = this.onLcLruEvicted
 
