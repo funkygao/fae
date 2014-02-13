@@ -5,11 +5,16 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
+	"sync"
 	"time"
 )
 
 type FunServantImpl struct {
 	conf *config.ConfigServant
+
+	idgenMutex      sync.Mutex
+	idSeq           int64
+	idLastTimestamp int64
 
 	lc *cache.LruCache
 	mc *memcache.Client

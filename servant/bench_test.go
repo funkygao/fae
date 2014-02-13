@@ -32,3 +32,12 @@ func BenchmarkGoMap(b *testing.B) {
 		x[i] = true
 	}
 }
+
+func BenchmarkIdNext(b *testing.B) {
+	servant := setupServant()
+	ctx := rpc.NewContext()
+	ctx.Caller = "me"
+	for i := 0; i < b.N; i++ {
+		servant.IdNext(ctx, 0)
+	}
+}

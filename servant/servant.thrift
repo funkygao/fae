@@ -11,6 +11,9 @@ exception TMongoNotFound {
     11: optional string message
 }
 
+exception TIdTimeBackwards {
+}
+
 struct Context {
     /**
      * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
@@ -53,9 +56,11 @@ service FunServant {
     /**
      *
      */
-    string id_next(
+    i64 id_next(
         1: required Context ctx
         2: i16 flag
+    ) throws (
+        1: TIdTimeBackwards backwards
     ),
 
     /**

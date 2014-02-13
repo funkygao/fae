@@ -65,3 +65,10 @@ func TestLegacyServerSelector(t *testing.T) {
 	assert.Equal(t, "mongodb://127.0.0.1:27017/qa_royal_log/", addr.Url())
 	assert.Equal(t, nil, err)
 }
+
+func TestNormalizedKind(t *testing.T) {
+	fun := NewLegacyServerSelector(0)
+	assert.Equal(t, "log", fun.normalizedKind("database.log"))
+	assert.Equal(t, "db5", fun.normalizedKind("db5"))
+	assert.Equal(t, "db3", fun.normalizedKind("database.db3"))
+}
