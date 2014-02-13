@@ -124,8 +124,8 @@ try {
         true,
         false,
         true);
-    echo "[Client] mg.find_and_modify received:\n";
-    print_r(bson_decode($r));
+    $val = bson_decode($r);
+    echo "[Client] mg.find_and_modify received: ", $val['value'], "\n";
 
     // id.next
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
