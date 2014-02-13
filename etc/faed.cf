@@ -35,20 +35,20 @@
                     kind: "log"
                     host: "127.0.0.1"
                     port: 27017
-                    db: "qa_royal_log"
+                    db: "royal_log"
                     replicaSet: ""
                 }
                 {
                     kind: "default"
                     host: "127.0.0.1"
                     port: 27017
-                    db: "qa_royal_0"
+                    db: "royal_0"
                 }
                 {
                     kind: "db1"
                     host: "127.0.0.1"
                     port: 27017
-                    db: "qa_royal_1"
+                    db: "royal_1"
                 }
             ]
         }
