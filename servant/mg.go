@@ -394,8 +394,43 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	kind string, table string, shardId int32,
-	command []byte) (r []byte, appErr error) {
+	query []byte, change []byte, upsert bool,
+	remove bool, returnNew bool) (r []byte, appErr error) {
+	profiler := this.profiler()
 
+	// get mongodb session
+	sess, err := this.mongoSession(kind, shardId)
+	if err != nil {
+		appErr = err
+		return
+	}
+	defer sess.Recyle(&err)
+
+	bsonQuery, err := this.unmarshalIn(query)
+	if err != nil {
+		appErr = err
+		return
+	}
+	bsonChange, err := this.unmarshalIn(change)
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	doc := bson.M{}
+	changeInfo, _ := sess.DB().C(table).Find(bsonQuery).
+		Apply(mgo.Change{Update: bsonChange,
+		Upsert: upsert, Remove: remove, ReturnNew: returnNew}, &doc)
+	r = this.marshalOut(doc)
+
+	profiler.do("mg.findAndModify", ctx,
+		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
+		kind, table, shardId,
+		bsonQuery,
+		bsonChange,
+		appErr,
+		changeInfo.Updated, changeInfo.Removed,
+		doc)
 	return
 }
 

@@ -117,6 +117,16 @@ try {
         print_r($ex);
     }
 
+    // mg.findAndModify
+    $r = $client->mg_find_and_modify($ctx, 'default', 'idsquence', 0,
+        bson_encode(array('table_name' => 'idMap')),
+        bson_encode(array('$inc' => array('value' => 1))),
+        true,
+        false,
+        true);
+    echo "[Client] mg.find_and_modify received:\n";
+    print_r(bson_decode($r));
+
     // id.next
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";

@@ -290,7 +290,11 @@ service FunServant {
         2: string kind,
         3: string table,
         4: i32 shardId,
-        5: binary command
+        5: binary query,
+        6: binary change,
+        7: bool upsert,
+        8: bool remove,
+        9: bool returnNew
     ),
 
 }
