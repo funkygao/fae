@@ -16,7 +16,7 @@ func (this *FunServantImpl) runWatchdog() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Debug("mg: %v, mc: %v, lc: %d",
+		log.Debug("mg{%v}, mc{%v}, lc{%d}",
 			this.mg.FreeConn(),
 			this.mc.FreeConn(),
 			this.lc.Len())
