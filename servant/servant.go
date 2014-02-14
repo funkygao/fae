@@ -2,9 +2,11 @@ package servant
 
 import (
 	"github.com/funkygao/fae/config"
+	rest "github.com/funkygao/fae/http"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
+	"net/http"
 	"time"
 )
 
@@ -29,6 +31,12 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
 
 	this.mg = mongo.New(this.conf.Mongodb)
+
+	rest.RegisterHttpApi("/s/{cmd}",
+		func(w http.ResponseWriter, req *http.Request,
+			params map[string]interface{}) (interface{}, error) {
+			return this.handleHttpQuery(w, req, params)
+		}).Methods("GET")
 
 	return
 }

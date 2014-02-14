@@ -1,6 +1,10 @@
 package engine
 
 import (
+	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/peer"
+	"github.com/funkygao/fae/servant"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
@@ -23,6 +27,13 @@ func (this *Engine) ServeForever() {
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
+	// when config loaded, create the servants
+	svr := servant.NewFunServant(config.Servants)
+	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
+	svr.Start()
+
+	this.peer = peer.NewPeer(this.conf.peerGroupAddr,
+		this.conf.peerHeartbeatInterval, this.conf.peerDeadThreshold)
 	if err := this.peer.Start(); err != nil {
 		log.Error(err)
 	}

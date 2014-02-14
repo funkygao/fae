@@ -2,9 +2,6 @@ package engine
 
 import (
 	"github.com/funkygao/fae/config"
-	"github.com/funkygao/fae/peer"
-	"github.com/funkygao/fae/servant"
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
 	"time"
@@ -61,14 +58,6 @@ func (this *Engine) LoadConfigFile() *Engine {
 
 	this.conf = cf
 	this.doLoadConfig()
-
-	// when config loaded, create the servants
-	svr := servant.NewFunServant(config.Servants)
-	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
-	svr.Start()
-
-	this.peer = peer.NewPeer(this.conf.peerGroupAddr,
-		this.conf.peerHeartbeatInterval, this.conf.peerDeadThreshold)
 
 	return this
 }
