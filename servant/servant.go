@@ -34,7 +34,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.mg = mongo.New(this.conf.Mongodb)
 	if this.conf.Mongodb.DebugProtocol {
 		mgo.SetDebug(true)
-		mgo.SetLogger(mongoProtocolLogger{})
+		mgo.SetLogger(&mongoProtocolLogger{})
 	}
 
 	rest.RegisterHttpApi("/s/{cmd}",
