@@ -14,6 +14,11 @@ exception TMongoNotFound {
 exception TIdTimeBackwards {
 }
 
+struct TMemcacheData {
+    1: required binary data
+    2: required i32 flags
+}
+
 struct Context {
     /**
      * e,g. POST+/facebook/getPaymentRequestId/+34ca2cf6
@@ -112,14 +117,14 @@ service FunServant {
      *
      * @param Context ctx - Request context info.
      * @param string key -
-     * @param binary value -
+     * @param TMemcacheData value -
      * @param i32 expiration - in seconds: either a relative time from now (up to 1 month), or 
      *     an absolute Unix epoch time. Zero means the Item has no expiration time.
      */
     bool mc_set(
         1: required Context ctx, 
         2: required string key, 
-        3: required binary value, 
+        3: required TMemcacheData value, 
         4: required i32 expiration
     ),
 
@@ -128,9 +133,9 @@ service FunServant {
      *
      * @param Context ctx - Request context info.
      * @param string key -
-     * @return binary - Value of the key
+     * @return TMemcacheData - Value of the key
      */
-    binary mc_get(
+    TMemcacheData mc_get(
         1: required Context ctx, 
         2: required string key
     ) throws (
@@ -142,14 +147,14 @@ service FunServant {
      *
      * @param Context ctx - Request context info.
      * @param string key -
-     * @param binary value - Value of the key
+     * @param TMemcacheData value - Value of the key
      * @param i32 expiration -
      * @return bool - False if the key already exists.
      */
     bool mc_add(
         1: required Context ctx, 
         2: required string key, 
-        3: required binary value, 
+        3: required TMemcacheData value, 
         4: required i32 expiration
     ),
 

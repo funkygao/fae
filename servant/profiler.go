@@ -31,14 +31,23 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 		return
 	}
 
+	// format visible body
+	for idx, arg := range args {
+		if mcData, ok := arg.(*rpc.TMemcacheData); ok {
+			if mcData != nil {
+				args[idx] = fmt.Sprintf("{Data:%s Flags:%d}",
+					mcData.Data, mcData.Flags)
+			}
+		}
+	}
+
+	body := fmt.Sprintf(format, args...)
 	if slow { // TODO config
 		// slow response
-		body := fmt.Sprintf(format, args...)
 		header := fmt.Sprintf("SLOW=%s Q=%s X{%s} ",
 			elapsed, name, this.contextInfo(ctx))
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
-		body := fmt.Sprintf(format, args...)
 		header := fmt.Sprintf("T=%s Q=%s X{%s} ",
 			elapsed, name, this.contextInfo(ctx))
 		log.Debug(header + this.truncatedStr(body))

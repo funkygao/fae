@@ -10,11 +10,12 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
-	expiration int32) (r bool, appErr error) {
+func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
+	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	profiler := this.profiler()
 
-	appErr = this.mc.Set(&memcache.Item{Key: key, Value: value,
+	appErr = this.mc.Set(&memcache.Item{Key: key,
+		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
 	if appErr == nil {
 		r = true
@@ -33,14 +34,17 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string, value []byte,
 	return
 }
 
-func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
+func (this *FunServantImpl) McGet(ctx *rpc.Context,
+	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
 	profiler := this.profiler()
 
 	it, err := this.mc.Get(key)
 	if err == nil {
 		// cache hit
-		r = it.Value
+		r = rpc.NewTMemcacheData()
+		r.Data = it.Value
+		r.Flags = int32(it.Flags)
 	} else if err == memcache.ErrCacheMiss {
 		// cache miss
 		miss = rpc.NewTCacheMissed()
@@ -59,11 +63,13 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, key string) (r []byte,
 	return
 }
 
-func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string, value []byte,
+func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
+	value *rpc.TMemcacheData,
 	expiration int32) (r bool, appErr error) {
 	profiler := this.profiler()
 
-	appErr = this.mc.Add(&memcache.Item{Key: key, Value: value,
+	appErr = this.mc.Add(&memcache.Item{Key: key,
+		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
 	if appErr == nil {
 		r = true

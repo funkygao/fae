@@ -29,6 +29,7 @@ use fun\rpc\FunServantClient;
 use fun\rpc\Context;
 use fun\rpc\TCacheMissed;
 use fun\rpc\TMongoMissed;
+use fun\rpc\TMemcacheData;
 
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
@@ -50,9 +51,12 @@ try {
     echo "[Client] ping received: ", $return, "\n";
 
     // mc
-    echo '[Client] mc_set received: ', $client->mc_set($ctx, 'hello-php', 'world 世界', 120), "\n";
-    echo '[Client] mc_get received: ', $client->mc_get($ctx, 'hello-php'), "\n";
-    echo '[Client] mc_add received: ', $client->mc_add($ctx, 'test:counter:uid', 0, 3500), "\n";
+    $mcData = new TMemcacheData();
+    $mcData->data = 'world 世界';
+    echo '[Client] mc_set received: ', $client->mc_set($ctx, 'hello-php', $mcData, 120), "\n";
+    echo '[Client] mc_get received: ', print_r($client->mc_get($ctx, 'hello-php')), "\n";
+    $mcData->data = 0;
+    echo '[Client] mc_add received: ', $client->mc_add($ctx, 'test:counter:uid', $mcData, 3500), "\n";
     echo '[Client] mc_inc received: ', $client->mc_increment($ctx, 'test:counter:uid', 7), "\n";
     try {
         echo '[Client] mc_get hello-non-exist received: ', $client->mc_get($ctx, 'hello-non-exist'), "\n";
