@@ -33,7 +33,8 @@ func runClient(wg *sync.WaitGroup) {
 	remote := proxy.New()
 	client, err := remote.Servant(":9001")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer client.Transport.Close()
 
