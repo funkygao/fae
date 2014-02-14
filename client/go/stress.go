@@ -22,7 +22,7 @@ func init() {
 }
 
 func parseFlag() {
-	flag.IntVar(&N, "n", 1000000, "loops count")
+	flag.IntVar(&N, "n", 10000, "loops count")
 	flag.IntVar(&C, "c", 500, "concurrent num")
 	flag.Parse()
 }
