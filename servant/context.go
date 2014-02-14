@@ -23,7 +23,7 @@ func (this contextInfo) String() string {
 		return "Invalid"
 	}
 
-	s := fmt.Sprintf("C^%s+%s+%s", this.httpMethod, this.uri, this.seqId)
+	s := fmt.Sprintf("%s^%s+%s", this.httpMethod, this.uri, this.seqId)
 	if this.ctx.IsSetHost() {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}

@@ -64,7 +64,7 @@ func (this *TFunServer) handleClient(client thrift.TTransport) {
 	}
 
 	if this.engine.conf.rpc.debugSession {
-		log.Debug("accepted session peer %s",
+		log.Debug("accepted session peer{%s}",
 			client.(*thrift.TSocket).Conn().RemoteAddr().String())
 	}
 
@@ -76,16 +76,16 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	remoteAddr := client.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequest(client); err != nil {
 		this.engine.stats.TotalFailedSessions.Add(1)
-		log.Error("session peer[%s] failed: %s", remoteAddr, err)
+		log.Error("session peer{%s} failed: %s", remoteAddr, err)
 	}
 
 	elapsed := time.Since(t1)
 	if this.engine.conf.rpc.debugSession {
-		log.Debug("session peer[%s] closed after %s", remoteAddr, elapsed)
+		log.Debug("session peer{%s} closed after %s", remoteAddr, elapsed)
 	} else if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
 		// slow session
 		this.engine.stats.TotalSlowSessions.Add(1)
-		log.Warn("SLOW=%s session peer: %s", elapsed, remoteAddr)
+		log.Warn("SLOW=%s session peer{%s}", elapsed, remoteAddr)
 	}
 
 }
@@ -117,7 +117,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
 			this.engine.stats.TotalSlowCalls.Add(1)
-			log.Warn("SLOW=%s call peer: %s", elapsed, remoteAddr)
+			log.Warn("SLOW=%s call peer{%s}", elapsed, remoteAddr)
 		}
 
 		// check transport error
@@ -127,7 +127,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 			return nil
 		} else if err != nil {
 			// non-EOF transport err
-			log.Error("ERROR transport, peer(%s) %s", remoteAddr, err)
+			log.Error("ERROR transport, peer{%s} %s", remoteAddr, err)
 			this.engine.stats.TotalFailedCalls.Add(1)
 			return err
 		}
@@ -135,7 +135,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		// it is servant generated TApplicationException
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Add(1)
-			log.Error("ERROR servant call, peer(%s) %s", remoteAddr, err)
+			log.Error("ERROR servant call, peer{%s} %s", remoteAddr, err)
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
