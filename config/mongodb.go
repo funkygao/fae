@@ -54,6 +54,7 @@ func (this *ConfigMongodbServer) Url() string {
 
 type ConfigMongodb struct {
 	DebugProtocol         bool
+	DebugHeartbeat        bool
 	ShardBaseNum          int
 	ShardStrategy         string
 	ConnectTimeout        int
@@ -66,6 +67,7 @@ type ConfigMongodb struct {
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.DebugProtocol = cf.Bool("debug_protocol", false)
+	this.DebugHeartbeat = cf.Bool("debug_heartbeat", false)
 	this.ShardStrategy = cf.String("shard_strategy", "legacy")
 	this.ConnectTimeout = cf.Int("connect_timeout", 4)
 	this.IoTimeout = cf.Int("io_timeout", 30)

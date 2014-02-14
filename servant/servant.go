@@ -32,9 +32,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
 
 	this.mg = mongo.New(this.conf.Mongodb)
-	if this.conf.Mongodb.DebugProtocol {
-		mgo.SetDebug(true)
+	if this.conf.Mongodb.DebugProtocol ||
+		this.conf.Mongodb.DebugHeartbeat {
 		mgo.SetLogger(&mongoProtocolLogger{})
+		mgo.SetDebug(this.conf.Mongodb.DebugProtocol)
 	}
 
 	rest.RegisterHttpApi("/s/{cmd}",
