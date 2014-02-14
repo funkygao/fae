@@ -62,9 +62,6 @@ func (this *Engine) LoadConfigFile() *Engine {
 	this.conf = cf
 	this.doLoadConfig()
 
-	// RegisterHttpApi is ready
-	this.setupHttpServ()
-
 	// when config loaded, create the servants
 	svr := servant.NewFunServant(config.Servants)
 	this.rpcProcessor = rpc.NewFunServantProcessor(svr)

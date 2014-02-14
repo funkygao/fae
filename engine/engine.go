@@ -3,9 +3,6 @@ package engine
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/peer"
-	"github.com/gorilla/mux"
-	"net"
-	"net/http"
 	"time"
 )
 
@@ -14,11 +11,6 @@ type Engine struct {
 
 	configFile string
 	StartedAt  time.Time
-
-	httpListener net.Listener
-	httpServer   *http.Server
-	httpRouter   *mux.Router
-	httpPaths    []string
 
 	rpcProcessor thrift.TProcessor
 	rpcServer    thrift.TServer
