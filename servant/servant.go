@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
+	"labix.org/v2/mgo"
 	"net/http"
 	"time"
 )
@@ -31,6 +32,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
 
 	this.mg = mongo.New(this.conf.Mongodb)
+	if this.conf.Mongodb.DebugProtocol {
+		mgo.SetDebug(true)
+		mgo.SetLogger(mongoProtocolLogger{})
+	}
 
 	rest.RegisterHttpApi("/s/{cmd}",
 		func(w http.ResponseWriter, req *http.Request,
