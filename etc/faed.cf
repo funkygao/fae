@@ -6,7 +6,7 @@
     peer_heartbeat_interval: 10
 
     rpc: {
-        //listen_addr: "/var/run/fae.sock"
+        //listen_addr: "/tmp/fae.sock"
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
@@ -14,39 +14,41 @@
         client_timeout: 10
         session_slow_threshold: 8
         call_slow_threshold: 5
-        debug_session: false
+        debug_session: true
         tcp_nodelay: true
     }
 
     servants: {
-        prof_max_answer_size: 4096
-        watchdog_interval: 600
+        profiler_max_body_size: 2048
+        watchdog_interval: 0
         peers_cooperate: false
         profiler_rate: 1000
 
         mongodb: {
+            debug_heartbeat: true
+            debug_protocol: false
             shard_base_num: 100000
             shard_strategy: "legacy"
             connect_timeout: 4
             io_timeout: 30
-            heartbeat_interval: 60
+            heartbeat_interval: 0
             max_idle_conns_per_server: 3
             servers: [
                 {
-                    kind: "log"
+                    pool: "log"
                     host: "127.0.0.1"
                     port: 27017
                     db: "royal_log"
                     replicaSet: ""
                 }
                 {
-                    kind: "default"
+                    pool: "default"
                     host: "127.0.0.1"
                     port: 27017
                     db: "royal_0"
                 }
                 {
-                    kind: "db1"
+                    pool: "db1"
                     host: "127.0.0.1"
                     port: 27017
                     db: "royal_1"
@@ -60,6 +62,7 @@
 
         memcache: {
             hash_strategy: "standard"
+            max_idle_conns_per_server: 3
             timeout: 4
             servers: [
                 {

@@ -55,9 +55,9 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 }
 
 func (this *profiler) truncatedStr(val string) string {
-	if len(val) < this.conf.ProfilerMaxAnswerSize {
+	if len(val) < this.conf.ProfilerMaxBodySize {
 		return val
 	}
 
-	return val[:this.conf.ProfilerMaxAnswerSize] + "..."
+	return val[:this.conf.ProfilerMaxBodySize] + "..."
 }
