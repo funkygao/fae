@@ -21,11 +21,12 @@ Release Notes - fae - Version v0.0.1.alpha
     . recyleable mongodb pooling 
     . profiler sampling rate feature added
     . config tcp nodelay to turn on/off Nagle
+    . use memcache flags to auto (un)serialize php object, will not serialize if primitive type
 
 ** Bug
 
     . fixed race condition
-
+    . bson order['use_order'] data type lost, gone now
 
 ** Todo
 
@@ -35,5 +36,8 @@ Release Notes - fae - Version v0.0.1.alpha
     . https://github.com/golang/glog
     . proxy of servant pooling
     . https://github.com/rcrowley/go-metrics
+    . compress memcache data(check compress of live mc data)
+    . optimize mc/mg pool
+    . mongodb findColumn in php
 
 ----
