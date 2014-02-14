@@ -50,21 +50,25 @@ func (this *TFunServer) Serve() error {
 		}
 
 		if client != nil {
-			this.engine.stats.TotalSessions.Add(1)
-			if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-				tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
-			}
-
-			if this.engine.conf.rpc.debugSession {
-				log.Debug("accepted session peer %s",
-					client.(*thrift.TSocket).Conn().RemoteAddr().String())
-			}
-
-			go this.processSession(client)
+			go this.handleClient(client)
 		}
 	}
 
 	return nil
+}
+
+func (this *TFunServer) handleClient(client thrift.TTransport) {
+	this.engine.stats.TotalSessions.Add(1)
+	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
+	}
+
+	if this.engine.conf.rpc.debugSession {
+		log.Debug("accepted session peer %s",
+			client.(*thrift.TSocket).Conn().RemoteAddr().String())
+	}
+
+	this.processSession(client)
 }
 
 func (this *TFunServer) processSession(client thrift.TTransport) {

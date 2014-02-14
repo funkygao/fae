@@ -109,7 +109,12 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 *   idmap servent...
 *   user account servant...
 
-### Requirement
+### Remarks
+
+*   golang uses /proc/sys/net/core/somaxconn as listener backlog
+    - increase it if you need over 128(default) simultaneous outstanding connections
+
+### Dependencies
 
 hg
 
