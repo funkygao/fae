@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/proxy"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"math/rand"
 	"sync"
 	"time"
 )
 
 var (
-	N   int
-	C   int
-	ctx *rpc.Context
+	N     int
+	C     int
+	FailC int
+	ctx   *rpc.Context
 )
 
 func init() {
@@ -23,23 +25,30 @@ func init() {
 
 func parseFlag() {
 	flag.IntVar(&N, "n", 10000, "loops count")
-	flag.IntVar(&C, "c", 500, "concurrent num")
+	flag.IntVar(&C, "c", 800, "concurrent num")
 	flag.Parse()
 }
 
-func runClient(wg *sync.WaitGroup) {
+func runClient(wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
 	remote := proxy.New()
 	client, err := remote.Servant(":9001")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("seq^%d err^%v\n", seq, err)
+		FailC += 1
 		return
 	}
 	defer client.Transport.Close()
 
+	var mcKey string
+	var mcValue []byte
 	for i := 0; i < N; i++ {
 		client.Ping(ctx)
+		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
+		mcValue = []byte("value of " + mcKey)
+		client.McAdd(ctx, mcKey, mcValue, 3600)
+		client.McSet(ctx, mcKey, mcValue, 3600)
 	}
 }
 
@@ -51,9 +60,9 @@ func main() {
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
-		go runClient(wg)
+		go runClient(wg, i)
 	}
 	wg.Wait()
 
-	fmt.Printf("N=%d, elapsed=%s", N, time.Since(t1))
+	fmt.Printf("N=%d, C=%d, FailC=%d, elapsed=%s", N, C, FailC, time.Since(t1))
 }
