@@ -64,5 +64,5 @@ func main() {
 	}
 	wg.Wait()
 
-	fmt.Printf("N=%d, C=%d, FailC=%d, elapsed=%s", N, C, FailC, time.Since(t1))
+	fmt.Printf("N=%d, C=%d, FailC=%d, elapsed=%s\n", N, C, FailC, time.Since(t1))
 }
