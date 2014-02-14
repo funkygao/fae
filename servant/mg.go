@@ -36,6 +36,9 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 
 	// do insert and check error
+	//raw := bson.Raw{}
+	//raw.Kind = '\x03'
+	//raw.Data = doc
 	err = sess.DB().C(table).Insert(bsonDoc)
 	if err != nil {
 		// will not rais app error
