@@ -7,10 +7,11 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/cache"
+	log "github.com/funkygao/log4go"
 )
 
 func (this *FunServantImpl) onLcLruEvicted(key cache.Key, value interface{}) {
-
+	log.Critical("lru[%v] evicted", key)
 }
 
 func (this *FunServantImpl) LcSet(ctx *rpc.Context,
