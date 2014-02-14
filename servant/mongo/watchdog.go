@@ -8,6 +8,10 @@ import (
 )
 
 func (this *Client) runWatchdog() {
+	if this.conf.HeartbeatInterval == 0 {
+		return
+	}
+
 	ticker := time.NewTicker(time.Duration(this.conf.HeartbeatInterval) * time.Second)
 	defer ticker.Stop()
 
