@@ -40,7 +40,7 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	}
 }
 
-func (this *FunServantImpl) truncatedStr(val string) string {
+func (this *profiler) truncatedStr(val string) string {
 	if len(val) < this.conf.ProfilerMaxAnswerSize {
 		return val
 	}
