@@ -16,7 +16,12 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 
 	switch cmd {
 	case "stat":
-		output["mongo"] = *this.mg
+		output["mongo"] = this.mg.FreeConn()
+		output["memcache"] = this.mc.FreeConn()
+		output["lcache"] = this.lc.Len()
+
+	case "conf":
+		output["conf"] = *this.conf
 
 	default:
 		return nil, errors.New("Not Found")
