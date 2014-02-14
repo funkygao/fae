@@ -192,7 +192,7 @@ service FunServant {
 
     binary mg_find_one(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         /** where condition */
@@ -204,7 +204,7 @@ service FunServant {
 
     list<binary> mg_find_all(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query,
@@ -216,7 +216,7 @@ service FunServant {
 
     binary mg_find_id(
         1: required Context ctx,
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary id
@@ -224,7 +224,7 @@ service FunServant {
 
     i32 mg_count(
         1: required Context ctx,
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query
@@ -232,7 +232,7 @@ service FunServant {
 
     bool mg_update(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query,
@@ -241,7 +241,7 @@ service FunServant {
 
     bool mg_update_id(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: i32 id,
@@ -250,7 +250,7 @@ service FunServant {
 
     bool mg_upsert(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query,
@@ -259,7 +259,7 @@ service FunServant {
 
     bool mg_upsert_id(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: i32 id,
@@ -268,7 +268,7 @@ service FunServant {
 
     bool mg_insert(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary doc
@@ -276,7 +276,7 @@ service FunServant {
 
     bool mg_inserts(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: list<binary> doc
@@ -284,7 +284,7 @@ service FunServant {
 
     bool mg_delete(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query
@@ -292,7 +292,7 @@ service FunServant {
 
     binary mg_find_and_modify(
         1: required Context ctx, 
-        2: string kind,
+        2: string pool,
         3: string table,
         4: i32 shardId,
         5: binary query,

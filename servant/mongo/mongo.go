@@ -11,7 +11,7 @@ type Client struct {
 	conf     *config.ConfigMongodb
 	selector ServerSelector
 	lk       sync.Mutex
-	freeconn map[string][]*mgo.Session // the session pool, key is kind
+	freeconn map[string][]*mgo.Session // the session pool, key is pool
 
 	connectTimeout time.Duration
 	ioTimeout      time.Duration
@@ -42,8 +42,8 @@ func (this *Client) FreeConn() map[string][]*mgo.Session {
 	return this.freeconn
 }
 
-func (this *Client) Session(kind string, shardId int32) (*Session, error) {
-	server, err := this.selector.PickServer(kind, int(shardId))
+func (this *Client) Session(pool string, shardId int32) (*Session, error) {
+	server, err := this.selector.PickServer(pool, int(shardId))
 	if err != nil {
 		return nil, err
 	}

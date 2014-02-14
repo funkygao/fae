@@ -7,17 +7,17 @@ import (
 
 // Sharding was done on client
 type LegacyServerSelector struct {
-	Servers map[string]*config.ConfigMongodbServer // key is kind
+	Servers map[string]*config.ConfigMongodbServer // key is pool
 }
 
 func NewLegacyServerSelector(baseNum int) *LegacyServerSelector {
 	return &LegacyServerSelector{}
 }
 
-func (this *LegacyServerSelector) PickServer(kind string,
+func (this *LegacyServerSelector) PickServer(pool string,
 	shardId int) (server *config.ConfigMongodbServer, err error) {
 	var present bool
-	server, present = this.Servers[this.normalizedKind(kind)]
+	server, present = this.Servers[this.normalizedPool(pool)]
 	if !present {
 		err = ErrServerNotFound
 	}
@@ -29,16 +29,16 @@ func (this *LegacyServerSelector) SetServers(servers map[string]*config.ConfigMo
 	this.Servers = servers
 }
 
-func (this *LegacyServerSelector) normalizedKind(kind string) string {
+func (this *LegacyServerSelector) normalizedPool(pool string) string {
 	const (
 		N      = 2
 		PREFIX = "database."
 	)
 
-	p := strings.SplitN(kind, PREFIX, N)
+	p := strings.SplitN(pool, PREFIX, N)
 	if len(p) == 2 {
 		return p[1]
 	}
 
-	return kind
+	return pool
 }

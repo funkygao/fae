@@ -8,20 +8,20 @@ import (
 
 type StandardServerSelector struct {
 	ShardBaseNum int
-	Servers      map[string]*config.ConfigMongodbServer // key is kind
+	Servers      map[string]*config.ConfigMongodbServer // key is pool
 }
 
 func NewStandardServerSelector(baseNum int) *StandardServerSelector {
 	return &StandardServerSelector{ShardBaseNum: baseNum}
 }
 
-func (this *StandardServerSelector) PickServer(kind string,
+func (this *StandardServerSelector) PickServer(pool string,
 	shardId int) (server *config.ConfigMongodbServer, err error) {
-	const SHARD_KIND_PREFIX = "db"
+	const SHARD_POOL_PREFIX = "db"
 
 	var bucket string
-	if !strings.HasPrefix(kind, SHARD_KIND_PREFIX) {
-		bucket = kind
+	if !strings.HasPrefix(pool, SHARD_POOL_PREFIX) {
+		bucket = pool
 	} else {
 		bucket = fmt.Sprintf("db%d", (shardId/this.ShardBaseNum)+1)
 	}

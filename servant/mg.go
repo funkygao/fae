@@ -9,11 +9,11 @@ import (
 )
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	doc []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -26,8 +26,8 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	if err != nil {
 		appErr = err
 		profiler.do("mg.insert", ctx,
-			"{kind^%s table^%s id^%d doc^%v} {err^%v r^%v}",
-			kind, table, shardId,
+			"{pool^%s table^%s id^%d doc^%v} {err^%v r^%v}",
+			pool, table, shardId,
 			bsonDoc,
 			appErr,
 			r)
@@ -45,8 +45,8 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.insert", ctx,
-		"{kind^%s table^%s id^%d doc^%v} {err^%v r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d doc^%v} {err^%v r^%v}",
+		pool, table, shardId,
 		bsonDoc,
 		appErr,
 		r)
@@ -55,12 +55,12 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	docs [][]byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -90,8 +90,8 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.inserts", ctx,
-		"{kind^%s table^%s id^%d docN^%d} {err^%v r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d docN^%d} {err^%v r^%v}",
+		pool, table, shardId,
 		len(docs),
 		appErr,
 		r)
@@ -100,12 +100,12 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -123,8 +123,8 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.del", ctx,
-		"{kind^%s table^%s id^%d query^%v} {err^%v r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v} {err^%v r^%v}",
+		pool, table, shardId,
 		bsonQuery,
 		appErr,
 		r)
@@ -133,13 +133,13 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte, fields []byte) (r []byte,
 	miss *rpc.TMongoNotFound, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -173,8 +173,8 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 			miss = rpc.NewTMongoNotFound()
 			miss.Message = thrift.StringPtr(err.Error())
 			profiler.do("mg.findOne", ctx,
-				"{kind^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
-				kind, table, shardId,
+				"{pool^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
+				pool, table, shardId,
 				bsonQuery,
 				bsonFields,
 				miss,
@@ -190,8 +190,8 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	r = this.marshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
-		"{kind^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
+		pool, table, shardId,
 		bsonQuery,
 		bsonFields,
 		miss,
@@ -202,12 +202,12 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte, fields []byte, limit int32, skip int32,
 	orderBy []string) (r [][]byte, appErr error) {
 	profiler := this.profiler()
 
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -254,8 +254,8 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{kind^%s table^%s id^%d query^%v fields^%v} {err^%v rN^%d}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v fields^%v} {err^%v rN^%d}",
+		pool, table, shardId,
 		bsonQuery,
 		bsonFields,
 		appErr,
@@ -265,12 +265,12 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -296,8 +296,8 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.update", ctx,
-		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
+		pool, table, shardId,
 		bsonQuery,
 		bsonChange,
 		appErr,
@@ -307,18 +307,18 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgUpdateId(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	id int32, change []byte) (r bool, appErr error) {
 	appErr = ErrNotImplemented
 	return
 }
 
 func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	profiler := this.profiler()
 
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -342,8 +342,8 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.upsert", ctx,
-		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
+		pool, table, shardId,
 		bsonQuery,
 		bsonChange,
 		appErr,
@@ -353,19 +353,19 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	id int32, change []byte) (r bool, appErr error) {
 	appErr = ErrNotImplemented
 	return
 }
 
 func (this *FunServantImpl) MgCount(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -383,8 +383,8 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	n = int32(r)
 
 	profiler.do("mg.count", ctx,
-		"{kind^%s table^%s id^%d query^%v} {err^%v r^%d}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v} {err^%v r^%d}",
+		pool, table, shardId,
 		bsonQuery,
 		appErr,
 		n)
@@ -393,13 +393,13 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	query []byte, change []byte, upsert bool,
 	remove bool, returnNew bool) (r []byte, appErr error) {
 	profiler := this.profiler()
 
 	// get mongodb session
-	sess, err := this.mongoSession(kind, shardId)
+	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
 		return
@@ -424,8 +424,8 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	r = this.marshalOut(doc)
 
 	profiler.do("mg.findAndModify", ctx,
-		"{kind^%s table^%s id^%d query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
-		kind, table, shardId,
+		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
+		pool, table, shardId,
 		bsonQuery,
 		bsonChange,
 		appErr,
@@ -435,7 +435,7 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) MgFindId(ctx *rpc.Context,
-	kind string, table string, shardId int32,
+	pool string, table string, shardId int32,
 	id []byte) (r []byte, appErr error) {
 	appErr = ErrNotImplemented
 	return

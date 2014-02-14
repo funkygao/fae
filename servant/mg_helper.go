@@ -6,11 +6,11 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-func (this *FunServantImpl) mongoSession(kind string,
+func (this *FunServantImpl) mongoSession(pool string,
 	shardId int32) (*mongo.Session, error) {
-	sess, err := this.mg.Session(kind, shardId)
+	sess, err := this.mg.Session(pool, shardId)
 	if err != nil {
-		log.Error("{kind^%s id^%d} %s", kind, shardId, err)
+		log.Error("{pool^%s id^%d} %s", pool, shardId, err)
 		return nil, err
 	}
 

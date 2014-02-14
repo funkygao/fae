@@ -7,7 +7,7 @@ import (
 )
 
 type ConfigMongodbServer struct {
-	Kind         string
+	Pool         string
 	Host         string
 	Port         string
 	User         string
@@ -18,7 +18,7 @@ type ConfigMongodbServer struct {
 }
 
 func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
-	this.Kind = section.String("kind", "")
+	this.Pool = section.String("pool", "")
 	this.Host = section.String("host", "")
 	this.Port = section.String("port", "27017")
 	this.DbName = section.String("db", "")
@@ -28,7 +28,7 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 	this.ReplicaSet = section.String("replicaSet", "")
 	if this.Host == "" ||
 		this.Port == "" ||
-		this.Kind == "" ||
+		this.Pool == "" ||
 		this.DbName == "" {
 		panic("required field missing")
 	}
@@ -79,7 +79,7 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 		server := new(ConfigMongodbServer)
 		server.ShardBaseNum = this.ShardBaseNum
 		server.loadConfig(section)
-		this.Servers[server.Kind] = server
+		this.Servers[server.Pool] = server
 	}
 
 	log.Debug("mongodb: %+v", *this)

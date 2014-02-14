@@ -66,9 +66,9 @@ func TestLegacyServerSelector(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
-func TestNormalizedKind(t *testing.T) {
+func TestNormalizedPool(t *testing.T) {
 	fun := NewLegacyServerSelector(0)
-	assert.Equal(t, "log", fun.normalizedKind("database.log"))
-	assert.Equal(t, "db5", fun.normalizedKind("db5"))
-	assert.Equal(t, "db3", fun.normalizedKind("database.db3"))
+	assert.Equal(t, "log", fun.normalizedPool("database.log"))
+	assert.Equal(t, "db5", fun.normalizedPool("db5"))
+	assert.Equal(t, "db3", fun.normalizedPool("database.db3"))
 }
