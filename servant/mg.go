@@ -26,8 +26,8 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	if err != nil {
 		appErr = err
 		profiler.do("mg.insert", ctx,
-			"{pool^%s table^%s id^%d doc^%v} {err^%v r^%v}",
-			pool, table, shardId,
+			"{pool^%s table^%s doc^%v} {err^%v r^%v}",
+			pool, table,
 			bsonDoc,
 			appErr,
 			r)
@@ -48,8 +48,8 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.insert", ctx,
-		"{pool^%s table^%s id^%d doc^%v} {err^%v r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s doc^%v} {err^%v r^%v}",
+		pool, table,
 		bsonDoc,
 		appErr,
 		r)
@@ -93,8 +93,8 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.inserts", ctx,
-		"{pool^%s table^%s id^%d docN^%d} {err^%v r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s docN^%d} {err^%v r^%v}",
+		pool, table,
 		len(docs),
 		appErr,
 		r)
@@ -126,8 +126,8 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.del", ctx,
-		"{pool^%s table^%s id^%d query^%v} {err^%v r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v} {err^%v r^%v}",
+		pool, table,
 		bsonQuery,
 		appErr,
 		r)
@@ -176,8 +176,8 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 			miss = rpc.NewTMongoNotFound()
 			miss.Message = thrift.StringPtr(err.Error())
 			profiler.do("mg.findOne", ctx,
-				"{pool^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
-				pool, table, shardId,
+				"{pool^%s table^%s query^%v fields^%v} {miss^%v err^%v val^%v}",
+				pool, table,
 				bsonQuery,
 				bsonFields,
 				miss,
@@ -193,8 +193,8 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	r = this.marshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
-		"{pool^%s table^%s id^%d query^%v fields^%v} {miss^%v err^%v val^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v fields^%v} {miss^%v err^%v val^%v}",
+		pool, table,
 		bsonQuery,
 		bsonFields,
 		miss,
@@ -257,8 +257,8 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.findAll", ctx,
-		"{pool^%s table^%s id^%d query^%v fields^%v} {err^%v rN^%d}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v fields^%v} {err^%v rN^%d}",
+		pool, table,
 		bsonQuery,
 		bsonFields,
 		appErr,
@@ -299,8 +299,8 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.update", ctx,
-		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v chg^%v} {err^%v r^%v}",
+		pool, table,
 		bsonQuery,
 		bsonChange,
 		appErr,
@@ -345,8 +345,8 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 
 	profiler.do("mg.upsert", ctx,
-		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v chg^%v} {err^%v r^%v}",
+		pool, table,
 		bsonQuery,
 		bsonChange,
 		appErr,
@@ -386,8 +386,8 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	n = int32(r)
 
 	profiler.do("mg.count", ctx,
-		"{pool^%s table^%s id^%d query^%v} {err^%v r^%d}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v} {err^%v r^%d}",
+		pool, table,
 		bsonQuery,
 		appErr,
 		n)
@@ -427,8 +427,8 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	r = this.marshalOut(doc)
 
 	profiler.do("mg.findAndModify", ctx,
-		"{pool^%s table^%s id^%d query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
-		pool, table, shardId,
+		"{pool^%s table^%s query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
+		pool, table,
 		bsonQuery,
 		bsonChange,
 		appErr,
