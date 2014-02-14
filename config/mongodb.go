@@ -59,7 +59,7 @@ type ConfigMongodb struct {
 	IoTimeout             int
 	MaxIdleConnsPerServer int
 	HeartbeatInterval     int
-	Servers               map[string]*ConfigMongodbServer // key is kind
+	Servers               map[string]*ConfigMongodbServer // key is pool
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
