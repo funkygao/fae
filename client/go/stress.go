@@ -42,11 +42,11 @@ func runClient(wg *sync.WaitGroup, seq int) {
 	defer client.Transport.Close()
 
 	var mcKey string
-	var mcValue []byte
+	var mcValue = rpc.NewTMemcacheData()
 	for i := 0; i < N; i++ {
 		client.Ping(ctx)
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
-		mcValue = []byte("value of " + mcKey)
+		mcValue.Data = []byte("value of " + mcKey)
 		client.McAdd(ctx, mcKey, mcValue, 3600)
 		client.McSet(ctx, mcKey, mcValue, 3600)
 	}

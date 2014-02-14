@@ -14,7 +14,7 @@ from thrift.protocol import TBinaryProtocol
 from thrift.transport.TTransport import TTransportException
 from thrift.Thrift import TApplicationException
 from fun.rpc import FunServant
-from fun.rpc.ttypes import TCacheMissed
+from fun.rpc.ttypes import TCacheMissed, TMemcacheData
 
 t1 = datetime.datetime.now()
 sock = TSocket.TSocket('localhost', 9001)
@@ -42,7 +42,9 @@ print '[Client] ping received:', r, elapsed()
 
 # mc
 #=====
-print '[Client] mc_set received:', client.mc_set(ctx, 'hello', 'world 世界', 120), elapsed()
+mcData = TMemcacheData()
+mcData.data = 'world 世界'
+print '[Client] mc_set received:', client.mc_set(ctx, 'hello', mcData, 120), elapsed()
 print '[Client] mc_get received:', client.mc_get(ctx, 'hello'), elapsed()
 
 try:
