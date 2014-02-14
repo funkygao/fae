@@ -1,10 +1,10 @@
 all:gen
 
 gen:
-	@thrift -gen   go servant.thrift
-	@thrift -gen   py servant.thrift
-	@thrift -gen  php servant.thrift
-	@thrift -gen java servant.thrift
+	@thrift -gen   go thrift/servant.thrift
+	@thrift -gen   py thrift/servant.thrift
+	@thrift -gen  php thrift/servant.thrift
+	@thrift -gen java thrift/servant.thrift
 
 clean:
 	@rm -rf gen-go
