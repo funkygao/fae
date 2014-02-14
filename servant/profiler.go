@@ -26,7 +26,12 @@ func (this *FunServantImpl) profiler() profiler {
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	if elapsed.Seconds() > 5.0 { // TODO config
+	slow := elapsed.Seconds() > 5
+	if !slow && !this.on {
+		return
+	}
+
+	if slow { // TODO config
 		// slow response
 		body := fmt.Sprintf(format, args...)
 		header := fmt.Sprintf("SLOW=%s Q=%s X{%s} ",
