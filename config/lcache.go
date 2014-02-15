@@ -7,10 +7,16 @@ import (
 
 type ConfigLcache struct {
 	LruMaxItems int
+	enabled     bool
 }
 
 func (this *ConfigLcache) loadConfig(cf *conf.Conf) {
 	this.LruMaxItems = cf.Int("lru_max_items", 1<<30)
+	this.enabled = true
 
 	log.Debug("lcache: %+v", *this)
+}
+
+func (this *ConfigLcache) Enabled() bool {
+	return this.enabled
 }

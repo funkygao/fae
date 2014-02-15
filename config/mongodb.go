@@ -62,6 +62,11 @@ type ConfigMongodb struct {
 	MaxIdleConnsPerServer int
 	HeartbeatInterval     int
 	Servers               map[string]*ConfigMongodbServer // key is pool
+	enabled               bool
+}
+
+func (this *ConfigMongodb) Enabled() bool {
+	return this.enabled
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {

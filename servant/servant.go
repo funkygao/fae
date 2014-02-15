@@ -23,19 +23,26 @@ type FunServantImpl struct {
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.idgen = NewIdGenerator()
-	this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
-	this.lc.OnEvicted = this.onLcLruEvicted
 
-	memcacheServers := this.conf.Memcache.ServerList()
-	this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
-	this.mc.Timeout = time.Duration(this.conf.Memcache.Timeout) * time.Second
-	this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
+	if this.conf.Lcache.Enabled() {
+		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
+		this.lc.OnEvicted = this.onLcLruEvicted
+	}
 
-	this.mg = mongo.New(this.conf.Mongodb)
-	if this.conf.Mongodb.DebugProtocol ||
-		this.conf.Mongodb.DebugHeartbeat {
-		mgo.SetLogger(&mongoProtocolLogger{})
-		mgo.SetDebug(this.conf.Mongodb.DebugProtocol)
+	if this.conf.Memcache.Enabled() {
+		memcacheServers := this.conf.Memcache.ServerList()
+		this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
+		this.mc.Timeout = time.Duration(this.conf.Memcache.Timeout) * time.Second
+		this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
+	}
+
+	if this.conf.Mongodb.Enabled() {
+		this.mg = mongo.New(this.conf.Mongodb)
+		if this.conf.Mongodb.DebugProtocol ||
+			this.conf.Mongodb.DebugHeartbeat {
+			mgo.SetLogger(&mongoProtocolLogger{})
+			mgo.SetDebug(this.conf.Mongodb.DebugProtocol)
+		}
 	}
 
 	rest.RegisterHttpApi("/s/{cmd}",

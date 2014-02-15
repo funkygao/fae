@@ -34,24 +34,22 @@ func LoadServants(cf *conf.Conf) {
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
 	section, err := cf.Section("mongodb")
-	if err != nil {
-		panic(err)
+	if err == nil {
+		Servants.Mongodb.loadConfig(section)
 	}
-	Servants.Mongodb.loadConfig(section)
 
 	// memcached section
 	Servants.Memcache = new(ConfigMemcache)
 	section, err = cf.Section("memcache")
-	if err != nil {
-		panic(err)
+	if err == nil {
+		Servants.Memcache.loadConfig(section)
 	}
-	Servants.Memcache.loadConfig(section)
 
 	// lcache section
 	Servants.Lcache = new(ConfigLcache)
 	section, err = cf.Section("lcache")
-	if err != nil {
-		panic(err)
+	if err == nil {
+		Servants.Lcache.loadConfig(section)
 	}
-	Servants.Lcache.loadConfig(section)
+
 }

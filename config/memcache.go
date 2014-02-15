@@ -32,6 +32,7 @@ type ConfigMemcache struct {
 	HashStrategy          string
 	Timeout               int
 	MaxIdleConnsPerServer int
+	enabled               bool
 
 	Servers map[string]*ConfigMemcacheServer // key is host:port(addr)
 }
@@ -45,6 +46,10 @@ func (this *ConfigMemcache) ServerList() []string {
 	}
 
 	return servers
+}
+
+func (this *ConfigMemcache) Enabled() bool {
+	return this.enabled
 }
 
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
@@ -62,6 +67,7 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 		server.loadConfig(section)
 		this.Servers[server.Address()] = server
 	}
+	this.enabled = true
 
 	log.Debug("memcache: %+v", *this)
 }
