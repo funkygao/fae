@@ -22,16 +22,17 @@ Release Notes - fae - Version v0.0.1.alpha
     . profiler sampling rate feature added
     . config tcp nodelay to turn on/off Nagle
     . use memcache flags to auto (un)serialize php object, will not serialize if primitive type
+    . an instance can disable some service so that we can customize deployment
 
 ** Bug
 
     . fixed race condition
-    . bson order['use_order'] data type lost, gone now
 
 ** Todo
 
     . graceful degrade with Circuit Breaker
     . use framed transport for better performance 
+    . disable some services by config
     . user service with auto local caching
     . https://github.com/golang/glog
     . proxy of servant pooling
@@ -39,5 +40,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . compress memcache data(check compress of live mc data)
     . optimize mc/mg pool
     . mongodb findColumn in php
+    . bitmap, replicated consitent hash
 
 ----

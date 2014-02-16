@@ -62,7 +62,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		if this.stats.TotalSessions > 0 {
 			output["call/session"] = this.stats.TotalCalls / this.stats.TotalSessions
 		}
-		output["peers"] = this.peer.Neighbors()
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()

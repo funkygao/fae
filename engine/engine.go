@@ -2,7 +2,6 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"github.com/funkygao/fae/peer"
 	"time"
 )
 
@@ -14,8 +13,6 @@ type Engine struct {
 
 	rpcProcessor thrift.TProcessor
 	rpcServer    thrift.TServer
-
-	peer *peer.Peer
 
 	stats    *engineStats
 	pid      int

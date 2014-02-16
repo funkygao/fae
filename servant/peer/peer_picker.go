@@ -19,9 +19,9 @@ type consistentPeerPicker struct {
 	peers *hash.Map
 }
 
-func newPeerPicker(self string) PeerPicker {
-	return &consistentPeerPicker{peers: hash.New(3, nil), Mutex: new(sync.Mutex),
-		self: self}
+func newPeerPicker(self string, replicas int) PeerPicker {
+	return &consistentPeerPicker{peers: hash.New(replicas, nil),
+		Mutex: new(sync.Mutex), self: self}
 }
 
 func (this *consistentPeerPicker) DelPeer(peers ...string) {

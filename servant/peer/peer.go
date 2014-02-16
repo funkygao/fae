@@ -37,12 +37,13 @@ type Peer struct {
 	neighbors map[string]time.Time
 }
 
-func NewPeer(gaddr string, interval int, deadThreshold float64) (this *Peer) {
+func NewPeer(gaddr string, interval int,
+	deadThreshold float64, replicas int) (this *Peer) {
 	this = new(Peer)
 	this.RWMutex = new(sync.RWMutex)
 	this.groupAddr = gaddr
 	this.selfAddr = ip.LocalIpv4Addrs()[0]
-	this.picker = newPeerPicker(this.selfAddr)
+	this.picker = newPeerPicker(this.selfAddr, replicas)
 	this.heartbeatInterval = interval
 	this.deadThreshold = deadThreshold
 	this.neighbors = make(map[string]time.Time)

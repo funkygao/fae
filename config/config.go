@@ -14,6 +14,7 @@ type ConfigServant struct {
 	ProfilerRate        int
 
 	// distribute load accross servers
+	PeersReplica          int
 	PeersCooperate        bool
 	PeerGroupAddr         string
 	PeerHeartbeatInterval int
@@ -33,6 +34,7 @@ func LoadServants(cf *conf.Conf) {
 	Servants.PeersCooperate = cf.Bool("peers_cooperate", false)
 	Servants.ProfilerMaxBodySize = cf.Int("profiler_max_body_size", 1<<10)
 	Servants.ProfilerRate = cf.Int("profiler_rate", 1) // default 1/1000
+	Servants.PeersReplica = cf.Int("peer_replicas", 3)
 	Servants.PeerHeartbeatInterval = cf.Int("peer_heartbeat_interval", 0)
 	Servants.PeerDeadThreshold = cf.Float("peer_dead_threshold",
 		float64(Servants.PeerHeartbeatInterval)*3)

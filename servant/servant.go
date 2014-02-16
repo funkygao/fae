@@ -3,9 +3,9 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
-	"github.com/funkygao/fae/peer"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
+	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/golib/cache"
 	"labix.org/v2/mgo"
 	"net/http"
@@ -49,7 +49,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	if this.conf.PeerEnabled() {
 		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
-			this.conf.PeerHeartbeatInterval, this.conf.PeerDeadThreshold)
+			this.conf.PeerHeartbeatInterval,
+			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
 	}
 
 	rest.RegisterHttpApi("/s/{cmd}",
