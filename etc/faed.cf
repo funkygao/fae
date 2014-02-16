@@ -7,7 +7,7 @@
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         // framed: false
-        client_timeout: 10
+        client_timeout: 30
         session_slow_threshold: 8
         call_slow_threshold: 5
         debug_session: true

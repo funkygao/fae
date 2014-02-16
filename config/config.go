@@ -2,6 +2,7 @@ package config
 
 import (
 	conf "github.com/funkygao/jsconf"
+	log "github.com/funkygao/log4go"
 )
 
 var (
@@ -15,7 +16,6 @@ type ConfigServant struct {
 
 	// distribute load accross servers
 	PeersReplica          int
-	PeersCooperate        bool
 	PeerGroupAddr         string
 	PeerHeartbeatInterval int
 	PeerDeadThreshold     float64
@@ -31,7 +31,6 @@ func init() {
 
 func LoadServants(cf *conf.Conf) {
 	Servants.WatchdogInterval = cf.Int("watchdog_interval", 60*10)
-	Servants.PeersCooperate = cf.Bool("peers_cooperate", false)
 	Servants.ProfilerMaxBodySize = cf.Int("profiler_max_body_size", 1<<10)
 	Servants.ProfilerRate = cf.Int("profiler_rate", 1) // default 1/1000
 	Servants.PeersReplica = cf.Int("peer_replicas", 3)
@@ -60,6 +59,8 @@ func LoadServants(cf *conf.Conf) {
 	if err == nil {
 		Servants.Lcache.loadConfig(section)
 	}
+
+	log.Debug("servants: %+v", *Servants)
 }
 
 func (this *ConfigServant) PeerEnabled() bool {
