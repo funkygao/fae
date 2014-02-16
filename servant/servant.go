@@ -3,6 +3,7 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/fae/peer"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/cache"
@@ -14,6 +15,7 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
+	peer  *peer.Peer
 	idgen *IdGenerator
 	lc    *cache.LruCache
 	mc    *memcache.Client
@@ -45,6 +47,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
+	if this.conf.PeerEnabled() {
+		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
+			this.conf.PeerHeartbeatInterval, this.conf.PeerDeadThreshold)
+	}
+
 	rest.RegisterHttpApi("/s/{cmd}",
 		func(w http.ResponseWriter, req *http.Request,
 			params map[string]interface{}) (interface{}, error) {
@@ -56,4 +63,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 func (this *FunServantImpl) Start() {
 	go this.runWatchdog()
+	if this.peer != nil {
+		this.peer.Start()
+	}
 }

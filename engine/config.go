@@ -38,10 +38,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 type engineConfig struct {
 	*conf.Conf
 
-	httpListenAddr        string
-	peerGroupAddr         string
-	peerHeartbeatInterval int
-	peerDeadThreshold     float64
+	httpListenAddr string
 
 	rpc *configRpc
 }
@@ -64,9 +61,6 @@ func (this *Engine) LoadConfigFile() *Engine {
 
 func (this *Engine) doLoadConfig() {
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
-	this.conf.peerHeartbeatInterval = this.conf.Int("peer_heartbeat_interval", 30)
-	this.conf.peerDeadThreshold = this.conf.Float("peer_dead_threshold", 30)
-	this.conf.peerGroupAddr = this.conf.String("peer_group_addr", "224.0.0.2:19850")
 
 	// rpc section
 	this.conf.rpc = new(configRpc)
