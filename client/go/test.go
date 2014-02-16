@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/funkygao/fae/proxy"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
 	"time"
 )
 

@@ -4,8 +4,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/funkygao/fae/proxy"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
 	"math/rand"
 	"sync"
 	"time"

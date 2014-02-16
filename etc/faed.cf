@@ -25,7 +25,7 @@
         peer_heartbeat_interval: 10
 
         mongodb: {
-            debug_heartbeat: true
+            debug_heartbeat: false
             debug_protocol: false
             shard_base_num: 100000
             shard_strategy: "legacy"
