@@ -107,7 +107,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	}
 
 	profiler.do("mc.del", ctx,
-		"{key^%s} {err^%s r^%v}",
+		"{key^%s} {err^%v r^%v}",
 		key,
 		appErr,
 		r)
