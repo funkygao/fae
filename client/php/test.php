@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', 'On');
+error_reporting(E_ALL);
+
 $GLOBALS['THRIFT_ROOT'] = '/opt/app/thrift/lib/php';
 $GLOBALS['SERVANT_ROOT'] = '../../servant/gen-php/fun/rpc';
 require_once $GLOBALS['THRIFT_ROOT'].'/Thrift.php';
