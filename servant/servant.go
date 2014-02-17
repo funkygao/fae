@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/peer"
+	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
 	"labix.org/v2/mgo"
 	"net/http"
@@ -15,7 +16,8 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	peer  *peer.Peer
+	proxy *proxy.Proxy // remote fae agent
+	peer  *peer.Peer   // topology of cluster
 	idgen *IdGenerator
 	lc    *cache.LruCache
 	mc    *memcache.Client
@@ -51,6 +53,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
 			this.conf.PeerHeartbeatInterval,
 			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
+		this.proxy = proxy.New()
 	}
 
 	rest.RegisterHttpApi("/s/{cmd}",
