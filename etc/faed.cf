@@ -15,7 +15,7 @@
     }
 
     servants: {
-        profiler_max_body_size: 60
+        profiler_max_body_size: 160
         watchdog_interval: 0
         profiler_rate: 1000
         // multicast address in the range 224.0.0.0 through 239.255.255.255

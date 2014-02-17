@@ -11,6 +11,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . golang servant client so that we can chain the call to distributed servers
     . unix domain socket rpc server transport
     . auto discovery of peers and form a cluster to serve requests
+    . memcache consistent hash
     . global uniq id generator servant added
 
 ** Improvement
@@ -41,5 +42,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . optimize mc/mg pool
     . mongodb findColumn in php
     . bitmap, replicated consitent hash
+    . cpuprof
 
 ----
