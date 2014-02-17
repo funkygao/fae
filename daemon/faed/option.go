@@ -42,11 +42,11 @@ func setupProfiler() {
 
 		pprof.StartCPUProfile(f)
 
-		log.Info("CPU profiler [%s] enabled\n", options.cpuprof)
+		log.Info("CPU profiler [%s] enabled", options.cpuprof)
 	}
 
 	if options.memprof != "" {
-		log.Info("MEM profiler [%s] enabled\n", options.memprof)
+		log.Info("MEM profiler [%s] enabled", options.memprof)
 	}
 }
 
