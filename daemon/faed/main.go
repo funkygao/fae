@@ -51,6 +51,4 @@ func main() {
 	engine.NewEngine(options.configFile).
 		LoadConfigFile().
 		ServeForever()
-
-	shutdown()
 }
