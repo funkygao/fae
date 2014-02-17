@@ -1,5 +1,6 @@
 {
     http_listen_addr: ":9002"
+    cpu_num: "auto"
 
     rpc: {
         //listen_addr: "/tmp/fae.sock"

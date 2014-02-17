@@ -7,6 +7,8 @@ import (
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
+	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -18,7 +20,19 @@ func (this *Engine) ServeForever() {
 
 	signal.IgnoreSignal(syscall.SIGHUP)
 
-	log.Info("Launching Engine...")
+	var (
+		totalCpus int
+		maxProcs  int
+	)
+	totalCpus = runtime.NumCPU()
+	cpuNumConfig := this.conf.String("cpu_num", "auto")
+	if cpuNumConfig == "auto" {
+		maxProcs = totalCpus/2 + 1
+	} else {
+		maxProcs, _ = strconv.Atoi(cpuNumConfig)
+	}
+	runtime.GOMAXPROCS(maxProcs)
+	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
 	// start the stats counter
 	this.stats.Start(this.StartedAt)
