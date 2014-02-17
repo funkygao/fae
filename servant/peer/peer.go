@@ -22,7 +22,7 @@ func (this *peerMessage) unmarshal(data []byte) (err error) {
 }
 
 type Peer struct {
-	*sync.RWMutex
+	rwmutex *sync.RWMutex
 
 	c      net.Conn
 	picker PeerPicker
@@ -39,7 +39,7 @@ type Peer struct {
 func NewPeer(gaddr string, interval int,
 	deadThreshold float64, replicas int) (this *Peer) {
 	this = new(Peer)
-	this.RWMutex = new(sync.RWMutex)
+	this.rwmutex = new(sync.RWMutex)
 	this.groupAddr = gaddr
 	this.selfAddr = ip.LocalIpv4Addrs()[0]
 	this.picker = newPeerPicker(this.selfAddr, replicas)
@@ -50,14 +50,14 @@ func NewPeer(gaddr string, interval int,
 }
 
 func (this *Peer) Neighbors() *map[string]time.Time {
-	this.RLock()
-	defer this.RUnlock()
+	this.rwmutex.RLock()
+	defer this.rwmutex.RUnlock()
 	return &this.neighbors
 }
 
 func (this *Peer) killNeighbor(ip string) {
-	this.Lock()
-	defer this.Unlock()
+	this.rwmutex.Lock()
+	defer this.rwmutex.Unlock()
 
 	delete(this.neighbors, ip)
 	this.picker.DelPeer(ip)
@@ -67,8 +67,8 @@ func (this *Peer) killNeighbor(ip string) {
 }
 
 func (this *Peer) refreshNeighbor(ip string) {
-	this.Lock()
-	defer this.Unlock()
+	this.rwmutex.Lock()
+	defer this.rwmutex.Unlock()
 
 	if _, present := this.neighbors[ip]; !present {
 		log.Info("Peer[%s] joined", ip)
