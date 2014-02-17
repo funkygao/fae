@@ -3,6 +3,7 @@ package servant
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/mongo"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -22,7 +23,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	// unmarshal inbound param
 	// client json_encode, server json_decode into internal bson.M struct
-	bsonDoc, err := this.unmarshalIn(doc)
+	bsonDoc, err := mongo.UnmarshalIn(doc)
 	if err != nil {
 		appErr = err
 		profiler.do("mg.insert", ctx,
@@ -74,7 +75,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	// client bson_encode, server bson_decode into internal bson.M struct
 	bsonDocs := make([]interface{}, len(docs))
 	for i, doc := range docs {
-		bsonDoc, err := this.unmarshalIn(doc)
+		bsonDoc, err := mongo.UnmarshalIn(doc)
 		if err != nil {
 			appErr = err
 			return
@@ -115,7 +116,7 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
@@ -149,14 +150,14 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
 	var bsonFields bson.M
-	if !this.mgFieldsIsNil(fields) {
-		bsonFields, err = this.unmarshalIn(fields)
+	if !mongo.FieldsIsNil(fields) {
+		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
 			appErr = err
 			return
@@ -165,7 +166,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	var result bson.M
 	q := sess.DB().C(table).Find(bsonQuery)
-	if !this.mgFieldsIsNil(fields) {
+	if !mongo.FieldsIsNil(fields) {
 		q.Select(bsonFields)
 	}
 	err = q.One(&result)
@@ -190,7 +191,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		return
 	}
 
-	r = this.marshalOut(result)
+	r = mongo.MarshalOut(result)
 
 	profiler.do("mg.findOne", ctx,
 		"{pool^%s table^%s query^%v fields^%v} {miss^%v err^%v val^%v}",
@@ -217,14 +218,14 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
 	var bsonFields bson.M
-	if !this.mgFieldsIsNil(fields) {
-		bsonFields, err = this.unmarshalIn(fields)
+	if !mongo.FieldsIsNil(fields) {
+		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
 			appErr = err
 			return
@@ -232,7 +233,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	}
 
 	q := sess.DB().C(table).Find(bsonQuery)
-	if !this.mgFieldsIsNil(fields) {
+	if !mongo.FieldsIsNil(fields) {
 		q.Select(bsonFields)
 	}
 	if limit > 0 {
@@ -250,7 +251,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	if err == nil {
 		r = make([][]byte, len(result))
 		for i, v := range result {
-			r[i] = this.marshalOut(v)
+			r[i] = mongo.MarshalOut(v)
 		}
 	} else {
 		appErr = err
@@ -280,12 +281,12 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonChange, err := this.unmarshalIn(change)
+	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		appErr = err
 		return
@@ -328,12 +329,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonChange, err := this.unmarshalIn(change)
+	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		appErr = err
 		return
@@ -375,7 +376,7 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
@@ -409,12 +410,12 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	}
 	defer sess.Recyle(&err)
 
-	bsonQuery, err := this.unmarshalIn(query)
+	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		appErr = err
 		return
 	}
-	bsonChange, err := this.unmarshalIn(change)
+	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		appErr = err
 		return
@@ -424,7 +425,7 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	changeInfo, _ := sess.DB().C(table).Find(bsonQuery).
 		Apply(mgo.Change{Update: bsonChange,
 		Upsert: upsert, Remove: remove, ReturnNew: returnNew}, &doc)
-	r = this.marshalOut(doc)
+	r = mongo.MarshalOut(doc)
 
 	profiler.do("mg.findAndModify", ctx,
 		"{pool^%s table^%s query^%v chg^%v} {err^%v updated^%d removed^%d r^%v}",
