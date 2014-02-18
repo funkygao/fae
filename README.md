@@ -109,6 +109,20 @@ It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
 *   idmap servent...
 *   user account servant...
 
+### Points of failure
+
+*   rpc client app could crash
+*   rpc client hardware could crash
+*   rpc client network card could fail
+*   network contention could cause timeouts
+*   network elements such as routers could fail
+*   transmission errors may lose messages
+*   client and server versions may be incompatable
+*   server network card could fail
+*   server may have hardware problems
+*   server software may crash
+*   backend system such as database may become corrupted
+
 ### Remarks
 
 *   golang uses /proc/sys/net/core/somaxconn as listener backlog
