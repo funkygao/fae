@@ -54,6 +54,10 @@ func StopHttpServ() {
 	}
 }
 
+func Launched() bool {
+	return api != nil
+}
+
 func RegisterHttpApi(path string,
 	handlerFunc func(http.ResponseWriter,
 		*http.Request, map[string]interface{}) (interface{}, error)) *mux.Route {

@@ -57,11 +57,13 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.proxy = proxy.New()
 	}
 
-	rest.RegisterHttpApi("/s/{cmd}",
-		func(w http.ResponseWriter, req *http.Request,
-			params map[string]interface{}) (interface{}, error) {
-			return this.handleHttpQuery(w, req, params)
-		}).Methods("GET")
+	if rest.Launched() {
+		rest.RegisterHttpApi("/s/{cmd}",
+			func(w http.ResponseWriter, req *http.Request,
+				params map[string]interface{}) (interface{}, error) {
+				return this.handleHttpQuery(w, req, params)
+			}).Methods("GET")
+	}
 
 	return
 }
