@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
+	"github.com/funkygao/golib/idgen"
 	"labix.org/v2/mgo"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ type FunServantImpl struct {
 
 	proxy *proxy.Proxy // remote fae agent
 	peer  *peer.Peer   // topology of cluster
-	idgen *IdGenerator
+	idgen *idgen.IdGenerator
 	lc    *cache.LruCache
 	mc    *memcache.Client
 	mg    *mongo.Client
@@ -26,7 +27,7 @@ type FunServantImpl struct {
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
-	this.idgen = NewIdGenerator()
+	this.idgen = idgen.NewIdGenerator()
 
 	if this.conf.Lcache.Enabled() {
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
