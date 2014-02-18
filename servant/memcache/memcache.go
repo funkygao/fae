@@ -14,7 +14,9 @@ import (
 
 type Client struct {
 	MaxIdleConnsPerServer int
-	Timeout               time.Duration
+
+	// both for conn and io timeout
+	Timeout time.Duration
 
 	selector ServerSelector
 

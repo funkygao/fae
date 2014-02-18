@@ -59,6 +59,7 @@ func (this *TFunServer) Serve() error {
 
 func (this *TFunServer) handleClient(client thrift.TTransport) {
 	this.engine.stats.TotalSessions.Add(1)
+
 	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
 
