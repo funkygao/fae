@@ -1,7 +1,6 @@
 package servant
 
 import (
-	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -30,7 +29,7 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 		output["conf"] = *this.conf
 
 	default:
-		return nil, errors.New("Not Found")
+		return nil, ErrHttp404
 	}
 
 	return output, nil
