@@ -61,11 +61,10 @@ func (this *TFunServer) handleClient(client thrift.TTransport) {
 	this.engine.stats.TotalSessions.Add(1)
 	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
-	}
 
-	if this.engine.conf.rpc.debugSession {
-		log.Debug("accepted session peer{%s}",
-			client.(*thrift.TSocket).Conn().RemoteAddr().String())
+		if this.engine.conf.rpc.debugSession {
+			log.Debug("accepted session peer{%s}", tcp.RemoteAddr())
+		}
 	}
 
 	this.processSession(client)
