@@ -4,6 +4,7 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
+	"github.com/funkygao/golib/trace"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -443,4 +444,23 @@ func (this *FunServantImpl) MgFindId(ctx *rpc.Context,
 	id []byte) (r []byte, appErr error) {
 	appErr = ErrNotImplemented
 	return
+}
+
+type mongoProtocolLogger struct {
+}
+
+func (this *mongoProtocolLogger) Output(calldepth int, s string) error {
+	log.Debug("(%s) %s", trace.CallerFuncName(calldepth), s)
+	return nil
+}
+
+func (this *FunServantImpl) mongoSession(pool string,
+	shardId int32) (*mongo.Session, error) {
+	sess, err := this.mg.Session(pool, shardId)
+	if err != nil {
+		log.Error("{pool^%s id^%d} %s", pool, shardId, err)
+		return nil, err
+	}
+
+	return sess, err
 }
