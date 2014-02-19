@@ -287,7 +287,7 @@ service FunServant {
         2: string pool,
         3: string table,
         4: i32 shardId,
-        5: list<binary> doc
+        5: list<binary> docs
     ),
 
     bool mg_delete(
