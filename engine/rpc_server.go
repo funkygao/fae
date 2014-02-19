@@ -58,6 +58,8 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleClient(client thrift.TTransport) {
+	this.engine.stats.SessionPerSecond.Mark(1)
+
 	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
 
@@ -112,6 +114,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		ok, err := processor.Process(inputProtocol, outputProtocol)
 
 		elapsed = time.Since(t1)
+		this.engine.stats.CallPerSecond.Mark(1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e3)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
