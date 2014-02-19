@@ -11,6 +11,14 @@ exception TMongoNotFound {
     11: optional string message
 }
 
+exception TMongoDegrade {
+    11: optional string message
+}
+
+exception TMongoReadOnly {
+    11: optional string message
+}
+
 exception TIdTimeBackwards {
 }
 

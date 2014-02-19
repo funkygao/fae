@@ -17,6 +17,7 @@
     }
 
     servants: {
+        stats_output_interval: 60
         profiler_max_body_size: 160
         watchdog_interval: 0
         profiler_rate: 1000

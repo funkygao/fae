@@ -3,6 +3,7 @@ package config
 import (
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 var (
@@ -13,6 +14,7 @@ type ConfigServant struct {
 	WatchdogInterval    int
 	ProfilerMaxBodySize int
 	ProfilerRate        int
+	StatsOutputInterval time.Duration
 
 	// distribute load accross servers
 	PeersReplica          int
@@ -38,6 +40,8 @@ func LoadServants(cf *conf.Conf) {
 	Servants.PeerDeadThreshold = cf.Float("peer_dead_threshold",
 		float64(Servants.PeerHeartbeatInterval)*3)
 	Servants.PeerGroupAddr = cf.String("peer_group_addr", "224.0.0.2:19850")
+	Servants.StatsOutputInterval = time.Duration(cf.Int("stats_output_interval",
+		0)) * time.Second
 
 	// mongodb section
 	Servants.Mongodb = new(ConfigMongodb)
