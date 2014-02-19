@@ -36,7 +36,7 @@ func newEngineStats() (this *engineStats) {
 	metrics.Register("total.calls.slow", this.TotalSlowCalls)
 	this.SessionLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.us.session", this.SessionLatencies)
+	metrics.Register("latency.ms.session", this.SessionLatencies)
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("latency.us.call", this.CallLatencies)
