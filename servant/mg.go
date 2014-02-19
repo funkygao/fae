@@ -13,7 +13,7 @@ import (
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	doc []byte) (r bool, appErr error) {
-	this.stats.MgInsert.Inc(1)
+	this.stats.inc("mg.insert")
 	profiler := this.profiler()
 
 	sess, err := this.mongoSession(pool, shardId)
@@ -63,7 +63,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	docs [][]byte) (r bool, appErr error) {
-	this.stats.MgInserts.Inc(1)
+	this.stats.inc("mg.inserts")
 	profiler := this.profiler()
 
 	// get mongodb session
@@ -109,7 +109,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (r bool, appErr error) {
-	this.stats.MgDel.Inc(1)
+	this.stats.inc("mg.del")
 	profiler := this.profiler()
 
 	// get mongodb session
@@ -144,7 +144,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, fields []byte) (r []byte,
 	miss *rpc.TMongoNotFound, appErr error) {
-	this.stats.MgFindOne.Inc(1)
+	this.stats.inc("mg.findOne")
 	profiler := this.profiler()
 
 	// get mongodb session
@@ -214,7 +214,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, fields []byte, limit int32, skip int32,
 	orderBy []string) (r [][]byte, appErr error) {
-	this.stats.MgFindAll.Inc(1)
+	this.stats.inc("mg.findAll")
 	profiler := this.profiler()
 
 	sess, err := this.mongoSession(pool, shardId)
@@ -277,7 +277,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
-	this.stats.MgUpdate.Inc(1)
+	this.stats.inc("mg.update")
 	profiler := this.profiler()
 
 	// get mongodb session
@@ -327,7 +327,7 @@ func (this *FunServantImpl) MgUpdateId(ctx *rpc.Context,
 func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
-	this.stats.MgUpsert.Inc(1)
+	this.stats.inc("mg.upsert")
 	profiler := this.profiler()
 
 	sess, err := this.mongoSession(pool, shardId)
@@ -374,7 +374,7 @@ func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
 func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
-	this.stats.MgCount.Inc(1)
+	this.stats.inc("mg.count")
 	profiler := this.profiler()
 
 	// get mongodb session
@@ -409,7 +409,7 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte, upsert bool,
 	remove bool, returnNew bool) (r []byte, appErr error) {
-	this.stats.MgFindAndModify.Inc(1)
+	this.stats.inc("mg.findAndModify")
 	profiler := this.profiler()
 
 	// get mongodb session
