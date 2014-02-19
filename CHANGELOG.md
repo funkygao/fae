@@ -13,6 +13,8 @@ Release Notes - fae - Version v0.0.1.alpha
     . auto discovery of peers and form a cluster to serve requests
     . memcache consistent hash
     . global uniq id generator servant added
+    . mongodb graceful degrade with Circuit Breaker
+    . session based local var(like thread local)
 
 ** Improvement
 
@@ -24,6 +26,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . config tcp nodelay to turn on/off Nagle
     . use memcache flags to auto (un)serialize php object, will not serialize if primitive type
     . an instance can disable some service so that we can customize deployment
+    . use https://github.com/rcrowley/go-metrics as internal stats
 
 ** Bug
 
@@ -31,17 +34,16 @@ Release Notes - fae - Version v0.0.1.alpha
 
 ** Todo
 
-    . graceful degrade with Circuit Breaker
     . use framed transport for better performance 
     . disable some services by config
     . user service with auto local caching
     . https://github.com/golang/glog
     . proxy of servant pooling
-    . https://github.com/rcrowley/go-metrics
     . compress memcache data(check compress of live mc data)
     . optimize mc/mg pool
     . mongodb findColumn in php
     . bitmap, replicated consitent hash
     . cpuprof
+    . memcache only as conn timeout, add io timeout
 
 ----
