@@ -27,7 +27,11 @@ type engineStats struct {
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.memStats = new(runtime.MemStats)
+	this.registerMetrics()
+	return
+}
 
+func (this *engineStats) registerMetrics() {
 	this.TotalFailedSessions = metrics.NewCounter()
 	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
 	this.TotalSlowSessions = metrics.NewCounter()
@@ -46,21 +50,20 @@ func newEngineStats() (this *engineStats) {
 	metrics.Register("rps.session", this.SessionPerSecond)
 	this.CallPerSecond = metrics.NewMeter()
 	metrics.Register("rps.call", this.CallPerSecond)
-
-	return
 }
 
+// TODO
 func (this engineStats) String() string {
 	return ""
 }
 
 func (this *engineStats) Start(t time.Time, interval time.Duration) {
 	this.startedAt = t
+
 	if interval > 0 {
 		go metrics.Log(metrics.DefaultRegistry,
 			interval, log.New(os.Stderr, "", log.LstdFlags))
 	}
-
 }
 
 func (this *engineStats) Runtime() map[string]interface{} {
