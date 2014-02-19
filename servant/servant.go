@@ -30,6 +30,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.idgen = idgen.NewIdGenerator()
 	this.stats = new(servantStats)
+	this.stats.registerMetrics()
 
 	if this.conf.Lcache.Enabled() {
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
@@ -72,7 +73,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 func (this *FunServantImpl) Start() {
 	go this.runWatchdog()
-	this.stats.Start(this.conf.StatsOutputInterval)
 	if this.peer != nil {
 		this.peer.Start()
 	}

@@ -7,5 +7,6 @@ import (
 
 func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
 	log.Debug("ping from %+v", *ctx)
+	this.stats.Ping.Inc(1)
 	return "pong", nil
 }
