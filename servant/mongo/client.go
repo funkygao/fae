@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/breaker"
 	"labix.org/v2/mgo"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ type Client struct {
 	lk       sync.Mutex
 	freeconn map[string][]*mgo.Session // the session pool, key is pool
 
+	breaker        *breaker.Consecutive
 	connectTimeout time.Duration
 	ioTimeout      time.Duration
 }
@@ -20,6 +22,8 @@ type Client struct {
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
+	this.breaker = &breaker.Consecutive{FailureAllowance: 10,
+		RetryTimeout: time.Second * 10}
 	this.connectTimeout = time.Duration(this.conf.ConnectTimeout) * time.Second
 	this.ioTimeout = time.Duration(this.conf.IoTimeout) * time.Second
 	switch cf.ShardStrategy {
