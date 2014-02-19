@@ -58,8 +58,6 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleClient(client thrift.TTransport) {
-	this.engine.stats.TotalSessions.Inc(1)
-
 	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
 
@@ -80,6 +78,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	}
 
 	elapsed := time.Since(t1)
+	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1000)
 	if this.engine.conf.rpc.debugSession {
 		log.Debug("session peer{%s} closed after %s", remoteAddr, elapsed)
 	} else if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
@@ -112,8 +111,8 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		t1 = time.Now()
 		ok, err := processor.Process(inputProtocol, outputProtocol)
 
-		this.engine.stats.TotalCalls.Inc(1)
 		elapsed = time.Since(t1)
+		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1000)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
 			this.engine.stats.TotalSlowCalls.Inc(1)
