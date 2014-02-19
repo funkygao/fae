@@ -13,6 +13,7 @@
         call_slow_threshold: 5
         debug_session: true
         tcp_nodelay: true
+        stats_output_interval: 60
     }
 
     servants: {

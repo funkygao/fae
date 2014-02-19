@@ -115,7 +115,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 
 		elapsed = time.Since(t1)
 		this.engine.stats.CallPerSecond.Mark(1)
-		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e3)
+		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
 			this.engine.stats.TotalSlowCalls.Inc(1)

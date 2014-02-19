@@ -35,7 +35,7 @@ func (this *Engine) ServeForever() {
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
 	// start the stats counter
-	this.stats.Start(this.StartedAt)
+	this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval)
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()

@@ -41,7 +41,7 @@ func newEngineStats() (this *engineStats) {
 	metrics.Register("latency.ms.session", this.SessionLatencies)
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.us.call", this.CallLatencies)
+	metrics.Register("latency.ms.call", this.CallLatencies)
 	this.SessionPerSecond = metrics.NewMeter()
 	metrics.Register("rps.session", this.SessionPerSecond)
 	this.CallPerSecond = metrics.NewMeter()
@@ -54,10 +54,13 @@ func (this engineStats) String() string {
 	return ""
 }
 
-func (this *engineStats) Start(t time.Time) {
+func (this *engineStats) Start(t time.Time, interval time.Duration) {
 	this.startedAt = t
-	go metrics.Log(metrics.DefaultRegistry,
-		time.Duration(60)*time.Second, log.New(os.Stderr, "", log.LstdFlags))
+	if interval > 0 {
+		go metrics.Log(metrics.DefaultRegistry,
+			interval, log.New(os.Stderr, "", log.LstdFlags))
+	}
+
 }
 
 func (this *engineStats) Runtime() map[string]interface{} {
