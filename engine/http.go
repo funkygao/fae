@@ -58,10 +58,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
-		output["stats"] = this.stats
-		if this.stats.TotalSessions > 0 {
-			output["call/session"] = this.stats.TotalCalls / this.stats.TotalSessions
-		}
+		output["stats"] = this.stats.String()
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()

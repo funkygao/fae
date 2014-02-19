@@ -3,46 +3,53 @@ package engine
 import (
 	"fmt"
 	"github.com/funkygao/golib/gofmt"
+	"github.com/funkygao/metrics"
+	"log"
+	"os"
 	"runtime"
-	"strconv"
-	"sync/atomic"
 	"time"
 )
-
-type AtomicInt int64
-
-func (this *AtomicInt) Add(n int64) {
-	atomic.AddInt64((*int64)(this), n)
-}
-
-func (this *AtomicInt) Get() int64 {
-	return atomic.LoadInt64((*int64)(this))
-}
-
-func (this *AtomicInt) String() string {
-	return strconv.FormatInt(this.Get(), 10)
-}
 
 type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	TotalSessions       AtomicInt
-	TotalCalls          AtomicInt
-	TotalFailedCalls    AtomicInt
-	TotalFailedSessions AtomicInt
-	TotalSlowSessions   AtomicInt
-	TotalSlowCalls      AtomicInt
+	TotalSessions       metrics.Counter
+	TotalCalls          metrics.Counter
+	TotalFailedCalls    metrics.Counter
+	TotalFailedSessions metrics.Counter
+	TotalSlowSessions   metrics.Counter
+	TotalSlowCalls      metrics.Counter
 }
 
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.memStats = new(runtime.MemStats)
+
+	this.TotalSessions = metrics.NewCounter()
+	metrics.Register("total.sessions", this.TotalSessions)
+	this.TotalFailedSessions = metrics.NewCounter()
+	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
+	this.TotalSlowSessions = metrics.NewCounter()
+	metrics.Register("total.sessions.slow", this.TotalSlowSessions)
+	this.TotalCalls = metrics.NewCounter()
+	metrics.Register("total.calls", this.TotalCalls)
+	this.TotalFailedCalls = metrics.NewCounter()
+	metrics.Register("total.calls.fail", this.TotalFailedCalls)
+	this.TotalSlowCalls = metrics.NewCounter()
+	metrics.Register("total.calls.slow", this.TotalSlowCalls)
+
 	return
 }
 
-func (this engineStats) Start(t time.Time) {
+func (this engineStats) String() string {
+	return ""
+}
+
+func (this *engineStats) Start(t time.Time) {
 	this.startedAt = t
+	go metrics.Log(metrics.DefaultRegistry,
+		time.Duration(60)*time.Second, log.New(os.Stderr, "", log.LstdFlags))
 }
 
 func (this *engineStats) Runtime() map[string]interface{} {
