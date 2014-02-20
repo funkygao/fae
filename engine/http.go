@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
 	log "github.com/funkygao/log4go"
 	"github.com/gorilla/mux"
@@ -65,6 +66,10 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 
 	case "mem":
 		output["mem"] = *this.stats.memStats
+
+	case "conf":
+		output["engine"] = *this.conf
+		output["servants"] = *config.Servants
 
 	default:
 		return nil, errors.New("Not Found")
