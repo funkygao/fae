@@ -46,6 +46,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . bitmap, replicated consitent hash
     . cpuprof
     . memcache only as conn timeout, add io timeout
-    . lcache always evicted, servant stats not logging
+    . servant stats not logging
 
 ----
