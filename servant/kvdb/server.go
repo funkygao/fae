@@ -7,12 +7,16 @@ import (
 )
 
 type Server struct {
+	shards   int
 	servlets []*servlet
 	path     string
 }
 
-func NewServer(path string) *Server {
-	return &Server{path: path}
+func NewServer(path string, servletNum int) *Server {
+	if servletNum == 0 {
+		servletNum = runtime.NumCPU()
+	}
+	return &Server{path: path, shards: servletNum}
 }
 
 func (this *Server) Open() (err error) {
@@ -24,7 +28,7 @@ func (this *Server) Open() (err error) {
 	}
 
 	this.servlets = make([]*servlet, 0)
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 0; i < this.shards; i++ {
 		servlet := newServlet(fmt.Sprintf("%s/%d", this.path, i))
 		if err := servlet.open(); err != nil {
 			this.close()

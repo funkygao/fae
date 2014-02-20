@@ -7,7 +7,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	s := NewServer("server")
+	s := NewServer("server", 0)
 	err := s.Open()
 	defer os.RemoveAll("server")
 	assert.Equal(t, nil, err)
