@@ -20,6 +20,7 @@ type ConfigServant struct {
 	PeerHeartbeatInterval int
 	PeerDeadThreshold     float64
 
+	Kvdb     *ConfigKvdb
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
@@ -58,6 +59,13 @@ func LoadServants(cf *conf.Conf) {
 	section, err = cf.Section("lcache")
 	if err == nil {
 		Servants.Lcache.loadConfig(section)
+	}
+
+	// kvdb section
+	Servants.Kvdb = new(ConfigKvdb)
+	section, err = cf.Section("kvdb")
+	if err == nil {
+		Servants.Kvdb.loadConfig(section)
 	}
 
 	log.Debug("servants: %+v", *Servants)
