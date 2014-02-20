@@ -45,6 +45,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - make a standard to hire developers
         - php frontend(more)
         - middleware backend(less)
+    - loose coupling            
 *   Contract(IDL) based instead of language dependent servcie api
     - each level developers have a common sense
     - communicate by contract instead of direct call
