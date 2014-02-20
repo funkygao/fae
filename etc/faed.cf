@@ -8,16 +8,17 @@
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         // framed: false
-        client_timeout: 30
-        session_slow_threshold: 8
         call_slow_threshold: 5
+        session_slow_threshold: 8
+        session_timeout: 30
+        max_outstanding_sessions: 5000
         debug_session: true
         tcp_nodelay: true
         stats_output_interval: 60
     }
 
     servants: {
-        profiler_max_body_size: 160
+        profiler_max_body_size: 60
         watchdog_interval: 0
         profiler_rate: 1000
         // multicast address in the range 224.0.0.0 through 239.255.255.255

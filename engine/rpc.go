@@ -45,12 +45,12 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	case strings.Contains(this.conf.rpc.listenAddr, "/"):
 		serverNetwork = "unix"
 		serverTransport, err = NewTUnixSocketTimeout(
-			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
+			this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
 
 	default:
 		serverNetwork = "tcp"
 		serverTransport, err = thrift.NewTServerSocketTimeout(
-			this.conf.rpc.listenAddr, this.conf.rpc.clientTimeout)
+			this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
 	}
 	if err != nil {
 		panic(err)
