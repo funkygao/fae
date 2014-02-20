@@ -19,6 +19,7 @@ func (this *FunServantImpl) onLcLruEvicted(key cache.Key, value interface{}) {
 func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 	key string, value []byte) (r bool, appErr error) {
 	this.stats.inc("lc.set")
+
 	profiler := this.profiler()
 	this.lc.Set(key, value)
 	r = true
@@ -32,6 +33,7 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("lc.get")
+
 	profiler := this.profiler()
 	result, ok := this.lc.Get(key)
 	if !ok {
@@ -49,6 +51,7 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 
 func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (appErr error) {
 	this.stats.inc("lc.del")
+
 	profiler := this.profiler()
 	this.lc.Del(key)
 	profiler.do("lc.del", ctx,

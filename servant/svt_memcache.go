@@ -13,8 +13,8 @@ import (
 func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.set")
-	profiler := this.profiler()
 
+	profiler := this.profiler()
 	appErr = this.mc.Set(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
@@ -39,8 +39,8 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("mc.get")
-	profiler := this.profiler()
 
+	profiler := this.profiler()
 	it, err := this.mc.Get(key)
 	if err == nil {
 		// cache hit
@@ -69,8 +69,8 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	value *rpc.TMemcacheData,
 	expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.add")
-	profiler := this.profiler()
 
+	profiler := this.profiler()
 	appErr = this.mc.Add(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
@@ -98,8 +98,8 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	appErr error) {
 	this.stats.inc("mc.del")
-	profiler := this.profiler()
 
+	profiler := this.profiler()
 	appErr = this.mc.Delete(key)
 	if appErr == nil {
 		r = true
@@ -122,12 +122,12 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	delta int32) (r int32, appErr error) {
 	this.stats.inc("mc.inc")
-	profiler := this.profiler()
 
 	var (
 		newVal uint64
 		err    error
 	)
+	profiler := this.profiler()
 	if delta > 0 {
 		newVal, err = this.mc.Increment(key, uint64(delta))
 	} else {
