@@ -22,6 +22,7 @@ Release Notes - fae - Version v0.0.2.rc
     . bitmap, replicated consitent hash
     . kvdb sharding by cluster with replicas
     . cpuprof/memprof
+    . QoS
 
 Release Notes - fae - Version v0.0.1.alpha
 ==========================================
