@@ -27,6 +27,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . use memcache flags to auto (un)serialize php object, will not serialize if primitive type
     . an instance can disable some service so that we can customize deployment
     . use https://github.com/rcrowley/go-metrics as internal stats
+    . control max outstanding session
 
 ** Bug
 
@@ -45,5 +46,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . bitmap, replicated consitent hash
     . cpuprof
     . memcache only as conn timeout, add io timeout
+    . lcache always evicted, servant stats not logging
 
 ----
