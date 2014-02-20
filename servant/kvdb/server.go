@@ -7,7 +7,7 @@ import (
 )
 
 type Server struct {
-	servlets []*Servlet
+	servlets []*servlet
 	path     string
 }
 
@@ -23,10 +23,10 @@ func (this *Server) Open() (err error) {
 		return err
 	}
 
-	this.servlets = make([]*Servlet, 0)
+	this.servlets = make([]*servlet, 0)
 	for i := 0; i < runtime.NumCPU(); i++ {
-		servlet := NewServlet(fmt.Sprintf("%s/%d", this.path, i))
-		servlet.Open()
+		servlet := newServlet(fmt.Sprintf("%s/%d", this.path, i))
+		servlet.open()
 		this.servlets = append(this.servlets, servlet)
 	}
 
@@ -36,7 +36,7 @@ func (this *Server) Open() (err error) {
 func (this *Server) close() {
 	if this.servlets != nil {
 		for _, servlet := range this.servlets {
-			servlet.Close()
+			servlet.close()
 		}
 		this.servlets = nil
 	}

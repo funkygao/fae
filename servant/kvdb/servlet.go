@@ -6,20 +6,20 @@ import (
 	"sync"
 )
 
-// A Servlet is a small wrapper around a single shard of a LevelDB data file.
-type Servlet struct {
+// A servlet is a small wrapper around a single shard of a LevelDB data file.
+type servlet struct {
 	path  string // data/0
 	db    *levigo.DB
 	mutex sync.Mutex
 }
 
-// NewServlet returns a new Servlet with a data shard stored at a given path.
-func NewServlet(path string) *Servlet {
-	return &Servlet{path: path}
+// Newservlet returns a new servlet with a data shard stored at a given path.
+func newServlet(path string) *servlet {
+	return &servlet{path: path}
 }
 
 // Opens the underlying LevelDB database and starts the message loop.
-func (this *Servlet) Open() error {
+func (this *servlet) open() error {
 	err := os.MkdirAll(this.path, DB_PERM)
 	if err != nil {
 		return err
@@ -41,35 +41,35 @@ func (this *Servlet) Open() error {
 }
 
 // Closes the underlying LevelDB database.
-func (this *Servlet) Close() {
+func (this *servlet) close() {
 	if this.db != nil {
 		this.db.Close()
 	}
 }
 
 // Locks the entire servlet.
-func (this *Servlet) Lock() {
+func (this *servlet) lock() {
 	this.mutex.Lock()
 }
 
 // Unlocks the entire servlet.
-func (this *Servlet) Unlock() {
+func (this *servlet) unlock() {
 	this.mutex.Unlock()
 }
 
-func (this *Servlet) Get(key []byte) (value []byte, err error) {
+func (this *servlet) get(key []byte) (value []byte, err error) {
 	ro := levigo.NewReadOptions()
 	defer ro.Close()
 	return this.db.Get(ro, key)
 }
 
-func (this *Servlet) Put(key []byte, value []byte) error {
+func (this *servlet) put(key []byte, value []byte) error {
 	wo := levigo.NewWriteOptions()
 	defer wo.Close()
 	return this.db.Put(wo, key, value)
 }
 
-func (this *Servlet) Delete(key []byte) error {
+func (this *servlet) delete(key []byte) error {
 	wo := levigo.NewWriteOptions()
 	defer wo.Close()
 	return this.db.Delete(wo, key)
