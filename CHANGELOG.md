@@ -23,6 +23,7 @@ Release Notes - fae - Version v0.0.2.rc
     . kvdb sharding by cluster with replicas
     . cpuprof/memprof
     . QoS
+    . better restart mechanism
 
 Release Notes - fae - Version v0.0.1.alpha
 ==========================================
