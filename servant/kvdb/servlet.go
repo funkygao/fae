@@ -1,7 +1,6 @@
 package kvdb
 
 import (
-	"fmt"
 	"github.com/jmhodges/levigo"
 	"os"
 	"sync"
@@ -27,14 +26,16 @@ func (this *Servlet) Open() error {
 	}
 
 	opts := levigo.NewOptions()
+	defer opts.Close()
 	opts.SetCache(levigo.NewLRUCache(1 << 30)) // TODO config
 	filter := levigo.NewBloomFilter(10)
 	opts.SetFilterPolicy(filter)
 	opts.SetCreateIfMissing(true)
 	db, err := levigo.Open(this.path, opts)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to open LevelDB database: %v", err))
+		return err
 	}
+
 	this.db = db
 	return nil
 }
