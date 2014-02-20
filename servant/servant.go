@@ -19,15 +19,15 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	sessions *sessions
-	stats    *servantStats
-	proxy    *proxy.Proxy // remote fae agent
-	peer     *peer.Peer   // topology of cluster
-	idgen    *idgen.IdGenerator
-	lc       *cache.LruCache
-	mc       *memcache.Client
-	mg       *mongo.Client
-	kvdb     *kvdb.Server
+	sessions *sessions          // state kept for sessions
+	stats    *servantStats      // stats
+	proxy    *proxy.Proxy       // remote fae agent
+	peer     *peer.Peer         // topology of cluster
+	idgen    *idgen.IdGenerator // global id generator
+	lc       *cache.LruCache    // local cache
+	mc       *memcache.Client   // memcache pool, auto sharding by key
+	mg       *mongo.Client      // mongodb pool, auto sharding by shardId
+	kvdb     *kvdb.Server       // kvdb based on LevelDB
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
