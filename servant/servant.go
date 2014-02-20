@@ -3,12 +3,14 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/fae/servant/kvdb"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
+	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"net/http"
 	"time"
@@ -25,6 +27,7 @@ type FunServantImpl struct {
 	lc       *cache.LruCache
 	mc       *memcache.Client
 	mg       *mongo.Client
+	kvdb     *kvdb.Server
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -37,6 +40,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	if this.conf.Lcache.Enabled() {
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
+	}
+
+	if this.conf.Kvdb.Enabled() {
+		this.kvdb = kvdb.NewServer(this.conf.Kvdb.Path,
+			this.conf.Kvdb.ServletNum)
 	}
 
 	if this.conf.Memcache.Enabled() {
@@ -76,6 +84,16 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 func (this *FunServantImpl) Start() {
 	go this.runWatchdog()
 	if this.peer != nil {
-		this.peer.Start()
+		if err := this.peer.Start(); err != nil {
+			log.Error("peer start: %v", err)
+			this.peer = nil
+		}
+	}
+
+	if this.kvdb != nil {
+		if err := this.kvdb.Open(); err != nil {
+			log.Error("kvdb start: %v", err)
+			this.kvdb = nil
+		}
 	}
 }

@@ -63,6 +63,11 @@
             lru_max_items: 1073741824
         }
 
+        kvdb: {
+            path: "/tmp/kvdb"
+            servlet_num: 10
+        }
+
         memcache: {
             hash_strategy: "standard"
             max_idle_conns_per_server: 3
