@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/funkygao/golib/breaker"
 	"net"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ type Client struct {
 
 	lk       sync.Mutex
 	freeconn map[string][]*conn
+	breaker  *breaker.Consecutive
 }
 
 func New(hashStrategy string, servers ...string) *Client {
@@ -38,7 +40,9 @@ func New(hashStrategy string, servers ...string) *Client {
 		panic(err)
 	}
 
-	return &Client{selector: selector}
+	return &Client{selector: selector,
+		breaker: &breaker.Consecutive{FailureAllowance: 10,
+			RetryTimeout: time.Second * 10}}
 }
 
 func (this *Client) FreeConn() map[string][]*conn {
