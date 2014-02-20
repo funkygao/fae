@@ -26,6 +26,7 @@ func (this *Server) Open() (err error) {
 	this.servlets = make([]*Servlet, 0)
 	for i := 0; i < runtime.NumCPU(); i++ {
 		servlet := NewServlet(fmt.Sprintf("%s/%d", this.path, i))
+		servlet.Open()
 		this.servlets = append(this.servlets, servlet)
 	}
 
