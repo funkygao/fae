@@ -28,3 +28,4 @@ var/
 log/
 daemon/faed/faed
 faed.lock
+*.class
