@@ -2,6 +2,7 @@ package kvdb
 
 import (
 	"github.com/funkygao/assert"
+	"math/rand"
 	"os"
 	"testing"
 )
@@ -43,6 +44,36 @@ func TestServlet(t *testing.T) {
 	assert.Equal(t, 0, len(val))
 }
 
+func BenchmarkRandomKeyGenerator(b *testing.B) {
+	const (
+		KEY_LEN = 80
+		VAL_LEN = 1024
+	)
+	key := make([]byte, KEY_LEN)
+	for i := 0; i < b.N; i++ {
+		key[rand.Intn(KEY_LEN)] = byte(rand.Int())
+	}
+}
+
+func BenchmarkServletRandomPut(b *testing.B) {
+	const (
+		KEY_LEN = 80
+		VAL_LEN = 1024
+	)
+	s := newServlet("test")
+	s.open()
+	defer s.close()
+	defer os.RemoveAll("test")
+
+	key := make([]byte, KEY_LEN)
+	value := make([]byte, VAL_LEN)
+	for i := 0; i < b.N; i++ {
+		key[rand.Intn(KEY_LEN)] = byte(rand.Int())
+		s.put(key, value)
+	}
+	b.SetBytes(int64(KEY_LEN + VAL_LEN))
+}
+
 func BenchmarkServletPut(b *testing.B) {
 	s := newServlet("test")
 	s.open()
@@ -70,6 +101,22 @@ func BenchmarkServletGet(b *testing.B) {
 		s.get(key)
 	}
 	b.SetBytes(int64(len(key) + len(value)))
+}
+
+func BenchmarkServletRandomGet(b *testing.B) {
+	const (
+		KEY_LEN = 80
+	)
+	s := newServlet("test")
+	s.open()
+	defer s.close()
+	defer os.RemoveAll("test")
+
+	key := make([]byte, KEY_LEN)
+	for i := 0; i < b.N; i++ {
+		key[rand.Intn(KEY_LEN)] = byte(rand.Int())
+		s.get(key)
+	}
 }
 
 func BenchmarkServletDelete(b *testing.B) {
