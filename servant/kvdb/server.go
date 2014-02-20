@@ -37,6 +37,18 @@ func (this *Server) Open() (err error) {
 	return nil
 }
 
+func (this *Server) Get(key []byte) (value []byte, err error) {
+	return this.servlets[this.servletOwnerIndex(key)].get(key)
+}
+
+func (this *Server) Put(key []byte, value []byte) error {
+	return this.servlets[this.servletOwnerIndex(key)].put(key, value)
+}
+
+func (this *Server) Delete(key []byte) error {
+	return this.servlets[this.servletOwnerIndex(key)].delete(key)
+}
+
 func (this *Server) close() {
 	if this.servlets != nil {
 		for _, servlet := range this.servlets {
