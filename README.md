@@ -97,7 +97,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - peer
         - other fae daemon that can be auto discovered
         - handles proxied requests from other(peer) fae
-        - watchdog of health of peers
+        - watchdog for health of peers
     -   proxy
         - stub of calling remote fae peers transparently
 
