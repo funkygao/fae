@@ -17,13 +17,14 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	stats *servantStats
-	proxy *proxy.Proxy // remote fae agent
-	peer  *peer.Peer   // topology of cluster
-	idgen *idgen.IdGenerator
-	lc    *cache.LruCache
-	mc    *memcache.Client
-	mg    *mongo.Client
+	sessions *sessions
+	stats    *servantStats
+	proxy    *proxy.Proxy // remote fae agent
+	peer     *peer.Peer   // topology of cluster
+	idgen    *idgen.IdGenerator
+	lc       *cache.LruCache
+	mc       *memcache.Client
+	mg       *mongo.Client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -31,6 +32,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.idgen = idgen.NewIdGenerator()
 	this.stats = new(servantStats)
 	this.stats.registerMetrics()
+	this.sessions = newSessions()
 
 	if this.conf.Lcache.Enabled() {
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)

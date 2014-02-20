@@ -14,7 +14,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . memcache consistent hash
     . global uniq id generator servant added
     . mongodb graceful degrade with Circuit Breaker
-    . session based local var(like thread local)
+    . session based local var(like thread local) so that servant can maintain state across request calls
 
 ** Improvement
 
