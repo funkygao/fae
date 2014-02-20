@@ -42,15 +42,24 @@ func (this *Server) Open() (err error) {
 }
 
 func (this *Server) Get(key []byte) (value []byte, err error) {
-	return this.servlets[this.servletOwnerIndex(key)].get(key)
+	servlet := this.servletByKey(key)
+	servlet.lock()
+	defer servlet.unlock()
+	return servlet.get(key)
 }
 
 func (this *Server) Put(key []byte, value []byte) error {
-	return this.servlets[this.servletOwnerIndex(key)].put(key, value)
+	servlet := this.servletByKey(key)
+	servlet.lock()
+	defer servlet.unlock()
+	return servlet.put(key, value)
 }
 
 func (this *Server) Delete(key []byte) error {
-	return this.servlets[this.servletOwnerIndex(key)].delete(key)
+	servlet := this.servletByKey(key)
+	servlet.lock()
+	defer servlet.unlock()
+	return servlet.delete(key)
 }
 
 func (this *Server) close() {
@@ -58,6 +67,7 @@ func (this *Server) close() {
 		for _, servlet := range this.servlets {
 			servlet.close()
 		}
+
 		this.servlets = nil
 	}
 }

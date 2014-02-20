@@ -43,7 +43,7 @@ func TestServlet(t *testing.T) {
 	assert.Equal(t, 0, len(val))
 }
 
-func BenchmarkServletput(b *testing.B) {
+func BenchmarkServletPut(b *testing.B) {
 	s := newServlet("test")
 	s.open()
 	defer s.close()
@@ -70,4 +70,19 @@ func BenchmarkServletGet(b *testing.B) {
 		s.get(key)
 	}
 	b.SetBytes(int64(len(key) + len(value)))
+}
+
+func BenchmarkServletDelete(b *testing.B) {
+	b.ReportAllocs()
+	s := newServlet("test")
+	s.open()
+	defer s.close()
+	defer os.RemoveAll("test")
+
+	key := []byte("hello")
+	value := []byte("world")
+	s.put(key, value)
+	for i := 0; i < b.N; i++ {
+		s.delete(key)
+	}
 }
