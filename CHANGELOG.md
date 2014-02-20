@@ -1,4 +1,29 @@
+Release Notes - fae - Version v0.0.2.rc
+=======================================
+
+** New Feature
+
+    .
+
+** Improvement
+
+    .
+
+**  Bug
+
+    .
+
+** Todo
+
+    . use framed transport for better performance 
+    . user service with auto local caching
+    . proxy of servant pooling
+    . optimize mc/mg pool, better failure handling
+    . bitmap, replicated consitent hash
+    . cpuprof/memprof
+
 Release Notes - fae - Version v0.0.1.alpha
+==========================================
 
 ** New Feature
 
@@ -27,24 +52,12 @@ Release Notes - fae - Version v0.0.1.alpha
     . use memcache flags to auto (un)serialize php object, will not serialize if primitive type
     . an instance can disable some service so that we can customize deployment
     . use https://github.com/rcrowley/go-metrics as internal stats
-    . control max outstanding session
+    . control max outstanding sessions num
 
 ** Bug
 
     . fixed race condition
 
-** Todo
 
-    . use framed transport for better performance 
-    . disable some services by config
-    . user service with auto local caching
-    . https://github.com/golang/glog
-    . proxy of servant pooling
-    . compress memcache data(check compress of live mc data)
-    . optimize mc/mg pool
-    . mongodb findColumn in php
-    . bitmap, replicated consitent hash
-    . cpuprof
-    . memcache only as conn timeout, add io timeout
 
 ----
