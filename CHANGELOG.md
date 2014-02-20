@@ -11,7 +11,9 @@ Release Notes - fae - Version v0.0.2.rc
 
 ###  Bug
 
-    .
+    . servant stats does not match engine stats
+    . rps stats seems to have problem
+    . call latency stats seems to have problem
 
 ### Todo
 
