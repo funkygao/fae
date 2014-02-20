@@ -23,7 +23,9 @@ Release Notes - fae - Version v0.0.2.rc
     . kvdb sharding by cluster with replicas
     . cpuprof/memprof
     . QoS
-    . better restart mechanism
+    . SOA governance
+    . SLA of servants
+    . better restart mechanism, socket pair?
 
 Release Notes - fae - Version v0.0.1.alpha
 ==========================================
