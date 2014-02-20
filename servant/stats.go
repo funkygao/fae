@@ -10,7 +10,7 @@ type servantStats struct {
 
 func (this *servantStats) registerMetrics() {
 	this.calls = metrics.NewPercentCounter()
-	metrics.Register("servant.call", this.calls)
+	metrics.Register("servant.calls", this.calls)
 }
 
 func (this *servantStats) inc(key string) {
