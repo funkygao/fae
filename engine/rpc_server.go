@@ -11,7 +11,7 @@ import (
 type TFunServer struct {
 	stopped bool
 
-	chSessionN             chan bool
+	throttle               chan bool
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
@@ -35,7 +35,7 @@ func NewTFunServer(engine *Engine,
 		outputTransportFactory: transportFactory,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
-		chSessionN:             make(chan bool, maxOutstandingSessions),
+		throttle:               make(chan bool, maxOutstandingSessions),
 	}
 }
 
@@ -53,8 +53,7 @@ func (this *TFunServer) Serve() error {
 		}
 
 		if client != nil {
-			// the throttle
-			this.chSessionN <- true
+			this.throttle <- true
 
 			go this.handleClient(client)
 		}
@@ -65,7 +64,7 @@ func (this *TFunServer) Serve() error {
 
 func (this *TFunServer) handleClient(client thrift.TTransport) {
 	defer func() {
-		<-this.chSessionN
+		<-this.throttle
 	}()
 	this.engine.stats.SessionPerSecond.Mark(1)
 
