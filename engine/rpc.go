@@ -65,7 +65,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		for {
 			err = this.rpcServer.Serve()
 			if err != nil {
-				log.Error(err)
+				log.Error("rpcServer: %v", err)
 				break
 			}
 		}

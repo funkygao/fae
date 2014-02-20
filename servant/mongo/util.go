@@ -9,7 +9,7 @@ import (
 func UnmarshalIn(d []byte) (v bson.M, err error) {
 	err = bson.Unmarshal(d, &v)
 	if err != nil {
-		log.Error("mongo.unmarshalIn error: %s -> %s", d, err)
+		log.Error("mongo.unmarshalIn: %s -> %s", d, err)
 	}
 
 	return
@@ -20,7 +20,7 @@ func MarshalOut(d bson.M) []byte {
 	val, err := bson.Marshal(d)
 	if err != nil {
 		// should never happen
-		log.Critical("mongo.marshalOut error: %+v -> %v", d, err)
+		log.Critical("mongo.marshalOut: %+v -> %v", d, err)
 	}
 
 	return val

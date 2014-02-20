@@ -41,7 +41,7 @@ func (this *Peer) discoverPeers() {
 		// if you run both sender and receiver on (logically) same IP host
 		line, _, err := reader.ReadLine()
 		if err != nil {
-			log.Error(err)
+			log.Error("discoverPeers: %v", err)
 			continue
 		}
 

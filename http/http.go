@@ -96,7 +96,7 @@ func RegisterHttpApi(path string,
 			status,
 			time.Since(t1))
 		if status != http.StatusOK {
-			log.Error("ERROR %v", err)
+			log.Error("HTTP: %v", err)
 		}
 
 		if ret != nil {

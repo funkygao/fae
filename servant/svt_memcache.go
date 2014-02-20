@@ -21,7 +21,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	if appErr == nil {
 		r = true
 	} else {
-		log.Error(appErr)
+		log.Error("mc.set: %v", appErr)
 	}
 
 	profiler.do("mc.set", ctx,
@@ -53,7 +53,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
 		appErr = err
-		log.Error(err)
+		log.Error("mc.get: %v", err)
 	}
 
 	profiler.do("mc.get", ctx,
@@ -81,7 +81,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 		appErr = nil
 	} else {
 		r = false
-		log.Error(appErr)
+		log.Error("mc.add: %v", appErr)
 	}
 
 	profiler.do("mc.add", ctx,
@@ -107,7 +107,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 		r = false
 		appErr = nil
 	} else {
-		log.Error(appErr)
+		log.Error("mc.del: %v", appErr)
 	}
 
 	profiler.do("mc.del", ctx,

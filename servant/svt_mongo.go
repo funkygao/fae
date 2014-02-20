@@ -45,7 +45,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	err = sess.DB().C(table).Insert(bsonDoc)
 	if err != nil {
 		// will not rais app error
-		log.Error(err)
+		log.Error("mg.insert: %v", err)
 	} else {
 		r = true
 	}
@@ -177,7 +177,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	err = q.One(&result)
 	if err != nil {
 		if err != mgo.ErrNotFound {
-			log.Error(err)
+			log.Error("mg.findOne: %v", err)
 		} else {
 			miss = rpc.NewTMongoNotFound()
 			miss.Message = thrift.StringPtr(err.Error())
@@ -303,7 +303,7 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	if err == nil {
 		r = true
 	} else {
-		log.Error("mg.update %v", err)
+		log.Error("mg.update: %v", err)
 	}
 
 	profiler.do("mg.update", ctx,
@@ -467,7 +467,7 @@ func (this *FunServantImpl) mongoSession(pool string,
 	shardId int32) (*mongo.Session, error) {
 	sess, err := this.mg.Session(pool, shardId)
 	if err != nil {
-		log.Error("{pool^%s id^%d} %s", pool, shardId, err)
+		log.Error("{pool^%s id^%d}: %s", pool, shardId, err)
 		return nil, err
 	}
 
