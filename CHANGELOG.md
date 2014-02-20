@@ -1,19 +1,19 @@
 Release Notes - fae - Version v0.0.2.rc
 =======================================
 
-** New Feature
+### New Feature
 
     .
 
-** Improvement
+### Improvement
 
     .
 
-**  Bug
+###  Bug
 
     .
 
-** Todo
+### Todo
 
     . use framed transport for better performance 
     . user service with auto local caching
@@ -25,7 +25,7 @@ Release Notes - fae - Version v0.0.2.rc
 Release Notes - fae - Version v0.0.1.alpha
 ==========================================
 
-** New Feature
+### New Feature
 
     . lcache(local cache shared among processes)
     . memcache backend
@@ -41,7 +41,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . mongodb graceful degrade with Circuit Breaker
     . session based local var(like thread local) so that servant can maintain state across request calls
 
-** Improvement
+### Improvement
 
     . source code was greatly refactored and better organized
     . request context added, so we can do auditting
@@ -54,7 +54,7 @@ Release Notes - fae - Version v0.0.1.alpha
     . use https://github.com/rcrowley/go-metrics as internal stats
     . control max outstanding sessions num
 
-** Bug
+### Bug
 
     . fixed race condition
 
