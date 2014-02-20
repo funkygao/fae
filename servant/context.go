@@ -38,8 +38,11 @@ func (this contextInfo) String() string {
 }
 
 func (this *FunServantImpl) contextInfo(ctx *rpc.Context) (r contextInfo) {
-	const N = 3
-	p := strings.SplitN(ctx.Caller, "+", N)
+	const (
+		N         = 3
+		SEPERATOR = "+"
+	)
+	p := strings.SplitN(ctx.Caller, SEPERATOR, N)
 	if len(p) != N {
 		return
 	}
