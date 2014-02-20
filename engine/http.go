@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"errors"
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
 	log "github.com/funkygao/log4go"
@@ -84,7 +83,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		}
 
 	default:
-		return nil, errors.New("Not Found")
+		return nil, rest.ErrHttp404
 	}
 
 	return output, nil
