@@ -20,24 +20,26 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
                                     |                        
                                     | short lived tcp/unix socket                        
                                     |                        
+                                    |                            peers discover
                                     |                            +---------------+
                                     |                     +------|  faed daemon  |-------+
-                            +---------------+  tcp        |      +---------------+       |
-                            |  faed daemon  |  proxy      |                              |
-                            +---------------+ ------------|      +---------------+       |
-                            |  local cache  |  consitent  +------|  faed daemon  |       |
-                            +---------------+  hash              +---------------+       |
-                                    |                                  |                 |
-                                    |                                  |                 |
+                            +---------------+             |      +---------------+       |
+                            |  faed daemon  |  tcp        |                              |
+                            +---------------+ ------------|      peers discover          |
+                            |  LRU cache    |  proxy      |      +---------------+       |
+                            +---------------+             +------|  faed daemon  |-------|
+                                    |                            +---------------+       |
+                                    |                                                    |
+                                    |                    consitent hash with replicas    |
                                     |----------------------------------------------------+
                                     |
-                                    | tcp long connection pool(heartbeat)                        
+                                    | tcp long connection pool(heartbeat) with recycling
                                     |
             +-----------------------------------------------+
-            |                       |                       | 
-        +----------------+  +----------------+  +----------------+
-        | mongodb servers|  |memcache servers|  |   more...      |
-        +----------------+  +----------------+  +----------------+
+            |                       |                       |     self contained
+        +----------------+  +----------------+  +------------------------------+
+        | mongodb servers|  |memcache servers|  | lcache | kvdb | dlog | idgen |
+        +----------------+  +----------------+  +------------------------------+
 
 ### Why SOA?
 
