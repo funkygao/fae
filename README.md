@@ -70,7 +70,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - some programs are not web based, e,g. batch, can be implemented as any language you like
 *   Most large scale site use SOA as infrastructure
 
-#### Terms
+#### Terms and sub-directories
 
 *   client
     - demonstration of how to call servants
