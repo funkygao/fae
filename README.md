@@ -43,6 +43,9 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Why SOA?
 
+*   More clear architecture
+    - UI -> php/python/... -> fae -> backend
+    - instead of php/python -> backend
 *   Seperation of concerns
     - make a standard to hire developers
         - each level developers have a common sense
