@@ -71,6 +71,18 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["engine"] = *this.conf
 		output["servants"] = *config.Servants
 
+	case "guide", "help", "h":
+		output["uris"] = []string{
+			"/admin/ping",
+			"/admin/debug",
+			"/admin/reload",
+			"/admin/stop",
+			"/admin/stat",
+			"/admin/runtime",
+			"/admin/mem",
+			"/admin/conf",
+		}
+
 	default:
 		return nil, errors.New("Not Found")
 	}
