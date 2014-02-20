@@ -90,7 +90,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   etc
     - the config file 
 *   http
-    - REST interface that's regsiter based 
+    - Plugin based REST interface 
     - for monitor/control purpose
 *   servant
     - RPC server side implementation
