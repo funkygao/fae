@@ -20,6 +20,7 @@ Release Notes - fae - Version v0.0.2.rc
     . proxy of servant pooling
     . optimize mc/mg pool, better failure handling
     . bitmap, replicated consitent hash
+    . kvdb sharding by cluster with replicas
     . cpuprof/memprof
 
 Release Notes - fae - Version v0.0.1.alpha

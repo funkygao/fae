@@ -1,6 +1,6 @@
 fae - Fun App Engine
 ====================
-It's a middleware multilingual RPC engine for enterprise SOA infrastructure.
+Middleware multilingual RPC engine for enterprise SOA infrastructure.
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
