@@ -14,6 +14,7 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
+	CurrentSessions     metrics.Counter
 	TotalFailedCalls    metrics.Counter
 	TotalFailedSessions metrics.Counter
 	TotalSlowSessions   metrics.Counter
@@ -32,6 +33,8 @@ func newEngineStats() (this *engineStats) {
 }
 
 func (this *engineStats) registerMetrics() {
+	this.CurrentSessions = metrics.NewCounter()
+	metrics.Register("current.sessions", this.CurrentSessions)
 	this.TotalFailedSessions = metrics.NewCounter()
 	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
 	this.TotalSlowSessions = metrics.NewCounter()
