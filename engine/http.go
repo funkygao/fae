@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -59,6 +60,9 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
 		output["stats"] = this.stats.String()
+		rusage := syscall.Rusage{}
+		syscall.Getrusage(0, &rusage)
+		output["rusage"] = rusage
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()
