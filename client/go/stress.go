@@ -14,6 +14,7 @@ import (
 var (
 	N     int
 	C     int
+	host  string
 	FailC int
 	ctx   *rpc.Context
 )
@@ -26,6 +27,7 @@ func init() {
 func parseFlag() {
 	flag.IntVar(&N, "n", 10000, "loops count")
 	flag.IntVar(&C, "c", 800, "concurrent num")
+	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.Parse()
 }
 
@@ -33,7 +35,7 @@ func runClient(wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
 	remote := proxy.New()
-	client, err := remote.Servant(":9001")
+	client, err := remote.Servant(host + ":9001")
 	if err != nil {
 		fmt.Printf("seq^%d err^%v\n", seq, err)
 		FailC += 1
