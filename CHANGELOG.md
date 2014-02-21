@@ -17,6 +17,7 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Todo
 
+    . LRUcache switch to better vitess implementation
     . use framed transport for better performance 
     . user service with auto local caching
     . proxy of servant pooling
