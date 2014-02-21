@@ -18,7 +18,7 @@ func (this *Engine) ServeForever() {
 	this.hostname, _ = os.Hostname()
 	this.pid = os.Getpid()
 
-	signal.IgnoreSignal(syscall.SIGHUP)
+	signal.IgnoreSignal(syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGSTOP)
 
 	var (
 		totalCpus int
