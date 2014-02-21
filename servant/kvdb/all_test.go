@@ -47,7 +47,6 @@ func TestServlet(t *testing.T) {
 func BenchmarkRandomKeyGenerator(b *testing.B) {
 	const (
 		KEY_LEN = 80
-		VAL_LEN = 1024
 	)
 	key := make([]byte, KEY_LEN)
 	for i := 0; i < b.N; i++ {
@@ -58,7 +57,7 @@ func BenchmarkRandomKeyGenerator(b *testing.B) {
 func BenchmarkServletRandomPut(b *testing.B) {
 	const (
 		KEY_LEN = 80
-		VAL_LEN = 1024
+		VAL_LEN = 10240
 	)
 	s := newServlet("test")
 	s.open()
