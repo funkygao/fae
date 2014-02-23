@@ -58,7 +58,7 @@ func main() {
 
 	t1 := time.Now()
 
-	remote := proxy.New(10, time.Minute*60)
+	remote := proxy.New(C, time.Minute*60)
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
