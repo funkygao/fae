@@ -25,4 +25,6 @@ func main() {
 		fmt.Println(r, time.Since(t1))
 		t1 = time.Now()
 	}
+
+	fmt.Println(remote.StatsJSON())
 }
