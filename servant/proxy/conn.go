@@ -1,7 +1,3 @@
-/*
-Proxy of remote servant so that we can distribute request
-to cluster instead of having to serve all by ourselves.
-*/
 package proxy
 
 import (
@@ -9,7 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 )
 
-func (this *Proxy) connect(serverAddr string) (*rpc.FunServantClient, error) {
+func connect(serverAddr string) (*rpc.FunServantClient, error) {
 	transportFactory := thrift.NewTTransportFactory()
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 

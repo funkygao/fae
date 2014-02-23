@@ -10,12 +10,12 @@ import (
 func main() {
 	t1 := time.Now()
 
-	remote := proxy.New()
+	remote := proxy.New(5, 0)
 	client, err := remote.Servant(":9001")
 	if err != nil {
 		panic(err)
 	}
-	defer client.Transport.Close()
+	defer client.Recycle()
 
 	ctx := rpc.NewContext()
 	ctx.Caller = "me"

@@ -1,42 +1,42 @@
+/*
+Proxy of remote servant so that we can dispatch request
+to cluster instead of having to serve all by ourselves.
+*/
 package proxy
 
 import (
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"sync"
+	"time"
 )
 
 type Proxy struct {
-	*sync.RWMutex
-	freeServant map[string][]*rpc.FunServantClient
+	mutex *sync.Mutex
+
+	// pools for each remote peer(faed) instance
+	capacity    int
+	idleTimeout time.Duration
+	pools       map[string]*funServantPeerPool
 }
 
-func New() (this *Proxy) {
-	this = new(Proxy)
-	this.RWMutex = new(sync.RWMutex)
-	this.freeServant = make(map[string][]*rpc.FunServantClient)
+func New(capacity int, idleTimeout time.Duration) (this *Proxy) {
+	this = &Proxy{capacity: capacity, idleTimeout: idleTimeout,
+		mutex: new(sync.Mutex)}
+	this.pools = make(map[string]*funServantPeerPool)
 	return
 }
 
-func (this *Proxy) Servant(serverAddr string) (*rpc.FunServantClient, error) {
+func (this *Proxy) Servant(serverAddr string) (*FunServantPeer, error) {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
 	return this.getServant(serverAddr)
 }
 
-func (this *Proxy) getServant(serverAddr string) (*rpc.FunServantClient, error) {
-	s, ok := this.getFreeServant(serverAddr)
-	if ok {
-		return s, nil
+func (this *Proxy) getServant(serverAddr string) (*FunServantPeer, error) {
+	if _, ok := this.pools[serverAddr]; !ok {
+		this.pools[serverAddr] = newFunServantPeerPool(serverAddr,
+			this.capacity, this.idleTimeout)
+		this.pools[serverAddr].Open()
 	}
 
-	// create the servant connection on demand
-	return this.connect(serverAddr)
+	return this.pools[serverAddr].Get()
 }
-
-func (this *Proxy) putFreeServant(serverAddr string, client *rpc.FunServantClient) {
-
-}
-
-func (this *Proxy) getFreeServant(serverAddr string) (client *rpc.FunServantClient, ok bool) {
-	return
-}
-
-// TODO recycle

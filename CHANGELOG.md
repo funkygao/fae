@@ -7,7 +7,7 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Improvement
 
-    .
+    . universal resource pool management
 
 ###  Bug
 
@@ -17,6 +17,7 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Todo
 
+    . warmup, connect backend on startup
     . LRUcache switch to better vitess implementation
     . use framed transport for better performance 
     . user service with auto local caching

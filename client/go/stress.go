@@ -34,14 +34,14 @@ func parseFlag() {
 func runClient(wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
-	remote := proxy.New()
+	remote := proxy.New(10, time.Minute*60)
 	client, err := remote.Servant(host + ":9001")
 	if err != nil {
 		fmt.Printf("seq^%d err^%v\n", seq, err)
 		FailC += 1
 		return
 	}
-	defer client.Transport.Close()
+	defer client.Recycle()
 
 	var mcKey string
 	var mcValue = rpc.NewTMemcacheData()
