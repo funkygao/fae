@@ -14,7 +14,8 @@ type funServantPeerPool struct {
 
 func newFunServantPeerPool(serverAddr string, capacity int,
 	idleTimeout time.Duration) (this *funServantPeerPool) {
-	this = &funServantPeerPool{idleTimeout: idleTimeout, capacity: capacity}
+	this = &funServantPeerPool{idleTimeout: idleTimeout, capacity: capacity,
+		serverAddr: serverAddr}
 	return
 }
 
