@@ -27,6 +27,11 @@
         peer_dead_threshold: 30
         peer_heartbeat_interval: 10
 
+        proxy: {
+            pool_capacity: 5
+            idle_timeout: 600
+        }
+
         mongodb: {
             debug_heartbeat: false
             debug_protocol: false

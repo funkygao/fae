@@ -24,6 +24,7 @@ type ConfigServant struct {
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
+	Proxy    *ConfigProxy
 }
 
 func init() {
@@ -66,6 +67,13 @@ func LoadServants(cf *conf.Conf) {
 	section, err = cf.Section("kvdb")
 	if err == nil {
 		Servants.Kvdb.loadConfig(section)
+	}
+
+	// proxy section
+	Servants.Proxy = new(ConfigProxy)
+	section, err = cf.Section("proxy")
+	if err == nil {
+		Servants.Proxy.loadConfig(section)
 	}
 
 	log.Debug("servants: %+v", *Servants)
