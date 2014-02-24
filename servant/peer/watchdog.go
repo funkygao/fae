@@ -7,13 +7,11 @@ import (
 )
 
 func (this *Peer) runHeartbeat() {
-	t := time.NewTicker(time.Duration(this.heartbeatInterval) * time.Second)
-	defer t.Stop()
-
 	var msg = peerMessage{}
 	var err error
 	msg["ip"] = this.selfAddr
-	for _ = range t.C {
+	sleepInterval := time.Duration(this.heartbeatInterval) * time.Second
+	for {
 		if err = this.publish(msg); err != nil {
 			log.Error("Publish fails: %v", err)
 		}
@@ -25,7 +23,9 @@ func (this *Peer) runHeartbeat() {
 			}
 		}
 
+		time.Sleep(sleepInterval)
 	}
+
 }
 
 func (this *Peer) discoverPeers() {
