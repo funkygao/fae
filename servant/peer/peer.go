@@ -97,7 +97,7 @@ func (this *Peer) Start() (err error) {
 	go this.runHeartbeat()
 	go this.discoverPeers()
 
-	log.Info("Peer[%s] joined at %s", this.selfAddr, this.groupAddr)
+	log.Info("Self[%s] joined at %s", this.selfAddr, this.groupAddr)
 
 	return
 }
