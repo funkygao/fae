@@ -50,7 +50,7 @@ func (this *Peer) discoverPeers() {
 			continue
 		}
 
-		log.Debug("discovered peer: %+v", msg)
+		log.Debug("Discovered peer: %+v", msg)
 
 		neighborIp, present := msg["ip"]
 		if !present {
