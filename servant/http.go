@@ -25,8 +25,6 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 		if this.lc != nil {
 			output["lcache"] = this.lc.Len()
 		}
-
-	case "proxy":
 		if this.proxy != nil {
 			output["proxy"] = this.proxy.StatsJSON()
 		}
