@@ -8,15 +8,17 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 var (
-	N     int
-	C     int
-	host  string
-	FailC int
-	ctx   *rpc.Context
+	N           int
+	C           int
+	host        string
+	FailC       int
+	ctx         *rpc.Context
+	concurrentN int32
 )
 
 func init() {
@@ -25,8 +27,8 @@ func init() {
 }
 
 func parseFlag() {
-	flag.IntVar(&N, "n", 1000, "loops count")
-	flag.IntVar(&C, "c", 800, "concurrent num")
+	flag.IntVar(&N, "n", 1000, "loops count for each client")
+	flag.IntVar(&C, "c", 2500, "concurrent num")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.Parse()
 }
@@ -42,6 +44,8 @@ func runClient(remote *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	}
 	defer client.Recycle()
 
+	atomic.AddInt32(&concurrentN, 1)
+
 	var mcKey string
 	var mcValue = rpc.NewTMemcacheData()
 	for i := 0; i < N; i++ {
@@ -51,6 +55,8 @@ func runClient(remote *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		client.McAdd(ctx, mcKey, mcValue, 3600)
 		client.McSet(ctx, mcKey, mcValue, 3600)
 	}
+
+	atomic.AddInt32(&concurrentN, -1)
 }
 
 func main() {
@@ -64,6 +70,14 @@ func main() {
 		wg.Add(1)
 		go runClient(remote, wg, i)
 	}
+
+	go func() {
+		for {
+			fmt.Printf("concurrency: %d\n", concurrentN)
+			time.Sleep(time.Second)
+		}
+	}()
+
 	wg.Wait()
 
 	fmt.Printf("N=%d, C=%d, FailC=%d, elapsed=%s\n", N, C, FailC, time.Since(t1))
