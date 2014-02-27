@@ -57,8 +57,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	}
 
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
-		serverTransport, transportFactory, protocolFactory,
-		this.conf.rpc.maxOutstandingSessions)
+		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, this.conf.rpc.listenAddr)
 
 	done = make(chan interface{})

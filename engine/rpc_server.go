@@ -11,7 +11,6 @@ import (
 type TFunServer struct {
 	stopped bool
 
-	throttle               chan bool
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
@@ -19,15 +18,16 @@ type TFunServer struct {
 	outputTransportFactory thrift.TTransportFactory
 	inputProtocolFactory   thrift.TProtocolFactory
 	outputProtocolFactory  thrift.TProtocolFactory
+
+	pool *rpcThreadPool
 }
 
 func NewTFunServer(engine *Engine,
 	processor thrift.TProcessor,
 	serverTransport thrift.TServerTransport,
 	transportFactory thrift.TTransportFactory,
-	protocolFactory thrift.TProtocolFactory,
-	maxOutstandingSessions int) *TFunServer {
-	return &TFunServer{
+	protocolFactory thrift.TProtocolFactory) *TFunServer {
+	this := &TFunServer{
 		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,
@@ -35,8 +35,9 @@ func NewTFunServer(engine *Engine,
 		outputTransportFactory: transportFactory,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
-		throttle:               make(chan bool, maxOutstandingSessions),
 	}
+	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleClient)
+	return this
 }
 
 func (this *TFunServer) Serve() error {
@@ -46,27 +47,28 @@ func (this *TFunServer) Serve() error {
 		return err
 	}
 
+	this.pool.start()
+
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
-		if err != nil {
-			log.Error("Accept: %v", err)
+		if client != nil {
+			this.pool.dispatch(client)
 		}
 
-		if client != nil {
-			this.throttle <- true
-
-			go this.handleClient(client)
+		if err != nil {
+			log.Error("Accept: %v", err)
 		}
 	}
 
 	return nil
 }
 
-func (this *TFunServer) handleClient(client thrift.TTransport) {
+func (this *TFunServer) handleClient(req interface{}) {
 	defer func() {
-		<-this.throttle
 		this.engine.stats.CurrentSessions.Dec(1)
 	}()
+
+	client := req.(thrift.TTransport)
 
 	this.engine.stats.SessionPerSecond.Mark(1)
 	this.engine.stats.CurrentSessions.Inc(1)

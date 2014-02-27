@@ -8,34 +8,38 @@ import (
 )
 
 type configProcessManagement struct {
-	model           string
-	maxChildren     int
-	startServers    int
-	minSpareServers int
-	maxSpareServers int
+	model                  string
+	maxOutstandingSessions int
+	startServers           int
+	minSpareServers        int64
+	spawnServers           int
 }
 
 func (this *configProcessManagement) loadConfig(section *conf.Conf) {
 	this.model = section.String("model", "static")
-	this.maxChildren = section.Int("max_children", 10000)
 	this.startServers = section.Int("start_servers", 1000)
-	this.minSpareServers = section.Int("min_spare_servers", 200)
-	this.maxSpareServers = section.Int("max_spare_servers", 2000)
-	log.Debug("rpc pm: %+v", *this)
+	this.minSpareServers = int64(section.Int("min_spare_servers", 200))
+	this.spawnServers = section.Int("spawn_servers_n", 100)
+	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
+
+	log.Debug("pm: %+v", *this)
+}
+
+func (this *configProcessManagement) dynamic() bool {
+	return this.model == "dynamic"
 }
 
 type configRpc struct {
-	sessionSlowThreshold   float64 // in seconds per session
-	callSlowThreshold      float64 // in seconds per call
-	listenAddr             string
-	sessionTimeout         time.Duration
-	framed                 bool
-	protocol               string
-	debugSession           bool
-	tcpNoDelay             bool
-	maxOutstandingSessions int
-	statsOutputInterval    time.Duration
-	pm                     *configProcessManagement
+	sessionSlowThreshold float64 // in seconds per session
+	callSlowThreshold    float64 // in seconds per call
+	listenAddr           string
+	sessionTimeout       time.Duration
+	framed               bool
+	protocol             string
+	debugSession         bool
+	tcpNoDelay           bool
+	statsOutputInterval  time.Duration
+	pm                   *configProcessManagement
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -46,7 +50,6 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 
 	this.sessionSlowThreshold = section.Float("session_slow_threshold", 5)
 	this.callSlowThreshold = section.Float("call_slow_threshold", 5)
-	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
 	this.sessionTimeout = time.Duration(section.Int("session_timeout",
 		0)) * time.Second
 	this.framed = section.Bool("framed", false)
