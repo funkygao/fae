@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
+	"log"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -16,7 +17,7 @@ var (
 	N           int
 	C           int
 	host        string
-	FailC       int
+	FailC       int32
 	ctx         *rpc.Context
 	concurrentN int32
 )
@@ -36,14 +37,18 @@ func parseFlag() {
 func runClient(remote *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
+	log.Printf("%6d started\n", seq)
+
+	t1 := time.Now()
 	client, err := remote.Servant(host + ":9001")
 	if err != nil {
-		fmt.Printf("seq^%d err^%v\n", seq, err)
-		FailC += 1
+		log.Printf("seq^%d err^%v\n", seq, err)
+		atomic.AddInt32(&FailC, 1)
 		return
 	}
 	defer client.Recycle()
 
+	log.Printf("%6d connected within %s\n", seq, time.Since(t1))
 	atomic.AddInt32(&concurrentN, 1)
 
 	var mcKey string
@@ -56,6 +61,7 @@ func runClient(remote *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		client.McSet(ctx, mcKey, mcValue, 3600)
 	}
 
+	log.Printf("%6d done\n", seq)
 	atomic.AddInt32(&concurrentN, -1)
 }
 
@@ -73,13 +79,13 @@ func main() {
 
 	go func() {
 		for {
-			fmt.Printf("concurrency: %d\n", concurrentN)
+			log.Printf("concurrency: %d\n", concurrentN)
 			time.Sleep(time.Second)
 		}
 	}()
 
 	wg.Wait()
 
-	fmt.Printf("N=%d, C=%d, FailC=%d, elapsed=%s\n", N, C, FailC, time.Since(t1))
-	fmt.Println(remote.StatsJSON())
+	log.Printf("N=%d, C=%d, FailC=%d, elapsed=%s\n", N, C, FailC, time.Since(t1))
+	log.Println(remote.StatsJSON())
 }
