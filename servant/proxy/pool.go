@@ -34,10 +34,6 @@ func (this *funServantPeerPool) Open() {
 		this.idleTimeout)
 }
 
-func (this *funServantPeerPool) IsClosed() bool {
-	return this.pool == nil
-}
-
 func (this *funServantPeerPool) Get() (*FunServantPeer, error) {
 	fun, err := this.pool.Get()
 	if err != nil {
@@ -48,5 +44,7 @@ func (this *funServantPeerPool) Get() (*FunServantPeer, error) {
 }
 
 func (this *funServantPeerPool) Put(conn *FunServantPeer) {
-	this.pool.Put(conn)
+	if !this.pool.IsClosed() {
+		this.pool.Put(conn)
+	}
 }
