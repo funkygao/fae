@@ -50,8 +50,6 @@ func (this *Peer) discoverPeers() {
 			continue
 		}
 
-		log.Debug("Discovered peer: %+v", msg)
-
 		neighborIp, present := msg["ip"]
 		if !present {
 			log.Info("Peer msg has no 'ip'")
@@ -60,4 +58,29 @@ func (this *Peer) discoverPeers() {
 
 		this.refreshNeighbor(neighborIp.(string))
 	}
+}
+
+func (this *Peer) killNeighbor(ip string) {
+	this.rwmutex.Lock()
+	defer this.rwmutex.Unlock()
+
+	delete(this.neighbors, ip)
+	this.picker.DelPeer(ip)
+	log.Info("Peer[%s] killed", ip)
+
+	log.Debug("Neighbors: %+v", this.neighbors)
+}
+
+func (this *Peer) refreshNeighbor(ip string) {
+	this.rwmutex.Lock()
+	defer this.rwmutex.Unlock()
+
+	if _, present := this.neighbors[ip]; !present {
+		log.Info("Peer[%s] joined", ip)
+		this.picker.AddPeer(ip)
+	}
+
+	this.neighbors[ip] = time.Now()
+
+	log.Debug("Neighbors: %+v", this.neighbors)
 }
