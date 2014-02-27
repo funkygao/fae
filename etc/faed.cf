@@ -13,7 +13,7 @@
         session_timeout: 30
         debug_session: true
         tcp_nodelay: true
-        stats_output_interval: 60
+        stats_output_interval: 600
         // process management, learned from php-fpm
         pm: {
             // model: "static"
@@ -47,7 +47,7 @@
             shard_strategy: "legacy"
             connect_timeout: 4
             io_timeout: 30
-            heartbeat_interval: 0
+            heartbeat_interval: 60
             max_idle_conns_per_server: 3
             servers: [
                 {
