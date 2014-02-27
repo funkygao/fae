@@ -12,27 +12,29 @@ import (
 type Proxy struct {
 	mutex *sync.Mutex
 
-	// pools for each remote peer(faed) instance
-	capacity    int
-	idleTimeout time.Duration
-	pools       map[string]*funServantPeerPool
+	capacity    int                            // all fae peer share same capacity, weight TODO
+	idleTimeout time.Duration                  // fae peer in pool idle timeout
+	pools       map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr
 }
 
 func New(capacity int, idleTimeout time.Duration) (this *Proxy) {
-	this = &Proxy{capacity: capacity, idleTimeout: idleTimeout,
-		mutex: new(sync.Mutex)}
+	this = &Proxy{
+		capacity:    capacity,
+		idleTimeout: idleTimeout,
+		mutex:       new(sync.Mutex),
+	}
 	this.pools = make(map[string]*funServantPeerPool)
 	return
 }
 
-func (this *Proxy) Servant(serverAddr string) (*FunServantPeer, error) {
+func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
-	if _, ok := this.pools[serverAddr]; !ok {
-		this.pools[serverAddr] = newFunServantPeerPool(serverAddr,
+	if _, ok := this.pools[peerAddr]; !ok {
+		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
 			this.capacity, this.idleTimeout)
-		this.pools[serverAddr].Open()
+		this.pools[peerAddr].Open()
 	}
 
-	return this.pools[serverAddr].Get()
+	return this.pools[peerAddr].Get()
 }
