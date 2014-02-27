@@ -13,6 +13,8 @@ type mockClient struct {
 	freeconn map[string][]*mockSession
 }
 
+var client *mockClient
+
 func prepareFixture(n int) *mockClient {
 	addr := "localhost"
 	c := &mockClient{freeconn: make(map[string][]*mockSession)}
@@ -24,21 +26,19 @@ func prepareFixture(n int) *mockClient {
 
 func TestDeleteDeadSessions(t *testing.T) {
 	for i := 0; i < 10; i++ {
-		client := prepareFixture(i)
+		client = prepareFixture(i)
 		t.Logf("members %d", i)
-		deleteDeadSessions(t, client)
+		testDeleteDeadSessions(t)
 	}
 
 }
 
-func deleteDeadSessions(t *testing.T, client *mockClient) {
+func testDeleteDeadSessions(t *testing.T) {
 	for _, sessions := range client.freeconn {
-		for idx, _ := range sessions {
-			t.Logf("idx %d", idx)
-			if rand.Intn(2) > -1 {
+		for _, sess := range sessions {
+			if rand.Intn(2) == 1 {
 				t.Logf("before delete: %+v", client.freeconn["localhost"])
-				t.Logf("idx %d", idx)
-				deleteSession(client, sessions, idx)
+				deleteSession(sess)
 				t.Logf("after  delete: %+v", client.freeconn["localhost"])
 			}
 		}
@@ -46,9 +46,13 @@ func deleteDeadSessions(t *testing.T, client *mockClient) {
 
 }
 
-func deleteSession(c *mockClient, sessions []*mockSession, idx int) {
+func deleteSession(session *mockSession) {
 	//sessions = append(sessions[:idx], sessions[idx+1:]...) this doesn't work
-	c.freeconn["localhost"] = append(c.freeconn["localhost"][:idx],
-		c.freeconn["localhost"][idx+1:]...)
+	for idx, sess := range client.freeconn["localhost"] {
+		if sess == session {
+			client.freeconn["localhost"] = append(client.freeconn["localhost"][:idx],
+				client.freeconn["localhost"][idx+1:]...)
+		}
+	}
 
 }

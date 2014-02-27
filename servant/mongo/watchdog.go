@@ -17,8 +17,8 @@ func (this *Client) runWatchdog() {
 
 	var wg *sync.WaitGroup
 	for _ = range ticker.C {
-		this.lk.Lock()
 		wg = new(sync.WaitGroup)
+		this.lk.Lock()
 		for _, sessions := range this.freeconn {
 			for _, sess := range sessions {
 				wg.Add(1)
@@ -26,18 +26,18 @@ func (this *Client) runWatchdog() {
 			}
 		}
 		this.lk.Unlock()
-
 		wg.Wait()
 	}
 
 }
 
-// TODO remove dead session from freecon
 func (this *Client) checkServerStatus(wg *sync.WaitGroup, sess *mgo.Session) {
 	defer wg.Done()
 	err := sess.Ping()
 	if err != nil {
-		log.Error("mongodb[%v]: %s", sess.LiveServers(), err)
 		sess.Close()
+		this.killConn(sess)
+
+		log.Error("mongodb[%v]: %s", sess.LiveServers(), err)
 	}
 }

@@ -47,7 +47,7 @@
             shard_strategy: "legacy"
             connect_timeout: 4
             io_timeout: 30
-            heartbeat_interval: 60
+            heartbeat_interval: 600
             max_idle_conns_per_server: 3
             servers: [
                 {

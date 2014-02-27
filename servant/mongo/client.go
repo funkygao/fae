@@ -108,3 +108,16 @@ func (this *Client) getFreeConn(url string) (sess *mgo.Session, ok bool) {
 	this.freeconn[url] = freelist[:len(freelist)-1]
 	return sess, true
 }
+
+// caller is responsible for lock
+func (this *Client) killConn(session *mgo.Session) {
+	for addr, sessions := range this.freeconn {
+		for idx, sess := range sessions {
+			if sess == session { // pointer addr compare
+				// https://code.google.com/p/go-wiki/wiki/SliceTricks
+				this.freeconn[addr] = append(this.freeconn[addr][:idx],
+					this.freeconn[addr][idx+1:]...)
+			}
+		}
+	}
+}
