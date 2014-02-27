@@ -7,6 +7,23 @@ import (
 	"time"
 )
 
+type configProcessManagement struct {
+	model           string
+	maxChildren     int
+	startServers    int
+	minSpareServers int
+	maxSpareServers int
+}
+
+func (this *configProcessManagement) loadConfig(section *conf.Conf) {
+	this.model = section.String("model", "static")
+	this.maxChildren = section.Int("max_children", 10000)
+	this.startServers = section.Int("start_servers", 1000)
+	this.minSpareServers = section.Int("min_spare_servers", 200)
+	this.maxSpareServers = section.Int("max_spare_servers", 2000)
+	log.Debug("rpc pm: %+v", *this)
+}
+
 type configRpc struct {
 	sessionSlowThreshold   float64 // in seconds per session
 	callSlowThreshold      float64 // in seconds per call
@@ -18,6 +35,7 @@ type configRpc struct {
 	tcpNoDelay             bool
 	maxOutstandingSessions int
 	statsOutputInterval    time.Duration
+	pm                     *configProcessManagement
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -37,6 +55,14 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.debugSession = section.Bool("debug_session", false)
 	this.statsOutputInterval = time.Duration(section.Int("stats_output_interval",
 		0)) * time.Second
+
+	// pm section
+	this.pm = new(configProcessManagement)
+	sec, err := section.Section("pm")
+	if err != nil {
+		panic(err)
+	}
+	this.pm.loadConfig(sec)
 
 	log.Debug("rpc: %+v", *this)
 }

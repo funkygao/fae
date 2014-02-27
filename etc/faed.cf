@@ -15,6 +15,14 @@
         debug_session: true
         tcp_nodelay: true
         stats_output_interval: 60
+        // process management, learned from php-fpm
+        pm: {
+            model: "dynamic"
+            max_children: 20000
+            start_servers: 1000
+            min_spare_servers: 100
+            max_spare_servers: 2000
+        }
     }
 
     servants: {
