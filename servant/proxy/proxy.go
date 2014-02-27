@@ -28,10 +28,6 @@ func New(capacity int, idleTimeout time.Duration) (this *Proxy) {
 func (this *Proxy) Servant(serverAddr string) (*FunServantPeer, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
-	return this.getServant(serverAddr)
-}
-
-func (this *Proxy) getServant(serverAddr string) (*FunServantPeer, error) {
 	if _, ok := this.pools[serverAddr]; !ok {
 		this.pools[serverAddr] = newFunServantPeerPool(serverAddr,
 			this.capacity, this.idleTimeout)
