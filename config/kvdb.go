@@ -6,13 +6,13 @@ import (
 )
 
 type ConfigKvdb struct {
-	Path       string
+	BasePath   string
 	ServletNum int
 	enabled    bool
 }
 
 func (this *ConfigKvdb) loadConfig(cf *conf.Conf) {
-	this.Path = cf.String("path", "/tmp/kvdb")
+	this.BasePath = cf.String("base_path", "/tmp/kvdb")
 	this.ServletNum = cf.Int("servlet_num", 0)
 	this.enabled = true
 

@@ -77,7 +77,8 @@
         }
 
         kvdb: {
-            path: "/tmp/kvdb"
+            // CHANGE this on online servers!!!
+            base_path: "/tmp/kvdb"
             servlet_num: 10
         }
 

@@ -43,7 +43,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	if this.conf.Kvdb.Enabled() {
-		this.kvdb = kvdb.NewServer(this.conf.Kvdb.Path,
+		this.kvdb = kvdb.NewServer(this.conf.Kvdb.BasePath,
 			this.conf.Kvdb.ServletNum)
 	}
 
@@ -97,4 +97,8 @@ func (this *FunServantImpl) Start() {
 			this.kvdb = nil
 		}
 	}
+}
+
+func (this *FunServantImpl) warmUp() {
+
 }
