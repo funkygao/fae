@@ -53,3 +53,7 @@ func (this *StandardServerSelector) PickServer(key string) (net.Addr, error) {
 		uint32(len(this.addrs))
 	return this.addrs[bucket], nil
 }
+
+func (this *StandardServerSelector) ServerList() (servers []net.Addr) {
+	return this.addrs
+}

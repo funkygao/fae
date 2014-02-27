@@ -45,6 +45,12 @@ func New(hashStrategy string, servers ...string) *Client {
 			RetryTimeout: time.Second * 10}}
 }
 
+func (this *Client) WarmUp() {
+	for _, addr := range this.selector.ServerList() {
+		this.getConn(addr)
+	}
+}
+
 func (this *Client) FreeConn() map[string][]*conn {
 	this.lk.Lock()
 	defer this.lk.Unlock()

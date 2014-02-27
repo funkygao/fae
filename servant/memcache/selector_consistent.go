@@ -28,3 +28,7 @@ func (this *ConsistentServerSelector) PickServer(key string) (net.Addr, error) {
 
 	return net.ResolveTCPAddr("tcp", server)
 }
+
+func (this *ConsistentServerSelector) ServerList() (servers []net.Addr) {
+	return
+}
