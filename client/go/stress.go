@@ -34,13 +34,13 @@ func parseFlag() {
 	flag.Parse()
 }
 
-func runClient(remote *proxy.Proxy, wg *sync.WaitGroup, seq int) {
+func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
 	log.Printf("%6d started\n", seq)
 
 	t1 := time.Now()
-	client, err := remote.Servant(host + ":9001")
+	client, err := proxy.Servant(host + ":9001")
 	if err != nil {
 		log.Printf("seq^%d err^%v\n", seq, err)
 		atomic.AddInt32(&FailC, 1)
@@ -70,16 +70,17 @@ func main() {
 
 	t1 := time.Now()
 
-	remote := proxy.New(C*4, time.Minute*60)
+	proxy := proxy.New(C*4, time.Minute*60)
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
-		go runClient(remote, wg, i)
+		go runClient(proxy, wg, i)
 	}
 
 	go func() {
 		for {
 			log.Printf("concurrency: %d\n", concurrentN)
+			log.Println(proxy.StatsJSON())
 			time.Sleep(time.Second)
 		}
 	}()
@@ -87,5 +88,4 @@ func main() {
 	wg.Wait()
 
 	log.Printf("N=%d, C=%d, FailC=%d, elapsed=%s\n", N, C, FailC, time.Since(t1))
-	log.Println(remote.StatsJSON())
 }
