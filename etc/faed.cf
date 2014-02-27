@@ -87,6 +87,7 @@
             timeout: 4
             servers: [
                 {
+                    pool: "default"
                     host: "127.0.0.1"
                     port: "11211"
                 }

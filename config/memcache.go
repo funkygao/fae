@@ -7,6 +7,7 @@ import (
 )
 
 type ConfigMemcacheServer struct {
+	pool string
 	host string
 	hort string
 }
@@ -20,6 +21,7 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 	if this.hort == "" {
 		panic("Empty memcache server port")
 	}
+	this.pool = section.String("pool", "default")
 
 	log.Debug("memcache server: %+v", *this)
 }
