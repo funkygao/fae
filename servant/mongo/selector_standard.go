@@ -38,3 +38,8 @@ func (this *StandardServerSelector) PickServer(pool string,
 func (this *StandardServerSelector) SetServers(servers map[string]*config.ConfigMongodbServer) {
 	this.Servers = servers
 }
+
+// TODO
+func (this *StandardServerSelector) ServerList() (servers []*config.ConfigMongodbServer) {
+	return
+}

@@ -29,6 +29,11 @@ func (this *LegacyServerSelector) SetServers(servers map[string]*config.ConfigMo
 	this.Servers = servers
 }
 
+// FIXME
+func (this *LegacyServerSelector) ServerList() (servers []*config.ConfigMongodbServer) {
+	return
+}
+
 func (this *LegacyServerSelector) normalizedPool(pool string) string {
 	const (
 		N      = 2

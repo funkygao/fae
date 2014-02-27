@@ -60,6 +60,12 @@ func (this *Client) Session(pool string, shardId int32) (*Session, error) {
 	return &Session{Session: sess, client: this, server: server}, nil
 }
 
+func (this *Client) WarmUp() {
+	for _, server := range this.selector.ServerList() {
+		this.getConn(server.Address())
+	}
+}
+
 func (this *Client) getConn(url string) (*mgo.Session, error) {
 	sess, ok := this.getFreeConn(url)
 	if ok {
