@@ -64,7 +64,8 @@ func (this *engineStats) Start(t time.Time, interval time.Duration) {
 	this.startedAt = t
 
 	if interval > 0 {
-		go metrics.Log(metrics.DefaultRegistry,
+		time.Sleep(time.Second * 10)
+		metrics.Log(metrics.DefaultRegistry,
 			interval, log.New(os.Stderr, "", log.LstdFlags))
 	}
 }
