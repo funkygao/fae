@@ -112,7 +112,3 @@ func (this *FunServantImpl) Start() {
 		}
 	}
 }
-
-func (this *FunServantImpl) warmUp() {
-
-}
