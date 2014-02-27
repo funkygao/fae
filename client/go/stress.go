@@ -27,7 +27,7 @@ func init() {
 }
 
 func parseFlag() {
-	flag.IntVar(&N, "n", 1000, "loops count for each client")
+	flag.IntVar(&N, "n", 10000, "loops count for each client")
 	flag.IntVar(&C, "c", 2500, "concurrent num")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.Parse()
@@ -64,7 +64,7 @@ func main() {
 
 	t1 := time.Now()
 
-	remote := proxy.New(C, time.Minute*60)
+	remote := proxy.New(C*4, time.Minute*60)
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
