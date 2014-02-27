@@ -32,21 +32,42 @@ type FunServantImpl struct {
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
-	this.idgen = idgen.NewIdGenerator()
+
+	// stats
 	this.stats = new(servantStats)
 	this.stats.registerMetrics()
+
+	// http REST
+	if rest.Launched() {
+		rest.RegisterHttpApi("/s/{cmd}",
+			func(w http.ResponseWriter, req *http.Request,
+				params map[string]interface{}) (interface{}, error) {
+				return this.handleHttpQuery(w, req, params)
+			}).Methods("GET")
+	}
+
+	// remote fae peer
+	if this.conf.PeerEnabled() {
+		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
+			this.conf.PeerHeartbeatInterval,
+			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
+		this.proxy = proxy.New(this.conf.Proxy.PoolCapacity,
+			this.conf.Proxy.IdleTimeout)
+	}
+
+	// idgen
+	this.idgen = idgen.NewIdGenerator()
+
+	// TODO session
 	this.sessions = newSessions()
 
+	// local cache
 	if this.conf.Lcache.Enabled() {
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
 
-	if this.conf.Kvdb.Enabled() {
-		this.kvdb = kvdb.NewServer(this.conf.Kvdb.BasePath,
-			this.conf.Kvdb.ServletNum)
-	}
-
+	// memcache
 	if this.conf.Memcache.Enabled() {
 		memcacheServers := this.conf.Memcache.ServerList()
 		this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
@@ -54,6 +75,13 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
 	}
 
+	// kvdb
+	if this.conf.Kvdb.Enabled() {
+		this.kvdb = kvdb.NewServer(this.conf.Kvdb.BasePath,
+			this.conf.Kvdb.ServletNum)
+	}
+
+	// mongodb
 	if this.conf.Mongodb.Enabled() {
 		this.mg = mongo.New(this.conf.Mongodb)
 		if this.conf.Mongodb.DebugProtocol ||
@@ -63,27 +91,13 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
-	if this.conf.PeerEnabled() {
-		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
-			this.conf.PeerHeartbeatInterval,
-			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
-		this.proxy = proxy.New(this.conf.Proxy.PoolCapacity,
-			this.conf.Proxy.IdleTimeout)
-	}
-
-	if rest.Launched() {
-		rest.RegisterHttpApi("/s/{cmd}",
-			func(w http.ResponseWriter, req *http.Request,
-				params map[string]interface{}) (interface{}, error) {
-				return this.handleHttpQuery(w, req, params)
-			}).Methods("GET")
-	}
-
 	return
 }
 
 func (this *FunServantImpl) Start() {
 	go this.runWatchdog()
+	go this.warmUp()
+
 	if this.peer != nil {
 		if err := this.peer.Start(); err != nil {
 			log.Error("peer start: %v", err)
