@@ -38,6 +38,6 @@ func (this *Client) checkServerStatus(wg *sync.WaitGroup, sess *mgo.Session) {
 		sess.Close()
 		this.killConn(sess)
 
-		log.Error("mongodb[%v]: %s", sess.LiveServers(), err)
+		log.Error("mongodb[%v] killed for: %s", sess.LiveServers(), err)
 	}
 }
