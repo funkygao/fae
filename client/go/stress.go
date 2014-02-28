@@ -77,7 +77,6 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	var result []byte
 	mgQuery, _ := bson.Marshal(bson.M{"snsid": "100003391571259"})
 	mgFields, _ := bson.Marshal(bson.M{})
-	var err1 error
 	for i := 0; i < N; i++ {
 		_, err = client.Ping(ctx)
 		if err != nil {
@@ -85,14 +84,11 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		}
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
 		mcValue.Data = []byte("value of " + mcKey)
-		_, err = client.McAdd(ctx, mcKey, mcValue, 3600)
-		if err != nil {
-			log.Fatal(err)
-		}
 		_, err = client.McSet(ctx, mcKey, mcValue, 3600)
 		if err != nil {
 			log.Fatal(err)
 		}
+		_, err, _ = client.McGet(ctx, mcKey)
 		_, err = client.LcSet(ctx, mcKey, mcValue.Data)
 		if err != nil {
 			log.Fatal(err)
@@ -105,12 +101,15 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		result, err1, err = client.MgFindOne(ctx, "default", "idmap", 0,
+		result, _, err = client.MgFindOne(ctx, "default", "idmap", 0,
 			mgQuery,
 			mgFields)
-		log.Printf("%v %v", result, err1)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if false {
+			log.Printf("%s", result)
 		}
 		client.KvdbSet(ctx, fixture.RandomByteSlice(30),
 			fixture.RandomByteSlice(10<<10))
@@ -127,7 +126,7 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 }
 
 func tryServantPool(proxy *proxy.Proxy) {
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < C; i++ {
 		t1 := time.Now()
 		client, err := proxy.Servant(host + ":9001")
 		if err != nil {
