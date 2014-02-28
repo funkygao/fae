@@ -142,7 +142,8 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 			return nil
 		} else if err != nil {
 			// non-EOF transport err
-			log.Error("transport peer{%s}: %s", remoteAddr, err)
+			// e,g. connection reset by peer
+			// e,g. broken pipe
 			this.engine.stats.TotalFailedCalls.Inc(1)
 			return err
 		}
