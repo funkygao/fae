@@ -16,13 +16,13 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	this.stats.inBytes.Inc(int64(len(value.Data) + len(key)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Set(&memcache.Item{Key: key,
+	err := this.mc.Set(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
-	if appErr == nil {
+	if err == nil {
 		r = true
 	} else {
-		log.Error("mc.set: %v", appErr)
+		log.Error("mc.set: %v", err)
 	}
 
 	profiler.do("mc.set", ctx,
@@ -55,7 +55,6 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 		miss = rpc.NewTCacheMissed()
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
-		appErr = err
 		log.Error("mc.get: %v", err)
 	}
 
@@ -75,17 +74,13 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	this.stats.inBytes.Inc(int64(len(key) + len(value.Data)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Add(&memcache.Item{Key: key,
+	err := this.mc.Add(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
-	if appErr == nil {
+	if err == nil {
 		r = true
-	} else if appErr == memcache.ErrNotStored {
-		r = false
-		appErr = nil
 	} else {
-		r = false
-		log.Error("mc.add: %v", appErr)
+		log.Error("mc.add: %v", err)
 	}
 
 	profiler.do("mc.add", ctx,
@@ -105,14 +100,11 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Delete(key)
-	if appErr == nil {
+	err := this.mc.Delete(key)
+	if err == nil {
 		r = true
-	} else if appErr == memcache.ErrCacheMiss {
-		r = false
-		appErr = nil
 	} else {
-		log.Error("mc.del: %v", appErr)
+		log.Error("mc.del: %v", err)
 	}
 
 	profiler.do("mc.del", ctx,
