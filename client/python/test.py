@@ -80,3 +80,8 @@ doc = bson.dumps(userDoc)
 print 'doc:', doc
 print '[Client] mg_insert received:', client.mg_insert(ctx, 'db1', 'usertest', 0, doc), elapsed()
 
+# kvdb
+#=====
+print '[Client] kvdb_set received:', client.kvdb_set(ctx, 'kvdbtest', 'we are the world'), elapsed()
+print '[Client] kvdb_get received:', client.kvdb_get(ctx, 'kvdbtest'), elapsed()
+print '[Client] kvdb_del received:', client.kvdb_del(ctx, 'kvdbtest'), elapsed()
