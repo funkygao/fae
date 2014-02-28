@@ -80,7 +80,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	if err == nil {
 		r = true
 	} else {
-		log.Error("mc.add: %v", err)
+		log.Error("mc.add[%s]: %v", key, err)
 	}
 
 	profiler.do("mc.add", ctx,
