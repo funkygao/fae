@@ -21,10 +21,14 @@ var (
 	FailC       int32
 	ctx         *rpc.Context
 	concurrentN int32
+	verbose     int
+	calls       int64
+	lastCalls   int64
 )
 
 func init() {
 	ctx = rpc.NewContext()
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
 	ctx.Caller = "stress test agent"
 }
 
@@ -32,13 +36,16 @@ func parseFlag() {
 	flag.IntVar(&N, "n", 10000, "loops count for each client")
 	flag.IntVar(&C, "c", 2500, "concurrent num")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
+	flag.IntVar(&verbose, "v", 0, "verbose")
 	flag.Parse()
 }
 
 func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
-	log.Printf("%6d started\n", seq)
+	if verbose > 2 {
+		log.Printf("%6d started\n", seq)
+	}
 
 	t1 := time.Now()
 	client, err := proxy.Servant(host + ":9001")
@@ -49,7 +56,10 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	}
 	defer client.Recycle()
 
-	log.Printf("%6d connected within %s\n", seq, time.Since(t1))
+	if verbose > 2 {
+		log.Printf("%6d connected within %s\n", seq, time.Since(t1))
+	}
+
 	atomic.AddInt32(&concurrentN, 1)
 
 	var mcKey string
@@ -66,9 +76,14 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		client.IdNext(ctx, 0)
 		client.KvdbSet(ctx, fixture.RandomByteSlice(30),
 			fixture.RandomByteSlice(10<<10))
+
+		atomic.AddInt64(&calls, 8)
 	}
 
-	log.Printf("%6d done\n", seq)
+	if verbose > 2 {
+		log.Printf("%6d done\n", seq)
+	}
+
 	atomic.AddInt32(&concurrentN, -1)
 }
 
@@ -77,7 +92,7 @@ func main() {
 
 	t1 := time.Now()
 
-	proxy := proxy.New(C*4, time.Minute*60)
+	proxy := proxy.New(C, time.Minute*60)
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
@@ -86,8 +101,19 @@ func main() {
 
 	go func() {
 		for {
-			log.Printf("concurrency: %d\n", concurrentN)
-			log.Println(proxy.StatsJSON())
+			currentCalls := atomic.LoadInt64(&calls)
+			if lastCalls != 0 {
+				log.Printf("concurrency: %5d calls:%9d cps:%6d\n", concurrentN,
+					atomic.LoadInt64(&calls), currentCalls-lastCalls)
+			} else {
+				log.Printf("concurrency: %5d calls:%9d\n", concurrentN,
+					atomic.LoadInt64(&calls))
+			}
+			lastCalls = currentCalls
+			if verbose > 1 {
+				log.Println(proxy.StatsJSON())
+			}
+
 			time.Sleep(time.Second)
 		}
 	}()
