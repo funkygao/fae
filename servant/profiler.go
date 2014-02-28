@@ -14,8 +14,8 @@ type profiler struct {
 	t1 time.Time
 }
 
-func (this *FunServantImpl) profiler() profiler {
-	p := profiler{on: false}
+func (this *FunServantImpl) profiler() *profiler {
+	p := &profiler{on: false}
 	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
 	p.t1 = time.Now()
 	p.FunServantImpl = this
@@ -26,7 +26,7 @@ func (this *FunServantImpl) profiler() profiler {
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	slow := elapsed.Seconds() > 5
+	slow := elapsed.Seconds() > 3
 	if !slow && !this.on {
 		return
 	}
