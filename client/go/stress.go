@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
+	"github.com/funkygao/golib/fixture"
 	"log"
 	"math/rand"
 	"sync"
@@ -57,8 +58,14 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		client.Ping(ctx)
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
 		mcValue.Data = []byte("value of " + mcKey)
+		client.Ping(ctx)
 		client.McAdd(ctx, mcKey, mcValue, 3600)
 		client.McSet(ctx, mcKey, mcValue, 3600)
+		client.LcSet(ctx, mcKey, mcValue.Data)
+		client.LcGet(ctx, mcKey)
+		client.IdNext(ctx, 0)
+		client.KvdbSet(ctx, fixture.RandomByteSlice(30),
+			fixture.RandomByteSlice(10<<10))
 	}
 
 	log.Printf("%6d done\n", seq)
