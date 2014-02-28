@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/fixture"
 	"github.com/funkygao/golib/gofmt"
+	"labix.org/v2/mgo/bson"
 	"log"
 	"math/rand"
 	"sync"
@@ -25,6 +26,8 @@ var (
 	verbose     int
 	calls       int64
 	lastCalls   int64
+	clientN     int32
+	test1       bool
 )
 
 func init() {
@@ -38,16 +41,22 @@ func parseFlag() {
 	flag.IntVar(&C, "c", 2500, "concurrent num")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose")
+	flag.BoolVar(&test1, "t1", true, "only test connect/close")
 	flag.Parse()
+}
+
+func sampling() bool {
+	return rand.Intn(100) == 1
 }
 
 func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	defer wg.Done()
 
-	if verbose > 2 {
+	if verbose > 3 && sampling() {
 		log.Printf("%6d started\n", seq)
 	}
 
+	atomic.AddInt32(&clientN, 1)
 	t1 := time.Now()
 	client, err := proxy.Servant(host + ":9001")
 	if err != nil {
@@ -57,7 +66,7 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	}
 	defer client.Recycle()
 
-	if verbose > 2 {
+	if verbose > 4 && sampling() {
 		log.Printf("%6d connected within %s\n", seq, time.Since(t1))
 	}
 
@@ -65,27 +74,72 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 
 	var mcKey string
 	var mcValue = rpc.NewTMemcacheData()
+	var result []byte
+	mgQuery, _ := bson.Marshal(bson.M{"snsid": "100003391571259"})
+	mgFields, _ := bson.Marshal(bson.M{})
+	var err1 error
 	for i := 0; i < N; i++ {
-		client.Ping(ctx)
+		_, err = client.Ping(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
 		mcValue.Data = []byte("value of " + mcKey)
-		client.Ping(ctx)
-		client.McAdd(ctx, mcKey, mcValue, 3600)
-		client.McSet(ctx, mcKey, mcValue, 3600)
-		client.LcSet(ctx, mcKey, mcValue.Data)
-		client.LcGet(ctx, mcKey)
-		client.IdNext(ctx, 0)
+		_, err = client.McAdd(ctx, mcKey, mcValue, 3600)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = client.McSet(ctx, mcKey, mcValue, 3600)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = client.LcSet(ctx, mcKey, mcValue.Data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, _, err = client.LcGet(ctx, mcKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, _, err = client.IdNext(ctx, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+		result, err1, err = client.MgFindOne(ctx, "default", "idmap", 0,
+			mgQuery,
+			mgFields)
+		log.Printf("%v %v", result, err1)
+		if err != nil {
+			log.Fatal(err)
+		}
 		client.KvdbSet(ctx, fixture.RandomByteSlice(30),
 			fixture.RandomByteSlice(10<<10))
 
 		atomic.AddInt64(&calls, 8)
 	}
 
-	if verbose > 2 {
+	if verbose > 3 && sampling() {
 		log.Printf("%6d done\n", seq)
 	}
 
+	atomic.AddInt32(&clientN, -1)
 	atomic.AddInt32(&concurrentN, -1)
+}
+
+func tryServantPool(proxy *proxy.Proxy) {
+	for i := 0; i < 10000; i++ {
+		t1 := time.Now()
+		client, err := proxy.Servant(host + ":9001")
+		if err != nil {
+			log.Printf("seq^%d err^%v\n", i, err)
+			atomic.AddInt32(&FailC, 1)
+			return
+		}
+		log.Printf("%8d connected within %s", i, time.Since(t1))
+		client.Recycle()
+	}
+
+	log.Println("try server connect/close done!!!")
 }
 
 func main() {
@@ -94,6 +148,14 @@ func main() {
 	t1 := time.Now()
 
 	proxy := proxy.New(C, time.Minute*60)
+
+	tryServantPool(proxy)
+	if test1 {
+		return
+	}
+
+	time.Sleep(time.Second * 2)
+
 	wg := new(sync.WaitGroup)
 	for i := 0; i < C; i++ {
 		wg.Add(1)
@@ -103,18 +165,21 @@ func main() {
 	go func() {
 		for {
 			currentCalls := atomic.LoadInt64(&calls)
+			cn := atomic.LoadInt32(&clientN)
 			if lastCalls != 0 {
-				log.Printf("concurrency: %5d calls:%12s cps:%9s\n",
+				log.Printf("client: %5d concurrency: %5d calls:%12s cps: %9s\n",
+					cn,
 					concurrentN,
 					gofmt.Comma(currentCalls),
 					gofmt.Comma(currentCalls-lastCalls))
 			} else {
-				log.Printf("concurrency: %5d calls:%12s\n",
+				log.Printf("client: %5d concurrency: %5d calls: %12s\n",
+					cn,
 					concurrentN,
 					gofmt.Comma(currentCalls))
 			}
 			lastCalls = currentCalls
-			if verbose > 1 {
+			if verbose > 10 {
 				log.Println(proxy.StatsJSON())
 			}
 
