@@ -132,7 +132,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
 			this.engine.stats.TotalSlowCalls.Inc(1)
-			log.Warn("SLOW=%s call peer{%s}", elapsed, remoteAddr)
+			log.Warn("SLOW call=%.3fs, peer{%s}", elapsed.Seconds(), remoteAddr)
 		}
 
 		// check transport error
