@@ -76,7 +76,7 @@ func (this *Peer) refreshNeighbor(ip string) {
 	defer this.rwmutex.Unlock()
 
 	if _, present := this.neighbors[ip]; !present {
-		log.Info("Peer[%s] joined", ip)
+		log.Info("Peer[%s] becoming rookie", ip)
 		this.picker.AddPeer(ip)
 	}
 
