@@ -140,6 +140,11 @@ try {
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
 
+    // id.next
+    echo "[Client] kvdb_set received:", $client->kvdb_set($ctx, 'php-kvdb-hello', 'you bunny'), "\n";
+    echo "[Client] kvdb_get received:", $client->kvdb_get($ctx, 'php-kvdb-hello'), "\n";
+    echo "[Client] kvdb_del received:", $client->kvdb_del($ctx, 'php-kvdb-hello'), "\n";
+
     $transport->close();
 } catch (TException $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";
