@@ -19,14 +19,14 @@
             // model: "static"
             model: "dynamic"
             max_outstanding_sessions: 5000
-            start_servers: 10000
+            start_servers: 1000
             min_spare_servers: 600
-            spawn_servers_n: 800
+            spawn_servers_n: 300
         }
     }
 
     servants: {
-        profiler_max_body_size: 60
+        profiler_max_body_size: 600
         watchdog_interval: 0
         profiler_rate: 1000
         // multicast address in the range 224.0.0.0 through 239.255.255.255
@@ -48,7 +48,7 @@
             connect_timeout: 4
             io_timeout: 30
             heartbeat_interval: 600
-            max_idle_conns_per_server: 3
+            max_idle_conns_per_server: 20
             servers: [
                 {
                     pool: "log"
@@ -84,7 +84,7 @@
 
         memcache: {
             hash_strategy: "standard"
-            max_idle_conns_per_server: 3
+            max_idle_conns_per_server: 20
             timeout: 4
             servers: [
                 {
