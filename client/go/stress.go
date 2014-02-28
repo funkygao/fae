@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/fixture"
+	"github.com/funkygao/golib/gofmt"
 	"log"
 	"math/rand"
 	"sync"
@@ -103,11 +104,14 @@ func main() {
 		for {
 			currentCalls := atomic.LoadInt64(&calls)
 			if lastCalls != 0 {
-				log.Printf("concurrency: %5d calls:%9d cps:%6d\n", concurrentN,
-					atomic.LoadInt64(&calls), currentCalls-lastCalls)
+				log.Printf("concurrency: %5d calls:%12s cps:%9s\n",
+					concurrentN,
+					gofmt.Comma(currentCalls),
+					gofmt.Comma(currentCalls-lastCalls))
 			} else {
-				log.Printf("concurrency: %5d calls:%9d\n", concurrentN,
-					atomic.LoadInt64(&calls))
+				log.Printf("concurrency: %5d calls:%12s\n",
+					concurrentN,
+					gofmt.Comma(currentCalls))
 			}
 			lastCalls = currentCalls
 			if verbose > 1 {
