@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// profiler and auditter
 type profiler struct {
 	*FunServantImpl
 	on bool
