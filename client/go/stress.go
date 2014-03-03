@@ -80,26 +80,31 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	for i := 0; i < N; i++ {
 		_, err = client.Ping(ctx)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
 		mcValue.Data = []byte("value of " + mcKey)
 		_, err = client.McSet(ctx, mcKey, mcValue, 3600)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		_, err, _ = client.McGet(ctx, mcKey)
 		_, err = client.LcSet(ctx, mcKey, mcValue.Data)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		_, _, err = client.LcGet(ctx, mcKey)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		_, _, err = client.IdNext(ctx, 0)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		result, _, err = client.MgFindOne(ctx, "default", "idmap", 0,
 			mgQuery,
