@@ -105,7 +105,7 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 			mgQuery,
 			mgFields)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		if false {
