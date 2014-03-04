@@ -45,7 +45,12 @@ func (this *rpcThreadPool) dispatch(request interface{}) {
 	if this.cf.dynamic() {
 		this.reqChan <- request
 	} else {
-		go this.handler(request)
+		// here, reqChan is just a throttle to control max outstanding sessions
+		this.reqChan <- true
+		go func() {
+			this.handler(request)
+			<-this.reqChan
+		}()
 	}
 }
 
