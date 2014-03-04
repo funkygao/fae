@@ -20,7 +20,7 @@ func (this *Engine) launchHttpServ() {
 		return
 	}
 
-	rest.LaunchHttpServ(this.conf.httpListenAddr)
+	rest.LaunchHttpServ(this.conf.httpListenAddr, this.conf.pprofListenAddr)
 	rest.RegisterHttpApi("/admin/{cmd}",
 		func(w http.ResponseWriter, req *http.Request,
 			params map[string]interface{}) (interface{}, error) {
@@ -84,6 +84,9 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 			"/admin/runtime",
 			"/admin/mem",
 			"/admin/conf",
+		}
+		if this.conf.pprofListenAddr != "" {
+			output["pprof"] = "http://" + this.conf.pprofListenAddr + "/debug/pprof/"
 		}
 
 	default:

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"time"
 )
 
@@ -21,7 +22,7 @@ type httpRestApi struct {
 	httpPaths    []string
 }
 
-func LaunchHttpServ(listenAddr string) (err error) {
+func LaunchHttpServ(listenAddr string, debugAddr string) (err error) {
 	if api != nil {
 		return nil
 	}
@@ -41,6 +42,9 @@ func LaunchHttpServ(listenAddr string) (err error) {
 	log.Info("HTTP server ready at http:%s", listenAddr)
 
 	go api.httpServer.Serve(api.httpListener)
+	if debugAddr != "" {
+		go http.ListenAndServe(debugAddr, nil)
+	}
 
 	return nil
 }

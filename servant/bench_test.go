@@ -12,7 +12,7 @@ func setupServant() *FunServantImpl {
 	cf, _ := conf.Load("../etc/faed.cf")
 	section, _ := cf.Section("servants")
 	config.LoadServants(section)
-	http.LaunchHttpServ(":9999")
+	http.LaunchHttpServ(":9999", "")
 	return NewFunServant(config.Servants)
 }
 
