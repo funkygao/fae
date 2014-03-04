@@ -8,11 +8,12 @@ import (
 
 type rpcHandler func(req interface{})
 
+// Like php-fpm pm pool
 type rpcThreadPool struct {
 	cf           *configProcessManagement
 	handler      rpcHandler
-	reqChan      chan interface{}
 	spareServerN int32
+	reqChan      chan interface{} // max outstanding session throttle
 }
 
 func newRpcThreadPool(cf *configProcessManagement,
@@ -27,14 +28,14 @@ func newRpcThreadPool(cf *configProcessManagement,
 
 func (this *rpcThreadPool) start() {
 	if this.cf.dynamic() {
-		this.spawnChildren(this.cf.startServers)
+		this.spawnChildrenInBatch(this.cf.startServers)
 	}
 }
 
-func (this *rpcThreadPool) spawnChildren(n int) {
+func (this *rpcThreadPool) spawnChildrenInBatch(batchSize int) {
 	t1 := time.Now()
-	for i := 0; i < n; i++ {
-		go this.handleRequest()
+	for i := 0; i < batchSize; i++ {
+		go this.dynamicHandleRequest()
 		atomic.AddInt32(&this.spareServerN, 1)
 	}
 
@@ -54,18 +55,18 @@ func (this *rpcThreadPool) dispatch(request interface{}) {
 	}
 }
 
-func (this *rpcThreadPool) handleRequest() {
+func (this *rpcThreadPool) dynamicHandleRequest() {
 	for {
 		req := <-this.reqChan // will block
 
 		// got a request, before finishing it, I'm not spare
 		atomic.AddInt32(&this.spareServerN, -1)
 
-		// spawn children if neccessary
+		// spawn children in batch if neccessary
 		leftN := atomic.LoadInt32(&this.spareServerN)
 		if leftN < this.cf.minSpareServers {
 			log.Warn("rpc thread pool seems busy: left %d", leftN)
-			go this.spawnChildren(this.cf.spawnServers)
+			go this.spawnChildrenInBatch(this.cf.spawnServers)
 		}
 
 		// handle request
