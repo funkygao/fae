@@ -67,17 +67,22 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleClient(req interface{}) {
-	defer func() {
-		this.engine.stats.CurrentSessions.Dec(1)
-	}()
+	defer this.engine.stats.CurrentSessions.Dec(1)
 
-	client := req.(thrift.TTransport)
+	client, ok := req.(thrift.TTransport)
+	if !ok {
+		log.Error("Invalid client request: %#v", req)
+		return
+	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
 	this.engine.stats.CurrentSessions.Inc(1)
 
 	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		tcp.SetNoDelay(this.engine.conf.rpc.tcpNoDelay)
+		if !this.engine.conf.rpc.tcpNoDelay {
+			// in golang, no delay by default
+			tcp.SetNoDelay(false)
+		}
 
 		if this.engine.conf.rpc.debugSession {
 			log.Debug("accepted session peer{%s}", tcp.RemoteAddr())
