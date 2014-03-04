@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/locking"
+	"github.com/funkygao/golib/profile"
 	"github.com/funkygao/golib/signal"
 	"os"
 	"runtime/debug"
@@ -41,8 +42,18 @@ func main() {
 		}
 	}()
 
+	if options.cpuprof || options.memprof {
+		cf := &profile.Config{
+			Quiet:       true,
+			ProfilePath: "profiler",
+			CPUProfile:  options.cpuprof,
+			MemProfile:  options.memprof,
+		}
+
+		defer profile.Start(cf).Stop()
+	}
+
 	setupLogging(options.logLevel, options.logFile)
-	setupProfiler()
 
 	go runWatchdog(time.Second * time.Duration(options.tick))
 

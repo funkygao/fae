@@ -6,8 +6,8 @@ var (
 		showVersion bool
 		logFile     string
 		tick        int
-		cpuprof     string
-		memprof     string
+		cpuprof     bool
+		memprof     bool
 		lockFile    string
 		logLevel    string
 	}

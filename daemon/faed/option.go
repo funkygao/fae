@@ -7,7 +7,6 @@ import (
 	_log "log"
 	"os"
 	"path/filepath"
-	"runtime/pprof"
 )
 
 func parseFlags() {
@@ -17,8 +16,8 @@ func parseFlags() {
 	flag.StringVar(&options.lockFile, "lockfile", "faed.lock", "lockfile path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
 	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")
-	flag.StringVar(&options.cpuprof, "cpuprof", "", "cpu profiling file")
-	flag.StringVar(&options.memprof, "memprof", "", "memory profiling file")
+	flag.BoolVar(&options.cpuprof, "cpuprof", false, "enable cpu profiling")
+	flag.BoolVar(&options.memprof, "memprof", false, "enable memory profiling")
 	flag.Usage = showUsage
 
 	flag.Parse()
@@ -31,23 +30,6 @@ func parseFlags() {
 func showUsage() {
 	fmt.Fprint(os.Stderr, USAGE)
 	flag.PrintDefaults()
-}
-
-func setupProfiler() {
-	if options.cpuprof != "" {
-		f, err := os.Create(options.cpuprof)
-		if err != nil {
-			panic(err)
-		}
-
-		pprof.StartCPUProfile(f)
-
-		log.Info("CPU profiler [%s] enabled", options.cpuprof)
-	}
-
-	if options.memprof != "" {
-		log.Info("MEM profiler [%s] enabled", options.memprof)
-	}
 }
 
 func setupLogging(loggingLevel, logFile string) {
