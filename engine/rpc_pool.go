@@ -49,7 +49,7 @@ func (this *rpcThreadPool) dispatch(request interface{}) {
 		this.reqChan <- request
 	} else {
 		// here, reqChan is just a throttle to control max outstanding sessions
-		this.reqChan <- true
+		this.reqChan <- true // block if outstanding sessions overflows
 		go func() {
 			this.handler(request)
 			<-this.reqChan
@@ -71,7 +71,7 @@ func (this *rpcThreadPool) dynamicHandleRequest() {
 			go this.spawnChildrenInBatch(this.cf.spawnServers)
 		}
 
-		// handle request
+		// handle client request
 		this.handler(req)
 
 		// this request finished, I'm spare again, able to handle new request
