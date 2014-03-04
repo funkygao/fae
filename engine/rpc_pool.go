@@ -9,6 +9,8 @@ import (
 type rpcClientHandler func(req interface{})
 
 // Like php-fpm pm pool
+// goroutine under benchmark is around 40k/s, if higher conn/s
+// is required, need pre-fork goroutines
 type rpcThreadPool struct {
 	cf           *configProcessManagement
 	handler      rpcClientHandler
