@@ -47,6 +47,6 @@ func runWatchdog(interval time.Duration) {
 		log.Info("cpu: %3.2f%% us, %3.2f%% sy, rss:%s",
 			userCpuUtil,
 			sysCpuUtil,
-			gofmt.ByteSize(float64(rusage.Maxrss)))
+			gofmt.ByteSize(float64(rusage.Maxrss*1024)))
 	}
 }
