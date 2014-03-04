@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	log "github.com/funkygao/log4go"
 	"net"
@@ -60,7 +61,7 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return nil
+	return errors.New("stopped")
 }
 
 func (this *TFunServer) handleClient(req interface{}) {
