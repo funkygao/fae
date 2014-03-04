@@ -44,9 +44,7 @@ func main() {
 	setupLogging(options.logLevel, options.logFile)
 	setupProfiler()
 
-	ticker := time.NewTicker(time.Second * time.Duration(options.tick))
-	go runWatchdog(ticker)
-	defer ticker.Stop()
+	go runWatchdog(time.Second * time.Duration(options.tick))
 
 	engine.NewEngine(options.configFile).
 		LoadConfigFile().

@@ -8,9 +8,11 @@ import (
 	"time"
 )
 
-func runWatchdog(ticker *time.Ticker) {
+func runWatchdog(interval time.Duration) {
 	startTime := time.Now()
 	ms := new(runtime.MemStats)
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
 	for _ = range ticker.C {
 		runtime.ReadMemStats(ms)
