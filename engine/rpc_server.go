@@ -66,21 +66,21 @@ func (this *TFunServer) Serve() error {
 	return errors.New("stopped")
 }
 
-func (this *TFunServer) handleClient(req interface{}) {
+func (this *TFunServer) handleClient(client interface{}) {
 	defer this.engine.stats.CurrentSessions.Dec(1)
 
-	client, ok := req.(thrift.TTransport)
+	transport, ok := client.(thrift.TTransport)
 	if !ok {
-		log.Error("Invalid client request: %#v", req)
+		log.Error("Invalid client: %#v", client)
 		return
 	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
 	this.engine.stats.CurrentSessions.Inc(1)
 
-	if tcp, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+	if tcp, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		if !this.engine.conf.rpc.tcpNoDelay {
-			// in golang, no delay by default
+			// golang is tcp no delay by default
 			tcp.SetNoDelay(false)
 		}
 
@@ -89,7 +89,7 @@ func (this *TFunServer) handleClient(req interface{}) {
 		}
 	}
 
-	this.processSession(client)
+	this.processSession(transport)
 }
 
 func (this *TFunServer) processSession(client thrift.TTransport) {
