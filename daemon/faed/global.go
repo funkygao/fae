@@ -8,13 +8,15 @@ var (
 		tick        int
 		cpuprof     bool
 		memprof     bool
+		blockprof   bool
 		lockFile    string
 		logLevel    string
 	}
 )
 
 const (
-	USAGE = `fae - Fun App Engine
+	PROFILER_DIR = "profiler"
+	USAGE        = `fae - Fun App Engine
 
 Flags:
 `

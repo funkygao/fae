@@ -18,6 +18,7 @@ func parseFlags() {
 	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")
 	flag.BoolVar(&options.cpuprof, "cpuprof", false, "enable cpu profiling")
 	flag.BoolVar(&options.memprof, "memprof", false, "enable memory profiling")
+	flag.BoolVar(&options.blockprof, "blockprof", false, "enable block profiling")
 	flag.Usage = showUsage
 
 	flag.Parse()

@@ -44,10 +44,11 @@ func main() {
 
 	if options.cpuprof || options.memprof {
 		cf := &profile.Config{
-			Quiet:       true,
-			ProfilePath: "profiler",
-			CPUProfile:  options.cpuprof,
-			MemProfile:  options.memprof,
+			Quiet:        true,
+			ProfilePath:  PROFILER_DIR,
+			CPUProfile:   options.cpuprof,
+			MemProfile:   options.memprof,
+			BlockProfile: options.blockprof,
 		}
 
 		defer profile.Start(cf).Stop()
