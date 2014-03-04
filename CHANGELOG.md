@@ -31,6 +31,7 @@ Release Notes - fae - Version v0.0.2.rc
     . optimize mc/mg pool, better failure handling
     . bitmap, replicated consitent hash
     . cpuprof/memprof
+    . db flush in batch
     . IO throughput of servants
     . QoS
     . SLA of servants
