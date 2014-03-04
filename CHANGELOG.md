@@ -3,33 +3,39 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### New Feature
 
-    .
+    . kvdb sharding by cluster with replicas
+    . kvdb servant and load test
 
 ### Improvement
 
     . universal resource pool management
+    . rpc server thread pool
+    . hot cache, local duplication
 
 ###  Bug
 
     . servant stats does not match engine stats
     . rps stats seems to have problem
     . call latency stats seems to have problem
+    . fail to stop the engine
 
 ### Todo
 
     . warmup, connect backend on startup
+    . memcache also support backend pools by name
+    . pool pkg bug
     . LRUcache switch to better vitess implementation
     . use framed transport for better performance 
     . user service with auto local caching
     . proxy of servant pooling
     . optimize mc/mg pool, better failure handling
     . bitmap, replicated consitent hash
-    . kvdb sharding by cluster with replicas
     . cpuprof/memprof
+    . IO throughput of servants
     . QoS
-    . SOA governance
     . SLA of servants
     . better restart mechanism, socket pair?
+    . THeaderTransport
 
 Release Notes - fae - Version v0.0.1.alpha
 ==========================================
