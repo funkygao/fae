@@ -38,6 +38,7 @@ func NewTFunServer(engine *Engine,
 		outputProtocolFactory:  protocolFactory,
 	}
 	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleClient)
+	engine.rpcThreadPool = this.pool
 	return this
 }
 
@@ -48,6 +49,7 @@ func (this *TFunServer) Serve() error {
 		return err
 	}
 
+	// start the thread pool
 	this.pool.start()
 
 	for !this.stopped {

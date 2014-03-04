@@ -60,6 +60,11 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
 		output["stats"] = this.stats.String()
+		output["pm"] = map[string]int{
+			"spare_servers":    int(this.rpcThreadPool.spareServerN.Count()),
+			"sessions_waiting": len(this.rpcThreadPool.reqChan),
+			"sessions_cap":     cap(this.rpcThreadPool.reqChan),
+		}
 		rusage := syscall.Rusage{}
 		syscall.Getrusage(0, &rusage)
 		output["rusage"] = rusage

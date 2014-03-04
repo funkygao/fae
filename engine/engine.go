@@ -11,8 +11,9 @@ type Engine struct {
 	configFile string
 	StartedAt  time.Time
 
-	rpcProcessor thrift.TProcessor
-	rpcServer    thrift.TServer
+	rpcProcessor  thrift.TProcessor
+	rpcServer     thrift.TServer
+	rpcThreadPool *rpcThreadPool
 
 	stats    *engineStats
 	pid      int
