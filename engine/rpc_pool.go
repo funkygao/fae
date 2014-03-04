@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-type rpcHandler func(req interface{})
+type rpcClientHandler func(req interface{})
 
 // Like php-fpm pm pool
 type rpcThreadPool struct {
 	cf           *configProcessManagement
-	handler      rpcHandler
+	handler      rpcClientHandler
 	spareServerN int32
 	reqChan      chan interface{} // max outstanding session throttle
 }
 
 func newRpcThreadPool(cf *configProcessManagement,
-	handler rpcHandler) (this *rpcThreadPool) {
+	handler rpcClientHandler) (this *rpcThreadPool) {
 	this = new(rpcThreadPool)
 	this.cf = cf
 	this.handler = handler
