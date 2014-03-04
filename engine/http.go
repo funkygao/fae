@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"runtime"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
@@ -61,7 +62,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["hostname"] = this.hostname
 		output["stats"] = this.stats.String()
 		output["pm"] = map[string]int{
-			"spare_servers":    int(this.rpcThreadPool.spareServerN.Count()),
+			"spare_servers":    int(atomic.LoadInt32(&this.rpcThreadPool.spareServerN)),
 			"sessions_waiting": len(this.rpcThreadPool.reqChan),
 			"sessions_cap":     cap(this.rpcThreadPool.reqChan),
 		}

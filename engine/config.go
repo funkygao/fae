@@ -11,14 +11,14 @@ type configProcessManagement struct {
 	model                  string
 	maxOutstandingSessions int
 	startServers           int
-	minSpareServers        int64
+	minSpareServers        int32
 	spawnServers           int
 }
 
 func (this *configProcessManagement) loadConfig(section *conf.Conf) {
 	this.model = section.String("model", "static")
 	this.startServers = section.Int("start_servers", 1000)
-	this.minSpareServers = int64(section.Int("min_spare_servers", 200))
+	this.minSpareServers = int32(section.Int("min_spare_servers", 200))
 	this.spawnServers = section.Int("spawn_servers_n", 100)
 	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
 

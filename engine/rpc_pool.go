@@ -2,7 +2,7 @@ package engine
 
 import (
 	log "github.com/funkygao/log4go"
-	"github.com/funkygao/metrics"
+	"sync/atomic"
 	"time"
 )
 
@@ -12,7 +12,7 @@ type rpcThreadPool struct {
 	cf           *configProcessManagement
 	handler      rpcHandler
 	reqChan      chan interface{}
-	spareServerN metrics.Counter
+	spareServerN int32
 }
 
 func newRpcThreadPool(cf *configProcessManagement,
@@ -22,9 +22,6 @@ func newRpcThreadPool(cf *configProcessManagement,
 	this.handler = handler
 	this.reqChan = make(chan interface{}, this.cf.maxOutstandingSessions)
 
-	// stats
-	this.spareServerN = metrics.NewCounter()
-	metrics.Register("pool.spare_server", this.spareServerN)
 	return
 }
 
@@ -38,7 +35,7 @@ func (this *rpcThreadPool) spawnChildren(n int) {
 	t1 := time.Now()
 	for i := 0; i < n; i++ {
 		go this.handleRequest()
-		this.spareServerN.Inc(1)
+		atomic.AddInt32(&this.spareServerN, 1)
 	}
 
 	log.Debug("rpcThreadPool spawned %d children within %s", n, time.Since(t1))
@@ -56,9 +53,11 @@ func (this *rpcThreadPool) handleRequest() {
 	for {
 		req := <-this.reqChan // will block
 
-		// maintain pool spare servers
-		this.spareServerN.Dec(1)
-		leftN := this.spareServerN.Count()
+		// got a request, before finishing it, I'm not spare
+		atomic.AddInt32(&this.spareServerN, -1)
+
+		// spawn children if neccessary
+		leftN := atomic.LoadInt32(&this.spareServerN)
 		if leftN < this.cf.minSpareServers {
 			log.Warn("rpc thread pool seems busy: left %d", leftN)
 			go this.spawnChildren(this.cf.spawnServers)
@@ -67,7 +66,8 @@ func (this *rpcThreadPool) handleRequest() {
 		// handle request
 		this.handler(req)
 
-		this.spareServerN.Inc(1)
+		// this request finished, I'm spare again, able to handle new request
+		atomic.AddInt32(&this.spareServerN, 1)
 	}
 
 }
