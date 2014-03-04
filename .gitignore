@@ -26,6 +26,7 @@ servant/gen-py/
 servant/gen-java/
 var/
 log/
+profiler/
 daemon/faed/faed
 faed.lock
 *.class
