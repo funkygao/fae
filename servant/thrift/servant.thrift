@@ -47,6 +47,11 @@ struct Context {
      * Session id.
      */
     13:optional string sid
+
+    /**
+     * Reserved for future.
+     */
+    14:optional string reserved
 }
 
 /**
