@@ -36,6 +36,8 @@ Release Notes - fae - Version v0.0.2.rc
     . QoS
     . SLA of servants
     . better restart mechanism, socket pair?
+    . simulate a low bandwidth, timeout env
+    . parse/explain each db query to find bad query, e,g. no indexed query
     . THeaderTransport
 
 Release Notes - fae - Version v0.0.1.alpha
