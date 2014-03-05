@@ -3,6 +3,7 @@ package mongo
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
+	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"sync"
 	"time"
@@ -61,9 +62,35 @@ func (this *Client) Session(pool string, shardId int32) (*Session, error) {
 }
 
 func (this *Client) WarmUp() {
-	for _, server := range this.selector.ServerList() {
-		this.getConn(server.Address())
+	var (
+		sess *mgo.Session
+		err  error
+		t1   = time.Now()
+	)
+	for retries := 0; retries < 3; retries++ {
+		for _, server := range this.selector.ServerList() {
+			sess, err = this.getConn(server.Address())
+			if err != nil {
+				log.Error("Warmup %v fail: %s", server.Address(), err)
+				break
+			} else {
+				this.putFreeConn(server.Url(), sess)
+			}
+		}
+
+		if err == nil {
+			break
+		}
 	}
+
+	if err == nil {
+		log.Trace("Mongodb warmed up within %s: %+v",
+			time.Since(t1), this.freeconn)
+	} else {
+		log.Error("Mongodb failed to warm up within %s: %s",
+			time.Since(t1), err)
+	}
+
 }
 
 func (this *Client) getConn(url string) (*mgo.Session, error) {

@@ -9,6 +9,7 @@ Release Notes - fae - Version v0.0.2.rc
 ### Improvement
 
     . universal resource pool management
+    . warmup, connect backend on startup
     . rpc server thread pool
     . calculate concurrent conns for each remote php host, so that we know which host is busy, alarming
     . hot cache, local duplication
@@ -22,7 +23,6 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Todo
 
-    . warmup, connect backend on startup
     . memcache also support backend pools by name
     . pool pkg bug
     . LRUcache switch to better vitess implementation

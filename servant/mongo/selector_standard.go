@@ -7,12 +7,12 @@ import (
 )
 
 type StandardServerSelector struct {
-	ShardBaseNum int
-	Servers      map[string]*config.ConfigMongodbServer // key is pool
+	shardBaseNum int
+	servers      map[string]*config.ConfigMongodbServer // key is pool
 }
 
 func NewStandardServerSelector(baseNum int) *StandardServerSelector {
-	return &StandardServerSelector{ShardBaseNum: baseNum}
+	return &StandardServerSelector{shardBaseNum: baseNum}
 }
 
 func (this *StandardServerSelector) PickServer(pool string,
@@ -23,11 +23,11 @@ func (this *StandardServerSelector) PickServer(pool string,
 	if !strings.HasPrefix(pool, SHARD_POOL_PREFIX) {
 		bucket = pool
 	} else {
-		bucket = fmt.Sprintf("db%d", (shardId/this.ShardBaseNum)+1)
+		bucket = fmt.Sprintf("db%d", (shardId/this.shardBaseNum)+1)
 	}
 
 	var present bool
-	server, present = this.Servers[bucket]
+	server, present = this.servers[bucket]
 	if !present {
 		err = ErrServerNotFound
 	}
@@ -36,10 +36,12 @@ func (this *StandardServerSelector) PickServer(pool string,
 }
 
 func (this *StandardServerSelector) SetServers(servers map[string]*config.ConfigMongodbServer) {
-	this.Servers = servers
+	this.servers = servers
 }
 
-// TODO
 func (this *StandardServerSelector) ServerList() (servers []*config.ConfigMongodbServer) {
+	for _, s := range this.servers {
+		servers = append(servers, s)
+	}
 	return
 }
