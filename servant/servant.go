@@ -96,7 +96,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 func (this *FunServantImpl) Start() {
 	go this.runWatchdog()
-	go this.warmUp()
+	this.warmUp()
 
 	if this.peer != nil {
 		if err := this.peer.Start(); err != nil {
