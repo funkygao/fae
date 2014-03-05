@@ -10,8 +10,7 @@ import (
 func main() {
 	t1 := time.Now()
 
-	remote := proxy.New(5, 0)
-	client, err := remote.Servant(":9001")
+	client, err := proxy.New(5, 0).Servant(":9001")
 	if err != nil {
 		panic(err)
 	}
@@ -26,5 +25,4 @@ func main() {
 		t1 = time.Now()
 	}
 
-	fmt.Println(remote.StatsJSON())
 }
