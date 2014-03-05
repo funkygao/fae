@@ -74,6 +74,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   client
     - demonstration of how to call servants
+    - stress test
     - currently supports python/go/php/java
 *   config
     - configuration lib shared by engine and servant
@@ -95,11 +96,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   servant
     - RPC server side implementation
     - peer
-        - other fae daemon that can be auto discovered
-        - handles proxied requests from other(peer) fae
+        - other fae daemon that can be auto discovered through multicast
         - watchdog for health of peers
+        - handles proxied requests from other(peer) fae
     -   proxy
         - stub of calling remote fae peers transparently
+        - pooling
 
 ### Highlights
 
