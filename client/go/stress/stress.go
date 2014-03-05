@@ -32,8 +32,9 @@ var (
 
 func init() {
 	ctx = rpc.NewContext()
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
 	ctx.Caller = "stress test agent"
+
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
 }
 
 func parseFlag() {
