@@ -10,6 +10,7 @@ Release Notes - fae - Version v0.0.2.rc
 
     . universal resource pool management
     . rpc server thread pool
+    . calculate concurrent conns for each remote php host, so that we know which host is busy, alarming
     . hot cache, local duplication
 
 ###  Bug

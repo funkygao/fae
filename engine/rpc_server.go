@@ -5,6 +5,8 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	log "github.com/funkygao/log4go"
 	"net"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -21,6 +23,9 @@ type TFunServer struct {
 	outputProtocolFactory  thrift.TProtocolFactory
 
 	pool *rpcThreadPool
+
+	mu                  sync.Mutex
+	clientConcurrencies map[string]int
 }
 
 func NewTFunServer(engine *Engine,
@@ -36,6 +41,7 @@ func NewTFunServer(engine *Engine,
 		outputTransportFactory: transportFactory,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
+		clientConcurrencies:    make(map[string]int),
 	}
 	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleClient)
 	engine.rpcThreadPool = this.pool
@@ -52,6 +58,9 @@ func (this *TFunServer) Serve() error {
 	// start the thread pool
 	this.pool.start()
 
+	// any web frontend got stuck?
+	go this.monitorClients()
+
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
 		if client != nil {
@@ -63,7 +72,7 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return errors.New("stopped")
+	return errors.New("rpc server stopped")
 }
 
 func (this *TFunServer) handleClient(client interface{}) {
@@ -78,18 +87,47 @@ func (this *TFunServer) handleClient(client interface{}) {
 	this.engine.stats.SessionPerSecond.Mark(1)
 	this.engine.stats.CurrentSessions.Inc(1)
 
-	if tcp, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		if !this.engine.conf.rpc.tcpNoDelay {
 			// golang is tcp no delay by default
-			tcp.SetNoDelay(false)
+			tcpClient.SetNoDelay(false)
 		}
 
 		if this.engine.conf.rpc.debugSession {
-			log.Debug("accepted session peer{%s}", tcp.RemoteAddr())
+			log.Debug("accepted session peer{%s}", tcpClient.RemoteAddr())
 		}
+
+		// store client concurrent connections count
+		this.mu.Lock()
+		p := strings.SplitN(tcpClient.RemoteAddr().String(), ":", 3)
+		if len(p) == 3 && p[1] != "" {
+			this.clientConcurrencies[p[1]] += 1
+			defer func() {
+				this.mu.Lock()
+				this.clientConcurrencies[p[1]] -= 1
+				this.mu.Unlock()
+			}()
+		}
+		this.mu.Unlock()
 	}
 
 	this.processSession(transport)
+}
+
+// if concurrent conns from same client is too high, it means
+// web frontend(php-fpm) got stuck, keep forking children
+// TODO
+func (this *TFunServer) monitorClients() {
+	for {
+		log.Debug("%+v", this.clientConcurrencies)
+		for clientIp, concurrentConns := range this.clientConcurrencies {
+			if concurrentConns > 200 {
+				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
+			}
+		}
+
+		time.Sleep(time.Second * 10)
+	}
 }
 
 func (this *TFunServer) processSession(client thrift.TTransport) {
