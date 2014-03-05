@@ -37,11 +37,11 @@ func init() {
 }
 
 func parseFlag() {
-	flag.IntVar(&N, "n", 10000, "loops count for each client")
+	flag.IntVar(&N, "n", 1000, "loops count for each client")
 	flag.IntVar(&C, "c", 2500, "concurrent num")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose")
-	flag.BoolVar(&test1, "t1", true, "only test connect/close")
+	flag.BoolVar(&test1, "t1", false, "only test connect/close")
 	flag.Parse()
 }
 
