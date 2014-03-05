@@ -64,7 +64,7 @@ func (this *TFunServer) Serve() error {
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
 		if client != nil {
-			this.pool.dispatch(client)
+			this.pool.Dispatch(client)
 		}
 
 		if err != nil {

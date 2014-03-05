@@ -30,21 +30,11 @@ func newRpcThreadPool(cf *configProcessManagement,
 
 func (this *rpcThreadPool) Start() {
 	if this.cf.dynamic() {
-		this.spawnChildrenInBatch(this.cf.startServers)
+		this.spawnDynamicChildrenInBatch(this.cf.startServers)
 	}
 }
 
-func (this *rpcThreadPool) spawnChildrenInBatch(batchSize int) {
-	t1 := time.Now()
-	for i := 0; i < batchSize; i++ {
-		go this.dynamicHandleRequest()
-		atomic.AddInt32(&this.spareServerN, 1)
-	}
-
-	log.Debug("rpcThreadPool spawned %d children within %s", batchSize, time.Since(t1))
-}
-
-func (this *rpcThreadPool) dispatch(request interface{}) {
+func (this *rpcThreadPool) Dispatch(request interface{}) {
 	if this.cf.dynamic() {
 		this.reqChan <- request
 	} else {
@@ -55,6 +45,16 @@ func (this *rpcThreadPool) dispatch(request interface{}) {
 			<-this.reqChan
 		}()
 	}
+}
+
+func (this *rpcThreadPool) spawnDynamicChildrenInBatch(batchSize int) {
+	t1 := time.Now()
+	for i := 0; i < batchSize; i++ {
+		go this.dynamicHandleRequest()
+		atomic.AddInt32(&this.spareServerN, 1)
+	}
+
+	log.Debug("rpcThreadPool spawned %d children within %s", batchSize, time.Since(t1))
 }
 
 func (this *rpcThreadPool) dynamicHandleRequest() {
@@ -68,7 +68,7 @@ func (this *rpcThreadPool) dynamicHandleRequest() {
 		leftN := atomic.LoadInt32(&this.spareServerN)
 		if leftN < this.cf.minSpareServers {
 			log.Warn("rpc thread pool seems busy: left %d", leftN)
-			go this.spawnChildrenInBatch(this.cf.spawnServers)
+			go this.spawnDynamicChildrenInBatch(this.cf.spawnServers)
 		}
 
 		// handle client request
