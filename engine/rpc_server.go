@@ -99,12 +99,12 @@ func (this *TFunServer) handleClient(client interface{}) {
 
 		// store client concurrent connections count
 		this.mu.Lock()
-		p := strings.SplitN(tcpClient.RemoteAddr().String(), ":", 3)
-		if len(p) == 3 && p[1] != "" {
-			this.clientConcurrencies[p[1]] += 1
+		p := strings.SplitN(tcpClient.RemoteAddr().String(), ":", 2)
+		if len(p) == 2 && p[0] != "" {
+			this.clientConcurrencies[p[0]] += 1
 			defer func() {
 				this.mu.Lock()
-				this.clientConcurrencies[p[1]] -= 1
+				this.clientConcurrencies[p[0]] -= 1
 				this.mu.Unlock()
 			}()
 		}
