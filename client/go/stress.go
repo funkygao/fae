@@ -166,6 +166,7 @@ func main() {
 		go runClient(proxy, wg, i)
 	}
 
+	// book keeping
 	go func() {
 		for {
 			currentCalls := atomic.LoadInt64(&calls)
