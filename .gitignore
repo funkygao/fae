@@ -28,5 +28,6 @@ var/
 log/
 profiler/
 daemon/faed/faed
+client/go/stress/stress
 faed.lock
 *.class
