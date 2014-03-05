@@ -56,7 +56,7 @@ func (this *TFunServer) Serve() error {
 	}
 
 	// start the thread pool
-	this.pool.start()
+	this.pool.Start()
 
 	// any web frontend got stuck?
 	go this.monitorClients()

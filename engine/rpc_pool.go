@@ -28,7 +28,7 @@ func newRpcThreadPool(cf *configProcessManagement,
 	return
 }
 
-func (this *rpcThreadPool) start() {
+func (this *rpcThreadPool) Start() {
 	if this.cf.dynamic() {
 		this.spawnChildrenInBatch(this.cf.startServers)
 	}
