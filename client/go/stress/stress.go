@@ -72,6 +72,9 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	}
 
 	atomic.AddInt32(&concurrentN, 1)
+	defer func() {
+		atomic.AddInt32(&concurrentN, -1)
+	}()
 
 	var mcKey string
 	var mcValue = rpc.NewTMemcacheData()
@@ -128,7 +131,6 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	}
 
 	atomic.AddInt32(&clientN, -1)
-	atomic.AddInt32(&concurrentN, -1)
 }
 
 func tryServantPool(proxy *proxy.Proxy) {
@@ -152,7 +154,7 @@ func main() {
 
 	t1 := time.Now()
 
-	proxy := proxy.New(C, time.Minute*60)
+	proxy := proxy.New(C/2, time.Minute*60)
 
 	tryServantPool(proxy)
 	if test1 {
