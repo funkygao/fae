@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/funkygao/golib/breaker"
+	log "github.com/funkygao/log4go"
 	"net"
 	"strconv"
 	"strings"
@@ -46,8 +47,34 @@ func New(hashStrategy string, servers ...string) *Client {
 }
 
 func (this *Client) WarmUp() {
-	for _, addr := range this.selector.ServerList() {
-		this.getConn(addr)
+	var (
+		cn  *conn
+		err error
+		t1  = time.Now()
+	)
+	for retries := 0; retries < 3; retries++ {
+		for _, addr := range this.selector.ServerList() {
+			cn, err = this.getConn(addr)
+			if err != nil {
+				log.Error("Warmup %v fail: %s", addr, err)
+				break
+			} else {
+				cn.condRelease(&err)
+			}
+		}
+
+		if err == nil {
+			// ok, needn't retry
+			break
+		}
+	}
+
+	if err == nil {
+		log.Trace("Memcache warmed up within %s: %+v",
+			time.Since(t1), this.freeconn)
+	} else {
+		log.Error("Memcache failed to warm up within %s: %s",
+			time.Since(t1), err)
 	}
 }
 
