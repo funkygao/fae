@@ -28,6 +28,7 @@ var (
 	lastCalls   int64
 	clientN     int32
 	test1       bool
+	callErrs    int64
 )
 
 func init() {
@@ -84,6 +85,7 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 	for i := 0; i < N; i++ {
 		_, err = client.Ping(ctx)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 			return
 		}
@@ -91,22 +93,26 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 		mcValue.Data = []byte("value of " + mcKey)
 		_, err = client.McSet(ctx, mcKey, mcValue, 3600)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 			return
 		}
 		_, err, _ = client.McGet(ctx, mcKey)
 		_, err = client.LcSet(ctx, mcKey, mcValue.Data)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 			return
 		}
 		_, _, err = client.LcGet(ctx, mcKey)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 			return
 		}
 		_, _, err = client.IdNext(ctx, 0)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 			return
 		}
@@ -114,6 +120,7 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 			mgQuery,
 			mgFields)
 		if err != nil {
+			atomic.AddInt64(&callErrs, 1)
 			log.Println(err)
 		}
 
@@ -175,11 +182,12 @@ func main() {
 			currentCalls := atomic.LoadInt64(&calls)
 			cn := atomic.LoadInt32(&clientN)
 			if lastCalls != 0 {
-				log.Printf("client: %5d concurrency: %5d calls:%12s cps: %9s\n",
+				log.Printf("client: %5d concurrency: %5d calls:%12s cps: %9s errs: %9s\n",
 					cn,
 					concurrentN,
 					gofmt.Comma(currentCalls),
-					gofmt.Comma(currentCalls-lastCalls))
+					gofmt.Comma(currentCalls-lastCalls),
+					gofmt.Comma(callErrs))
 			} else {
 				log.Printf("client: %5d concurrency: %5d calls: %12s\n",
 					cn,
