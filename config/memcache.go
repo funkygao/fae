@@ -9,7 +9,7 @@ import (
 type ConfigMemcacheServer struct {
 	pool string
 	host string
-	hort string
+	port string
 }
 
 func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
@@ -17,8 +17,8 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 	if this.host == "" {
 		panic("Empty memcache server host")
 	}
-	this.hort = section.String("port", "")
-	if this.hort == "" {
+	this.port = section.String("port", "")
+	if this.port == "" {
 		panic("Empty memcache server port")
 	}
 	this.pool = section.String("pool", "default")
@@ -27,7 +27,7 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 }
 
 func (this *ConfigMemcacheServer) Address() string {
-	return this.host + ":" + this.hort
+	return this.host + ":" + this.port
 }
 
 type ConfigMemcache struct {
