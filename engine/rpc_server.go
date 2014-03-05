@@ -119,7 +119,6 @@ func (this *TFunServer) handleClient(client interface{}) {
 // TODO
 func (this *TFunServer) monitorClients() {
 	for {
-		log.Debug("%+v", this.clientConcurrencies)
 		for clientIp, concurrentConns := range this.clientConcurrencies {
 			if concurrentConns > 200 {
 				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
