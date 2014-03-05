@@ -22,7 +22,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	if err == nil {
 		r = true
 	} else {
-		log.Error("mc.set: %v", err)
+		log.Error("mc.set {key^%s}: %v", key, err)
 	}
 
 	profiler.do("mc.set", ctx,
@@ -55,7 +55,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 		miss = rpc.NewTCacheMissed()
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
-		log.Error("mc.get: %v", err)
+		log.Error("mc.get {key^%s}: %v", key, err)
 	}
 
 	profiler.do("mc.get", ctx,
@@ -80,7 +80,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	if err == nil {
 		r = true
 	} else {
-		log.Error("mc.add[%s]: %v", key, err)
+		log.Error("mc.add {key^%s}: %v", key, err)
 	}
 
 	profiler.do("mc.add", ctx,
@@ -104,7 +104,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
 	if err == nil {
 		r = true
 	} else {
-		log.Error("mc.del: %v", err)
+		log.Error("mc.del {key^%s}: %v", key, err)
 	}
 
 	profiler.do("mc.del", ctx,
@@ -134,6 +134,8 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 
 	if err == nil {
 		r = int32(newVal)
+	} else {
+		log.Error("mc.inc {key^%s}: %v", key, err)
 	}
 
 	profiler.do("mc.inc", ctx,
