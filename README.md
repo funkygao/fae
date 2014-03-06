@@ -137,7 +137,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 #### Requirement for fae
 
-If a single fae is deployed for the whole cluster, its performances demands:
+If a single fae is deployed for the whole cluster, its capacity requirement:
 
 *   qps
     - 20000 call/s
@@ -151,6 +151,8 @@ If a single fae is deployed for the whole cluster, its performances demands:
     - mongodb instances     60
     - local tcp port used 7000
 
+*   summary
+
                 php
                  |
                  | 1000 concurrent conns
@@ -158,7 +160,6 @@ If a single fae is deployed for the whole cluster, its performances demands:
                 fae
                  |
                  | pool size 20
-                 | 20*6 + 20*60 = 1500
                  | total 1500 persistent backend tcp conns
                  |
                  | total 6000 simultaneous memcache conns at most
