@@ -5,6 +5,7 @@ Release Notes - fae - Version v0.0.2.rc
 
     . kvdb sharding by cluster with replicas
     . kvdb servant and load test
+    . mongodb/memcache graceful degrade with Circuit Breaker
 
 ### Improvement
 
@@ -23,7 +24,6 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Todo
 
-    . mongodb/memcache graceful degrade with Circuit Breaker
     . memcache also support backend pools by name
     . pool pkg bug
     . LRUcache switch to better vitess implementation

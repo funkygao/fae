@@ -5,5 +5,6 @@ import (
 )
 
 var (
-	ErrServerNotFound = errors.New("mongodb server not found")
+	ErrServerNotFound = errors.New("mongodb: server not found")
+	ErrCircuitOpen    = errors.New("mongodb: circuit open")
 )

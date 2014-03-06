@@ -10,20 +10,19 @@ import (
 )
 
 type Client struct {
-	conf     *config.ConfigMongodb
+	conf *config.ConfigMongodb
+
 	selector ServerSelector
+
 	lk       sync.Mutex
 	freeconn map[string][]*mgo.Session // the session pool, key is pool
-
-	breaker *breaker.Consecutive
+	breakers map[string]*breaker.Consecutive
 }
 
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
-	this.breaker = &breaker.Consecutive{
-		FailureAllowance: this.conf.Breaker.FailureAllowance,
-		RetryTimeout:     this.conf.Breaker.RetryTimeout}
+	this.breakers = make(map[string]*breaker.Consecutive)
 
 	switch cf.ShardStrategy {
 	case "legacy":
@@ -67,9 +66,9 @@ func (this *Client) WarmUp() {
 	)
 	for retries := 0; retries < 3; retries++ {
 		for _, server := range this.selector.ServerList() {
-			sess, err = this.getConn(server.Address())
+			sess, err = this.getConn(server.Url())
 			if err != nil {
-				log.Error("Warmup %v fail: %s", server.Address(), err)
+				log.Error("Warmup %v fail: %s", server.Url(), err)
 				break
 			} else {
 				this.putFreeConn(server.Url(), sess)
@@ -97,12 +96,22 @@ func (this *Client) getConn(url string) (*mgo.Session, error) {
 		return sess, nil
 	}
 
-	// create session on demand
+	return this.dial(url)
+}
+
+func (this *Client) dial(url string) (*mgo.Session, error) {
+	if this.breakers[url].Open() {
+		log.Warn("Circuit %s open", url)
+		return nil, ErrCircuitOpen
+	}
+
 	sess, err := mgo.DialWithTimeout(url, this.conf.ConnectTimeout)
 	if err != nil {
+		this.breakers[url].Fail()
 		return nil, err
 	}
 
+	this.breakers[url].Succeed()
 	sess.SetSocketTimeout(this.conf.IoTimeout)
 	sess.SetMode(mgo.Monotonic, true)
 
@@ -126,6 +135,12 @@ func (this *Client) putFreeConn(url string, sess *mgo.Session) {
 func (this *Client) getFreeConn(url string) (sess *mgo.Session, ok bool) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
+	if _, present := this.breakers[url]; !present {
+		this.breakers[url] = &breaker.Consecutive{
+			FailureAllowance: this.conf.Breaker.FailureAllowance,
+			RetryTimeout:     this.conf.Breaker.RetryTimeout}
+	}
+
 	if this.freeconn == nil {
 		return nil, false
 	}
