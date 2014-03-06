@@ -32,6 +32,12 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 	case "conf":
 		output["conf"] = *this.conf
 
+	case "guide", "help", "h":
+		output["uris"] = []string{
+			"/s/stat",
+			"/s/conf",
+		}
+
 	default:
 		return nil, rest.ErrHttp404
 	}
