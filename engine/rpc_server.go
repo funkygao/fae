@@ -45,6 +45,13 @@ func NewTFunServer(engine *Engine,
 	}
 	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleClient)
 	engine.rpcThreadPool = this.pool
+
+	// start the thread pool
+	this.pool.Start()
+
+	// any web frontend got stuck?
+	go this.monitorClients()
+
 	return this
 }
 
@@ -54,12 +61,6 @@ func (this *TFunServer) Serve() error {
 	if err != nil {
 		return err
 	}
-
-	// start the thread pool
-	this.pool.Start()
-
-	// any web frontend got stuck?
-	go this.monitorClients()
 
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
