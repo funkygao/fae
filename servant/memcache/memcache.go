@@ -22,7 +22,7 @@ type Client struct {
 	breaker  *breaker.Consecutive
 
 	lk       sync.Mutex
-	freeconn map[string][]*conn
+	freeconn map[net.Addr][]*conn
 }
 
 func New(cf *config.ConfigMemcache) (this *Client) {
@@ -80,7 +80,7 @@ func (this *Client) WarmUp() {
 	}
 }
 
-func (this *Client) FreeConn() map[string][]*conn {
+func (this *Client) FreeConn() map[net.Addr][]*conn {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	return this.freeconn
@@ -90,14 +90,14 @@ func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	if this.freeconn == nil {
-		this.freeconn = make(map[string][]*conn)
+		this.freeconn = make(map[net.Addr][]*conn)
 	}
-	freelist := this.freeconn[addr.String()]
+	freelist := this.freeconn[addr]
 	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		cn.nc.Close()
 		return
 	}
-	this.freeconn[addr.String()] = append(freelist, cn)
+	this.freeconn[addr] = append(freelist, cn)
 }
 
 func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
@@ -106,12 +106,12 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 	if this.freeconn == nil {
 		return nil, false
 	}
-	freelist, ok := this.freeconn[addr.String()]
+	freelist, ok := this.freeconn[addr]
 	if !ok || len(freelist) == 0 {
 		return nil, false
 	}
 	cn = freelist[len(freelist)-1]
-	this.freeconn[addr.String()] = freelist[:len(freelist)-1]
+	this.freeconn[addr] = freelist[:len(freelist)-1]
 	return cn, true
 }
 
