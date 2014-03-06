@@ -14,6 +14,11 @@ from thrift.protocol import TBinaryProtocol
 from thrift.transport.TTransport import TTransportException
 from fun.rpc import FunServant
 
+# config
+CONCURRENT = 100
+SESSIONS = 1000 * 1000
+PINGS_PER_CLIENT = 2
+
 def ping(n):
     #sock = TSocket.TSocket('127.0.0.1', 9001)
     sock = TSocket.TSocket('192.168.22.160', 9001)
@@ -29,18 +34,15 @@ def ping(n):
     for i in xrange(n):
         client.ping(ctx)
 
-def main():
-    CONCURRENT = 100
-    CLIENTS = 1000 * 1000
-    PINGS_PER_CLIENT = 2
+def main():    
     t1 = datetime.datetime.now()
     pool = multiprocessing.Pool(processes=CONCURRENT)
-    for i in xrange(CLIENTS):
+    for i in xrange(SESSIONS):
         pool.apply(ping, (PINGS_PER_CLIENT, ))
     pool.close()
     pool.join()
 
-    print PINGS_PER_CLIENT*CLIENTS, 'called'
+    print PINGS_PER_CLIENT*SESSIONS, 'called'
     print datetime.datetime.now() - t1
 
 if __name__ == '__main__':
