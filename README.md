@@ -60,27 +60,29 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 #### Directories
 
 *   client
-    - demonstration of how to call servants
+    - multilingual example code of how to call fae
     - stress test
-    - currently supports python/go/php/java
 *   config
     - configuration lib shared by engine and servant
+*   etc
+    - the config file 
 *   daemon
     - the fae deamon
-    - usually one instance per host
 *   engine
     - load config file
     - export internal status through REST api
     - launch servants
     - implements thrift rpc server
+    - session based audit/profiler
+    - handles timeout
     - launch thrift rpc serve
     - major version controller
-*   etc
-    - the config file 
 *   http
     - Plugin based REST interface 
     - for monitor/control purpose
 *   servant
+    - manages circuit break
+    - call based audit/profiler
     - RPC server side implementation
     - peer
         - other fae daemon that can be auto discovered through multicast
