@@ -12,13 +12,13 @@ type rpcClientHandler func(req interface{})
 // forking goroutine under benchmark is around 40k/s, if higher conn/s
 // is required, need pre-fork goroutines
 type rpcThreadPool struct {
-	cf           *configProcessManagement
+	cf           configProcessManagement
 	handler      rpcClientHandler
 	spareServerN int32
 	reqChan      chan interface{} // max outstanding session throttle
 }
 
-func newRpcThreadPool(cf *configProcessManagement,
+func newRpcThreadPool(cf configProcessManagement,
 	handler rpcClientHandler) (this *rpcThreadPool) {
 	this = new(rpcThreadPool)
 	this.cf = cf

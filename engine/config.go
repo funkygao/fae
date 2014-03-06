@@ -8,7 +8,7 @@ import (
 )
 
 type configProcessManagement struct {
-	model                  string
+	mode                   string
 	maxOutstandingSessions int
 	startServers           int
 	minSpareServers        int32
@@ -16,17 +16,15 @@ type configProcessManagement struct {
 }
 
 func (this *configProcessManagement) loadConfig(section *conf.Conf) {
-	this.model = section.String("model", "static")
+	this.mode = section.String("mode", "static")
 	this.startServers = section.Int("start_servers", 1000)
 	this.minSpareServers = int32(section.Int("min_spare_servers", 200))
 	this.spawnServers = section.Int("spawn_servers_n", 100)
 	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
-
-	log.Debug("pm: %+v", *this)
 }
 
 func (this *configProcessManagement) dynamic() bool {
-	return this.model == "dynamic"
+	return this.mode == "dynamic"
 }
 
 type configRpc struct {
@@ -39,7 +37,7 @@ type configRpc struct {
 	debugSession         bool
 	tcpNoDelay           bool
 	statsOutputInterval  time.Duration
-	pm                   *configProcessManagement
+	pm                   configProcessManagement
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -60,7 +58,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 		0)) * time.Second
 
 	// pm section
-	this.pm = new(configProcessManagement)
+	this.pm = configProcessManagement{}
 	sec, err := section.Section("pm")
 	if err != nil {
 		panic(err)
