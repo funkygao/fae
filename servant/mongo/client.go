@@ -15,20 +15,16 @@ type Client struct {
 	lk       sync.Mutex
 	freeconn map[string][]*mgo.Session // the session pool, key is pool
 
-	breaker        *breaker.Consecutive
-	connectTimeout time.Duration
-	ioTimeout      time.Duration
+	breaker *breaker.Consecutive
 }
 
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
-
 	this.breaker = &breaker.Consecutive{
 		FailureAllowance: this.conf.Breaker.FailureAllowance,
 		RetryTimeout:     this.conf.Breaker.RetryTimeout}
-	this.connectTimeout = time.Duration(this.conf.ConnectTimeout) * time.Second
-	this.ioTimeout = time.Duration(this.conf.IoTimeout) * time.Second
+
 	switch cf.ShardStrategy {
 	case "legacy":
 		this.selector = NewLegacyServerSelector(cf.ShardBaseNum)
@@ -102,12 +98,12 @@ func (this *Client) getConn(url string) (*mgo.Session, error) {
 	}
 
 	// create session on demand
-	sess, err := mgo.DialWithTimeout(url, this.connectTimeout)
+	sess, err := mgo.DialWithTimeout(url, this.conf.ConnectTimeout)
 	if err != nil {
 		return nil, err
 	}
 
-	sess.SetSocketTimeout(this.ioTimeout)
+	sess.SetSocketTimeout(this.conf.IoTimeout)
 	sess.SetMode(mgo.Monotonic, true)
 
 	return sess, nil

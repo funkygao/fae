@@ -4,6 +4,7 @@ import (
 	"fmt"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 type ConfigMongodbServer struct {
@@ -57,8 +58,8 @@ type ConfigMongodb struct {
 	DebugHeartbeat        bool
 	ShardBaseNum          int
 	ShardStrategy         string
-	ConnectTimeout        int
-	IoTimeout             int
+	ConnectTimeout        time.Duration
+	IoTimeout             time.Duration
 	MaxIdleConnsPerServer int
 	HeartbeatInterval     int
 	Breaker               ConfigBreaker
@@ -77,8 +78,8 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.DebugProtocol = cf.Bool("debug_protocol", false)
 	this.DebugHeartbeat = cf.Bool("debug_heartbeat", false)
 	this.ShardStrategy = cf.String("shard_strategy", "legacy")
-	this.ConnectTimeout = cf.Int("connect_timeout", 4)
-	this.IoTimeout = cf.Int("io_timeout", 30)
+	this.ConnectTimeout = time.Duration(cf.Int("connect_timeout", 4)) * time.Second
+	this.IoTimeout = time.Duration(cf.Int("io_timeout", 30)) * time.Second
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	section, err := cf.Section("breaker")
