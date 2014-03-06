@@ -25,6 +25,7 @@ var (
 	concurrentN int32
 	verbose     int
 	calls       int64
+	pingOnly    bool
 	lastCalls   int64
 	clientN     int32
 	test1       bool
@@ -44,6 +45,7 @@ func parseFlag() {
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose")
 	flag.BoolVar(&test1, "t1", false, "only test connect/close")
+	flag.BoolVar(&pingOnly, "p", false, "only call ping")
 	flag.Parse()
 }
 
@@ -89,6 +91,11 @@ func runClient(proxy *proxy.Proxy, wg *sync.WaitGroup, seq int) {
 			log.Println(err)
 			return
 		}
+		if pingOnly {
+			atomic.AddInt64(&calls, 1)
+			continue
+		}
+
 		mcKey = fmt.Sprintf("mc_stress:%d", rand.Int())
 		mcValue.Data = []byte("value of " + mcKey)
 		_, err = client.McSet(ctx, mcKey, mcValue, 3600)
