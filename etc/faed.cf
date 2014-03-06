@@ -12,6 +12,7 @@
         call_slow_threshold: 5
         session_slow_threshold: 8
         session_timeout: 30
+        io_timeout: 2
         debug_session: true
         tcp_nodelay: true
         stats_output_interval: 600

@@ -32,6 +32,7 @@ type configRpc struct {
 	callSlowThreshold    float64 // in seconds per call
 	listenAddr           string
 	sessionTimeout       time.Duration
+	ioTimeout            time.Duration
 	framed               bool
 	protocol             string
 	debugSession         bool
@@ -50,6 +51,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.callSlowThreshold = section.Float("call_slow_threshold", 5)
 	this.sessionTimeout = time.Duration(section.Int("session_timeout",
 		0)) * time.Second
+	this.ioTimeout = time.Duration(section.Int("io_timeout", 0)) * time.Second
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
 	this.tcpNoDelay = section.Bool("tcp_nodelay", true)

@@ -93,6 +93,9 @@ func (this *TFunServer) handleClient(client interface{}) {
 			// golang is tcp no delay by default
 			tcpClient.SetNoDelay(false)
 		}
+		if this.engine.conf.rpc.ioTimeout > 0 {
+			tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
+		}
 
 		if this.engine.conf.rpc.debugSession {
 			log.Debug("Accepted session peer{%s}", tcpClient.RemoteAddr())
