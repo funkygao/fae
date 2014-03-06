@@ -62,7 +62,7 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.HashStrategy = cf.String("hash_strategy", "standard")
 	this.Timeout = time.Duration(cf.Int("timeout", 4)) * time.Second
 	section, err := cf.Section("breaker")
-	if err != nil {
+	if err == nil {
 		this.Breaker.loadConfig(section)
 	}
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 3)

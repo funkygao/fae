@@ -82,7 +82,7 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	section, err := cf.Section("breaker")
-	if err != nil {
+	if err == nil {
 		this.Breaker.loadConfig(section)
 	}
 	this.Servers = make(map[string]*ConfigMongodbServer)
