@@ -135,10 +135,8 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
     - 800Mb/s
 
 *   net conns
-    - concurrent php-fpm  1000
-    - memcache instances     6
-    - mongodb instances     60
     - local tcp port used 7000
+    - persistent tcp conns 2000
 
 *   summary
 
