@@ -44,31 +44,18 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### Why SOA?
 
 *   More clear architecture
-    - UI -> php/python/... -> fae -> backend
-    - instead of php/python -> backend
 *   Seperation of concerns
-    - make a standard to hire developers
-        - each level developers have a common sense
-        - php frontend(more)
-        - middleware backend(less)
-    - loose coupling            
 *   Reuse common code as service and transparently reuse infrastructure
-    - refuse copy & paste bug
 *   Centralized best practice
 *   Centralized monitoring, auditting and profiling
-    - easy to find problems
 *   Independently deployable/testable
     - vital code should be more robust
     - can't have too much vital code
 *   Reduce tcp 3/4 way handshake overhead
-    - long conn pooling
-    - make better use of mem
 *   Horizontal scale made easy
     - frontend(php) and middleware scale dependently
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
-    - some programs are not web based, e,g. batch, can be implemented as any language you like
-*   Most large scale site use SOA as infrastructure
 
 #### Directories
 
