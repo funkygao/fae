@@ -1,3 +1,5 @@
+// +build !plan9,!windows
+
 package servant
 
 import (
@@ -91,7 +93,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 }
 
 func (this *FunServantImpl) Start() {
-	go this.runWatchdog()
 	this.warmUp()
 
 	if this.peer != nil {
