@@ -17,7 +17,8 @@ from thrift.Thrift import TApplicationException
 from fun.rpc import FunServant
 
 def ping(n):
-    sock = TSocket.TSocket('127.0.0.1', 9001)
+    #sock = TSocket.TSocket('127.0.0.1', 9001)
+    sock = TSocket.TSocket('192.168.22.160', 9001)
     try:
         sock.open()
     except TTransportException, e:
@@ -32,8 +33,8 @@ def ping(n):
 
 def main():
     CONCURRENT = 100
-    CLIENTS = 1000
-    PINGS_PER_CLIENT = 1000
+    CLIENTS = 1000 * 1000
+    PINGS_PER_CLIENT = 2
     t1 = datetime.datetime.now()
     pool = multiprocessing.Pool(processes=CONCURRENT)
     for i in xrange(CLIENTS):
