@@ -28,6 +28,7 @@ type Client struct {
 func New(cf *config.ConfigMemcache) (this *Client) {
 	this = new(Client)
 	this.conf = cf
+	this.breakers = make(map[net.Addr]*breaker.Consecutive)
 
 	switch cf.HashStrategy {
 	case ConstistentHashStrategy:
@@ -40,8 +41,6 @@ func New(cf *config.ConfigMemcache) (this *Client) {
 	if err := this.selector.SetServers(cf.ServerList()...); err != nil {
 		panic(err)
 	}
-
-	this.breakers = make(map[net.Addr]*breaker.Consecutive)
 
 	return
 }
