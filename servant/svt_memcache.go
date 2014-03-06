@@ -16,13 +16,13 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	this.stats.inBytes.Inc(int64(len(value.Data) + len(key)))
 
 	profiler := this.profiler()
-	err := this.mc.Set(&memcache.Item{Key: key,
+	appErr = this.mc.Set(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
-	if err == nil {
+	if appErr == nil {
 		r = true
 	} else {
-		log.Error("mc.set {key^%s}: %v", key, err)
+		log.Error("mc.set {key^%s}: %v", key, appErr)
 	}
 
 	profiler.do("mc.set", ctx,
@@ -55,6 +55,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 		miss = rpc.NewTCacheMissed()
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
+		appErr = err
 		log.Error("mc.get {key^%s}: %v", key, err)
 	}
 
@@ -74,13 +75,13 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	this.stats.inBytes.Inc(int64(len(key) + len(value.Data)))
 
 	profiler := this.profiler()
-	err := this.mc.Add(&memcache.Item{Key: key,
+	appErr = this.mc.Add(&memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
-	if err == nil {
+	if appErr == nil {
 		r = true
 	} else {
-		log.Error("mc.add {key^%s}: %v", key, err)
+		log.Error("mc.add {key^%s}: %v", key, appErr)
 	}
 
 	profiler.do("mc.add", ctx,
@@ -94,17 +95,17 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	return
 }
 
-func (this *FunServantImpl) McDelete(ctx *rpc.Context, key string) (r bool,
-	appErr error) {
+func (this *FunServantImpl) McDelete(ctx *rpc.Context,
+	key string) (r bool, appErr error) {
 	this.stats.inc("mc.del")
 	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.profiler()
-	err := this.mc.Delete(key)
-	if err == nil {
+	appErr = this.mc.Delete(key)
+	if appErr == nil {
 		r = true
 	} else {
-		log.Error("mc.del {key^%s}: %v", key, err)
+		log.Error("mc.del {key^%s}: %v", key, appErr)
 	}
 
 	profiler.do("mc.del", ctx,
@@ -135,6 +136,7 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
 	if err == nil {
 		r = int32(newVal)
 	} else {
+		appErr = err
 		log.Error("mc.inc {key^%s}: %v", key, err)
 	}
 
