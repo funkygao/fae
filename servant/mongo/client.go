@@ -23,8 +23,10 @@ type Client struct {
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
-	this.breaker = &breaker.Consecutive{FailureAllowance: 10,
-		RetryTimeout: time.Second * 10}
+
+	this.breaker = &breaker.Consecutive{
+		FailureAllowance: this.conf.Breaker.FailureAllowance,
+		RetryTimeout:     this.conf.Breaker.RetryTimeout}
 	this.connectTimeout = time.Duration(this.conf.ConnectTimeout) * time.Second
 	this.ioTimeout = time.Duration(this.conf.IoTimeout) * time.Second
 	switch cf.ShardStrategy {

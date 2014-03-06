@@ -50,6 +50,10 @@
             io_timeout: 30
             heartbeat_interval: 600
             max_idle_conns_per_server: 20
+            breaker: {
+                failure_allowance: 5
+                retry_timeout: 10
+            }
             servers: [
                 {
                     pool: "log"
@@ -87,6 +91,10 @@
             hash_strategy: "standard"
             max_idle_conns_per_server: 20
             timeout: 4
+            breaker: {
+                failure_allowance: 5
+                retry_timeout: 10
+            }
             servers: [
                 {
                     pool: "default"

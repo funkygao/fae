@@ -23,6 +23,7 @@ Release Notes - fae - Version v0.0.2.rc
 
 ### Todo
 
+    . mongodb/memcache graceful degrade with Circuit Breaker
     . memcache also support backend pools by name
     . pool pkg bug
     . LRUcache switch to better vitess implementation
@@ -57,7 +58,6 @@ Release Notes - fae - Version v0.0.1.alpha
     . auto discovery of peers and form a cluster to serve requests
     . memcache consistent hash
     . global uniq id generator servant added
-    . mongodb graceful degrade with Circuit Breaker
     . session based local var(like thread local) so that servant can maintain state across request calls
 
 ### Improvement

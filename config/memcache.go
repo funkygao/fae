@@ -34,9 +34,10 @@ type ConfigMemcache struct {
 	HashStrategy          string
 	Timeout               int
 	MaxIdleConnsPerServer int
-	enabled               bool
+	Breaker               ConfigBreaker
+	Servers               map[string]*ConfigMemcacheServer // key is host:port(addr)
 
-	Servers map[string]*ConfigMemcacheServer // key is host:port(addr)
+	enabled bool
 }
 
 func (this *ConfigMemcache) ServerList() []string {
@@ -58,6 +59,10 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
 	this.Timeout = cf.Int("timeout", 4)
+	section, err := cf.Section("breaker")
+	if err != nil {
+		this.Breaker.loadConfig(section)
+	}
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 3)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
