@@ -13,6 +13,7 @@ var (
 	ErrNoStats      = errors.New("memcache: no statistics available")
 	ErrMalformedKey = errors.New("malformed: key is too long or contains invalid characters")
 	ErrNoServers    = errors.New("memcache: no servers configured or available")
+	ErrCircuitOpen  = errors.New("memcache: circuit open")
 )
 
 // ConnectTimeoutError is the error type used when it takes
