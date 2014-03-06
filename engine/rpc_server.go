@@ -94,7 +94,7 @@ func (this *TFunServer) handleClient(client interface{}) {
 		}
 
 		if this.engine.conf.rpc.debugSession {
-			log.Debug("accepted session peer{%s}", tcpClient.RemoteAddr())
+			log.Debug("Accepted session peer{%s}", tcpClient.RemoteAddr())
 		}
 
 		// store client concurrent connections count
@@ -140,7 +140,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	if this.engine.conf.rpc.debugSession {
-		log.Debug("session peer{%s} closed after %s", remoteAddr, elapsed)
+		log.Debug("Closed session peer{%s} after %s", remoteAddr, elapsed)
 	} else if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
 		// slow session
 		this.engine.stats.TotalSlowSessions.Inc(1)

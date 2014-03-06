@@ -81,6 +81,4 @@ func (this *Peer) refreshNeighbor(ip string) {
 	}
 
 	this.neighbors[ip] = time.Now()
-
-	log.Debug("Neighbors: %+v", this.neighbors)
 }

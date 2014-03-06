@@ -54,7 +54,7 @@ func (this *rpcThreadPool) spawnDynamicChildrenInBatch(batchSize int) {
 		atomic.AddInt32(&this.spareServerN, 1)
 	}
 
-	log.Debug("rpcThreadPool spawned %d children within %s", batchSize, time.Since(t1))
+	log.Debug("RpcThreadPool spawned %d children within %s", batchSize, time.Since(t1))
 }
 
 func (this *rpcThreadPool) dynamicHandleRequest() {
