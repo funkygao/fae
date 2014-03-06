@@ -169,6 +169,14 @@ thrift above 0.9.0 which depends on flex
     sh test/test.sh
     make install
 
+thrift_protocol.so
+
+    cd thrift/lib/php/src/ext/
+    phpize
+    ./configure --with-php-config=/usr/local/php/bin/php-config
+    make
+    make test
+
 php.ini
 
     extension="thrift_protocol.so"
