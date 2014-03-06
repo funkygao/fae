@@ -74,9 +74,7 @@ func RegisterHttpApi(path string,
 		params, err := api.decodeHttpParams(w, req)
 		if err == nil {
 			ret, err = handlerFunc(w, req, params)
-		}
-
-		if err != nil {
+		} else {
 			ret = map[string]interface{}{"error": err.Error()}
 		}
 
@@ -90,7 +88,8 @@ func RegisterHttpApi(path string,
 		w.WriteHeader(status)
 
 		// debug request body content
-		log.Trace("req body: %+v", params)
+		//log.Trace("req body: %+v", params)
+
 		// access log
 		log.Debug("%s \"%s %s %s\" %d %s",
 			req.RemoteAddr,
@@ -105,7 +104,11 @@ func RegisterHttpApi(path string,
 
 		if ret != nil {
 			// pretty write json result
-			pretty, _ := json.MarshalIndent(ret, "", "    ")
+			pretty, err := json.MarshalIndent(ret, "", "    ")
+			if err != nil {
+				log.Error(err)
+				return
+			}
 			w.Write(pretty)
 			w.Write([]byte("\n"))
 		}
