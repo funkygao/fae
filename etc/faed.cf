@@ -1,6 +1,6 @@
 {
     http_listen_addr: ":9002"
-    pprof_listen_addr: ":6060"
+    pprof_listen_addr: "localhost:6060"
     cpu_num: "auto"
 
     rpc: {
@@ -48,7 +48,7 @@
             shard_strategy: "legacy"
             connect_timeout: 4
             io_timeout: 30
-            heartbeat_interval: 600
+            heartbeat_interval: 30
             max_idle_conns_per_server: 20
             breaker: {
                 failure_allowance: 5
