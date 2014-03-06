@@ -38,19 +38,15 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 }
 
 // http://docs.mongodb.org/manual/reference/connection-string/
-func (this *ConfigMongodbServer) Address() string {
-	addr := "mongodb://" + this.Host + ":" + this.Port + "/"
+func (this *ConfigMongodbServer) Url() string {
+	url := "mongodb://" + this.Host + ":" + this.Port + "/"
 	if this.DbName != "" {
-		addr += this.DbName + "/"
+		url += this.DbName + "/"
 	}
 	if this.ReplicaSet != "" {
-		addr += "?replicaSet=" + this.ReplicaSet
+		url += "?replicaSet=" + this.ReplicaSet
 	}
-	return addr
-}
-
-func (this *ConfigMongodbServer) Url() string {
-	return this.Address()
+	return url
 }
 
 type ConfigMongodb struct {
