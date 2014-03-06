@@ -26,7 +26,7 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 			output["lcache"] = this.lc.Len()
 		}
 		if this.proxy != nil {
-			output["proxy"] = this.proxy.StatsJSON()
+			output["proxy"] = this.proxy.StatsMap()
 		}
 
 	case "conf":

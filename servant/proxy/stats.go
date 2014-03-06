@@ -1,17 +1,24 @@
 package proxy
 
 import (
-	"bytes"
-	"fmt"
+	"encoding/json"
 )
 
 func (this *Proxy) StatsJSON() string {
-	s := new(bytes.Buffer)
-	s.WriteString("[\n")
+	m := make(map[string]string)
 	for addr, pool := range this.pools {
-		s.WriteString(fmt.Sprintf(`%s{"%s":%v}%s`, "\t",
-			addr, pool.pool.StatsJSON(), "\n"))
+		m[addr] = pool.pool.StatsJSON()
 	}
-	s.WriteString("]")
-	return s.String()
+
+	pretty, _ := json.MarshalIndent(m, "", "    ")
+	return string(pretty)
+}
+
+func (this *Proxy) StatsMap() map[string]string {
+	m := make(map[string]string)
+	for addr, pool := range this.pools {
+		m[addr] = pool.pool.StatsJSON()
+	}
+
+	return m
 }
