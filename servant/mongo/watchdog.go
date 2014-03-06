@@ -35,7 +35,7 @@ func (this *Client) checkServerStatus(wg *sync.WaitGroup, sess *mgo.Session) {
 	defer wg.Done()
 	err := sess.Ping()
 	if err != nil {
-		// TODO show mongodb url in log
+		// TODO show mongodb uri in log
 		log.Error("mongodb killed for: %s", err)
 
 		sess.Close()

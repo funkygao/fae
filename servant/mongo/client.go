@@ -15,7 +15,7 @@ type Client struct {
 	selector ServerSelector
 
 	lk       sync.Mutex
-	freeconn map[string][]*mgo.Session // the session pool, key is pool
+	freeconn map[string][]*mgo.Session
 	breakers map[string]*breaker.Consecutive
 }
 
@@ -50,7 +50,7 @@ func (this *Client) Session(pool string, shardId int32) (*Session, error) {
 		return nil, err
 	}
 
-	sess, err := this.getConn(server.Url())
+	sess, err := this.getConn(server.Uri())
 	if err != nil {
 		return nil, err
 	}
@@ -66,12 +66,12 @@ func (this *Client) WarmUp() {
 	)
 	for retries := 0; retries < 3; retries++ {
 		for _, server := range this.selector.ServerList() {
-			sess, err = this.getConn(server.Url())
+			sess, err = this.getConn(server.Uri())
 			if err != nil {
-				log.Error("Warmup %v fail: %s", server.Url(), err)
+				log.Error("Warmup %v fail: %s", server.Uri(), err)
 				break
 			} else {
-				this.putFreeConn(server.Url(), sess)
+				this.putFreeConn(server.Uri(), sess)
 			}
 		}
 
@@ -90,53 +90,53 @@ func (this *Client) WarmUp() {
 
 }
 
-func (this *Client) getConn(url string) (*mgo.Session, error) {
-	sess, ok := this.getFreeConn(url)
+func (this *Client) getConn(uri string) (*mgo.Session, error) {
+	sess, ok := this.getFreeConn(uri)
 	if ok {
 		return sess, nil
 	}
 
-	return this.dial(url)
+	return this.dial(uri)
 }
 
-func (this *Client) dial(url string) (*mgo.Session, error) {
-	if this.breakers[url].Open() {
-		log.Warn("Circuit %s open", url)
+func (this *Client) dial(uri string) (*mgo.Session, error) {
+	if this.breakers[uri].Open() {
+		log.Warn("Circuit %s open", uri)
 		return nil, ErrCircuitOpen
 	}
 
-	sess, err := mgo.DialWithTimeout(url, this.conf.ConnectTimeout)
+	sess, err := mgo.DialWithTimeout(uri, this.conf.ConnectTimeout)
 	if err != nil {
-		this.breakers[url].Fail()
+		this.breakers[uri].Fail()
 		return nil, err
 	}
 
-	this.breakers[url].Succeed()
+	this.breakers[uri].Succeed()
 	sess.SetSocketTimeout(this.conf.IoTimeout)
 	sess.SetMode(mgo.Monotonic, true)
 
 	return sess, nil
 }
 
-func (this *Client) putFreeConn(url string, sess *mgo.Session) {
+func (this *Client) putFreeConn(uri string, sess *mgo.Session) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	if this.freeconn == nil {
 		this.freeconn = make(map[string][]*mgo.Session)
 	}
-	freelist := this.freeconn[url]
+	freelist := this.freeconn[uri]
 	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		sess.Close()
 		return
 	}
-	this.freeconn[url] = append(this.freeconn[url], sess)
+	this.freeconn[uri] = append(this.freeconn[uri], sess)
 }
 
-func (this *Client) getFreeConn(url string) (sess *mgo.Session, ok bool) {
+func (this *Client) getFreeConn(uri string) (sess *mgo.Session, ok bool) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
-	if _, present := this.breakers[url]; !present {
-		this.breakers[url] = &breaker.Consecutive{
+	if _, present := this.breakers[uri]; !present {
+		this.breakers[uri] = &breaker.Consecutive{
 			FailureAllowance: this.conf.Breaker.FailureAllowance,
 			RetryTimeout:     this.conf.Breaker.RetryTimeout}
 	}
@@ -144,14 +144,14 @@ func (this *Client) getFreeConn(url string) (sess *mgo.Session, ok bool) {
 	if this.freeconn == nil {
 		return nil, false
 	}
-	freelist, present := this.freeconn[url]
+	freelist, present := this.freeconn[uri]
 	if !present || len(freelist) == 0 {
 		return nil, false
 	}
 
 	// it is no longer free
 	sess = freelist[len(freelist)-1] // last item
-	this.freeconn[url] = freelist[:len(freelist)-1]
+	this.freeconn[uri] = freelist[:len(freelist)-1]
 	return sess, true
 }
 

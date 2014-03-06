@@ -16,6 +16,8 @@ type ConfigMongodbServer struct {
 	DbName       string
 	ReplicaSet   string
 	ShardBaseNum int
+
+	uri string // cache of op result
 }
 
 func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
@@ -34,19 +36,20 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 		panic("required field missing")
 	}
 
+	// http://docs.mongodb.org/manual/reference/connection-string/
+	this.uri = "mongodb://" + this.Host + ":" + this.Port + "/"
+	if this.DbName != "" {
+		this.uri += this.DbName + "/"
+	}
+	if this.ReplicaSet != "" {
+		this.uri += "?replicaSet=" + this.ReplicaSet
+	}
+
 	log.Debug("mongodb server: %+v", *this)
 }
 
-// http://docs.mongodb.org/manual/reference/connection-string/
-func (this *ConfigMongodbServer) Url() string {
-	url := "mongodb://" + this.Host + ":" + this.Port + "/"
-	if this.DbName != "" {
-		url += this.DbName + "/"
-	}
-	if this.ReplicaSet != "" {
-		url += "?replicaSet=" + this.ReplicaSet
-	}
-	return url
+func (this *ConfigMongodbServer) Uri() string {
+	return this.uri
 }
 
 type ConfigMongodb struct {

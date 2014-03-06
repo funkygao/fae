@@ -23,7 +23,7 @@ func (this *Session) DbName() string {
 func (this *Session) Recyle(err *error) {
 	if err == nil || this.resumableError(*err) {
 		// reusable session(connection)
-		this.client.putFreeConn(this.server.Url(), this.Session)
+		this.client.putFreeConn(this.server.Uri(), this.Session)
 	} else {
 		// kill this session
 		this.Session.Close()
