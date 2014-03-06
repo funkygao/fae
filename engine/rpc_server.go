@@ -134,7 +134,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	remoteAddr := client.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequest(client); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
-		log.Error("session peer{%s}: %s", remoteAddr, err)
+		log.Error("Session peer{%s}: %s", remoteAddr, err)
 	}
 
 	elapsed := time.Since(t1)
@@ -196,7 +196,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		// it is servant generated TApplicationException
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
-			log.Error("servant call peer{%s}: %s", remoteAddr, err)
+			log.Error("Servant call peer{%s}: %s", remoteAddr, err)
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
