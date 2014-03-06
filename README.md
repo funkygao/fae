@@ -70,7 +70,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - some programs are not web based, e,g. batch, can be implemented as any language you like
 *   Most large scale site use SOA as infrastructure
 
-#### Terms and sub-directories
+#### Directories
 
 *   client
     - demonstration of how to call servants
@@ -102,6 +102,71 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     -   proxy
         - stub of calling remote fae peers transparently
         - pooling
+
+### Capacity Plan
+
+#### Current stats
+
+##### Request/Day
+
+*   memcache pool
+    - get   420,247,276 
+    - set   172,524,762 
+*   mongodb pool
+    - insert     28,480,704   
+    - query     594,480,553  
+    - update    254,677,379  
+    - delete     11,922,536 
+    - getmore        68,673 
+    - command   749,813,398
+*   total
+    - memcache 0.6 Billion
+    - mongodb  0.9 Billion
+    - total    1.5 Billion
+
+##### Bandwidth
+
+*   web
+    - 10 times 80Mb/s = 800Mb/s
+
+*   memcache pool
+    - 2 times 20 = 40Mb/s
+
+*   mongodb pool
+    - 60 times 25Mb/s = 1.5Gb/s
+
+#### Requirement for fae
+
+If a single fae is deployed for the whole cluster, its performances demands:
+
+*   qps
+    - 20000 call/s
+
+*   bandwidth
+    - 800Mb/s
+
+*   net conns
+    - concurrent php-fpm  1000
+    - memcache instances     6
+    - mongodb instances     60
+    - local tcp port used 7000
+
+                php
+                 |
+                 | 1000 concurrent conns
+                 |
+                fae
+                 |
+                 | pool size 20
+                 | 20*6 + 20*60 = 1500
+                 | total 1500 persistent backend tcp conns
+                 |
+                 | total 6000 simultaneous memcache conns at most
+                 | total 1000 simultaneous mongodb conns at most
+                 |
+           +----------------+
+           |                |
+        memcache#6      mongodb#60
 
 ### Highlights
 
