@@ -5,7 +5,6 @@ stress test for dryrun of fae: ping
 '''
 
 import sys
-import bson
 import datetime
 import multiprocessing
 sys.path.append('../../servant/gen-py')
@@ -13,7 +12,6 @@ sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/lib/py
 from thrift.transport import TSocket
 from thrift.protocol import TBinaryProtocol
 from thrift.transport.TTransport import TTransportException
-from thrift.Thrift import TApplicationException
 from fun.rpc import FunServant
 
 def ping(n):
