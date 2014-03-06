@@ -19,9 +19,9 @@ type Client struct {
 	conf *config.ConfigMemcache
 
 	selector ServerSelector
-	breaker  *breaker.Consecutive
 
 	lk       sync.Mutex
+	breakers map[net.Addr]*breaker.Consecutive
 	freeconn map[net.Addr][]*conn
 }
 
@@ -41,9 +41,7 @@ func New(cf *config.ConfigMemcache) (this *Client) {
 		panic(err)
 	}
 
-	this.breaker = &breaker.Consecutive{
-		FailureAllowance: this.conf.Breaker.FailureAllowance,
-		RetryTimeout:     this.conf.Breaker.RetryTimeout}
+	this.breakers = make(map[net.Addr]*breaker.Consecutive)
 
 	return
 }
@@ -103,6 +101,12 @@ func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
+	if _, present := this.breakers[addr]; !present {
+		this.breakers[addr] = &breaker.Consecutive{
+			FailureAllowance: this.conf.Breaker.FailureAllowance,
+			RetryTimeout:     this.conf.Breaker.RetryTimeout}
+	}
+
 	if this.freeconn == nil {
 		return nil, false
 	}
@@ -116,6 +120,11 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 }
 
 func (this *Client) dial(addr net.Addr) (net.Conn, error) {
+	if this.breakers[addr].Open() {
+		log.Warn("Circuit %s open", addr.String())
+		return nil, ErrCircuitOpen
+	}
+
 	type connError struct {
 		cn  net.Conn
 		err error
@@ -127,6 +136,11 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	}()
 	select {
 	case ce := <-ch:
+		if ce.err != nil {
+			this.breakers[addr].Fail()
+		} else {
+			this.breakers[addr].Succeed()
+		}
 		return ce.cn, ce.err
 	case <-time.After(this.conf.Timeout):
 		// Too slow. Fall through.
@@ -138,6 +152,7 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 			ce.cn.Close()
 		}
 	}()
+	this.breakers[addr].Fail()
 	return nil, &ConnectTimeoutError{addr}
 }
 
