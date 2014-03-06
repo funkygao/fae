@@ -101,7 +101,6 @@ func (this *Client) getConn(uri string) (*mgo.Session, error) {
 
 func (this *Client) dial(uri string) (*mgo.Session, error) {
 	if this.breakers[uri].Open() {
-		log.Warn("Circuit %s open", uri)
 		return nil, ErrCircuitOpen
 	}
 

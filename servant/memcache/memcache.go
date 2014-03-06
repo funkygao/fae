@@ -120,7 +120,6 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 
 func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	if this.breakers[addr].Open() {
-		log.Warn("Circuit %s open", addr.String())
 		return nil, ErrCircuitOpen
 	}
 
