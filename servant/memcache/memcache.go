@@ -77,10 +77,14 @@ func (this *Client) WarmUp() {
 	}
 }
 
-func (this *Client) FreeConn() map[net.Addr][]*conn {
+func (this *Client) FreeConnMap() map[string][]*conn {
 	this.lk.Lock()
 	defer this.lk.Unlock()
-	return this.freeconn
+	ret := make(map[string][]*conn)
+	for addr, val := range this.freeconn {
+		ret[addr.String()] = val
+	}
+	return ret
 }
 
 func (this *Client) putFreeConn(addr net.Addr, cn *conn) {

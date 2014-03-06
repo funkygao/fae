@@ -38,7 +38,7 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 	return
 }
 
-func (this *Client) FreeConn() map[string][]*mgo.Session {
+func (this *Client) FreeConnMap() map[string][]*mgo.Session {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	return this.freeconn

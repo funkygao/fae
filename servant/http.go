@@ -17,10 +17,10 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 	switch cmd {
 	case "stat":
 		if this.mg != nil {
-			output["mongo"] = this.mg.FreeConn()
+			output["mongo"] = this.mg.FreeConnMap()
 		}
 		if this.mc != nil {
-			output["memcache"] = this.mc.FreeConn()
+			output["memcache"] = this.mc.FreeConnMap()
 		}
 		if this.lc != nil {
 			output["lcache"] = this.lc.Len()
