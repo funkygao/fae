@@ -33,5 +33,5 @@ func (this *conn) condRelease(err *error) {
 }
 
 func (this *conn) extendDeadline() {
-	this.nc.SetDeadline(time.Now().Add(this.client.Timeout))
+	this.nc.SetDeadline(time.Now().Add(this.client.conf.Timeout))
 }

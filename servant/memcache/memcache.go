@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
 	log "github.com/funkygao/log4go"
 	"net"
@@ -15,35 +16,36 @@ import (
 )
 
 type Client struct {
-	MaxIdleConnsPerServer int
-
-	// both for conn and io timeout
-	Timeout time.Duration
+	conf *config.ConfigMemcache
 
 	selector ServerSelector
+	breaker  *breaker.Consecutive
 
 	lk       sync.Mutex
 	freeconn map[string][]*conn
-	breaker  *breaker.Consecutive
 }
 
-func New(hashStrategy string, servers ...string) *Client {
-	var selector ServerSelector
-	switch hashStrategy {
+func New(cf *config.ConfigMemcache) (this *Client) {
+	this = new(Client)
+	this.conf = cf
+
+	switch cf.HashStrategy {
 	case ConstistentHashStrategy:
-		selector = new(ConsistentServerSelector)
+		this.selector = new(ConsistentServerSelector)
 
 	default:
-		selector = new(StandardServerSelector)
+		this.selector = new(StandardServerSelector)
 	}
 
-	if err := selector.SetServers(servers...); err != nil {
+	if err := this.selector.SetServers(cf.ServerList()...); err != nil {
 		panic(err)
 	}
 
-	return &Client{selector: selector,
-		breaker: &breaker.Consecutive{FailureAllowance: 10,
-			RetryTimeout: time.Second * 10}}
+	this.breaker = &breaker.Consecutive{
+		FailureAllowance: this.conf.Breaker.FailureAllowance,
+		RetryTimeout:     this.conf.Breaker.RetryTimeout}
+
+	return
 }
 
 func (this *Client) WarmUp() {
@@ -91,7 +93,7 @@ func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 		this.freeconn = make(map[string][]*conn)
 	}
 	freelist := this.freeconn[addr.String()]
-	if len(freelist) >= this.MaxIdleConnsPerServer {
+	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		cn.nc.Close()
 		return
 	}
@@ -126,7 +128,7 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	select {
 	case ce := <-ch:
 		return ce.cn, ce.err
-	case <-time.After(this.Timeout):
+	case <-time.After(this.conf.Timeout):
 		// Too slow. Fall through.
 	}
 	// Close the conn if it does end up finally coming in

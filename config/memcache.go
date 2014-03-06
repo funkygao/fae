@@ -4,6 +4,7 @@ import (
 	"fmt"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 type ConfigMemcacheServer struct {
@@ -31,8 +32,9 @@ func (this *ConfigMemcacheServer) Address() string {
 }
 
 type ConfigMemcache struct {
-	HashStrategy          string
-	Timeout               int
+	HashStrategy string
+	// for both conn and io timeout
+	Timeout               time.Duration
 	MaxIdleConnsPerServer int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMemcacheServer // key is host:port(addr)
@@ -58,7 +60,7 @@ func (this *ConfigMemcache) Enabled() bool {
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
-	this.Timeout = cf.Int("timeout", 4)
+	this.Timeout = time.Duration(cf.Int("timeout", 4)) * time.Second
 	section, err := cf.Section("breaker")
 	if err != nil {
 		this.Breaker.loadConfig(section)

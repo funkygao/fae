@@ -13,7 +13,6 @@ import (
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"net/http"
-	"time"
 )
 
 type FunServantImpl struct {
@@ -55,7 +54,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			this.conf.Proxy.IdleTimeout)
 	}
 
-	// idgen
+	// idgen, always present
 	this.idgen = idgen.NewIdGenerator()
 
 	// TODO session
@@ -69,10 +68,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// memcache
 	if this.conf.Memcache.Enabled() {
-		memcacheServers := this.conf.Memcache.ServerList()
-		this.mc = memcache.New(this.conf.Memcache.HashStrategy, memcacheServers...)
-		this.mc.Timeout = time.Duration(this.conf.Memcache.Timeout) * time.Second
-		this.mc.MaxIdleConnsPerServer = this.conf.Memcache.MaxIdleConnsPerServer
+		this.mc = memcache.New(this.conf.Memcache)
 	}
 
 	// kvdb
