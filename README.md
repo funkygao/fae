@@ -110,6 +110,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Use multicast to auto discover fae peers for delegation
 *   Highly usage of mem to improve latancy & throughput
 *   Merge recent requests to reduce backend service load
+*   Circuit breaker protection
 *   Fallback to mem when backend storage fails
     - requires session sticky to work
     - mem as response, and auto retry backend storage
