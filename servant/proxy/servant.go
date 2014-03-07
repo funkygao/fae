@@ -2,10 +2,12 @@ package proxy
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/pool"
 )
 
 // A kind of pool.Resource
 type FunServantPeer struct {
+	pool.Resource
 	*rpc.FunServantClient
 
 	pool *funServantPeerPool
