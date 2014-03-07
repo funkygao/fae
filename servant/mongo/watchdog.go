@@ -19,7 +19,7 @@ func (this *Client) runWatchdog() {
 	for _ = range ticker.C {
 		wg = new(sync.WaitGroup)
 		this.lk.Lock()
-		for _, sessions := range this.freeconn {
+		for _, sessions := range this.freeconns {
 			for _, sess := range sessions {
 				wg.Add(1)
 				go this.checkServerStatus(wg, sess)

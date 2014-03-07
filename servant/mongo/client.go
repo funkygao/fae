@@ -14,17 +14,17 @@ type Client struct {
 
 	selector ServerSelector
 
-	lk           sync.Mutex
-	freeconn     map[string][]*mgo.Session
-	breakers     map[string]*breaker.Consecutive
-	throttleConn map[string]chan interface{}
+	lk            sync.Mutex
+	freeconns     map[string][]*mgo.Session // key is server uri
+	breakers      map[string]*breaker.Consecutive
+	throttleConns map[string]chan interface{}
 }
 
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
 	this.breakers = make(map[string]*breaker.Consecutive)
-	this.throttleConn = make(map[string]chan interface{})
+	this.throttleConns = make(map[string]chan interface{})
 
 	switch cf.ShardStrategy {
 	case "legacy":
@@ -43,7 +43,7 @@ func New(cf *config.ConfigMongodb) (this *Client) {
 func (this *Client) FreeConnMap() map[string][]*mgo.Session {
 	this.lk.Lock()
 	defer this.lk.Unlock()
-	return this.freeconn
+	return this.freeconns
 }
 
 func (this *Client) Session(pool string, shardId int32) (*Session, error) {
@@ -84,7 +84,7 @@ func (this *Client) WarmUp() {
 
 	if err == nil {
 		log.Trace("Mongodb warmed up within %s: %+v",
-			time.Since(t1), this.freeconn)
+			time.Since(t1), this.freeconns)
 	} else {
 		log.Error("Mongodb failed to warm up within %s: %s",
 			time.Since(t1), err)
@@ -106,10 +106,10 @@ func (this *Client) dial(uri string) (*mgo.Session, error) {
 		return nil, ErrCircuitOpen
 	}
 
-	this.throttleConn[uri] <- true
+	this.throttleConns[uri] <- true
 	defer func() {
 		// release throttle
-		<-this.throttleConn[uri]
+		<-this.throttleConns[uri]
 	}()
 
 	sess, err := mgo.DialWithTimeout(uri, this.conf.ConnectTimeout)
@@ -128,15 +128,15 @@ func (this *Client) dial(uri string) (*mgo.Session, error) {
 func (this *Client) putFreeConn(uri string, sess *mgo.Session) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
-	if this.freeconn == nil {
-		this.freeconn = make(map[string][]*mgo.Session)
+	if this.freeconns == nil {
+		this.freeconns = make(map[string][]*mgo.Session)
 	}
-	freelist := this.freeconn[uri]
+	freelist := this.freeconns[uri]
 	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		sess.Close()
 		return
 	}
-	this.freeconn[uri] = append(this.freeconn[uri], sess)
+	this.freeconns[uri] = append(this.freeconns[uri], sess)
 }
 
 func (this *Client) getFreeConn(uri string) (sess *mgo.Session, ok bool) {
@@ -146,31 +146,31 @@ func (this *Client) getFreeConn(uri string) (sess *mgo.Session, ok bool) {
 		this.breakers[uri] = &breaker.Consecutive{
 			FailureAllowance: this.conf.Breaker.FailureAllowance,
 			RetryTimeout:     this.conf.Breaker.RetryTimeout}
-		this.throttleConn[uri] = make(chan interface{}, this.conf.MaxConnsPerServer)
+		this.throttleConns[uri] = make(chan interface{}, this.conf.MaxConnsPerServer)
 	}
 
-	if this.freeconn == nil {
+	if this.freeconns == nil {
 		return nil, false
 	}
-	freelist, present := this.freeconn[uri]
+	freelist, present := this.freeconns[uri]
 	if !present || len(freelist) == 0 {
 		return nil, false
 	}
 
 	// it is no longer free
 	sess = freelist[len(freelist)-1] // last item
-	this.freeconn[uri] = freelist[:len(freelist)-1]
+	this.freeconns[uri] = freelist[:len(freelist)-1]
 	return sess, true
 }
 
 // caller is responsible for lock
 func (this *Client) killConn(session *mgo.Session) {
-	for addr, sessions := range this.freeconn {
+	for addr, sessions := range this.freeconns {
 		for idx, sess := range sessions {
 			if sess == session { // pointer addr compare
 				// https://code.google.com/p/go-wiki/wiki/SliceTricks
-				this.freeconn[addr] = append(this.freeconn[addr][:idx],
-					this.freeconn[addr][idx+1:]...)
+				this.freeconns[addr] = append(this.freeconns[addr][:idx],
+					this.freeconns[addr][idx+1:]...)
 			}
 		}
 	}

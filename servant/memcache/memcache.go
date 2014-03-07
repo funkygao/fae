@@ -20,17 +20,17 @@ type Client struct {
 
 	selector ServerSelector
 
-	lk           sync.Mutex
-	breakers     map[net.Addr]*breaker.Consecutive
-	freeconn     map[net.Addr][]*conn
-	throttleConn map[net.Addr]chan interface{}
+	lk            sync.Mutex
+	breakers      map[net.Addr]*breaker.Consecutive
+	freeconns     map[net.Addr][]*conn
+	throttleConns map[net.Addr]chan interface{}
 }
 
 func New(cf *config.ConfigMemcache) (this *Client) {
 	this = new(Client)
 	this.conf = cf
 	this.breakers = make(map[net.Addr]*breaker.Consecutive)
-	this.throttleConn = make(map[net.Addr]chan interface{})
+	this.throttleConns = make(map[net.Addr]chan interface{})
 
 	switch cf.HashStrategy {
 	case ConstistentHashStrategy:
@@ -72,7 +72,7 @@ func (this *Client) WarmUp() {
 
 	if err == nil {
 		log.Trace("Memcache warmed up within %s: %+v",
-			time.Since(t1), this.freeconn)
+			time.Since(t1), this.freeconns)
 	} else {
 		log.Error("Memcache failed to warm up within %s: %s",
 			time.Since(t1), err)
@@ -83,7 +83,7 @@ func (this *Client) FreeConnMap() map[string][]*conn {
 	this.lk.Lock()
 	defer this.lk.Unlock()
 	ret := make(map[string][]*conn)
-	for addr, val := range this.freeconn {
+	for addr, val := range this.freeconns {
 		ret[addr.String()] = val
 	}
 	return ret
@@ -92,15 +92,15 @@ func (this *Client) FreeConnMap() map[string][]*conn {
 func (this *Client) putFreeConn(addr net.Addr, cn *conn) {
 	this.lk.Lock()
 	defer this.lk.Unlock()
-	if this.freeconn == nil {
-		this.freeconn = make(map[net.Addr][]*conn)
+	if this.freeconns == nil {
+		this.freeconns = make(map[net.Addr][]*conn)
 	}
-	freelist := this.freeconn[addr]
+	freelist := this.freeconns[addr]
 	if len(freelist) >= this.conf.MaxIdleConnsPerServer {
 		cn.nc.Close()
 		return
 	}
-	this.freeconn[addr] = append(freelist, cn)
+	this.freeconns[addr] = append(freelist, cn)
 }
 
 func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
@@ -110,18 +110,18 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 		this.breakers[addr] = &breaker.Consecutive{
 			FailureAllowance: this.conf.Breaker.FailureAllowance,
 			RetryTimeout:     this.conf.Breaker.RetryTimeout}
-		this.throttleConn[addr] = make(chan interface{}, this.conf.MaxConnsPerServer)
+		this.throttleConns[addr] = make(chan interface{}, this.conf.MaxConnsPerServer)
 	}
 
-	if this.freeconn == nil {
+	if this.freeconns == nil {
 		return nil, false
 	}
-	freelist, ok := this.freeconn[addr]
+	freelist, ok := this.freeconns[addr]
 	if !ok || len(freelist) == 0 {
 		return nil, false
 	}
 	cn = freelist[len(freelist)-1]
-	this.freeconn[addr] = freelist[:len(freelist)-1]
+	this.freeconns[addr] = freelist[:len(freelist)-1]
 	return cn, true
 }
 
@@ -130,10 +130,10 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 		return nil, ErrCircuitOpen
 	}
 
-	this.throttleConn[addr] <- true
+	this.throttleConns[addr] <- true
 	defer func() {
 		// release throttle
-		<-this.throttleConn[addr]
+		<-this.throttleConns[addr]
 	}()
 
 	type connError struct {
