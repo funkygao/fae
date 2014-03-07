@@ -16,7 +16,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer wg.Done()
 
 	if sampling(Concurrency) {
-		log.Printf("session{round^%3d seq^%6d} started", round, seq)
+		log.Printf("session{round^%d seq^%d} started", round, seq)
 	}
 
 	report.incSessions()
@@ -25,13 +25,13 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	client, err := proxy.Servant(host + ":9001")
 	if err != nil {
 		report.incConnErrs()
-		log.Printf("session{round^%3d seq^%6d} %v", round, seq, err)
+		log.Printf("session{round^%d seq^%d} %v", round, seq, err)
 		return
 	}
 	defer client.Recycle() // when err occurs, do we still need recyle?
 
 	if sampling(Concurrency) {
-		log.Printf("session{round^%3d seq^%6d} connected within %s",
+		log.Printf("session{round^%d seq^%d} connected within %s",
 			round, seq, time.Since(t1))
 	}
 
@@ -53,7 +53,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			_, err = client.Ping(ctx)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d ping} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d ping} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
@@ -63,13 +63,13 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			_, _, err = client.IdNext(ctx, 0)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d idgen} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d idgen} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
 		}
 
-		key = fmt.Sprintf("mc_stress:%d", rand.Int())
+		key = fmt.Sprintf("mc_stress: %d", rand.Int())
 		value = []byte("value of " + key)
 		mcValue.Data = value
 
@@ -77,14 +77,14 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			_, err = client.LcSet(ctx, key, value)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d lc_set} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d lc_set} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
 			_, _, err = client.LcGet(ctx, key)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d lc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d lc_get} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
@@ -94,14 +94,14 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			_, err = client.McSet(ctx, key, mcValue, 36000)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d mc_set} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d mc_set} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
 			_, err, _ = client.McGet(ctx, key)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d mc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
@@ -113,7 +113,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 				mgFields)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d mc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 
@@ -128,7 +128,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 				fixture.RandomByteSlice(10<<10))
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%3d seq^%6d mc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
@@ -136,7 +136,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	}
 
 	if sampling(Concurrency) {
-		log.Printf("session{round^%3d seq^%6d} finished", round, seq)
+		log.Printf("session{round^%d seq^%d} finished", round, seq)
 	}
 
 }
