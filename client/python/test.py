@@ -44,11 +44,11 @@ print '[Client] ping received:', r, elapsed()
 #=====
 mcData = TMemcacheData()
 mcData.data = 'world 世界'
-print '[Client] mc_set received:', client.mc_set(ctx, 'hello', mcData, 120), elapsed()
-print '[Client] mc_get received:', client.mc_get(ctx, 'hello'), elapsed()
+print '[Client] mc_set received:', client.mc_set(ctx, 'default', 'hello', mcData, 120), elapsed()
+print '[Client] mc_get received:', client.mc_get(ctx, 'default', 'hello'), elapsed()
 
 try:
-    print '[Client] mc_get hello-non-exist ->', client.mc_get(ctx, 'hello-non-exist'), elapsed()
+    print '[Client] mc_get hello-non-exist ->', client.mc_get(ctx, 'default', 'hello-non-exist'), elapsed()
 except TCacheMissed:
     print 'cache missed'
 except TApplicationException, e:

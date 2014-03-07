@@ -91,14 +91,14 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallMemcache != 0 {
-			_, err = client.McSet(ctx, key, mcValue, 36000)
+			_, err = client.McSet(ctx, MC_POOL, key, mcValue, 36000)
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d mc_set} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 			}
-			_, err, _ = client.McGet(ctx, key)
+			_, err, _ = client.McGet(ctx, MC_POOL, key)
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)

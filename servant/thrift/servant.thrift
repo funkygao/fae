@@ -148,6 +148,7 @@ service FunServant {
      * Set.
      *
      * @param Context ctx - Request context info.
+     * @param string pool - mc pool name
      * @param string key -
      * @param TMemcacheData value -
      * @param i32 expiration - in seconds: either a relative time from now (up to 1 month), or 
@@ -155,21 +156,24 @@ service FunServant {
      */
     bool mc_set(
         1: required Context ctx, 
-        2: required string key, 
-        3: required TMemcacheData value, 
-        4: required i32 expiration
+        2: required string pool,
+        3: required string key, 
+        4: required TMemcacheData value, 
+        5: required i32 expiration
     ),
 
     /**
      * Get.
      *
      * @param Context ctx - Request context info.
+     * @param string pool -
      * @param string key -
      * @return TMemcacheData - Value of the key
      */
     TMemcacheData mc_get(
         1: required Context ctx, 
-        2: required string key
+        2: required string pool,
+        3: required string key
     ) throws (
         1: TCacheMissed miss
     ),
@@ -178,6 +182,7 @@ service FunServant {
      * Add.
      *
      * @param Context ctx - Request context info.
+     * @param string pool -
      * @param string key -
      * @param TMemcacheData value - Value of the key
      * @param i32 expiration -
@@ -185,35 +190,40 @@ service FunServant {
      */
     bool mc_add(
         1: required Context ctx, 
-        2: required string key, 
-        3: required TMemcacheData value, 
-        4: required i32 expiration
+        2: required string pool,
+        3: required string key, 
+        4: required TMemcacheData value, 
+        5: required i32 expiration
     ),
 
     /**
      * Delete.
      *
      * @param Context ctx - Request context info.
+     * @param string pool -
      * @param string key -
      * @return bool - True if Success 
      */
     bool mc_delete(
         1: required Context ctx, 
-        2: required string key
+        2: required string pool,
+        3: required string key
     ),
 
     /**
      * Increment.
      *
      * @param Context ctx - Request context info.
+     * @param string pool -
      * @param string key -
      * @param i32 delta - If negative, means decrement
      * @return binary - New value of the key
      */
-    i32 mc_increment(
+    i64 mc_increment(
         1: required Context ctx, 
-        2: required string key, 
-        3: required i32 delta
+        2: required string pool,
+        3: required string key, 
+        4: required i64 delta
     ),
 
     //=================

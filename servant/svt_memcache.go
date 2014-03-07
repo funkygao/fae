@@ -10,13 +10,13 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
+func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.set")
 	this.stats.inBytes.Inc(int64(len(value.Data) + len(key)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Set(&memcache.Item{Key: key,
+	appErr = this.mc.Set(pool, &memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
 	if appErr == nil {
@@ -36,14 +36,14 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, key string,
 	return
 }
 
-func (this *FunServantImpl) McGet(ctx *rpc.Context,
+func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("mc.get")
 	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.profiler()
-	it, err := this.mc.Get(key)
+	it, err := this.mc.Get(pool, key)
 	if err == nil {
 		// cache hit
 		r = rpc.NewTMemcacheData()
@@ -68,14 +68,14 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context,
 	return
 }
 
-func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
+func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData,
 	expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.add")
 	this.stats.inBytes.Inc(int64(len(key) + len(value.Data)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Add(&memcache.Item{Key: key,
+	appErr = this.mc.Add(pool, &memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
 	if appErr == nil {
@@ -95,13 +95,13 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, key string,
 	return
 }
 
-func (this *FunServantImpl) McDelete(ctx *rpc.Context,
+func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	key string) (r bool, appErr error) {
 	this.stats.inc("mc.del")
 	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.profiler()
-	appErr = this.mc.Delete(key)
+	appErr = this.mc.Delete(pool, key)
 	if appErr == nil {
 		r = true
 	} else {
@@ -117,25 +117,18 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context,
 	return
 }
 
-func (this *FunServantImpl) McIncrement(ctx *rpc.Context, key string,
-	delta int32) (r int32, appErr error) {
+func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
+	key string, delta int64) (r int64, appErr error) {
 	this.stats.inc("mc.inc")
 	this.stats.inBytes.Inc(int64(len(key)))
 
-	var (
-		newVal uint64
-		err    error
-	)
 	profiler := this.profiler()
-	if delta > 0 {
-		newVal, err = this.mc.Increment(key, uint64(delta))
-	} else {
-		newVal, err = this.mc.Decrement(key, uint64(delta))
-	}
+	newVal, err := this.mc.Increment(pool, key, delta)
 
 	if err == nil {
-		r = int32(newVal)
+		r = int64(newVal)
 	} else {
+		// err may be memcache.ErrCacheMiss
 		appErr = err
 		log.Error("mc.inc {key^%s}: %v", key, err)
 	}

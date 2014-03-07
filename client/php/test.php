@@ -56,13 +56,13 @@ try {
     // mc
     $mcData = new TMemcacheData();
     $mcData->data = 'world 世界';
-    echo '[Client] mc_set received: ', $client->mc_set($ctx, 'hello-php', $mcData, 120), "\n";
-    echo '[Client] mc_get received: ', print_r($client->mc_get($ctx, 'hello-php')), "\n";
+    echo '[Client] mc_set received: ', $client->mc_set($ctx, 'default', 'hello-php', $mcData, 120), "\n";
+    echo '[Client] mc_get received: ', print_r($client->mc_get($ctx, 'default', 'hello-php')), "\n";
     $mcData->data = 0;
-    echo '[Client] mc_add received: ', $client->mc_add($ctx, 'test:counter:uid', $mcData, 3500), "\n";
-    echo '[Client] mc_inc received: ', $client->mc_increment($ctx, 'test:counter:uid', 7), "\n";
+    echo '[Client] mc_add received: ', $client->mc_add($ctx, 'default', 'test:counter:uid', $mcData, 3500), "\n";
+    echo '[Client] mc_inc received: ', $client->mc_increment($ctx, 'default', 'test:counter:uid', 7), "\n";
     try {
-        echo '[Client] mc_get hello-non-exist received: ', $client->mc_get($ctx, 'hello-non-exist'), "\n";
+        echo '[Client] mc_get hello-non-exist received: ', $client->mc_get($ctx, 'default', 'hello-non-exist'), "\n";
     } catch (TCacheMissed $ex) {
         echo $ex->getMessage(), "\n";
     }

@@ -23,6 +23,8 @@ const (
 
 	CallPingIdgen   = CallPing | CallIdGen
 	CallIdgenLcache = CallIdGen | CallLCache
+
+	MC_POOL = "default"
 )
 
 var (
