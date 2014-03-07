@@ -14,15 +14,17 @@ type Client struct {
 
 	selector ServerSelector
 
-	lk       sync.Mutex
-	freeconn map[string][]*mgo.Session
-	breakers map[string]*breaker.Consecutive
+	lk           sync.Mutex
+	freeconn     map[string][]*mgo.Session
+	breakers     map[string]*breaker.Consecutive
+	throttleConn map[string]chan interface{}
 }
 
 func New(cf *config.ConfigMongodb) (this *Client) {
 	this = new(Client)
 	this.conf = cf
 	this.breakers = make(map[string]*breaker.Consecutive)
+	this.throttleConn = make(map[string]chan interface{})
 
 	switch cf.ShardStrategy {
 	case "legacy":
@@ -104,6 +106,12 @@ func (this *Client) dial(uri string) (*mgo.Session, error) {
 		return nil, ErrCircuitOpen
 	}
 
+	this.throttleConn[uri] <- true
+	defer func() {
+		// release throttle
+		<-this.throttleConn[uri]
+	}()
+
 	sess, err := mgo.DialWithTimeout(uri, this.conf.ConnectTimeout)
 	if err != nil {
 		this.breakers[uri].Fail()
@@ -138,6 +146,7 @@ func (this *Client) getFreeConn(uri string) (sess *mgo.Session, ok bool) {
 		this.breakers[uri] = &breaker.Consecutive{
 			FailureAllowance: this.conf.Breaker.FailureAllowance,
 			RetryTimeout:     this.conf.Breaker.RetryTimeout}
+		this.throttleConn[uri] = make(chan interface{}, this.conf.MaxConnsPerServer)
 	}
 
 	if this.freeconn == nil {

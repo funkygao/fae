@@ -14,6 +14,8 @@ Release Notes - fae - Version v0.0.2.rc
     . rpc server thread pool
     . calculate concurrent conns for each remote php host, so that we know which host is busy, alarming
     . hot cache, local duplication
+    . memcache cluster pools
+    . throttle to limit max mc/mongodb concurrent conns per server
 
 ###  Bug
 

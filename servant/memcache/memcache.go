@@ -20,15 +20,17 @@ type Client struct {
 
 	selector ServerSelector
 
-	lk       sync.Mutex
-	breakers map[net.Addr]*breaker.Consecutive
-	freeconn map[net.Addr][]*conn
+	lk           sync.Mutex
+	breakers     map[net.Addr]*breaker.Consecutive
+	freeconn     map[net.Addr][]*conn
+	throttleConn map[net.Addr]chan interface{}
 }
 
 func New(cf *config.ConfigMemcache) (this *Client) {
 	this = new(Client)
 	this.conf = cf
 	this.breakers = make(map[net.Addr]*breaker.Consecutive)
+	this.throttleConn = make(map[net.Addr]chan interface{})
 
 	switch cf.HashStrategy {
 	case ConstistentHashStrategy:
@@ -108,6 +110,7 @@ func (this *Client) getFreeConn(addr net.Addr) (cn *conn, ok bool) {
 		this.breakers[addr] = &breaker.Consecutive{
 			FailureAllowance: this.conf.Breaker.FailureAllowance,
 			RetryTimeout:     this.conf.Breaker.RetryTimeout}
+		this.throttleConn[addr] = make(chan interface{}, this.conf.MaxConnsPerServer)
 	}
 
 	if this.freeconn == nil {
@@ -126,6 +129,12 @@ func (this *Client) dial(addr net.Addr) (net.Conn, error) {
 	if this.breakers[addr].Open() {
 		return nil, ErrCircuitOpen
 	}
+
+	this.throttleConn[addr] <- true
+	defer func() {
+		// release throttle
+		<-this.throttleConn[addr]
+	}()
 
 	type connError struct {
 		cn  net.Conn

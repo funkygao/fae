@@ -50,6 +50,7 @@
             io_timeout: 30
             heartbeat_interval: 30
             max_idle_conns_per_server: 20
+            max_conns_per_server: 50
             breaker: {
                 failure_allowance: 5
                 retry_timeout: 10
@@ -89,6 +90,7 @@
 
         memcache: {
             hash_strategy: "standard"
+            max_conns_per_server: 200
             max_idle_conns_per_server: 20
             timeout: 4
             breaker: {
