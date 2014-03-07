@@ -71,10 +71,7 @@ func (this *Client) Warmup() {
 		}
 	}
 
-	if err == nil {
-		log.Trace("Memcache warmed up within %s: %+v",
-			time.Since(t1), this.freeconns)
-	} else {
+	if err != nil {
 		log.Error("Memcache failed to warm up within %s: %s",
 			time.Since(t1), err)
 	}

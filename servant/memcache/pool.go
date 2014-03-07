@@ -3,6 +3,7 @@ package memcache
 import (
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 type ClientPool struct {
@@ -29,11 +30,13 @@ func (this *ClientPool) FreeConnMap() map[string]map[string][]*conn {
 }
 
 func (this *ClientPool) Warmup() {
+	t1 := time.Now()
 	for _, client := range this.clients {
 		client.Warmup()
 	}
 
-	log.Debug("Memcache pool warmup finished")
+	log.Trace("Memcache pool warmup finished within %s: %+v",
+		time.Since(t1), this.FreeConnMap())
 }
 
 func (this *ClientPool) Get(pool string, key string) (item *Item, err error) {
