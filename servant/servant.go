@@ -75,7 +75,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// kvdb
 	if this.conf.Kvdb.Enabled() {
-		this.kvdb = kvdb.NewServer(this.conf.Kvdb.BasePath,
+		this.kvdb = kvdb.NewServer(this.conf.Kvdb.DbPath,
 			this.conf.Kvdb.ServletNum)
 	}
 
