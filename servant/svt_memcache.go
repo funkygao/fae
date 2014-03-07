@@ -81,6 +81,10 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	if appErr == nil {
 		r = true
 	} else {
+		if appErr == memcache.ErrCacheMiss {
+			appErr = nil
+		}
+
 		log.Error("mc.add {key^%s}: %v", key, appErr)
 	}
 
@@ -105,6 +109,10 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	if appErr == nil {
 		r = true
 	} else {
+		if appErr == memcache.ErrCacheMiss {
+			appErr = nil
+		}
+
 		log.Error("mc.del {key^%s}: %v", key, appErr)
 	}
 
@@ -129,7 +137,6 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 		r = int64(newVal)
 	} else {
 		// err may be memcache.ErrCacheMiss
-		appErr = err
 		log.Error("mc.inc {key^%s}: %v", key, err)
 	}
 
