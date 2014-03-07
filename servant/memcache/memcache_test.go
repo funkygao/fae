@@ -1,16 +1,26 @@
 package memcache
 
 import (
-	"fmt"
+	"github.com/funkygao/fae/config"
 	"net"
-	"os"
-	"os/exec"
 	"strings"
 	"testing"
-	"time"
 )
 
 const testServer = "localhost:11211"
+
+func getClient(hash string, servers ...string) *Client {
+	var cf = config.ConfigMemcache{HashStrategy: hash}
+	cf.Servers = make(map[string]*config.ConfigMemcacheServer)
+	for _, server := range servers {
+		svr := new(config.ConfigMemcacheServer)
+		p := strings.Split(server, ":")
+		svr.Host, svr.Port = p[0], p[1]
+		cf.Servers[svr.Address()] = svr
+	}
+
+	return New(&cf)
+}
 
 func setup(t *testing.T) bool {
 	c, err := net.Dial("tcp", testServer)
@@ -27,29 +37,7 @@ func TestLocalhost(t *testing.T) {
 	if !setup(t) {
 		return
 	}
-	testWithClient(t, New("standard", testServer))
-}
-
-// Run the memcached binary as a child process and connect to its unix socket.
-func TestUnixSocket(t *testing.T) {
-	sock := fmt.Sprintf("/tmp/test-gomemcache-%d.sock", os.Getpid())
-	cmd := exec.Command("memcached", "-s", sock)
-	if err := cmd.Start(); err != nil {
-		t.Logf("skipping test; couldn't find memcached")
-		return
-	}
-	defer cmd.Wait()
-	defer cmd.Process.Kill()
-
-	// Wait a bit for the socket to appear.
-	for i := 0; i < 10; i++ {
-		if _, err := os.Stat(sock); err == nil {
-			break
-		}
-		time.Sleep(time.Duration(25*i) * time.Millisecond)
-	}
-
-	testWithClient(t, New("standard", sock))
+	testWithClient(t, getClient("standard", testServer))
 }
 
 func testWithClient(t *testing.T, c *Client) {
