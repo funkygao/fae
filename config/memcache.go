@@ -8,27 +8,27 @@ import (
 )
 
 type ConfigMemcacheServer struct {
-	pool string
-	host string
-	port string
+	Pool string
+	Host string
+	Port string
 }
 
 func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
-	this.host = section.String("host", "")
-	if this.host == "" {
+	this.Host = section.String("host", "")
+	if this.Host == "" {
 		panic("Empty memcache server host")
 	}
-	this.port = section.String("port", "")
-	if this.port == "" {
+	this.Port = section.String("port", "")
+	if this.Port == "" {
 		panic("Empty memcache server port")
 	}
-	this.pool = section.String("pool", "default")
+	this.Pool = section.String("pool", "default")
 
 	log.Debug("memcache server: %+v", *this)
 }
 
 func (this *ConfigMemcacheServer) Address() string {
-	return this.host + ":" + this.port
+	return this.Host + ":" + this.Port
 }
 
 type ConfigMemcache struct {
@@ -57,7 +57,7 @@ func (this *ConfigMemcache) ServerList() []string {
 func (this *ConfigMemcache) Pools() (pools []string) {
 	poolsMap := make(map[string]bool)
 	for _, server := range this.Servers {
-		poolsMap[server.pool] = true
+		poolsMap[server.Pool] = true
 	}
 	for poolName, _ := range poolsMap {
 		pools = append(pools, poolName)
