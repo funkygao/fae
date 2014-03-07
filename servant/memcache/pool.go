@@ -20,6 +20,14 @@ func New(cf *config.ConfigMemcache) *ClientPool {
 	return this
 }
 
+func (this *ClientPool) FreeConnMap() map[string]map[string][]*conn {
+	ret := make(map[string]map[string][]*conn)
+	for pool, client := range this.clients {
+		ret[pool] = client.FreeConnMap()
+	}
+	return ret
+}
+
 func (this *ClientPool) Warmup() {
 	for _, client := range this.clients {
 		client.Warmup()

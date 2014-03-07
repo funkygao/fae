@@ -1,6 +1,6 @@
 package servant
 
 func (this *FunServantImpl) warmUp() {
-	go this.mg.WarmUp()
-	go this.mc.WarmUp()
+	go this.mg.Warmup()
+	go this.mc.Warmup()
 }
