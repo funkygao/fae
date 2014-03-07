@@ -53,6 +53,17 @@ func (this *ConfigMemcache) ServerList() []string {
 	return servers
 }
 
+func (this *ConfigMemcache) Pools() (pools []string) {
+	poolsMap := make(map[string]bool)
+	for _, server := range this.Servers {
+		poolsMap[server.pool] = true
+	}
+	for poolName, _ := range poolsMap {
+		pools = append(pools, poolName)
+	}
+	return
+}
+
 func (this *ConfigMemcache) Enabled() bool {
 	return this.enabled
 }
