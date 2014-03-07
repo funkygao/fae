@@ -83,9 +83,9 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	} else {
 		if appErr == memcache.ErrNotStored {
 			appErr = nil
+		} else {
+			log.Error("mc.add {key^%s}: %v", key, appErr)
 		}
-
-		log.Error("mc.add {key^%s}: %v", key, appErr)
 	}
 
 	profiler.do("mc.add", ctx,
@@ -111,9 +111,9 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	} else {
 		if appErr == memcache.ErrCacheMiss {
 			appErr = nil
+		} else {
+			log.Error("mc.del {key^%s}: %v", key, appErr)
 		}
-
-		log.Error("mc.del {key^%s}: %v", key, appErr)
 	}
 
 	profiler.do("mc.del", ctx,
@@ -135,8 +135,7 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 
 	if err == nil {
 		r = int64(newVal)
-	} else {
-		// err may be memcache.ErrCacheMiss
+	} else if err != memcache.ErrCacheMiss {
 		log.Error("mc.inc {key^%s}: %v", key, err)
 	}
 
