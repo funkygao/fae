@@ -61,7 +61,7 @@ func (this *Client) Session(pool string, shardId int32) (*Session, error) {
 	return &Session{Session: sess, client: this, server: server}, nil
 }
 
-func (this *Client) WarmUp() {
+func (this *Client) Warmup() {
 	var (
 		sess *mgo.Session
 		err  error

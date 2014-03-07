@@ -19,7 +19,7 @@ func getClient(hash string, servers ...string) *Client {
 		cf.Servers[svr.Address()] = svr
 	}
 
-	return New(&cf)
+	return newClient(&cf)
 }
 
 func setup(t *testing.T) bool {

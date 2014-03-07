@@ -27,7 +27,7 @@ type Client struct {
 	throttleConns map[net.Addr]chan interface{}
 }
 
-func New(cf *config.ConfigMemcache) (this *Client) {
+func newClient(cf *config.ConfigMemcache) (this *Client) {
 	this = new(Client)
 	this.conf = cf
 	this.breakers = make(map[net.Addr]*breaker.Consecutive)
@@ -48,7 +48,7 @@ func New(cf *config.ConfigMemcache) (this *Client) {
 	return
 }
 
-func (this *Client) WarmUp() {
+func (this *Client) Warmup() {
 	var (
 		cn  *conn
 		err error
