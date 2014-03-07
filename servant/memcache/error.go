@@ -14,6 +14,7 @@ var (
 	ErrMalformedKey = errors.New("malformed: key is too long or contains invalid characters")
 	ErrNoServers    = errors.New("memcache: no servers configured or available")
 	ErrCircuitOpen  = errors.New("memcache: circuit open")
+	ErrInvalidPool  = errors.New("memcache: invalid pool name")
 )
 
 // ConnectTimeoutError is the error type used when it takes
