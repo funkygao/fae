@@ -7,6 +7,7 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
+	"github.com/funkygao/golib/gofmt"
 	"log"
 	"sync"
 	"time"
@@ -68,11 +69,9 @@ func main() {
 	wg := new(sync.WaitGroup)
 	t1 := time.Now()
 	for i := 0; i < Rounds; i++ {
-		log.Printf("Round %3d", i)
-
 		for j := 0; j < Concurrency; j++ {
 			wg.Add(1)
-			go runSession(proxy, wg, i, j)
+			go runSession(proxy, wg, i+1, j)
 		}
 
 		wg.Wait()
@@ -81,8 +80,12 @@ func main() {
 	elapsed := time.Since(t1)
 	sessions := Rounds * Concurrency
 	calls := sessions * LoopsPerSession
-	log.Printf("Elapsed: %s, calls: %.1f/s, sessions: %.1f/s",
+	log.Printf("Elapsed: %s, calls: {%s, %.1f/s}, sessions: {%s, %.1f/s}, errors: {session:%d, call:%d}",
 		elapsed,
+		gofmt.Comma(report.callOk),
 		float64(calls)/elapsed.Seconds(),
-		float64(sessions)/elapsed.Seconds())
+		gofmt.Comma(int64(report.sessionN)),
+		float64(sessions)/elapsed.Seconds(),
+		report.connErrs,
+		report.callErrs)
 }

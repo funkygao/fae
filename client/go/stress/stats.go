@@ -20,8 +20,8 @@ func (this *stats) incCallErr() {
 	atomic.AddInt64(&this.callErrs, 1)
 }
 
-func (this *stats) incCallOk(delta int64) {
-	atomic.AddInt64(&this.callOk, delta)
+func (this *stats) incCallOk() {
+	atomic.AddInt64(&this.callOk, 1)
 }
 
 func (this *stats) incSessions() {
