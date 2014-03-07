@@ -81,7 +81,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	if appErr == nil {
 		r = true
 	} else {
-		if appErr == memcache.ErrCacheMiss {
+		if appErr == memcache.ErrNotStored {
 			appErr = nil
 		}
 
