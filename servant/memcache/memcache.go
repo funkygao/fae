@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// mc client for a group of memcached instances
 type Client struct {
 	conf *config.ConfigMemcache
 

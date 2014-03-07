@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// mongodb client for a pool of mongodb servers
 type Client struct {
 	conf *config.ConfigMongodb
 
