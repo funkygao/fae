@@ -15,7 +15,7 @@ from thrift.transport.TTransport import TTransportException
 from fun.rpc import FunServant
 
 # config
-CONCURRENT = 100
+CONCURRENCY = 100
 SESSIONS = 1000 * 1000
 PINGS_PER_CLIENT = 2
 
@@ -36,7 +36,7 @@ def ping(n):
 
 def main():    
     t1 = datetime.datetime.now()
-    pool = multiprocessing.Pool(processes=CONCURRENT)
+    pool = multiprocessing.Pool(processes=CONCURRENCY)
     for i in xrange(SESSIONS):
         pool.apply(ping, (PINGS_PER_CLIENT, ))
     pool.close()
