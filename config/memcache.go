@@ -36,6 +36,7 @@ type ConfigMemcache struct {
 	// for both conn and io timeout
 	Timeout               time.Duration
 	MaxIdleConnsPerServer int
+	MaxConnsPerServer     int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMemcacheServer // key is host:port(addr)
 
@@ -77,6 +78,8 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 		this.Breaker.loadConfig(section)
 	}
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 3)
+	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
+		this.MaxIdleConnsPerServer*10)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
 		if err != nil {

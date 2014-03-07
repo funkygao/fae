@@ -60,6 +60,7 @@ type ConfigMongodb struct {
 	ConnectTimeout        time.Duration
 	IoTimeout             time.Duration
 	MaxIdleConnsPerServer int
+	MaxConnsPerServer     int
 	HeartbeatInterval     int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMongodbServer // key is pool
@@ -80,6 +81,8 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.ConnectTimeout = time.Duration(cf.Int("connect_timeout", 4)) * time.Second
 	this.IoTimeout = time.Duration(cf.Int("io_timeout", 30)) * time.Second
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
+	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
+		this.MaxIdleConnsPerServer*5)
 	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	section, err := cf.Section("breaker")
 	if err == nil {
