@@ -108,9 +108,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallMongo != 0 {
-			result, _, err = client.MgFindOne(ctx, "default", "idmap", 0,
-				mgQuery,
-				mgFields)
+			result, _, err = client.MgFindOne(ctx, "default", "idmap",
+				0, mgQuery, mgFields)
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
