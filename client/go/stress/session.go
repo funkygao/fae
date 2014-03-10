@@ -112,7 +112,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 				0, mgQuery, mgFields)
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d mg_findOne} %v", round, seq, err)
 			} else {
 				report.incCallOk()
 
@@ -123,11 +123,19 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallKvdb != 0 {
-			_, err = client.KvdbSet(ctx, fixture.RandomByteSlice(30),
+			key := fixture.RandomByteSlice(30)
+			_, err = client.KvdbSet(ctx, key,
 				fixture.RandomByteSlice(10<<10))
 			if err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d kvdb_set} %v", round, seq, err)
+			} else {
+				report.incCallOk()
+			}
+
+			if _, err = client.KvdbGet(ctx, key); err != nil {
+				log.Printf("session{round^%d seq^%d kvdb_get} %v", round, seq, err)
+				report.incCallErr()
 			} else {
 				report.incCallOk()
 			}
