@@ -31,6 +31,10 @@ func (this *servlet) open() error {
 	filter := levigo.NewBloomFilter(10)
 	opts.SetFilterPolicy(filter)
 	opts.SetCreateIfMissing(true)
+	opts.SetWriteBufferSize(1 << 20)
+	opts.SetBlockSize(1024)
+	opts.SetBlockRestartInterval(8)
+	opts.SetCompression(levigo.SnappyCompression)
 	db, err := levigo.Open(this.path, opts)
 	if err != nil {
 		return err
@@ -60,12 +64,15 @@ func (this *servlet) unlock() {
 func (this *servlet) get(key []byte) (value []byte, err error) {
 	ro := levigo.NewReadOptions()
 	defer ro.Close()
+	ro.SetVerifyChecksums(true)
+	ro.SetFillCache(true)
 	return this.db.Get(ro, key)
 }
 
 func (this *servlet) put(key []byte, value []byte) error {
 	wo := levigo.NewWriteOptions()
 	defer wo.Close()
+	wo.SetSync(false)
 	return this.db.Put(wo, key, value)
 }
 
