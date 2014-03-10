@@ -38,7 +38,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
 
 	default:
-		transportFactory = thrift.NewTTransportFactory()
+		transportFactory = thrift.NewTBufferedTransportFactory(2 << 10)
 	}
 
 	switch {

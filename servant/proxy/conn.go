@@ -6,10 +6,10 @@ import (
 )
 
 func connect(serverAddr string) (*rpc.FunServantClient, error) {
-	transportFactory := thrift.NewTTransportFactory()
+	transportFactory := thrift.NewTBufferedTransportFactory(2 << 10)
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
-	transport, err := thrift.NewTSocket(serverAddr)
+	transport, err := thrift.NewTSocketTimeout(serverAddr, 0)
 	if err != nil {
 		return nil, err
 	}
