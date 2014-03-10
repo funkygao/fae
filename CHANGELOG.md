@@ -34,6 +34,7 @@ Release Notes - fae - Version v0.0.2.rc
     . user service with auto local caching
     . proxy of servant pooling
     . optimize mc/mg pool, better failure handling
+    . RocksDB vs LevelDB
     . bitmap, replicated consitent hash
     . cpuprof/memprof
     . db flush in batch
