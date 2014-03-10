@@ -14,7 +14,7 @@ func tryServantPool(proxy *proxy.Proxy) {
 			log.Printf("seq^%d err^%v\n", i, err)
 			return
 		}
-		log.Printf("%8d connected within %s", i, time.Since(t1))
+		log.Printf("%8d connected within %s", i+1, time.Since(t1))
 		client.Recycle()
 	}
 
