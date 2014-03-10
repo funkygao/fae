@@ -15,7 +15,7 @@ type SqlDb struct {
 	db     *sql.DB
 }
 
-func NewSqlDb(driver, dsn string, logger *log.Logger) *SqlDb {
+func newSqlDb(driver, dsn string, logger *log.Logger) *SqlDb {
 	this := new(SqlDb)
 	this.driver = driver
 	this.dsn = dsn
