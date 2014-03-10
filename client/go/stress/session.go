@@ -98,10 +98,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			} else {
 				report.incCallOk()
 			}
-			_, miss, _ := client.McGet(ctx, MC_POOL, key)
-			if miss != nil {
+			_, miss, err := client.McGet(ctx, MC_POOL, key)
+			if miss != nil || err != nil {
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d mc_get} %v", round, seq, miss)
+				log.Printf("session{round^%d seq^%d mc_get} miss^%v, err^%v",
+					round, seq, miss, err)
 			} else {
 				report.incCallOk()
 			}
