@@ -88,14 +88,12 @@ func main() {
 	}
 
 	elapsed := time.Since(t1)
-	sessions := Rounds * Concurrency
-	calls := sessions * LoopsPerSession
 	log.Printf("Elapsed: %s, calls: {%s, %.1f/s}, sessions: {%s, %.1f/s}, errors: {session:%d, call:%d}",
 		elapsed,
 		gofmt.Comma(report.callOk),
-		float64(calls)/elapsed.Seconds(),
+		float64(report.callOk)/elapsed.Seconds(),
 		gofmt.Comma(int64(report.sessionN)),
-		float64(sessions)/elapsed.Seconds(),
+		float64(report.sessionN)/elapsed.Seconds(),
 		report.connErrs,
 		report.callErrs)
 }
