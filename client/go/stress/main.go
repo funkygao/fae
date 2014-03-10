@@ -9,6 +9,7 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -47,6 +48,7 @@ func init() {
 	ctx.Ip = thrift.StringPtr("127.0.0.1")
 	ctx.Sid = thrift.StringPtr("bcf8f619")
 
+	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
 }
 
