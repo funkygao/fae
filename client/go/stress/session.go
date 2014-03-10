@@ -123,9 +123,10 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallKvdb != 0 {
-			key := fixture.RandomByteSlice(30)
+			// key 20B, value 1KB
+			key := fixture.RandomByteSlice(20)
 			_, err = client.KvdbSet(ctx, key,
-				fixture.RandomByteSlice(10<<10))
+				fixture.RandomByteSlice(1<<10))
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d kvdb_set} %v", round, seq, err)
