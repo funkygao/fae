@@ -24,6 +24,7 @@ type ConfigServant struct {
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
 	Proxy    *ConfigProxy
+	Mysql    *ConfigMysql
 }
 
 func init() {
@@ -44,6 +45,12 @@ func LoadServants(cf *conf.Conf) {
 	section, err := cf.Section("mongodb")
 	if err == nil {
 		Servants.Mongodb.loadConfig(section)
+	}
+
+	Servants.Mysql = new(ConfigMysql)
+	section, err = cf.Section("mysql")
+	if err == nil {
+		Servants.Mysql.loadConfig(section)
 	}
 
 	// memcached section
