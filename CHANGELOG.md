@@ -28,6 +28,7 @@ Release Notes - fae - Version v0.0.2.rc
 
     . memcache also support backend pools by name
     . pool pkg bug
+    . recyleable byte array for thrift buffered transport
     . LRUcache switch to better vitess implementation
     . use framed transport for better performance 
     . user service with auto local caching
