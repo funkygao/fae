@@ -36,7 +36,6 @@ var (
 	Rounds          int // sessions=Rounds*Concurrency
 	LoopsPerSession int // calls=sessions*LoopsPerSession
 	Cmd             int
-	ShowCmd         bool
 	host            string
 	verbose         int
 )
@@ -56,20 +55,15 @@ func parseFlag() {
 	flag.IntVar(&Concurrency, "c", 3000, "concurrent num")
 	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
 	flag.IntVar(&Cmd, "x", CallPing, "bitwise rpc calls")
-	flag.BoolVar(&ShowCmd, "xx", false, "show bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
+	flag.Usage = showUsage
 	flag.Parse()
 }
 
 func main() {
 	parseFlag()
-
-	if ShowCmd {
-		showCmdHelp()
-		return
-	}
 
 	proxy := proxy.New(Concurrency, time.Minute*60)
 	tryServantPool(proxy)
