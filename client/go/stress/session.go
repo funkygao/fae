@@ -69,7 +69,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 		}
 
-		key = fmt.Sprintf("mc_stress: %d", rand.Int())
+		key = fmt.Sprintf("mc_stress:%d", rand.Int())
 		value = []byte("value of " + key)
 		mcValue.Data = value
 
