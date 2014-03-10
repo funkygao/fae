@@ -14,7 +14,7 @@ func New(cf *config.ConfigMysql) *ClientPool {
 	this.conf = cf
 	this.clients = make(map[string]*SqlDb)
 	for _, pool := range cf.Pools() {
-		this.clients[pool] = NewSqlDb("mysql", dsn, nil)
+		this.clients[pool] = newSqlDb("mysql", dsn, nil)
 	}
 	return this
 }
