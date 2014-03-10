@@ -16,13 +16,13 @@ type ConfigMysqlServer struct {
 	DbName       string
 	ShardBaseNum int
 
-	uri string // cache of op result
+	dsn string // cache of op result
 }
 
 func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	this.Pool = section.String("pool", "")
 	this.Host = section.String("host", "")
-	this.Port = section.String("port", "27017")
+	this.Port = section.String("port", "3306")
 	this.DbName = section.String("db", "")
 	this.ShardBaseNum = section.Int("shard_base_num", this.ShardBaseNum)
 	this.User = section.String("user", "")
@@ -34,16 +34,16 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 		panic("required field missing")
 	}
 
-	this.uri = "mysql://" + this.Host + ":" + this.Port + "/"
+	this.dsn = "mysql://" + this.Host + ":" + this.Port + "/"
 	if this.DbName != "" {
-		this.uri += this.DbName + "/"
+		this.dsn += this.DbName + "/"
 	}
 
 	log.Debug("mysql server: %+v", *this)
 }
 
-func (this *ConfigMysqlServer) Uri() string {
-	return this.uri
+func (this *ConfigMysqlServer) DSN() string {
+	return this.dsn
 }
 
 type ConfigMysql struct {
@@ -64,6 +64,17 @@ type ConfigMysql struct {
 
 func (this *ConfigMysql) Enabled() bool {
 	return this.enabled
+}
+
+func (this *ConfigMysql) Pools() (pools []string) {
+	poolsMap := make(map[string]bool)
+	for _, server := range this.Servers {
+		poolsMap[server.Pool] = true
+	}
+	for poolName, _ := range poolsMap {
+		pools = append(pools, poolName)
+	}
+	return
 }
 
 func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
