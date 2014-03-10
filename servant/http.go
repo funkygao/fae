@@ -28,6 +28,10 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 		if this.proxy != nil {
 			output["proxy"] = this.proxy.StatsMap()
 		}
+		if this.kvdb != nil {
+			output["kvdb"] = this.kvdb
+			output["kvdb.count"] = this.kvdb.Count()
+		}
 
 	case "conf":
 		output["conf"] = *this.conf

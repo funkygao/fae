@@ -74,3 +74,15 @@ func (this *servlet) delete(key []byte) error {
 	defer wo.Close()
 	return this.db.Delete(wo, key)
 }
+
+func (this *servlet) count() (c int) {
+	ro := levigo.NewReadOptions()
+	defer ro.Close()
+	it := this.db.NewIterator(ro)
+	defer it.Close()
+	it.SeekToFirst()
+	for it = it; it.Valid(); it.Next() {
+		c += 1
+	}
+	return
+}

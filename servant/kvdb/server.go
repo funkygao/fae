@@ -62,6 +62,13 @@ func (this *Server) Delete(key []byte) error {
 	return servlet.delete(key)
 }
 
+func (this *Server) Count() (c int) {
+	for _, s := range this.servlets {
+		c += s.count()
+	}
+	return
+}
+
 func (this *Server) close() {
 	if this.servlets != nil {
 		for _, servlet := range this.servlets {
