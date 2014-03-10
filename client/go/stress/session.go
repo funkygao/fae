@@ -15,7 +15,7 @@ import (
 func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer wg.Done()
 
-	if sampling(Concurrency) {
+	if sampling(SampleRate) {
 		log.Printf("session{round^%d seq^%d} started", round, seq)
 	}
 
@@ -30,7 +30,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	}
 	defer client.Recycle() // when err occurs, do we still need recyle?
 
-	if sampling(Concurrency) {
+	if sampling(SampleRate) {
 		log.Printf("session{round^%d seq^%d} connected within %s",
 			round, seq, time.Since(t1))
 	}
@@ -134,7 +134,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 	}
 
-	if sampling(Concurrency) {
+	if sampling(SampleRate) {
 		log.Printf("session{round^%d seq^%d} finished", round, seq)
 	}
 
