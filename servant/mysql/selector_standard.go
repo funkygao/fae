@@ -32,3 +32,9 @@ func (this *StandardServerSelector) PickServer(pool string,
 	defer this.mu.Unlock()
 	return
 }
+
+func (this *StandardServerSelector) endsWithDigit(pool string) bool {
+	lastChar := pool[len(pool)-1]
+	return lastChar >= '0' && lastChar <= '9'
+
+}
