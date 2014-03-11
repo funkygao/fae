@@ -354,7 +354,7 @@ service FunServant {
         3: string table,
         4: i32 shardId,
         5: string sql,
-        6: list<binary> args
+        6: list<binary> argv
     ),
 
     binary my_query_one(
@@ -363,6 +363,6 @@ service FunServant {
         3: string table,
         4: i32 shardId,
         5: string sql,
-        6: list<binary> args
+        6: list<binary> argv
     ),
 }
