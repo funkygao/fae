@@ -106,6 +106,7 @@
             max_conns_per_server: 200
             max_idle_conns_per_server: 20
             timeout: 4
+            replica_num: 2
             breaker: {
                 failure_allowance: 5
                 retry_timeout: 10
