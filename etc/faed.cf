@@ -13,7 +13,7 @@
         session_slow_threshold: 8
         session_timeout: 30
         io_timeout: 2
-        debug_session: true
+        debug_session: false
         tcp_nodelay: true
         stats_output_interval: 600
         // process management, learned from php-fpm
@@ -39,6 +39,19 @@
         proxy: {
             pool_capacity: 5
             idle_timeout: 600
+        }
+
+        mysql: {
+            breaker: {
+                failure_allowance: 5
+                retry_timeout: 10
+            }
+            servers: [
+                pool: "default"
+                host: "127.0.0.1"
+                port: 3306
+                db: "war"
+            ]
         }
 
         mongodb: {

@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/kvdb"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
+	"github.com/funkygao/fae/servant/mysql"
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
@@ -28,6 +29,7 @@ type FunServantImpl struct {
 	lc       *cache.LruCache      // local cache
 	mc       *memcache.ClientPool // memcache pool, auto sharding by key
 	mg       *mongo.Client        // mongodb pool, auto sharding by shardId
+	my       *mysql.ClientPool    // mysql pool, auto sharding by shardId
 	kvdb     *kvdb.Server         // kvdb based on LevelDB
 }
 
@@ -79,9 +81,15 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			this.conf.Kvdb.ServletNum)
 	}
 
+	// mysql
+	if this.conf.Mysql.Enabled() {
+		this.my = mysql.New(this.conf.Mysql)
+	}
+
 	// mongodb
 	if this.conf.Mongodb.Enabled() {
 		this.mg = mongo.New(this.conf.Mongodb)
+
 		if this.conf.Mongodb.DebugProtocol ||
 			this.conf.Mongodb.DebugHeartbeat {
 			mgo.SetLogger(&mongoProtocolLogger{})
