@@ -25,7 +25,9 @@ func New(cf *config.ConfigMysql) *MysqlCluster {
 	this.selector.SetServers(cf)
 	this.clients = make(map[string]*mysql)
 	for _, server := range cf.Servers {
-		this.clients[server.DSN()] = newMysql(server.DSN())
+		my := newMysql(server.DSN())
+		my.setMaxIdleConns(cf.MaxIdleConnsPerServer)
+		this.clients[server.DSN()] = my
 	}
 
 	return this
