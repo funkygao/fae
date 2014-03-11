@@ -7,7 +7,7 @@ import (
 type ClientPool struct {
 	selector ServerSelector
 	conf     *config.ConfigMysql
-	clients  map[string]*SqlDb
+	clients  map[string]*mysql
 }
 
 func New(cf *config.ConfigMysql) *ClientPool {
@@ -18,9 +18,9 @@ func New(cf *config.ConfigMysql) *ClientPool {
 		this.selector = newStandardServerSelector()
 	}
 	this.selector.SetServers(cf)
-	this.clients = make(map[string]*SqlDb)
+	this.clients = make(map[string]*mysql)
 	for _, pool := range cf.Pools() {
-		this.clients[pool] = newSqlDb("mysql", cf.Servers[pool].DSN(), nil)
+		this.clients[pool] = newMysql(cf.Servers[pool].DSN())
 	}
 	return this
 }
