@@ -7,6 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// A mysql conn to a single mysql instance
+// Conn pool is natively supported by golang
 type mysql struct {
 	dsn string
 	db  *sql.DB
