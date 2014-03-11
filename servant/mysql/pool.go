@@ -24,3 +24,8 @@ func New(cf *config.ConfigMysql) *ClientPool {
 	}
 	return this
 }
+
+func (this *ClientPool) Query(pool string, table string, shardId int32,
+	sql string, args []interface{}) (r [][]byte, err error) {
+	return
+}

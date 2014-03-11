@@ -8,7 +8,10 @@ import (
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	shardId int32, sql string, args [][]byte) (r [][]byte, appErr error) {
 	profiler := this.profiler()
-	log.Debug("ha")
+	r, appErr = this.my.Query(pool, table, shardId, sql, args.([]interface{}))
+	if appErr != nil {
+		log.Error("my.query: %v", appErr)
+	}
 	profiler.do("my.query", ctx,
 		"{pool^%s table^%s sql^%s} {r^%v}",
 		pool, table, sql, r)
