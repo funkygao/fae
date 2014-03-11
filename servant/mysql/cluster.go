@@ -4,14 +4,14 @@ import (
 	"github.com/funkygao/fae/config"
 )
 
-type ClientPool struct {
-	selector ServerSelector
+type MysqlCluster struct {
 	conf     *config.ConfigMysql
-	clients  map[string]*mysql
+	selector ServerSelector
+	clients  map[string]*mysql // key is pool name
 }
 
-func New(cf *config.ConfigMysql) *ClientPool {
-	this := new(ClientPool)
+func New(cf *config.ConfigMysql) *MysqlCluster {
+	this := new(MysqlCluster)
 	this.conf = cf
 	switch cf.ShardStrategy {
 	default:
@@ -25,7 +25,7 @@ func New(cf *config.ConfigMysql) *ClientPool {
 	return this
 }
 
-func (this *ClientPool) Query(pool string, table string, shardId int32,
+func (this *MysqlCluster) Query(pool string, table string, shardId int32,
 	sql string, args []interface{}) (r [][]byte, err error) {
 	return
 }
