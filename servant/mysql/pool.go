@@ -5,13 +5,19 @@ import (
 )
 
 type ClientPool struct {
-	conf    *config.ConfigMysql
-	clients map[string]*SqlDb
+	selector ServerSelector
+	conf     *config.ConfigMysql
+	clients  map[string]*SqlDb
 }
 
 func New(cf *config.ConfigMysql) *ClientPool {
 	this := new(ClientPool)
 	this.conf = cf
+	switch cf.ShardStrategy {
+	default:
+		this.selector = newStandardServerSelector()
+	}
+	this.selector.SetServers(cf)
 	this.clients = make(map[string]*SqlDb)
 	for _, pool := range cf.Pools() {
 		this.clients[pool] = newSqlDb("mysql", cf.Servers[pool].DSN(), nil)

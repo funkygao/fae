@@ -1,6 +1,10 @@
 package mysql
 
+import (
+	"github.com/funkygao/fae/config"
+)
+
 type ServerSelector interface {
-	SetServers(servers ...string)
+	SetServers(*config.ConfigMysql)
 	PickServer(pool string, shardId int) (addr string, err error)
 }

@@ -1,9 +1,18 @@
 package mysql
 
+import (
+	"github.com/funkygao/fae/config"
+)
+
 type StandardServerSelector struct {
 }
 
-func (this *StandardServerSelector) SetServers(servers ...string) {
+func newStandardServerSelector() (this *StandardServerSelector) {
+	this = new(StandardServerSelector)
+	return
+}
+
+func (this *StandardServerSelector) SetServers(servers *config.ConfigMysql) {
 
 }
 
