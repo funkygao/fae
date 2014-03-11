@@ -2,6 +2,8 @@ package mysql
 
 import (
 	"database/sql"
+	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/breaker"
 	log "github.com/funkygao/log4go"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -9,13 +11,17 @@ import (
 // A mysql conn to a single mysql instance
 // Conn pool is natively supported by golang
 type mysql struct {
-	dsn string
-	db  *sql.DB
+	dsn     string
+	db      *sql.DB
+	breaker *breaker.Consecutive
 }
 
-func newMysql(dsn string) *mysql {
+func newMysql(dsn string, bc *config.ConfigBreaker) *mysql {
 	this := new(mysql)
 	this.dsn = dsn
+	this.breaker = &breaker.Consecutive{
+		FailureAllowance: bc.FailureAllowance,
+		RetryTimeout:     bc.RetryTimeout}
 
 	return this
 }
@@ -34,10 +40,21 @@ func (this *mysql) setMaxIdleConns(n int) {
 	this.db.SetMaxIdleConns(n)
 }
 
-func (this *mysql) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows, err error) {
 	log.Debug("%s, args=%+v\n", query, args)
 
-	return this.db.Query(query, args...)
+	if this.breaker.Open() {
+		return nil, ErrCircuitOpen
+	}
+
+	rows, err = this.db.Query(query, args...)
+	if err != nil {
+		this.breaker.Fail()
+	} else {
+		this.breaker.Succeed()
+	}
+
+	return
 }
 
 func (this *mysql) QueryRow(query string, args ...interface{}) *sql.Row {
@@ -49,13 +66,23 @@ func (this *mysql) QueryRow(query string, args ...interface{}) *sql.Row {
 func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int64, err error) {
 	log.Debug("%s, args=%+v\n", query, args)
 
+	if this.breaker.Open() {
+		return 0, ErrCircuitOpen
+	}
+
 	var result sql.Result
 	result, err = this.db.Exec(query, args...)
 	if err != nil {
+		this.breaker.Fail()
 		return 0, err
 	}
 
 	afftectedRows, err = result.RowsAffected()
+	if err != nil {
+		this.breaker.Fail()
+	} else {
+		this.breaker.Succeed()
+	}
 	return
 
 }

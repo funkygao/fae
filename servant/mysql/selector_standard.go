@@ -2,39 +2,30 @@ package mysql
 
 import (
 	"github.com/funkygao/fae/config"
-	"github.com/funkygao/golib/breaker"
 )
 
 type StandardServerSelector struct {
-	conf     *config.ConfigMysql
-	breakers map[string]*breaker.Consecutive // key is pool
-	clients  map[string]*mysql               // key is pool
+	conf    *config.ConfigMysql
+	clients map[string]*mysql // key is pool
 }
 
 func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSelector) {
-	const MAX_RETRIES = 3
 	this = new(StandardServerSelector)
 	this.conf = cf
-	this.breakers = make(map[string]*breaker.Consecutive)
 	this.clients = make(map[string]*mysql)
 	for _, server := range cf.Servers {
-		my := newMysql(server.DSN())
-		retries := 0
-		for ; retries < MAX_RETRIES; retries++ {
+		my := newMysql(server.DSN(), &cf.Breaker)
+		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
 			err := my.Open()
 			if err == nil {
 				break
 			}
-		}
-		if retries == MAX_RETRIES {
-			// FIXME
+
+			my.breaker.Fail()
 		}
 
 		my.setMaxIdleConns(cf.MaxIdleConnsPerServer)
 		this.clients[server.Pool] = my
-		this.breakers[server.Pool] = &breaker.Consecutive{
-			FailureAllowance: this.conf.Breaker.FailureAllowance,
-			RetryTimeout:     this.conf.Breaker.RetryTimeout}
 	}
 
 	return
