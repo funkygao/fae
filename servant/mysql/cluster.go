@@ -19,7 +19,12 @@ func New(cf *config.ConfigMysql) *MysqlCluster {
 	return this
 }
 
-func (this *MysqlCluster) Query(pool string, shardId int32,
-	sql string, args []interface{}) (r *sql.Rows, err error) {
-	return
+func (this *MysqlCluster) Query(pool string, shardId int,
+	sql string, args []interface{}) (*sql.Rows, error) {
+	my, err := this.selector.PickServer(pool, shardId)
+	if err != nil {
+		return nil, err
+	}
+
+	return my.Query(sql, args...)
 }
