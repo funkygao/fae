@@ -14,6 +14,7 @@ type ConfigMysqlServer struct {
 	User         string
 	Pass         string
 	DbName       string
+	Charset      string
 	ShardBaseNum int
 
 	dsn string // cache of op result
@@ -25,8 +26,9 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	this.Port = section.String("port", "3306")
 	this.DbName = section.String("db", "")
 	this.ShardBaseNum = section.Int("shard_base_num", this.ShardBaseNum)
-	this.User = section.String("user", "")
-	this.Pass = section.String("pass", "")
+	this.User = section.String("username", "")
+	this.Pass = section.String("password", "")
+	this.Charset = section.String("charset", "utf8")
 	if this.Host == "" ||
 		this.Port == "" ||
 		this.Pool == "" ||
@@ -34,9 +36,16 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 		panic("required field missing")
 	}
 
-	this.dsn = "mysql://" + this.Host + ":" + this.Port + "/"
-	if this.DbName != "" {
-		this.dsn += this.DbName + "/"
+	this.dsn = ""
+	if this.User != "" {
+		this.dsn = this.User + ":"
+		if this.Pass != "" {
+			this.dsn += this.Pass
+		}
+	}
+	this.dsn += fmt.Sprintf("@(%s:%s)/%s?", this.Host, this.Port, this.DbName)
+	if this.Charset != "" {
+		this.dsn += "charset=" + this.Charset
 	}
 
 	log.Debug("mysql server: %+v", *this)
