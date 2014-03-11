@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ErrInvalidDsn = errors.New("Invalid mysql dsn")
+	ErrServerNotFound = errors.New("mysql: server not found")
 )
