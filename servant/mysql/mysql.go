@@ -30,7 +30,7 @@ func (this mysql) String() string {
 }
 
 // sets the maximum number of connections in the idle connection pool
-func (this *mysql) SetMaxIdleConns(n int) {
+func (this *mysql) setMaxIdleConns(n int) {
 	this.db.SetMaxIdleConns(n)
 }
 
