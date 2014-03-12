@@ -146,8 +146,10 @@ try {
     echo "[Client] kvdb_del received:", $client->kvdb_del($ctx, 'php-kvdb-hello'), "\n";
 
     // my.query
-    $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
-    var_dump(json_decode($rows));
+    for ($i=0; $i<10000; $i++) {
+        $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
+        print_r(json_decode($rows));
+    }
 
     $transport->close();
 } catch (TException $tx) {
