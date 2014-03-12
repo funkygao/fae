@@ -1,6 +1,7 @@
 package servant
 
 import (
+	sql_ "database/sql"
 	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
@@ -26,7 +27,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		res["cols"] = cols
 		vals := make([][]string, 0)
 		for rows.Next() {
-			rawRowValues := make([][]byte, len(cols))
+			rawRowValues := make([]sql_.RawBytes, len(cols))
 			rowValues := make([]string, len(cols))
 			rowValuePtrs := make([]interface{}, len(cols))
 			for i, _ := range cols {
