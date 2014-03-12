@@ -26,15 +26,23 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		res["cols"] = cols
 		vals := make([][]string, 0)
 		for rows.Next() {
+			rawRowValues := make([][]byte, len(cols))
 			rowValues := make([]string, len(cols))
 			rowValuePtrs := make([]interface{}, len(cols))
 			for i, _ := range cols {
-				rowValuePtrs[i] = &rowValues[i]
+				rowValuePtrs[i] = &rawRowValues[i]
 			}
 			err = rows.Scan(rowValuePtrs...)
 			if err != nil {
 				appErr = err
 				log.Error("my.query: %v", err)
+			}
+			for i, raw := range rawRowValues {
+				if raw == nil {
+					rowValues[i] = "NULL"
+				} else {
+					rowValues[i] = string(raw)
+				}
 			}
 
 			vals = append(vals, rowValues)
