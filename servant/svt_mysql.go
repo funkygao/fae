@@ -15,6 +15,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		appErr = err
 		log.Error("my.query: %v", err)
 	}
+	// recycle the underlying connection back to conn pool
 	defer rows.Close()
 
 	// pack the result
@@ -47,6 +48,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			}
 
 			vals = append(vals, rowValues)
+		}
+		// check for errors after we’re done iterating over the rows
+		err = rows.Err()
+		if err != nil {
+			appErr = err
+			log.Error("my.query: %v", err)
 		}
 		res["vals"] = vals
 	}
