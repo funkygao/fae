@@ -43,12 +43,12 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 			this.dsn += this.Pass
 		}
 	}
-	this.dsn += fmt.Sprintf("@(%s:%s)/%s?", this.Host, this.Port, this.DbName)
+	this.dsn += fmt.Sprintf("@tcp(%s:%s)/%s?", this.Host, this.Port, this.DbName)
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
 
-	log.Debug("mysql server: %+v", *this)
+	log.Debug("mysql server: %s", this.dsn)
 }
 
 func (this *ConfigMysqlServer) DSN() string {
