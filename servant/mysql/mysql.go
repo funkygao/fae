@@ -31,6 +31,14 @@ func (this *mysql) Open() (err error) {
 	return
 }
 
+func (this *mysql) Ping() error {
+	if this.db == nil {
+		return ErrNotOpen
+	}
+
+	return this.db.Ping()
+}
+
 func (this mysql) String() string {
 	return this.dsn
 }

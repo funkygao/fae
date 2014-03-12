@@ -16,8 +16,7 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	for _, server := range cf.Servers {
 		my := newMysql(server.DSN(), &cf.Breaker)
 		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
-			err := my.Open()
-			if err == nil {
+			if my.Open() == nil && my.Ping() == nil {
 				break
 			}
 
