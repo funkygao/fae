@@ -26,7 +26,9 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 			my.breaker.Fail()
 		}
 
-		my.setMaxIdleConns(cf.MaxIdleConnsPerServer)
+		my.db.SetMaxIdleConns(cf.MaxIdleConnsPerServer)
+		// https://code.google.com/p/go/source/detail?r=8a7ac002f840
+		my.db.SetMaxOpenConns(cf.MaxConnsPerServer)
 		this.clients[server.Pool] = my
 	}
 

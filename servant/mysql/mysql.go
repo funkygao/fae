@@ -43,11 +43,6 @@ func (this mysql) String() string {
 	return this.dsn
 }
 
-// sets the maximum number of connections in the idle connection pool
-func (this *mysql) setMaxIdleConns(n int) {
-	this.db.SetMaxIdleConns(n)
-}
-
 func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 	err error) {
 	log.Debug("%s, args=%+v", query, args)
@@ -94,8 +89,4 @@ func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int
 	}
 	return
 
-}
-
-func (this *mysql) Close() error {
-	return this.db.Close()
 }
