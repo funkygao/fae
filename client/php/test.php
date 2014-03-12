@@ -147,7 +147,7 @@ try {
 
     // my.query
     $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
-    print_r(json_decode($rows));
+    var_dump(json_decode($rows));
 
     $transport->close();
 } catch (TException $tx) {
