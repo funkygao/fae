@@ -348,7 +348,7 @@ service FunServant {
     // mysql section
     //=================
 
-    list<binary> my_query(
+    binary my_query(
         1: Context ctx,
         2: string pool,
         3: string table,
