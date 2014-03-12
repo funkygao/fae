@@ -29,7 +29,7 @@ type FunServantImpl struct {
 	lc       *cache.LruCache      // local cache
 	mc       *memcache.ClientPool // memcache pool, auto sharding by key
 	mg       *mongo.Client        // mongodb pool, auto sharding by shardId
-	my       *mysql.ClientPool    // mysql pool, auto sharding by shardId
+	my       *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
 	kvdb     *kvdb.Server         // kvdb based on LevelDB
 }
 
