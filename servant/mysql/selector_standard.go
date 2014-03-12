@@ -32,7 +32,7 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 }
 
 func (this *StandardServerSelector) PickServer(pool string,
-	shardId int) (*mysql, error) {
+	table string, shardId int) (*mysql, error) {
 	my, present := this.clients[pool]
 	if !present {
 		return nil, ErrServerNotFound
