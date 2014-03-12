@@ -1,11 +1,10 @@
 package servant
 
 import (
-	//sql_ "database/sql"
+	sql_ "database/sql"
 	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
-	"reflect"
 )
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
@@ -28,9 +27,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		res["cols"] = cols
 		vals := make([][]string, 0)
 		for rows.Next() {
-			rawRowValues := make([]interface{}, len(cols))
+			rawRowValues := make([]sql_.RawBytes, len(cols))
 			scanArgs := make([]interface{}, len(cols))
-			rowValues := make([]string, len(cols))
 			for i, _ := range cols {
 				scanArgs[i] = &rawRowValues[i]
 			}
@@ -39,12 +37,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				appErr = err
 				log.Error("my.query: %v", err)
 			}
+			rowValues := make([]string, len(cols))
 			for i, raw := range rawRowValues {
-				log.Debug("%v", reflect.TypeOf(raw))
 				if raw == nil {
 					rowValues[i] = "NULL"
 				} else {
-					//rowValues[i] = string(raw)
+					rowValues[i] = string(raw)
 				}
 			}
 
