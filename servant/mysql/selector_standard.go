@@ -17,6 +17,9 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 		my := newMysql(server.DSN(), &cf.Breaker)
 		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
 			if my.Open() == nil && my.Ping() == nil {
+				// sql.Open() does not establish any connections to the database
+				// it's lazy
+				// sql.Ping() does
 				break
 			}
 
