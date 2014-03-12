@@ -40,8 +40,9 @@ func (this *mysql) setMaxIdleConns(n int) {
 	this.db.SetMaxIdleConns(n)
 }
 
-func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows, err error) {
-	log.Debug("%s, args=%+v\n", query, args)
+func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
+	err error) {
+	log.Debug("%s, args=%+v", query, args)
 
 	if this.breaker.Open() {
 		return nil, ErrCircuitOpen

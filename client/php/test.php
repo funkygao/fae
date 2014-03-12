@@ -145,8 +145,9 @@ try {
     echo "[Client] kvdb_get received:", $client->kvdb_get($ctx, 'php-kvdb-hello'), "\n";
     echo "[Client] kvdb_del received:", $client->kvdb_del($ctx, 'php-kvdb-hello'), "\n";
 
-    $x = $client->my_query($ctx, 'pool', 'table', 1, 'select * from xx', NULL);
-    print_r($x);
+    // my.query
+    $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
+    print_r($rows);
 
     $transport->close();
 } catch (TException $tx) {
