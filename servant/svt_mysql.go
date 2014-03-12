@@ -10,11 +10,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	profiler := this.profiler()
 	rows, err := this.my.Query(pool, table, int(shardId), sql, nil)
 	if err != nil {
+		appErr = err
 		log.Error("my.query: %v", err)
 	}
 	profiler.do("my.query", ctx,
-		"{pool^%s table^%s sql^%s} {r^%v}",
-		pool, table, sql, rows)
+		"{pool^%s table^%s sql^%s} {r^%+v}",
+		pool, table, sql, *rows)
 	return
 }
 
