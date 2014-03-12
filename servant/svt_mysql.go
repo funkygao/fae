@@ -29,11 +29,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		for rows.Next() {
 			rawRowValues := make([]sql_.RawBytes, len(cols))
 			rowValues := make([]string, len(cols))
-			rowValuePtrs := make([]interface{}, len(cols))
+			scanArgs := make([]interface{}, len(cols))
 			for i, _ := range cols {
-				rowValuePtrs[i] = &rawRowValues[i]
+				scanArgs[i] = &rawRowValues[i]
 			}
-			err = rows.Scan(rowValuePtrs...)
+			err = rows.Scan(scanArgs...)
 			if err != nil {
 				appErr = err
 				log.Error("my.query: %v", err)
