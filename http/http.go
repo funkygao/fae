@@ -39,7 +39,7 @@ func LaunchHttpServ(listenAddr string, debugAddr string) (err error) {
 		return err
 	}
 
-	log.Info("HTTP server ready at http:%s", listenAddr)
+	log.Info("HTTP server ready at http:%s with pprof at %s", listenAddr, debugAddr)
 
 	go api.httpServer.Serve(api.httpListener)
 	if debugAddr != "" {

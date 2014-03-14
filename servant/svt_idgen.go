@@ -20,3 +20,8 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 
 	return
 }
+
+func (this *FunServantImpl) GenToken(ctx *rpc.Context) (r string,
+	appErr error) {
+
+}
