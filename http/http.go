@@ -131,6 +131,10 @@ func RegisterHttpApi(path string,
 	return api.httpRouter.HandleFunc(path, wrappedFunc)
 }
 
+func UnregisterAllHttpApi() {
+	api.httpPaths = api.httpPaths[:0]
+}
+
 func (this *httpRestApi) decodeHttpParams(w http.ResponseWriter,
 	req *http.Request) (map[string]interface{}, error) {
 	params := make(map[string]interface{})
