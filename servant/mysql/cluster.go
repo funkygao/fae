@@ -19,9 +19,9 @@ func New(cf *config.ConfigMysql) *MysqlCluster {
 	return this
 }
 
-func (this *MysqlCluster) Query(pool string, table string, shardId int,
+func (this *MysqlCluster) Query(pool string, table string, hintId int,
 	sql string, args []interface{}) (*sql.Rows, error) {
-	my, err := this.selector.PickServer(pool, table, shardId)
+	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return nil, err
 	}
@@ -29,10 +29,10 @@ func (this *MysqlCluster) Query(pool string, table string, shardId int,
 	return my.Query(sql, args...)
 }
 
-func (this *MysqlCluster) Exec(pool string, table string, shardId int,
+func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 	sql string, args []interface{}) (afftectedRows int64,
 	lastInsertId int64, err error) {
-	my, err := this.selector.PickServer(pool, table, shardId)
+	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return 0, 0, err
 	}

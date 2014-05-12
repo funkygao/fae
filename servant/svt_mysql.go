@@ -16,7 +16,7 @@ func (this *FunServantImpl) isSelectQuery(sql string) bool {
 }
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
-	shardId int32, sql string, args [][]byte) (r *rpc.MysqlResult, appErr error) {
+	hintId int32, sql string, args [][]byte) (r *rpc.MysqlResult, appErr error) {
 	const IDENT = "my.query"
 
 	profiler := this.profiler()
@@ -24,11 +24,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	this.stats.inBytes.Inc(int64(len(sql)))
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s}",
-		pool, table, shardId, sql)
+		pool, table, hintId, sql)
 
 	r = rpc.NewMysqlResult()
 	if this.isSelectQuery(sql) {
-		rows, err := this.my.Query(pool, table, int(shardId), sql, args)
+		rows, err := this.my.Query(pool, table, int(hintId), sql, nil)
 		if err != nil {
 			appErr = err
 			log.Error("%s: %s %v", IDENT, sql, err)
@@ -82,7 +82,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		r.Rows, _ = json.Marshal(res)
 	} else {
 		var err error
-		r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool, table, int(shardId), sql, nil)
+		r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool, table, int(hintId), sql, nil)
 		if err != nil {
 			appErr = err
 			log.Error("%s: %s %v", IDENT, sql, err)
@@ -97,7 +97,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 }
 
 func (this *FunServantImpl) MyQueryOne(ctx *rpc.Context, pool string, table string,
-	shardId int32, sql string, args [][]byte) (r []byte, appErr error) {
+	hintId int32, sql string, args [][]byte) (r []byte, appErr error) {
 	profiler := this.profiler()
 	profiler.do("my.queryOne", ctx,
 		"{pool^%s table^%s sql^%s} {r^%v}",
