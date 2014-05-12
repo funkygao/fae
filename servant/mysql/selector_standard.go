@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"github.com/funkygao/fae/config"
 )
 
@@ -37,7 +38,9 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 
 func (this *StandardServerSelector) PickServer(pool string,
 	table string, shardId int) (*mysql, error) {
-	my, present := this.clients[pool]
+	const SHARD_BASE_NUM = 200000 // TODO move the config
+	bucket := fmt.Sprintf("%s%d", pool, (shardId/SHARD_BASE_NUM)+1)
+	my, present := this.clients[bucket]
 	if !present {
 		return nil, ErrServerNotFound
 	}
@@ -48,5 +51,4 @@ func (this *StandardServerSelector) PickServer(pool string,
 func (this *StandardServerSelector) endsWithDigit(pool string) bool {
 	lastChar := pool[len(pool)-1]
 	return lastChar >= '0' && lastChar <= '9'
-
 }

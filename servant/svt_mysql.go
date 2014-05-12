@@ -17,16 +17,22 @@ func (this *FunServantImpl) isSelectQuery(sql string) bool {
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	shardId int32, sql string, args [][]byte) (r *rpc.MysqlResult, appErr error) {
+	const IDENT = "my.query"
+
 	profiler := this.profiler()
-	this.stats.inc("mg.query")
+	this.stats.inc(IDENT)
 	this.stats.inBytes.Inc(int64(len(sql)))
+	profiler.do(IDENT, ctx,
+		"{pool^%s table^%s id^%d sql^%s}",
+		pool, table, shardId, sql)
 
 	r = rpc.NewMysqlResult()
 	if this.isSelectQuery(sql) {
-		rows, err := this.my.Query(pool, table, int(shardId), sql, nil)
+		rows, err := this.my.Query(pool, table, int(shardId), sql, args)
 		if err != nil {
 			appErr = err
-			log.Error("my.query: %v", err)
+			log.Error("%s: %s %v", IDENT, sql, err)
+			return
 		}
 		// recycle the underlying connection back to conn pool
 		defer rows.Close()
@@ -36,7 +42,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("my.query: %v", err)
+			log.Error("%s: %s %v", IDENT, sql, err)
+			return
 		} else {
 			res["cols"] = cols
 			vals := make([][]string, 0)
@@ -49,7 +56,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				err = rows.Scan(scanArgs...)
 				if err != nil {
 					appErr = err
-					log.Error("my.query: %v", err)
+					log.Error("%s: %v", IDENT, err)
+					return
 				}
 				rowValues := make([]string, len(cols))
 				for i, raw := range rawRowValues {
@@ -66,17 +74,23 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			err = rows.Err()
 			if err != nil {
 				appErr = err
-				log.Error("my.query: %v", err)
+				log.Error("%s: %v", IDENT, err)
 			}
 			res["vals"] = vals
 		}
 
 		r.Rows, _ = json.Marshal(res)
 	} else {
-		r.RowsAffected, r.LastInsertId, _ = this.my.Exec(pool, table, int(shardId), sql, nil)
+		var err error
+		r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool, table, int(shardId), sql, nil)
+		if err != nil {
+			appErr = err
+			log.Error("%s: %s %v", IDENT, sql, err)
+			return
+		}
 	}
 
-	profiler.do("my.query", ctx,
+	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s sql^%s} {r^%s}",
 		pool, table, sql, r)
 	return
