@@ -148,7 +148,8 @@ try {
     // my.query
     for ($i=0; $i<5; $i++) {
         $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
-        print_r(json_decode($rows, TRUE));
+        echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
+        print_r(json_decode($rows->rows, TRUE));
     }
 
     $transport->close();

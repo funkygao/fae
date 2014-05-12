@@ -42,6 +42,7 @@ Release Notes - fae - Version v0.0.2.rc
     . IO throughput of servants
     . QoS
     . monitor mysql sql exec plan to identify bad queries
+    . mysql rowcount auto limit
     . SLA of servants
     . better restart mechanism, socket pair?
     . simulate a low bandwidth, timeout env

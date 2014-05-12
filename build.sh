@@ -18,7 +18,7 @@ if [[ $1 = "-linux" ]]; then
     exit
 else
     #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
-    go build -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID -w -s"
+    go build -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID -w"
 fi
 
 #---------

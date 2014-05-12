@@ -67,18 +67,19 @@ func (this *mysql) QueryRow(query string, args ...interface{}) *sql.Row {
 	return this.db.QueryRow(query, args...)
 }
 
-func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int64, err error) {
+func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int64,
+	lastInsertId int64, err error) {
 	log.Debug("%s, args=%+v\n", query, args)
 
 	if this.breaker.Open() {
-		return 0, ErrCircuitOpen
+		return 0, 0, ErrCircuitOpen
 	}
 
 	var result sql.Result
 	result, err = this.db.Exec(query, args...)
 	if err != nil {
 		this.breaker.Fail()
-		return 0, err
+		return 0, 0, err
 	}
 
 	afftectedRows, err = result.RowsAffected()
@@ -87,6 +88,8 @@ func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int
 	} else {
 		this.breaker.Succeed()
 	}
+
+	lastInsertId, _ = result.LastInsertId()
 	return
 
 }

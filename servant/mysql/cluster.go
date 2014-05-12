@@ -28,3 +28,14 @@ func (this *MysqlCluster) Query(pool string, table string, shardId int,
 
 	return my.Query(sql, args...)
 }
+
+func (this *MysqlCluster) Exec(pool string, table string, shardId int,
+	sql string, args []interface{}) (afftectedRows int64,
+	lastInsertId int64, err error) {
+	my, err := this.selector.PickServer(pool, table, shardId)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return my.ExecSql(sql, args...)
+}

@@ -54,6 +54,20 @@ struct Context {
     14:optional string reserved
 }
 
+struct MysqlResult {
+    /**
+     */
+    1:required i64 rowsAffected
+
+    /**
+     */
+    2:required i64 lastInsertId
+
+    /**
+     */
+    3:required binary rows
+}
+
 /**
  * Thrift don't support service multiplex, so we have to bury all
  * services into the giant FunServant.
@@ -348,7 +362,7 @@ service FunServant {
     // mysql section
     //=================
 
-    binary my_query(
+    MysqlResult my_query(
         1: Context ctx,
         2: string pool,
         3: string table,
