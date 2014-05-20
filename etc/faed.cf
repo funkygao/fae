@@ -55,11 +55,32 @@
                     db: "demos"
                 }
                 {
+                    pool: "ShardLookup"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "root"
+                    db: "ShardLookup"
+                }
+                {
                     pool: "UserShard1"
                     host: "127.0.0.1"
                     port: 3306
                     username: "root"
                     db: "UserShard1"
+                }
+                {
+                    pool: "WorldShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "root"
+                    db: "WorldShard1"
+                }
+                {
+                    pool: "AllianceShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "root"
+                    db: "AllianceShard1"
                 }
             ]
         }
