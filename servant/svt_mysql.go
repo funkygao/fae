@@ -22,9 +22,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	profiler := this.profiler()
 	this.stats.inc(IDENT)
 	this.stats.inBytes.Inc(int64(len(sql)))
-	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s id^%d sql^%s args^%+v}",
-		pool, table, hintId, sql, args)
 
 	// convert []string to []interface{}
 	margs := make([]interface{}, len(args), len(args))
@@ -76,12 +73,15 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 				vals = append(vals, rowValues)
 			}
+
 			// check for errors after we’re done iterating over the rows
 			err = rows.Err()
 			if err != nil {
 				appErr = err
 				log.Error("%s: %v", IDENT, err)
+				return
 			}
+
 			res["vals"] = vals
 		}
 
@@ -98,8 +98,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s sql^%s} {r^%s}",
-		pool, table, sql, r)
+		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%s}",
+		pool, table, hintId, sql, args, string(r.Rows))
 	return
 }
 
