@@ -36,16 +36,35 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	return
 }
 
-func (this *StandardServerSelector) PickServer(pool string,
-	table string, shardId int) (*mysql, error) {
+func (this *StandardServerSelector) pickShardedServer(pool string,
+	table string, hintId int) (*mysql, error) {
 	const SHARD_BASE_NUM = 200000 // TODO move the config
-	bucket := fmt.Sprintf("%s%d", pool, (shardId/SHARD_BASE_NUM)+1)
+	bucket := fmt.Sprintf("%s%d", pool, (hintId/SHARD_BASE_NUM)+1)
 	my, present := this.clients[bucket]
 	if !present {
 		return nil, ErrServerNotFound
 	}
 
 	return my, nil
+}
+
+func (this *StandardServerSelector) pickNonShardedServer(pool string,
+	table string) (*mysql, error) {
+	my, present := this.clients[pool]
+	if !present {
+		return nil, ErrServerNotFound
+	}
+
+	return my, nil
+}
+
+func (this *StandardServerSelector) PickServer(pool string,
+	table string, hintId int) (*mysql, error) {
+	if this.endsWithDigit(pool) {
+		return this.pickShardedServer(pool, table, hintId)
+	}
+
+	return this.pickNonShardedServer(pool, table)
 }
 
 func (this *StandardServerSelector) endsWithDigit(pool string) bool {
