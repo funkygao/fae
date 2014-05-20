@@ -36,6 +36,15 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	return
 }
 
+func (this *StandardServerSelector) shardedPool(pool string) bool {
+	switch pool {
+	case "ShardLookup", "Global":
+		return false
+	default:
+		return true
+	}
+}
+
 func (this *StandardServerSelector) pickShardedServer(pool string,
 	table string, hintId int) (*mysql, error) {
 	const SHARD_BASE_NUM = 200000 // TODO move the config
@@ -60,7 +69,7 @@ func (this *StandardServerSelector) pickNonShardedServer(pool string,
 
 func (this *StandardServerSelector) PickServer(pool string,
 	table string, hintId int) (*mysql, error) {
-	if this.endsWithDigit(pool) {
+	if this.shardedPool(pool) {
 		return this.pickShardedServer(pool, table, hintId)
 	}
 
