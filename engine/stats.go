@@ -63,10 +63,15 @@ func (this engineStats) String() string {
 func (this *engineStats) Start(t time.Time, interval time.Duration) {
 	this.startedAt = t
 
+	metricsWriter, err := os.OpenFile("metrics.log",
+		os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		panic(err)
+	}
 	if interval > 0 {
 		time.Sleep(time.Minute)
 		metrics.Log(metrics.DefaultRegistry,
-			interval, log.New(os.Stderr, "", log.LstdFlags))
+			interval, log.New(metricsWriter, "", log.LstdFlags))
 	}
 }
 
