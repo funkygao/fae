@@ -64,16 +64,13 @@ type ConfigMongodb struct {
 	HeartbeatInterval     int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMongodbServer // key is pool
-
-	enabled bool
 }
 
 func (this *ConfigMongodb) Enabled() bool {
-	return this.enabled
+	return len(this.Servers) > 0
 }
 
 func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
-	this.enabled = true
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.DebugProtocol = cf.Bool("debug_protocol", false)
 	this.DebugHeartbeat = cf.Bool("debug_heartbeat", false)
