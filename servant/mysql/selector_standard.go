@@ -57,7 +57,7 @@ func (this *StandardServerSelector) Servers() []*mysql {
 
 func (this *StandardServerSelector) shardedPool(pool string) bool {
 	switch pool {
-	case "ShardLookup", "Global":
+	case "ShardLookup", "Global", "Tickets":
 		return false
 	default:
 		return true
