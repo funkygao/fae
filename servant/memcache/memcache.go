@@ -69,6 +69,8 @@ func (this *Client) Warmup() {
 			// ok, needn't retry
 			break
 		}
+
+		time.Sleep(time.Second)
 	}
 
 	if err != nil {
