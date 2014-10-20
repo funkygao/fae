@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
-	log "github.com/funkygao/log4go"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -60,15 +59,11 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 }
 
 func (this *mysql) QueryRow(query string, args ...interface{}) *sql.Row {
-	log.Debug("%s, args=%+v\n", query, args)
-
 	return this.db.QueryRow(query, args...)
 }
 
 func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int64,
 	lastInsertId int64, err error) {
-	log.Debug("%s, args=%+v\n", query, args)
-
 	if this.breaker.Open() {
 		return 0, 0, ErrCircuitOpen
 	}
