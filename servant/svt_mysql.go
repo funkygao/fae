@@ -102,12 +102,3 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		pool, table, hintId, sql, args, string(r.Rows))
 	return
 }
-
-func (this *FunServantImpl) MyQueryOne(ctx *rpc.Context, pool string, table string,
-	hintId int32, sql string, args []string) (r []byte, appErr error) {
-	profiler := this.profiler()
-	profiler.do("my.queryOne", ctx,
-		"{pool^%s table^%s sql^%s} {r^%v}",
-		pool, table, sql, r)
-	return
-}

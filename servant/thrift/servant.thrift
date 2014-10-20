@@ -371,12 +371,4 @@ service FunServant {
         6: list<string> argv
     ),
 
-    binary my_query_one(
-        1: Context ctx,
-        2: string pool,
-        3: string table,
-        4: i32 hintId,
-        5: string sql,
-        6: list<string> argv
-    ),
 }
