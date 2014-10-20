@@ -31,3 +31,4 @@ daemon/faed/faed
 client/go/stress/stress
 faed.lock
 *.class
+etc/faed.cf
