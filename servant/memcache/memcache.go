@@ -52,13 +52,12 @@ func (this *Client) Warmup() {
 	var (
 		cn  *conn
 		err error
-		t1  = time.Now()
 	)
 	for retries := 0; retries < 3; retries++ {
 		for _, addr := range this.selector.ServerList() {
 			cn, err = this.getConn(addr)
 			if err != nil {
-				log.Error("Warmup %v fail: %s", addr, err)
+				log.Error("Warmup memcache[%v] fail: %s", addr, err)
 				break
 			} else {
 				cn.condRelease(&err)
@@ -73,10 +72,6 @@ func (this *Client) Warmup() {
 		time.Sleep(time.Second)
 	}
 
-	if err != nil {
-		log.Error("Memcache failed to warm up within %s: %s",
-			time.Since(t1), err)
-	}
 }
 
 func (this *Client) FreeConnMap() map[string][]*conn {

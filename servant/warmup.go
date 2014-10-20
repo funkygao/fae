@@ -9,6 +9,8 @@ func (this *FunServantImpl) warmUp() {
 		go this.mc.Warmup()
 	}
 
-	// TODO warmup mysql
+	if this.my != nil {
+		this.my.Warmup()
+	}
 
 }

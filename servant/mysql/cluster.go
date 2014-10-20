@@ -3,6 +3,8 @@ package mysql
 import (
 	"database/sql"
 	"github.com/funkygao/fae/config"
+	log "github.com/funkygao/log4go"
+	"time"
 )
 
 type MysqlCluster struct {
@@ -38,4 +40,24 @@ func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 	}
 
 	return my.ExecSql(sql, args...)
+}
+
+func (this *MysqlCluster) Warmup() {
+	var (
+		err error
+		t1  = time.Now()
+	)
+
+	for _, m := range this.selector.Servers() {
+		err = m.Ping()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+	}
+
+	log.Trace("Mysql pool warmup finished within %s: %+v",
+		time.Since(t1), this.selector)
+
 }

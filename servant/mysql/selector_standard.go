@@ -36,6 +36,25 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	return
 }
 
+func (this *StandardServerSelector) PickServer(pool string,
+	table string, hintId int) (*mysql, error) {
+	if this.shardedPool(pool) {
+		return this.pickShardedServer(pool, table, hintId)
+	}
+
+	return this.pickNonShardedServer(pool, table)
+}
+
+func (this *StandardServerSelector) Servers() []*mysql {
+	r := make([]*mysql, 0)
+	for _, m := range this.clients {
+		r = append(r, m)
+	}
+
+	return r
+
+}
+
 func (this *StandardServerSelector) shardedPool(pool string) bool {
 	switch pool {
 	case "ShardLookup", "Global":
@@ -65,15 +84,6 @@ func (this *StandardServerSelector) pickNonShardedServer(pool string,
 	}
 
 	return my, nil
-}
-
-func (this *StandardServerSelector) PickServer(pool string,
-	table string, hintId int) (*mysql, error) {
-	if this.shardedPool(pool) {
-		return this.pickShardedServer(pool, table, hintId)
-	}
-
-	return this.pickNonShardedServer(pool, table)
 }
 
 func (this *StandardServerSelector) endsWithDigit(pool string) bool {
