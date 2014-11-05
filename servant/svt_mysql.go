@@ -5,12 +5,12 @@ package servant
 
 import (
 	sql_ "database/sql"
-	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 	"strings"
 )
 
+// TODO let caller tell me
 func (this *FunServantImpl) isSelectQuery(sql string) bool {
 	return strings.HasPrefix(strings.ToLower(sql), "select")
 }
@@ -41,15 +41,14 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		defer rows.Close()
 
 		// pack the result
-		res := make(map[string]interface{})
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
 			log.Error("%s: %s %v", IDENT, sql, err)
 			return
 		} else {
-			res["cols"] = cols
-			vals := make([][]string, 0)
+			r.Cols = cols
+			r.Rows = make([][]string, 0)
 			for rows.Next() {
 				rawRowValues := make([]sql_.RawBytes, len(cols))
 				scanArgs := make([]interface{}, len(cols))
@@ -71,7 +70,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 					}
 				}
 
-				vals = append(vals, rowValues)
+				r.Rows = append(r.Rows, rowValues)
 			}
 
 			// check for errors after we’re done iterating over the rows
@@ -82,10 +81,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				return
 			}
 
-			res["vals"] = vals
 		}
-
-		r.Rows, _ = json.Marshal(res)
 	} else {
 		var err error
 		r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool, table, int(hintId),
@@ -98,7 +94,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%s}",
-		pool, table, hintId, sql, args, string(r.Rows))
+		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
+		pool, table, hintId, sql, args, r)
 	return
 }

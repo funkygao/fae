@@ -55,20 +55,6 @@ struct Context {
 }
 
 struct MysqlResult {
-    /**
-     */
-    1:required i64 rowsAffected
-
-    /**
-     */
-    2:required i64 lastInsertId
-
-    /**
-     */
-    3:required binary rows
-}
-
-struct DbResult {
     1:required i64 rowsAffected
     2:required i64 lastInsertId
     3:required list<string> cols

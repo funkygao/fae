@@ -235,3 +235,7 @@ php.ini
     extension="thrift_protocol.so"
     extension="apc.so"
 
+
+### TODO
+
+*   if mongodb not existent in config file, and mg query arrives, fae dies
