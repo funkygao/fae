@@ -59,6 +59,13 @@ try {
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
+    // mysql transation
+    $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL);
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'update UserInfo set power=power+1 where uid=?', array(1));
+    $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'COMMIT', NULL);
+    //$client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'ROLLBACK', NULL);
+    echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
+    print_r($rows);
     $transport->close();
 } catch (TException $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";
