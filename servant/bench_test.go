@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
 	"labix.org/v2/mgo/bson"
+	"strings"
 	"testing"
 )
 
@@ -60,5 +61,23 @@ func BenchmarkBson(b *testing.B) {
 			"hobbies": []string{"a", "b"}}}
 	for i := 0; i < b.N; i++ {
 		bson.Marshal(m)
+	}
+}
+
+// 880 ns/op
+func BenchmarkIsSelectQuery(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(strings.ToLower(sql), "select")
+	}
+}
+
+// 9 ns/op
+func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(sql, "select")
 	}
 }
