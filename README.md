@@ -211,12 +211,12 @@ thrift above 0.9.0 which depends on flex
 
     sudo apt-get install flex
 
-    git.apache.org/thrift.git/lib/go/thrift
+    go get git.apache.org/thrift.git/lib/go/thrift
 
-    git clone https://github.com/apache/thrift.git
-    cd thrift
+    git clone -b 0.9.1 https://github.com/apache/thrift thrift-0.9.1
+    cd thrift-0.9.1
     ./bootstrap.sh
-    ./configure --prefix=/opt/app/thrift
+    ./configure --prefix=/opt/app/thrift --with-cpp=no
     make
     make -k check
     sh test/test.sh
