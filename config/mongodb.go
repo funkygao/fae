@@ -75,8 +75,8 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 	this.DebugProtocol = cf.Bool("debug_protocol", false)
 	this.DebugHeartbeat = cf.Bool("debug_heartbeat", false)
 	this.ShardStrategy = cf.String("shard_strategy", "legacy")
-	this.ConnectTimeout = time.Duration(cf.Int("connect_timeout", 4)) * time.Second
-	this.IoTimeout = time.Duration(cf.Int("io_timeout", 30)) * time.Second
+	this.ConnectTimeout = cf.Duration("connect_timeout", 4*time.Second)
+	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)

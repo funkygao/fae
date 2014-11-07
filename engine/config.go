@@ -49,15 +49,13 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 
 	this.sessionSlowThreshold = section.Float("session_slow_threshold", 5)
 	this.callSlowThreshold = section.Float("call_slow_threshold", 5)
-	this.sessionTimeout = time.Duration(section.Int("session_timeout",
-		0)) * time.Second
-	this.ioTimeout = time.Duration(section.Int("io_timeout", 0)) * time.Second
+	this.sessionTimeout = section.Duration("session_timeout", 30*time.Second)
+	this.ioTimeout = section.Duration("io_timeout", 2*time.Second)
+	this.statsOutputInterval = section.Duration("stats_output_interval", 10*time.Second)
 	this.framed = section.Bool("framed", false)
 	this.protocol = section.String("protocol", "binary")
 	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
 	this.debugSession = section.Bool("debug_session", false)
-	this.statsOutputInterval = time.Duration(section.Int("stats_output_interval",
-		0)) * time.Second
 
 	// pm section
 	this.pm = configProcessManagement{}

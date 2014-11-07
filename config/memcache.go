@@ -73,7 +73,7 @@ func (this *ConfigMemcache) Enabled() bool {
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
-	this.Timeout = time.Duration(cf.Int("timeout", 4)) * time.Second
+	this.Timeout = cf.Duration("timeout", 4*time.Second)
 	this.ReplicaN = cf.Int("replica_num", 1)
 	section, err := cf.Section("breaker")
 	if err == nil {

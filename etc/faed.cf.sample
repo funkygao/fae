@@ -4,18 +4,17 @@
     cpu_num: "auto"
 
     rpc: {
-        //listen_addr: "/tmp/fae.sock"
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         // framed: false
         call_slow_threshold: 5
         session_slow_threshold: 8
-        session_timeout: 30
-        io_timeout: 2
+        session_timeout: "30s"
+        io_timeout: "2s"
         debug_session: false
         tcp_nodelay: true
-        stats_output_interval: 600
+        stats_output_interval: "10m"
         // process management, learned from php-fpm
         pm: {
             max_outstanding_sessions: 5000
@@ -38,13 +37,16 @@
 
         proxy: {
             pool_capacity: 5
-            idle_timeout: 600
+            idle_timeout: "600s"
         }
 
         mysql: {
+            connect_timeout: "4s"
+            io_timeout: "10s"
+
             breaker: {
                 failure_allowance: 5
-                retry_timeout: 10
+                retry_interval: "10s"
             }
             servers: [
                 {
@@ -90,14 +92,14 @@
             debug_protocol: false
             shard_base_num: 100000
             shard_strategy: "legacy"
-            connect_timeout: 4
-            io_timeout: 30
+            connect_timeout: "4s"
+            io_timeout: "30s"
             heartbeat_interval: 30
             max_idle_conns_per_server: 20
             max_conns_per_server: 50
             breaker: {
                 failure_allowance: 5
-                retry_timeout: 10
+                retry_interval: "10s"
             }
             servers: [
                 {
@@ -136,11 +138,11 @@
             hash_strategy: "standard"
             max_conns_per_server: 200
             max_idle_conns_per_server: 20
-            timeout: 4
+            timeout: "4s"
             replica_num: 2
             breaker: {
                 failure_allowance: 5
-                retry_timeout: 10
+                retry_interval: "10s"
             }
             servers: [
                 {

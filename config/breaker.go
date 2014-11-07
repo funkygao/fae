@@ -12,5 +12,5 @@ type ConfigBreaker struct {
 
 func (this *ConfigBreaker) loadConfig(cf *conf.Conf) {
 	this.FailureAllowance = uint(cf.Int("failure_allowance", 5))
-	this.RetryTimeout = time.Second * time.Duration(cf.Int("retry_timeout", 10))
+	this.RetryTimeout = cf.Duration("retry_interval", 10*time.Second)
 }

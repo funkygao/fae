@@ -14,7 +14,7 @@ type ConfigProxy struct {
 
 func (this *ConfigProxy) loadConfig(cf *conf.Conf) {
 	this.PoolCapacity = cf.Int("pool_capacity", 10)
-	this.IdleTimeout = time.Duration(cf.Int("idle_timeout", 600)) * time.Second
+	this.IdleTimeout = cf.Duration("idle_timeout", 600*time.Second)
 	this.enabled = true
 
 	log.Debug("proxy: %+v", *this)
