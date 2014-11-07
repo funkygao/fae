@@ -7,24 +7,38 @@ import (
 	"time"
 )
 
-type configProcessManagement struct {
-	mode                   string
-	maxOutstandingSessions int
-	startServers           int
-	minSpareServers        int32
-	spawnServers           int
+type engineConfig struct {
+	*conf.Conf
+
+	httpListenAddr  string
+	pprofListenAddr string
+
+	rpc *configRpc
 }
 
-func (this *configProcessManagement) loadConfig(section *conf.Conf) {
-	this.mode = section.String("mode", "static")
-	this.startServers = section.Int("start_servers", 1000)
-	this.minSpareServers = int32(section.Int("min_spare_servers", 200))
-	this.spawnServers = section.Int("spawn_servers_n", 100)
-	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
-}
+func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
+	this.conf.Conf = cf
 
-func (this *configProcessManagement) dynamic() bool {
-	return this.mode == "dynamic"
+	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
+	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
+
+	// rpc section
+	this.conf.rpc = new(configRpc)
+	section, err := this.conf.Section("rpc")
+	if err != nil {
+		panic(err)
+	}
+	this.conf.rpc.loadConfig(section)
+
+	section, err = this.conf.Section("servants")
+	if err != nil {
+		panic(err)
+	}
+	config.LoadServants(section)
+
+	log.Debug("engine: %+v", *this.conf)
+
+	return this
 }
 
 type configRpc struct {
@@ -68,39 +82,22 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	log.Debug("rpc: %+v", *this)
 }
 
-type engineConfig struct {
-	*conf.Conf
-
-	httpListenAddr  string
-	pprofListenAddr string
-
-	rpc *configRpc
+type configProcessManagement struct {
+	mode                   string
+	maxOutstandingSessions int
+	startServers           int
+	minSpareServers        int32
+	spawnServers           int
 }
 
-func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
-	this.conf = cf
-	this.doLoadConfig()
-
-	return this
+func (this *configProcessManagement) loadConfig(section *conf.Conf) {
+	this.mode = section.String("mode", "static")
+	this.startServers = section.Int("start_servers", 1000)
+	this.minSpareServers = int32(section.Int("min_spare_servers", 200))
+	this.spawnServers = section.Int("spawn_servers_n", 100)
+	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
 }
 
-func (this *Engine) doLoadConfig() {
-	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
-	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
-
-	// rpc section
-	this.conf.rpc = new(configRpc)
-	section, err := this.conf.Section("rpc")
-	if err != nil {
-		panic(err)
-	}
-	this.conf.rpc.loadConfig(section)
-
-	section, err = this.conf.Section("servants")
-	if err != nil {
-		panic(err)
-	}
-	config.LoadServants(section)
-
-	log.Debug("engine: %+v", *this.conf)
+func (this *configProcessManagement) dynamic() bool {
+	return this.mode == "dynamic"
 }

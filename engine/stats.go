@@ -68,8 +68,8 @@ func (this *engineStats) Start(t time.Time, interval time.Duration) {
 	if err != nil {
 		panic(err)
 	}
+
 	if interval > 0 {
-		time.Sleep(time.Minute)
 		metrics.Log(metrics.DefaultRegistry,
 			interval, log.New(metricsWriter, "", log.LstdFlags))
 	}

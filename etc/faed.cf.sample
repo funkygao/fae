@@ -1,7 +1,7 @@
 {
     http_listen_addr: ":9002"
     pprof_listen_addr: "localhost:6060"
-    cpu_num: "auto"
+    cpu_num: "max"
 
     rpc: {
         listen_addr: ":9001"

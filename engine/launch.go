@@ -28,6 +28,8 @@ func (this *Engine) ServeForever() {
 	cpuNumConfig := this.conf.String("cpu_num", "auto")
 	if cpuNumConfig == "auto" {
 		maxProcs = totalCpus/2 + 1
+	} else if cpuNumConfig == "max" {
+		maxProcs = totalCpus
 	} else {
 		maxProcs, _ = strconv.Atoi(cpuNumConfig)
 	}
