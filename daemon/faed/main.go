@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/locking"
 	"github.com/funkygao/golib/profile"
+	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
 	"os"
 	"runtime/debug"
@@ -30,6 +31,8 @@ func init() {
 	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
 		shutdown()
 	})
+
+	setupLogging()
 }
 
 func main() {
@@ -54,9 +57,7 @@ func main() {
 		defer profile.Start(cf).Stop()
 	}
 
-	setupLogging()
-
-	go runWatchdog(time.Second * time.Duration(options.tick))
+	go server.RunSysStats(time.Now(), time.Duration(options.tick))
 
 	engine.NewEngine(options.configFile).
 		LoadConfigFile().
