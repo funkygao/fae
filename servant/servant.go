@@ -5,7 +5,6 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
-	"github.com/funkygao/fae/servant/kvdb"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -21,16 +20,16 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	sessions *sessions            // state kept for sessions
-	stats    *servantStats        // stats
-	proxy    *proxy.Proxy         // remote fae agent
-	peer     *peer.Peer           // topology of cluster
-	idgen    *idgen.IdGenerator   // global id generator
-	lc       *cache.LruCache      // local cache
-	mc       *memcache.ClientPool // memcache pool, auto sharding by key
-	mg       *mongo.Client        // mongodb pool, auto sharding by shardId
-	my       *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	kvdb     *kvdb.Server         // kvdb based on LevelDB
+	sessions *sessions     // state kept for sessions
+	stats    *servantStats // stats
+
+	proxy *proxy.Proxy         // remote fae agent
+	peer  *peer.Peer           // topology of cluster
+	idgen *idgen.IdGenerator   // global id generator
+	lc    *cache.LruCache      // local cache
+	mc    *memcache.ClientPool // memcache pool, auto sharding by key
+	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
+	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -75,12 +74,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.mc = memcache.New(this.conf.Memcache)
 	}
 
-	// kvdb
-	if this.conf.Kvdb.Enabled() {
-		this.kvdb = kvdb.NewServer(this.conf.Kvdb.DbPath,
-			this.conf.Kvdb.ServletNum)
-	}
-
 	// mysql
 	if this.conf.Mysql.Enabled() {
 		this.my = mysql.New(this.conf.Mysql)
@@ -110,10 +103,4 @@ func (this *FunServantImpl) Start() {
 		}
 	}
 
-	if this.kvdb != nil {
-		if err := this.kvdb.Open(); err != nil {
-			log.Error("kvdb start: %v", err)
-			this.kvdb = nil
-		}
-	}
 }

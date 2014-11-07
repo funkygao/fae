@@ -9,6 +9,10 @@ var (
 	Servants *ConfigServant
 )
 
+func init() {
+	Servants = new(ConfigServant)
+}
+
 type ConfigServant struct {
 	ProfilerMaxBodySize int
 	ProfilerRate        int
@@ -19,16 +23,12 @@ type ConfigServant struct {
 	PeerHeartbeatInterval int
 	PeerDeadThreshold     float64
 
-	Kvdb     *ConfigKvdb
 	Mongodb  *ConfigMongodb
 	Memcache *ConfigMemcache
 	Lcache   *ConfigLcache
 	Proxy    *ConfigProxy
 	Mysql    *ConfigMysql
-}
-
-func init() {
-	Servants = new(ConfigServant)
+	Redis    *ConfigRedis // TODO
 }
 
 func LoadServants(cf *conf.Conf) {
@@ -65,13 +65,6 @@ func LoadServants(cf *conf.Conf) {
 	section, err = cf.Section("lcache")
 	if err == nil {
 		Servants.Lcache.loadConfig(section)
-	}
-
-	// kvdb section
-	Servants.Kvdb = new(ConfigKvdb)
-	section, err = cf.Section("kvdb")
-	if err == nil {
-		Servants.Kvdb.loadConfig(section)
 	}
 
 	// proxy section

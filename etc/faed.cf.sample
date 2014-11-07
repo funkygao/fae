@@ -128,12 +128,6 @@
             lru_max_items: 1073741824
         }
 
-        kvdb: {
-            // CHANGE this on online servers!!!
-            db_path: "/tmp/kvdb"
-            servlet_num: 10
-        }
-
         memcache: {
             hash_strategy: "standard"
             max_conns_per_server: 200

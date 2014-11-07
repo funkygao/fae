@@ -129,25 +129,6 @@ service FunServant {
     ),
 
     //=================
-    // kvdb section
-    //=================
-    bool kvdb_set(
-        1: required Context ctx,
-        2: required binary key,
-        3: required binary value
-    ),
-
-    binary kvdb_get(
-        1: required Context ctx,
-        2: required binary key
-    ),
-
-    bool kvdb_del(
-        1: required Context ctx,
-        2: required binary key
-    ),
-
-    //=================
     // memcache section
     //=================
 
