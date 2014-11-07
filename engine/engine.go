@@ -8,8 +8,7 @@ import (
 type Engine struct {
 	conf *engineConfig
 
-	configFile string
-	StartedAt  time.Time
+	StartedAt time.Time
 
 	rpcProcessor  thrift.TProcessor
 	rpcServer     thrift.TServer
@@ -20,9 +19,8 @@ type Engine struct {
 	hostname string
 }
 
-func NewEngine(fn string) (this *Engine) {
+func NewEngine() (this *Engine) {
 	this = new(Engine)
-	this.configFile = fn
 	this.stats = newEngineStats()
 
 	return

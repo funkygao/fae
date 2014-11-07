@@ -77,16 +77,7 @@ type engineConfig struct {
 	rpc *configRpc
 }
 
-func (this *Engine) LoadConfigFile() *Engine {
-	log.Info("Engine[%s] loading config file %s", BuildID, this.configFile)
-
-	cf := new(engineConfig)
-	var err error
-	cf.Conf, err = conf.Load(this.configFile)
-	if err != nil {
-		panic(err)
-	}
-
+func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	this.conf = cf
 	this.doLoadConfig()
 

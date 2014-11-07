@@ -57,9 +57,13 @@ func main() {
 		defer profile.Start(cf).Stop()
 	}
 
+	s := server.NewServer("fae")
+	s.LoadConfig(options.configFile)
+	s.Launch()
+
 	go server.RunSysStats(time.Now(), time.Duration(options.tick))
 
-	engine.NewEngine(options.configFile).
-		LoadConfigFile().
+	engine.NewEngine().
+		LoadConfig(s.Conf).
 		ServeForever()
 }
