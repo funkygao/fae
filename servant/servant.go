@@ -20,7 +20,7 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	sessions *sessions     // state kept for sessions
+	sessions *sessions     // state kept for sessions FIXME kill it
 	stats    *servantStats // stats
 
 	proxy *proxy.Proxy         // remote fae agent

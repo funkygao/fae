@@ -216,7 +216,7 @@ thrift above 0.9.0 which depends on flex
     git clone -b 0.9.1 https://github.com/apache/thrift thrift-0.9.1
     cd thrift-0.9.1
     ./bootstrap.sh
-    ./configure --prefix=/opt/app/thrift --with-cpp=no
+    ./configure --prefix=/opt/app/thrift --with-cpp=no --with-erlang=no --with-c_glib=no --with-perl=no --with-ruby=no --with-haskell=no --with-d=no
     make
     make -k check
     sh test/test.sh

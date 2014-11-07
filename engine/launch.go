@@ -42,11 +42,6 @@ func (this *Engine) ServeForever() {
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
-	// when config loaded, create the servants
-	svr := servant.NewFunServant(config.Servants)
-	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
-	svr.Start()
-
 	<-this.launchRpcServe()
 
 	log.Info("Engine terminated")

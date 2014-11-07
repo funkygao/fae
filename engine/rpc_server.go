@@ -43,7 +43,7 @@ func NewTFunServer(engine *Engine,
 		outputProtocolFactory:  protocolFactory,
 		clientConcurrencies:    make(map[string]int),
 	}
-	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleClient)
+	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleSession)
 	engine.rpcThreadPool = this.pool
 
 	// start the thread pool
@@ -76,7 +76,7 @@ func (this *TFunServer) Serve() error {
 	return errors.New("rpc server stopped")
 }
 
-func (this *TFunServer) handleClient(client interface{}) {
+func (this *TFunServer) handleSession(client interface{}) {
 	defer this.engine.stats.CurrentSessions.Dec(1)
 
 	transport, ok := client.(thrift.TTransport)
@@ -116,21 +116,6 @@ func (this *TFunServer) handleClient(client interface{}) {
 	}
 
 	this.processSession(transport)
-}
-
-// if concurrent conns from same client is too high, it means
-// web frontend(php-fpm) got stuck, keep forking children
-// TODO
-func (this *TFunServer) monitorClients() {
-	for {
-		for clientIp, concurrentConns := range this.clientConcurrencies {
-			if concurrentConns > 200 {
-				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
-			}
-		}
-
-		time.Sleep(time.Second * 10)
-	}
 }
 
 func (this *TFunServer) processSession(client thrift.TTransport) {
@@ -209,6 +194,21 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 	}
 
 	return nil
+}
+
+// if concurrent conns from same client is too high, it means
+// web frontend(php-fpm) got stuck, keep forking children
+// TODO
+func (this *TFunServer) monitorClients() {
+	for {
+		for clientIp, concurrentConns := range this.clientConcurrencies {
+			if concurrentConns > 200 { // TODO
+				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
+			}
+		}
+
+		time.Sleep(time.Second * 10)
+	}
 }
 
 func (this *TFunServer) Stop() error {

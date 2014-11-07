@@ -3,10 +3,18 @@ package engine
 import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/servant"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 	"strings"
 )
 
+// thrift internal layer
+//
+// Server
+// Processor (compiler genereated)
+// Protocol (JSON/compact/...)
+// Transport (TCP/HTTP/...)
 func (this *Engine) launchRpcServe() (done chan interface{}) {
 	var (
 		protocolFactory  thrift.TProtocolFactory
@@ -38,7 +46,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
 
 	default:
-		transportFactory = thrift.NewTBufferedTransportFactory(2 << 10)
+		transportFactory = thrift.NewTBufferedTransportFactory(2 << 10) // TODO
 	}
 
 	switch {
@@ -56,6 +64,11 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		panic(err)
 	}
 
+	// when config loaded, create the servants
+	svr := servant.NewFunServant(config.Servants)
+	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
+	svr.Start()
+
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, this.conf.rpc.listenAddr)
@@ -65,7 +78,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		for {
 			err = this.rpcServer.Serve()
 			if err != nil {
-				log.Error("rpcServer: %v", err)
+				log.Error("rpcServer: %+v", err)
 				break
 			}
 		}
