@@ -3,10 +3,25 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
 	_log "log"
 	"os"
 	"path/filepath"
+)
+
+var (
+	options struct {
+		configFile  string
+		showVersion bool
+		logFile     string
+		logLevel    string
+		tick        int
+		cpuprof     bool
+		memprof     bool
+		blockprof   bool
+		lockFile    string
+	}
 )
 
 func parseFlags() {
@@ -19,7 +34,6 @@ func parseFlags() {
 	flag.BoolVar(&options.cpuprof, "cpuprof", false, "enable cpu profiling")
 	flag.BoolVar(&options.memprof, "memprof", false, "enable memory profiling")
 	flag.BoolVar(&options.blockprof, "blockprof", false, "enable block profiling")
-	flag.Usage = showUsage
 
 	flag.Parse()
 
@@ -28,42 +42,8 @@ func parseFlags() {
 	}
 }
 
-func showUsage() {
-	fmt.Fprint(os.Stderr, USAGE)
-	flag.PrintDefaults()
-}
-
-func setupLogging(loggingLevel, logFile string) {
-	level := log.DEBUG
-	switch loggingLevel {
-	case "info":
-		level = log.INFO
-	case "warn":
-		level = log.WARNING
-	case "error":
-		level = log.ERROR
-	}
-
-	for _, filter := range log.Global {
-		filter.Level = level
-	}
-
-	if logFile == "stdout" {
-		log.AddFilter("stdout", level, log.NewConsoleLogWriter())
-	} else {
-		logDir := filepath.Dir(logFile)
-		if err := os.MkdirAll(logDir, 0744); err != nil {
-			panic(err)
-		}
-
-		writer := log.NewFileLogWriter(logFile, false)
-		log.AddFilter("file", level, writer)
-		writer.SetFormat("[%d %T] [%L] (%S) %M")
-		writer.SetRotate(true)
-		writer.SetRotateSize(0)
-		writer.SetRotateLines(0)
-		writer.SetRotateDaily(true)
-	}
+func setupLogging() {
+	server.SetupLogging(options.lockFile, options.logLevel)
 
 	// thrift lib use "log", so we also need to customize its behavior
 	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)

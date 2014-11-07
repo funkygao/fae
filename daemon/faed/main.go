@@ -45,7 +45,7 @@ func main() {
 	if options.cpuprof || options.memprof {
 		cf := &profile.Config{
 			Quiet:        true,
-			ProfilePath:  PROFILER_DIR,
+			ProfilePath:  "prof",
 			CPUProfile:   options.cpuprof,
 			MemProfile:   options.memprof,
 			BlockProfile: options.blockprof,
@@ -54,7 +54,7 @@ func main() {
 		defer profile.Start(cf).Stop()
 	}
 
-	setupLogging(options.logLevel, options.logFile)
+	setupLogging()
 
 	go runWatchdog(time.Second * time.Duration(options.tick))
 
