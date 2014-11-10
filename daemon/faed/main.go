@@ -61,7 +61,7 @@ func main() {
 	s.LoadConfig(options.configFile)
 	s.Launch()
 
-	go server.RunSysStats(time.Now(), time.Duration(options.tick))
+	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
 
 	engine.NewEngine().
 		LoadConfig(s.Conf).
