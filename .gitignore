@@ -32,3 +32,4 @@ client/go/stress/stress
 faed.lock
 *.class
 etc/faed.cf
+metrics.log
