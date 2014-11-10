@@ -48,7 +48,7 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 		this.dsn += "charset=" + this.Charset
 	}
 
-	log.Debug("mysql server: %s", this.dsn)
+	log.Debug("mysql instance: %s", this.dsn)
 }
 
 func (this *ConfigMysqlServer) DSN() string {

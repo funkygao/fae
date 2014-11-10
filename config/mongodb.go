@@ -45,7 +45,7 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 		this.uri += "?replicaSet=" + this.ReplicaSet
 	}
 
-	log.Debug("mongodb server: %+v", *this)
+	log.Debug("mongodb instance: %+v", *this)
 }
 
 func (this *ConfigMongodbServer) Uri() string {
