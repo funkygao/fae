@@ -21,6 +21,7 @@ type Engine struct {
 
 func NewEngine() (this *Engine) {
 	this = new(Engine)
+	this.conf = new(engineConfig)
 	this.stats = newEngineStats()
 
 	return
