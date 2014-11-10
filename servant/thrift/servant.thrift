@@ -36,22 +36,29 @@ struct Context {
     /**
      * Where the request originated.
      */
-    11:optional string host
+    2:optional string host
 
     /**
      * Remote user IP address.
      */
-    12:optional string ip
+    3:optional string ip
 
     /**
-     * Session id.
+     * Game Session id.
      */
-    13:optional string sid
+    4:optional string sid
+
+    /**
+     * PHP Request id.
+     *
+     * for thrift RPC, this is session id because this is within a single tcp conn
+     */ 
+    5:optional string rid
 
     /**
      * Reserved for future.
      */
-    14:optional string reserved
+    10:optional string reserved
 }
 
 struct MysqlResult {
