@@ -17,7 +17,7 @@ type profiler struct {
 
 func (this *FunServantImpl) profiler() *profiler {
 	p := &profiler{on: false}
-	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate)
+	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate) // rand(1000) <= ProfilerRate
 	p.t1 = time.Now()
 	p.FunServantImpl = this
 

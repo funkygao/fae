@@ -28,7 +28,8 @@
 
     servants: {
         profiler_max_body_size: 600
-        profiler_rate: 1000
+        // 10/1000 = 1%
+        profiler_rate: 10
         // multicast address in the range 224.0.0.0 through 239.255.255.255
         peer_replicas: 2
         peer_group_addr: "239.255.255.250:1900"
@@ -50,31 +51,35 @@
             }
             servers: [
                 {
-                    pool: "default"
-                    host: "127.0.0.1"
-                    port: 3306
-                    username: "root"
-                    db: "demos"
-                }
-                {
                     pool: "ShardLookup"
                     host: "127.0.0.1"
                     port: 3306
-                    username: "root"
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
                     db: "ShardLookup"
+                }
+                {
+                    pool: "Tickets"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
+                    db: "Tickets"
                 }
                 {
                     pool: "UserShard1"
                     host: "127.0.0.1"
                     port: 3306
-                    username: "root"
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
                     db: "UserShard1"
                 }
                 {
                     pool: "WorldShard1"
                     host: "127.0.0.1"
                     port: 3306
-                    username: "root"
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
                     db: "WorldShard1"
                 }
                 {
@@ -82,6 +87,7 @@
                     host: "127.0.0.1"
                     port: 3306
                     username: "root"
+                    password: "halfquestfarm4321"
                     db: "AllianceShard1"
                 }
             ]
