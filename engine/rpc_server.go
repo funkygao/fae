@@ -121,7 +121,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 func (this *TFunServer) processSession(client thrift.TTransport) {
 	t1 := time.Now()
 	remoteAddr := client.(*thrift.TSocket).Conn().RemoteAddr().String()
-	if err := this.processRequest(client); err != nil {
+	if err := this.processRequests(client); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
 		log.Error("Session peer{%s}: %s", remoteAddr, err)
 	}
@@ -138,7 +138,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 
 }
 
-func (this *TFunServer) processRequest(client thrift.TTransport) error {
+func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
 	outputTransport := this.outputTransportFactory.GetTransport(client)
