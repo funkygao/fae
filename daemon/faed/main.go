@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/golib/profile"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
+	_log "log"
 	"os"
 	"runtime/debug"
 	"syscall"
@@ -20,6 +21,10 @@ func init() {
 		server.ShowVersionAndExit()
 	}
 
+	server.SetupLogging(options.logFile, options.logLevel)
+	// thrift lib use "log", so we also need to customize its behavior
+	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
+
 	if options.lockFile != "" {
 		if locking.InstanceLocked(options.lockFile) {
 			fmt.Fprintf(os.Stderr, "Another instance is running, exit...\n")
@@ -32,7 +37,6 @@ func init() {
 		shutdown()
 	})
 
-	setupLogging()
 }
 
 func main() {

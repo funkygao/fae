@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/funkygao/golib/server"
-	_log "log"
 )
 
 var (
@@ -36,11 +34,4 @@ func parseFlags() {
 	if options.tick <= 0 {
 		panic("tick must be possitive")
 	}
-}
-
-func setupLogging() {
-	server.SetupLogging(options.lockFile, options.logLevel)
-
-	// thrift lib use "log", so we also need to customize its behavior
-	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 }
