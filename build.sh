@@ -8,6 +8,7 @@ fi
 
 VER=0.2.0a
 ID=$(git rev-parse HEAD | cut -c1-7)
+
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
