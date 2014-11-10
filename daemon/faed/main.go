@@ -17,7 +17,7 @@ func init() {
 	parseFlags()
 
 	if options.showVersion {
-		engine.ShowVersionAndExit()
+		server.ShowVersionAndExit()
 	}
 
 	if options.lockFile != "" {
