@@ -115,13 +115,9 @@ func (this *TFunServer) handleSession(client interface{}) {
 		this.mu.Unlock()
 	}
 
-	this.processSession(transport)
-}
-
-func (this *TFunServer) processSession(client thrift.TTransport) {
 	t1 := time.Now()
-	remoteAddr := client.(*thrift.TSocket).Conn().RemoteAddr().String()
-	if err := this.processRequests(client); err != nil {
+	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
+	if err := this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
 		log.Error("Session peer{%s}: %s", remoteAddr, err)
 	}
@@ -135,7 +131,6 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 		this.engine.stats.TotalSlowSessions.Inc(1)
 		log.Warn("SLOW=%s session peer{%s}", elapsed, remoteAddr)
 	}
-
 }
 
 func (this *TFunServer) processRequests(client thrift.TTransport) error {
@@ -144,12 +139,14 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	outputTransport := this.outputTransportFactory.GetTransport(client)
 	inputProtocol := this.inputProtocolFactory.GetProtocol(inputTransport)
 	outputProtocol := this.outputProtocolFactory.GetProtocol(outputTransport)
-	if inputTransport != nil {
-		defer inputTransport.Close()
-	}
-	if outputTransport != nil {
-		defer outputTransport.Close()
-	}
+	defer func() {
+		if inputTransport != nil {
+			inputTransport.Close()
+		}
+		if outputTransport != nil {
+			outputTransport.Close()
+		}
+	}()
 
 	var (
 		t1         time.Time
