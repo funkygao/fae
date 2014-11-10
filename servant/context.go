@@ -33,6 +33,10 @@ func (this contextInfo) String() string {
 	if this.ctx.IsSetSid() {
 		s = fmt.Sprintf("%s S^%s", s, *this.ctx.Sid)
 	}
+	// currently handles action cmds
+	if this.ctx.IsSetReserved() {
+		s = fmt.Sprintf("%s A^%s", s, *this.ctx.Reserved)
+	}
 
 	return s
 }
