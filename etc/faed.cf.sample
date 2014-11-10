@@ -17,7 +17,7 @@
         stats_output_interval: "10m"
         // process management, learned from php-fpm
         pm: {
-            max_outstanding_sessions: 5000
+            max_outstanding_sessions: 10000
             mode: "static"
             //mode: "dynamic"
             start_servers: 1000
