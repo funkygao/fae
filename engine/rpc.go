@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"

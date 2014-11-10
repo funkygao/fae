@@ -47,10 +47,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["result"] = "go to global logger to see result"
 		log.Info(string(stack[:stackSize]))
 
-	case "reload":
-		this.LoadConfigFile()
-		output["status"] = "ok"
-
 	case "stop":
 		this.rpcServer.Stop()
 		output["status"] = "stopped"
@@ -84,7 +80,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["uris"] = []string{
 			"/admin/ping",
 			"/admin/debug",
-			"/admin/reload",
 			"/admin/stop",
 			"/admin/stat",
 			"/admin/runtime",

@@ -2,12 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/funkygao/golib/server"
-	log "github.com/funkygao/log4go"
 	_log "log"
-	"os"
-	"path/filepath"
 )
 
 var (

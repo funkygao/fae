@@ -1,9 +1,6 @@
 package engine
 
 import (
-	"github.com/funkygao/fae/config"
-	"github.com/funkygao/fae/servant"
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
