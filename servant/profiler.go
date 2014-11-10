@@ -27,8 +27,8 @@ func (this *FunServantImpl) profiler() *profiler {
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	slow := elapsed.Seconds() > 3
-	if !slow && !this.on {
+	slow := elapsed.Seconds() > 3 // TODO config
+	if !(slow || this.on) {
 		return
 	}
 
