@@ -130,7 +130,7 @@ func (this *TFunServer) processSession(client thrift.TTransport) {
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	if this.engine.conf.rpc.debugSession {
 		log.Debug("Closed session peer{%s} after %s", remoteAddr, elapsed)
-	} else if elapsed.Seconds() > this.engine.conf.rpc.sessionSlowThreshold {
+	} else if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		// slow session
 		this.engine.stats.TotalSlowSessions.Inc(1)
 		log.Warn("SLOW=%s session peer{%s}", elapsed, remoteAddr)
@@ -163,7 +163,7 @@ func (this *TFunServer) processRequest(client thrift.TTransport) error {
 		elapsed = time.Since(t1)
 		this.engine.stats.CallPerSecond.Mark(1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
-		if elapsed.Seconds() > this.engine.conf.rpc.callSlowThreshold {
+		if elapsed > this.engine.conf.rpc.callSlowThreshold {
 			// slow call
 			this.engine.stats.TotalSlowCalls.Inc(1)
 			log.Warn("SLOW call=%.3fs, peer{%s}", elapsed.Seconds(), remoteAddr)
