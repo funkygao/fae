@@ -238,6 +238,8 @@ php.ini
 
 ### TODO
 
+*   FunServantImpl.session(ctx).profiler.do
+*   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,
 *   realtime tracking of concurrent sessions by client host
 *   session based profiler sampling, the whole session wholy sampled or not
 *   if mongodb not existent in config file, and mg query arrives, fae dies
