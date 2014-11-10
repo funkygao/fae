@@ -12,7 +12,6 @@
         call_slow_threshold: "3s"
         session_timeout: "30s"
         io_timeout: "2s"
-        debug_session: false
         tcp_nodelay: true
         stats_output_interval: "10m"
         // process management, learned from php-fpm

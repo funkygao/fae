@@ -238,6 +238,7 @@ php.ini
 
 ### TODO
 
+*   realtime tracking of concurrent sessions by client host
 *   session based profiler sampling, the whole session wholy sampled or not
 *   if mongodb not existent in config file, and mg query arrives, fae dies
 *   rate limit of connection of a given user
