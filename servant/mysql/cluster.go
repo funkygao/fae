@@ -51,13 +51,17 @@ func (this *MysqlCluster) Warmup() {
 	for _, m := range this.selector.Servers() {
 		err = m.Ping()
 		if err != nil {
-			log.Error(err)
-			continue
+			log.Error("mysql: %s", err)
+			break
 		}
 
 	}
 
-	log.Trace("Mysql pool warmup finished within %s: %+v",
-		time.Since(t1), this.selector)
-
+	if err != nil {
+		log.Error("Mysql failed to warmup within %s: %s",
+			time.Since(t1), err)
+	} else {
+		log.Trace("Mysql warm up within %s: %+v",
+			time.Since(t1), this.selector)
+	}
 }

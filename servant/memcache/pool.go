@@ -35,7 +35,7 @@ func (this *ClientPool) Warmup() {
 		client.Warmup()
 	}
 
-	log.Trace("Memcache pool warmup finished within %s: %+v",
+	log.Trace("Memcache pool warmup within %s: %+v",
 		time.Since(t1), this.FreeConnMap())
 }
 

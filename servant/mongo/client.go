@@ -84,10 +84,10 @@ func (this *Client) Warmup() {
 	}
 
 	if err == nil {
-		log.Trace("Mongodb warmed up within %s: %+v",
+		log.Trace("Mongodb warmup within %s: %+v",
 			time.Since(t1), this.freeconns)
 	} else {
-		log.Error("Mongodb failed to warm up within %s: %s",
+		log.Error("Mongodb failed to warmup within %s: %s",
 			time.Since(t1), err)
 	}
 
