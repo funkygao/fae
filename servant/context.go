@@ -10,7 +10,6 @@ type contextInfo struct {
 
 	httpMethod string
 	uri        string
-	seqId      string
 }
 
 func (this *contextInfo) Valid() bool {
@@ -22,7 +21,7 @@ func (this contextInfo) String() string {
 		return "Invalid"
 	}
 
-	s := fmt.Sprintf("%s^%s+%s", this.httpMethod, this.uri, this.ctx.Rid)
+	s := fmt.Sprintf("%s^%s S^%s", this.httpMethod, this.uri, this.ctx.Rid)
 	if this.ctx.IsSetHost() {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}

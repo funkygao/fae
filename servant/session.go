@@ -14,8 +14,10 @@ type session struct {
 func (this *session) getProfiler() *profiler {
 	if this.profiler == nil {
 		this.profiler = &profiler{}
+		// TODO 某些web server需要100%采样
 		this.profiler.on = sampling.SampleRateSatisfied(config.Servants.ProfilerRate) // rand(1000) <= ProfilerRate
-		this.profiler.t1 = time.Now()
+		this.profiler.t0 = time.Now()
+		this.profiler.t1 = this.profiler.t0
 	}
 
 	return this.profiler

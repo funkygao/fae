@@ -12,6 +12,7 @@ import (
 // profiler and auditter
 type profiler struct {
 	on bool
+	t0 time.Time
 	t1 time.Time
 }
 
@@ -23,27 +24,20 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 		return
 	}
 
-	// format visible body
-	for idx, arg := range args {
-		if mcData, ok := arg.(*rpc.TMemcacheData); ok {
-			if mcData != nil {
-				args[idx] = fmt.Sprintf("{Data:%s Flags:%d}",
-					mcData.Data, mcData.Flags)
-			}
-		}
-	}
-
 	body := fmt.Sprintf(format, args...)
 	if slow { // TODO config
 		// slow response
-		header := fmt.Sprintf("SLOW=%-10s Q=%s X{%s} ",
-			elapsed, name, this.contextInfo(ctx))
+		header := fmt.Sprintf("SLOW=%s/%s Q=%s X{%s} ",
+			elapsed, time.Since(this.t0), name, this.contextInfo(ctx))
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
-		header := fmt.Sprintf("T=%-10s Q=%s X{%s} ",
-			elapsed, name, this.contextInfo(ctx))
+		header := fmt.Sprintf("T=%s/%s Q=%s X{%s} ",
+			elapsed, time.Since(this.t0), name, this.contextInfo(ctx))
 		log.Debug(header + this.truncatedStr(body))
 	}
+
+	// reset t1
+	this.t1 = time.Now()
 }
 
 func (this *profiler) contextInfo(ctx *rpc.Context) (r contextInfo) {
@@ -57,7 +51,7 @@ func (this *profiler) contextInfo(ctx *rpc.Context) (r contextInfo) {
 	}
 
 	r.ctx = ctx
-	r.httpMethod, r.uri, r.seqId = p[0], p[1], p[2]
+	r.httpMethod, r.uri = p[0], p[1]
 
 	return
 }
