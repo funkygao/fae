@@ -1,28 +1,33 @@
 package servant
 
 import (
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"github.com/funkygao/golib/cache"
+	"github.com/funkygao/golib/sampling"
+	"time"
 )
 
-// most recent session state
-type sessions struct {
-	items *cache.LruCache
+type session struct {
+	profiler *profiler
 }
 
-func newSessions() *sessions {
-	this := &sessions{items: cache.NewLruCache(10 << 10)}
-	return this
+func (this *session) getProfiler() *profiler {
+	if this.profiler == nil {
+		this.profiler = &profiler{}
+		this.profiler.on = sampling.SampleRateSatisfied(config.Servants.ProfilerRate) // rand(1000) <= ProfilerRate
+		this.profiler.t1 = time.Now()
+	}
+
+	return this.profiler
 }
 
-func (this *sessions) set(ctx *rpc.Context, value interface{}) {
-	this.items.Set(ctx, value)
-}
+func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
+	s, present := this.sessions.Get(ctx.Rid)
+	if !present {
+		s = &session{}
+		this.sessions.Set(ctx.Rid, s)
 
-func (this *sessions) get(ctx *rpc.Context) (interface{}, bool) {
-	return this.items.Get(ctx)
-}
+	}
 
-func (this *sessions) del(ctx *rpc.Context) {
-	this.items.Del(ctx)
+	return s.(*session)
 }

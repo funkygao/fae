@@ -2,26 +2,17 @@ package servant
 
 import (
 	"fmt"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"github.com/funkygao/golib/sampling"
 	log "github.com/funkygao/log4go"
+	"strings"
 	"time"
 )
 
 // profiler and auditter
 type profiler struct {
-	*FunServantImpl
 	on bool
 	t1 time.Time
-}
-
-func (this *FunServantImpl) profiler() *profiler {
-	p := &profiler{on: false}
-	p.on = sampling.SampleRateSatisfied(this.conf.ProfilerRate) // rand(1000) <= ProfilerRate
-	p.t1 = time.Now()
-	p.FunServantImpl = this
-
-	return p
 }
 
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
@@ -55,10 +46,26 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	}
 }
 
+func (this *profiler) contextInfo(ctx *rpc.Context) (r contextInfo) {
+	const (
+		N         = 3
+		SEPERATOR = "+"
+	)
+	p := strings.SplitN(ctx.Caller, SEPERATOR, N)
+	if len(p) != N {
+		return
+	}
+
+	r.ctx = ctx
+	r.httpMethod, r.uri, r.seqId = p[0], p[1], p[2]
+
+	return
+}
+
 func (this *profiler) truncatedStr(val string) string {
-	if len(val) < this.conf.ProfilerMaxBodySize {
+	if len(val) < config.Servants.ProfilerMaxBodySize {
 		return val
 	}
 
-	return val[:this.conf.ProfilerMaxBodySize] + "..."
+	return val[:config.Servants.ProfilerMaxBodySize] + "..."
 }

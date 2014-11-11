@@ -20,8 +20,8 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	sessions *sessions     // state kept for sessions FIXME kill it
-	stats    *servantStats // stats
+	sessions *cache.LruCache // state kept for sessions FIXME kill it
+	stats    *servantStats   // stats
 
 	proxy *proxy.Proxy         // remote fae agent
 	peer  *peer.Peer           // topology of cluster
@@ -34,6 +34,7 @@ type FunServantImpl struct {
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
+	this.sessions = cache.NewLruCache(20 << 10) // TODO config
 
 	// stats
 	this.stats = new(servantStats)
@@ -59,9 +60,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// idgen, always present
 	this.idgen = idgen.NewIdGenerator()
-
-	// TODO session
-	this.sessions = newSessions()
 
 	// local cache
 	if this.conf.Lcache.Enabled() {

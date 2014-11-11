@@ -19,7 +19,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	hintId int32, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
 	const IDENT = "my.query"
 
-	profiler := this.profiler()
+	profiler := this.getSession(ctx).getProfiler()
 	this.stats.inc(IDENT)
 	this.stats.inBytes.Inc(int64(len(sql)))
 

@@ -3,7 +3,6 @@ package servant
 import (
 	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"strings"
 )
 
 type contextInfo struct {
@@ -15,7 +14,7 @@ type contextInfo struct {
 }
 
 func (this *contextInfo) Valid() bool {
-	return this.seqId != ""
+	return this.ctx.Rid != ""
 }
 
 func (this contextInfo) String() string {
@@ -23,7 +22,7 @@ func (this contextInfo) String() string {
 		return "Invalid"
 	}
 
-	s := fmt.Sprintf("%s^%s+%s", this.httpMethod, this.uri, this.seqId)
+	s := fmt.Sprintf("%s^%s+%s", this.httpMethod, this.uri, this.ctx.Rid)
 	if this.ctx.IsSetHost() {
 		s = fmt.Sprintf("%s H^%s", s, *this.ctx.Host)
 	}
@@ -37,25 +36,6 @@ func (this contextInfo) String() string {
 	if this.ctx.IsSetReserved() {
 		s = fmt.Sprintf("%s A^%s", s, *this.ctx.Reserved)
 	}
-	if this.ctx.IsSetRid() {
-		s = fmt.Sprintf("%s A^%s", s, *this.ctx.Rid)
-	}
 
 	return s
-}
-
-func (this *FunServantImpl) contextInfo(ctx *rpc.Context) (r contextInfo) {
-	const (
-		N         = 3
-		SEPERATOR = "+"
-	)
-	p := strings.SplitN(ctx.Caller, SEPERATOR, N)
-	if len(p) != N {
-		return
-	}
-
-	r.ctx = ctx
-	r.httpMethod, r.uri, r.seqId = p[0], p[1], p[2]
-
-	return
 }

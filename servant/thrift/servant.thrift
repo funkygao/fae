@@ -34,26 +34,26 @@ struct Context {
     1:required string caller
 
     /**
-     * Where the request originated.
-     */
-    2:optional string host
-
-    /**
-     * Remote user IP address.
-     */
-    3:optional string ip
-
-    /**
-     * Game Session id.
-     */
-    4:optional string sid
-
-    /**
      * PHP Request id.
      *
      * for thrift RPC, this is session id because this is within a single tcp conn
      */ 
-    5:optional string rid
+    2:required string rid
+
+    /**
+     * Where the request originated.
+     */
+    3:optional string host
+
+    /**
+     * Remote user IP address.
+     */
+    4:optional string ip
+
+    /**
+     * Game Session id.
+     */
+    5:optional string sid
 
     /**
      * Reserved for future.
