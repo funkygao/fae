@@ -1,6 +1,3 @@
-/*
-dlog ident:string tag:string
-*/
 package servant
 
 import (
@@ -9,6 +6,7 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
+// dlog ident:string tag:string
 func (this *FunServantImpl) Dlog(ctx *rpc.Context, ident string, tag string,
 	json string) (appErr error) {
 	this.stats.inc("dlog")
