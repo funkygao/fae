@@ -238,6 +238,7 @@ php.ini
 
 ### TODO
 
+*   hot configuration reload
 *   session timeout, what if php worker?
 *   FunServantImpl.session(ctx).profiler.do
 *   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,
