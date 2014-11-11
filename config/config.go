@@ -3,6 +3,7 @@ package config
 import (
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 var (
@@ -14,6 +15,7 @@ func init() {
 }
 
 type ConfigServant struct {
+	StatsOutputInterval time.Duration
 	ProfilerMaxBodySize int
 	ProfilerRate        int
 
@@ -32,6 +34,7 @@ type ConfigServant struct {
 }
 
 func LoadServants(cf *conf.Conf) {
+	Servants.StatsOutputInterval = cf.Duration("stats_output_interval", 10*time.Minute)
 	Servants.ProfilerMaxBodySize = cf.Int("profiler_max_body_size", 1<<10)
 	Servants.ProfilerRate = cf.Int("profiler_rate", 1) // default 1/1000
 	Servants.PeersReplica = cf.Int("peer_replicas", 3)

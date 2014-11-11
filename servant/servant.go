@@ -107,7 +107,7 @@ func (this *FunServantImpl) Start() {
 }
 
 func (this *FunServantImpl) showStats() {
-	ticker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(config.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
 	for _ = range ticker.C {

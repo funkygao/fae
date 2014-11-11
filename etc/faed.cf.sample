@@ -26,6 +26,7 @@
     }
 
     servants: {
+        stats_output_interval: "10m"
         profiler_max_body_size: 600
         // 10/1000 = 1%
         profiler_rate: 10
