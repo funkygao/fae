@@ -238,6 +238,7 @@ php.ini
 
 ### TODO
 
+*   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
 *   session timeout, what if php worker?
 *   FunServantImpl.session(ctx).profiler.do
