@@ -126,7 +126,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
-		log.Warn("SLOW=%s session peer{%s}", elapsed, remoteAddr)
+		log.Warn("SLOW session=%s, peer{%s}", elapsed, remoteAddr)
 	}
 }
 
@@ -163,11 +163,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		elapsed = time.Since(t1)
 		this.engine.stats.CallPerSecond.Mark(1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
-		if elapsed > this.engine.conf.rpc.callSlowThreshold {
-			// slow call
-			this.engine.stats.TotalSlowCalls.Inc(1)
-			log.Warn("SLOW call=%.3fs, peer{%s}", elapsed.Seconds(), remoteAddr)
-		}
 
 		// check transport error
 		if err, ok := err.(thrift.TTransportException); ok &&
@@ -190,6 +185,12 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 
 		if !ok || !inputProtocol.Transport().Peek() {
 			break
+		}
+
+		if elapsed > this.engine.conf.rpc.callSlowThreshold {
+			// slow call
+			this.engine.stats.TotalSlowCalls.Inc(1)
+			log.Warn("SLOW call=%.3fs, peer{%s}", elapsed.Seconds(), remoteAddr)
 		}
 	}
 

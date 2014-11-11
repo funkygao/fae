@@ -53,13 +53,23 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	switch {
 	case strings.Contains(this.conf.rpc.listenAddr, "/"):
 		serverNetwork = "unix"
-		serverTransport, err = NewTUnixSocketTimeout(
-			this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+		if this.conf.rpc.sessionTimeout.Seconds() > 0 {
+			serverTransport, err = NewTUnixSocketTimeout(
+				this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+		} else {
+			serverTransport, err = NewTUnixSocket(
+				this.conf.rpc.listenAddr)
+		}
 
 	default:
 		serverNetwork = "tcp"
-		serverTransport, err = thrift.NewTServerSocketTimeout(
-			this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+		if this.conf.rpc.sessionTimeout.Seconds() > 0 {
+			serverTransport, err = thrift.NewTServerSocketTimeout(
+				this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+		} else {
+			serverTransport, err = thrift.NewTServerSocket(
+				this.conf.rpc.listenAddr)
+		}
 	}
 	if err != nil {
 		panic(err)
