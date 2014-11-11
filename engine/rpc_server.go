@@ -93,9 +93,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 			// golang is tcp no delay by default
 			tcpClient.SetNoDelay(false)
 		}
-		if this.engine.conf.rpc.ioTimeout > 0 {
-			tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
-		}
 
 		log.Debug("New session from: %s", tcpClient.RemoteAddr())
 
@@ -155,6 +152,12 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	)
 	for {
 		t1 = time.Now()
+		if tcpClient, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+			if this.engine.conf.rpc.ioTimeout > 0 { // read + write
+				tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
+			}
+		}
+
 		ok, err := processor.Process(inputProtocol, outputProtocol)
 
 		elapsed = time.Since(t1)
