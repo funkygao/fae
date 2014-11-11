@@ -37,6 +37,9 @@ func (this contextInfo) String() string {
 	if this.ctx.IsSetReserved() {
 		s = fmt.Sprintf("%s A^%s", s, *this.ctx.Reserved)
 	}
+	if this.ctx.IsSetRid() {
+		s = fmt.Sprintf("%s A^%s", s, *this.ctx.Rid)
+	}
 
 	return s
 }
