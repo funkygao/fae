@@ -11,10 +11,12 @@ import (
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
+	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/idgen"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"net/http"
+	"time"
 )
 
 type FunServantImpl struct {
@@ -93,6 +95,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 func (this *FunServantImpl) Start() {
 	this.warmUp()
+	go this.showStats()
 
 	if this.peer != nil {
 		if err := this.peer.Start(); err != nil {
@@ -101,4 +104,15 @@ func (this *FunServantImpl) Start() {
 		}
 	}
 
+}
+
+func (this *FunServantImpl) showStats() {
+	ticker := time.NewTicker(time.Second * 10)
+	defer ticker.Stop()
+
+	for _ = range ticker.C {
+		log.Info("rpc: {in:%s, out:%s}",
+			gofmt.ByteSize(this.stats.inBytes.Count()),
+			gofmt.ByteSize(this.stats.outBytes.Count()))
+	}
 }
