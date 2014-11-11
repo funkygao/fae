@@ -26,6 +26,8 @@
     }
 
     servants: {
+        datecenter_id: 1
+        agent_id: 1
         stats_output_interval: "10m"
         profiler_max_body_size: 600
         // 10/1000 = 1%
