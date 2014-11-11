@@ -12,8 +12,8 @@ import (
 // profiler and auditter
 type profiler struct {
 	on bool
-	t0 time.Time
-	t1 time.Time
+	t0 time.Time // start of each session
+	t1 time.Time // start of each call
 }
 
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
