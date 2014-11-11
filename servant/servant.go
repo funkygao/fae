@@ -111,7 +111,8 @@ func (this *FunServantImpl) showStats() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {in:%s, out:%s}",
+		log.Info("rpc: {call:%d, in:%s, out:%s}",
+			this.stats.calls.Total(),
 			gofmt.ByteSize(this.stats.inBytes.Count()),
 			gofmt.ByteSize(this.stats.outBytes.Count()))
 	}
