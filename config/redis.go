@@ -3,9 +3,14 @@ package config
 import (
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 type ConfigRedisServer struct {
+	Host        string
+	Port        string
+	MaxIdle     int
+	IdleTimeout time.Duration
 }
 
 type ConfigRedis struct {
