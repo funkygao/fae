@@ -15,6 +15,9 @@ func init() {
 }
 
 type ConfigServant struct {
+	DataCenterId int
+	AgentId      int
+
 	StatsOutputInterval time.Duration
 	ProfilerMaxBodySize int
 	ProfilerRate        int
@@ -34,6 +37,8 @@ type ConfigServant struct {
 }
 
 func LoadServants(cf *conf.Conf) {
+	Servants.DataCenterId = cf.Int("data_center_id", 1)
+	Servants.AgentId = cf.Int("agent_id", 1)
 	Servants.StatsOutputInterval = cf.Duration("stats_output_interval", 10*time.Minute)
 	Servants.ProfilerMaxBodySize = cf.Int("profiler_max_body_size", 1<<10)
 	Servants.ProfilerRate = cf.Int("profiler_rate", 1) // default 1/1000

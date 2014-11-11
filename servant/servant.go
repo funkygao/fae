@@ -61,7 +61,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	// idgen, always present
-	this.idgen = idgen.NewIdGenerator()
+	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
 
 	// local cache
 	if this.conf.Lcache.Enabled() {
