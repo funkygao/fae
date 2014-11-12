@@ -6,7 +6,7 @@ if [[ $1 = "-loc" ]]; then
     exit
 fi
 
-VER=0.2.0a
+VER=0.2.1rc
 ID=$(git rev-parse HEAD | cut -c1-7)
 
 cd $(dirname $0)/servant; make
