@@ -110,7 +110,7 @@ func (this *FunServantImpl) showStats() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {call:%d, session:%d}",
+		log.Info("rpc: {sessions:%d, calls:%d}",
 			this.sessions.Len(),
 			this.stats.calls.Total())
 	}
