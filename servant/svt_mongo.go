@@ -14,7 +14,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	doc []byte) (r bool, appErr error) {
 	this.stats.inc("mg.insert")
-	this.stats.inBytes.Inc(int64(len(doc)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	sess, err := this.mongoSession(pool, shardId)
@@ -112,7 +111,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (r bool, appErr error) {
 	this.stats.inc("mg.del")
-	this.stats.inBytes.Inc(int64(len(query)))
 
 	profiler := this.getSession(ctx).getProfiler()
 
@@ -149,7 +147,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	query []byte, fields []byte) (r []byte,
 	miss *rpc.TMongoNotFound, appErr error) {
 	this.stats.inc("mg.findOne")
-	this.stats.inBytes.Inc(int64(len(query) + len(fields)))
 
 	profiler := this.getSession(ctx).getProfiler()
 
@@ -203,7 +200,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	}
 
 	r = mongo.MarshalOut(result)
-	this.stats.outBytes.Inc(int64(len(r)))
 
 	profiler.do("mg.findOne", ctx,
 		"{pool^%s table^%s query^%v fields^%v} {miss^%v err^%v val^%v}",
@@ -286,7 +282,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	this.stats.inc("mg.update")
-	this.stats.inBytes.Inc(int64(len(query) + len(change)))
 
 	profiler := this.getSession(ctx).getProfiler()
 
@@ -338,7 +333,6 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	this.stats.inc("mg.upsert")
-	this.stats.inBytes.Inc(int64(len(query) + len(change)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	sess, err := this.mongoSession(pool, shardId)
@@ -386,7 +380,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
 	this.stats.inc("mg.count")
-	this.stats.inBytes.Inc(int64(len(query)))
 
 	profiler := this.getSession(ctx).getProfiler()
 
@@ -423,7 +416,6 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	query []byte, change []byte, upsert bool,
 	remove bool, returnNew bool) (r []byte, appErr error) {
 	this.stats.inc("mg.findAndModify")
-	this.stats.inBytes.Inc(int64(len(query) + len(change)))
 
 	profiler := this.getSession(ctx).getProfiler()
 

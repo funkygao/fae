@@ -21,7 +21,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	profiler := this.getSession(ctx).getProfiler()
 	this.stats.inc(IDENT)
-	this.stats.inBytes.Inc(int64(len(sql)))
 
 	// convert []string to []interface{}
 	margs := make([]interface{}, len(args), len(args))
@@ -93,17 +92,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		}
 	}
 
-	var mysqlResultSize = 16
-	for _, col := range r.Cols {
-		mysqlResultSize += len(col)
-	}
-	for _, row := range r.Rows {
-		for _, d := range row {
-			mysqlResultSize += len(d)
-		}
-	}
-
-	this.stats.outBytes.Inc(int64(mysqlResultSize))
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
 		pool, table, hintId, sql, args, r)

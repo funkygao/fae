@@ -21,9 +21,10 @@ func (this *FunServantImpl) gm_register(ctx *rpc.Context, udid string) (appErr e
 }
 
 func (this *FunServantImpl) gm_actor_lockuser(ctx *rpc.Context, uid int64) (appErr error) {
-
+	return nil
 }
 
 func (this *FunServantImpl) gm_actor_locktile(ctx *rpc.Context, geohash int64) (appErr error) {
-
+	appErr = ErrNotImplemented
+	return nil
 }

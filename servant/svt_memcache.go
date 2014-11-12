@@ -13,7 +13,6 @@ import (
 func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.set")
-	this.stats.inBytes.Inc(int64(len(value.Data) + len(key)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	appErr = this.mc.Set(pool, &memcache.Item{Key: key,
@@ -40,7 +39,6 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("mc.get")
-	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	it, err := this.mc.Get(pool, key)
@@ -49,7 +47,6 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 		r = rpc.NewTMemcacheData()
 		r.Data = it.Value
 		r.Flags = int32(it.Flags)
-		this.stats.outBytes.Inc(int64(len(r.Data)))
 	} else if err == memcache.ErrCacheMiss {
 		// cache miss
 		miss = rpc.NewTCacheMissed()
@@ -72,7 +69,6 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData,
 	expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.add")
-	this.stats.inBytes.Inc(int64(len(key) + len(value.Data)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	appErr = this.mc.Add(pool, &memcache.Item{Key: key,
@@ -102,7 +98,6 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	key string) (r bool, appErr error) {
 	this.stats.inc("mc.del")
-	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.getSession(ctx).getProfiler()
 	appErr = this.mc.Delete(pool, key)
@@ -128,7 +123,6 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 	key string, delta int64) (r int64, appErr error) {
 	this.stats.inc("mc.inc")
-	this.stats.inBytes.Inc(int64(len(key)))
 
 	profiler := this.getSession(ctx).getProfiler()
 

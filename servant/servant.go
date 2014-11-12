@@ -11,7 +11,6 @@ import (
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
-	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/idgen"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
@@ -111,9 +110,8 @@ func (this *FunServantImpl) showStats() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {call:%d, in:%s, out:%s}",
-			this.stats.calls.Total(),
-			gofmt.ByteSize(this.stats.inBytes.Count()),
-			gofmt.ByteSize(this.stats.outBytes.Count()))
+		log.Info("rpc: {call:%d, session:%d}",
+			this.sessions.Len(),
+			this.stats.calls.Total())
 	}
 }
