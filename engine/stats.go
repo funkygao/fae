@@ -14,7 +14,6 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	CurrentSessions     metrics.Counter
 	TotalFailedCalls    metrics.Counter
 	TotalFailedSessions metrics.Counter
 	TotalSlowSessions   metrics.Counter
@@ -33,8 +32,6 @@ func newEngineStats() (this *engineStats) {
 }
 
 func (this *engineStats) registerMetrics() {
-	this.CurrentSessions = metrics.NewCounter()
-	metrics.Register("current.sessions", this.CurrentSessions)
 	this.TotalFailedSessions = metrics.NewCounter()
 	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
 	this.TotalSlowSessions = metrics.NewCounter()
@@ -45,10 +42,10 @@ func (this *engineStats) registerMetrics() {
 	metrics.Register("total.calls.slow", this.TotalSlowCalls)
 	this.SessionLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.ms.session", this.SessionLatencies)
+	metrics.Register("latency.session", this.SessionLatencies)
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.ms.call", this.CallLatencies)
+	metrics.Register("latency.call", this.CallLatencies)
 	this.SessionPerSecond = metrics.NewMeter()
 	metrics.Register("rps.session", this.SessionPerSecond)
 	this.CallPerSecond = metrics.NewMeter()
@@ -76,7 +73,7 @@ func (this *engineStats) Start(t time.Time, interval time.Duration) {
 }
 
 func (this *engineStats) Runtime() map[string]interface{} {
-	this.refreshMemStats()
+	runtime.ReadMemStats(this.memStats)
 
 	s := make(map[string]interface{})
 	s["goroutines"] = runtime.NumGoroutine()
@@ -112,8 +109,4 @@ func (this *engineStats) Runtime() map[string]interface{} {
 	s["memory.gc.pauses"] = gcPausesMs
 
 	return s
-}
-
-func (this *engineStats) refreshMemStats() {
-	runtime.ReadMemStats(this.memStats)
 }

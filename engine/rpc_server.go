@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type TFunServer struct {
 
 	pool *rpcThreadPool
 
+	sessionN            int64 // concurrent sessions
 	mu                  sync.Mutex
 	clientConcurrencies map[string]int
 }
@@ -77,7 +79,7 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleSession(client interface{}) {
-	defer this.engine.stats.CurrentSessions.Dec(1)
+	defer atomic.AddInt64(&this.sessionN, -1)
 
 	transport, ok := client.(thrift.TTransport)
 	if !ok {
@@ -86,7 +88,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
-	this.engine.stats.CurrentSessions.Inc(1)
+	atomic.AddInt64(&this.sessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		if !this.engine.conf.rpc.tcpNoDelay {
@@ -161,8 +163,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		ok, err := processor.Process(inputProtocol, outputProtocol)
 
 		elapsed = time.Since(t1)
-		this.engine.stats.CallPerSecond.Mark(1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
+		this.engine.stats.CallPerSecond.Mark(1)
 
 		// check transport error
 		if err, ok := err.(thrift.TTransportException); ok &&
