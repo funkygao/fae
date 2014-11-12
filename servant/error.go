@@ -5,6 +5,5 @@ import (
 )
 
 var (
-	ErrNotImplemented   = errors.New("Not implemented")
-	ErrUnderMaintenance = errors.New("Under maintenance")
+	ErrNotImplemented = errors.New("Not implemented")
 )
