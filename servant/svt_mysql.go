@@ -11,7 +11,7 @@ import (
 )
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
-	hintId int32, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
+	hintId int64, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
 	const (
 		IDENT      = "my.query"
 		SQL_SELECT = "SELECT"

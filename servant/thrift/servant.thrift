@@ -347,7 +347,7 @@ service FunServant {
         1: Context ctx,
         2: string pool,
         3: string table,
-        4: i32 hintId,
+        4: i64 hintId,
         5: string sql,
         6: list<string> argv
     ),
