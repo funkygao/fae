@@ -31,7 +31,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
-			log.Error("%s: %s %v", IDENT, sql, err)
+			log.Error("%s: %s (%v) %s", IDENT, sql, args, err)
 			return
 		}
 
@@ -42,7 +42,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("%s: %s %v", IDENT, sql, err)
+			log.Error("%s: %s (%v) %s", IDENT, sql, args, err)
 			return
 		} else {
 			r.Cols = cols
@@ -53,12 +53,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				for i, _ := range cols {
 					scanArgs[i] = &rawRowValues[i]
 				}
-				err = rows.Scan(scanArgs...)
-				if err != nil {
-					appErr = err
-					log.Error("%s: %v", IDENT, err)
+				if appErr = rows.Scan(scanArgs...); appErr != nil {
+					log.Error("%s: %s (%v) %s", IDENT, sql, args, appErr)
 					return
 				}
+
 				rowValues := make([]string, len(cols))
 				for i, raw := range rawRowValues {
 					if raw == nil {
@@ -72,27 +71,21 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			}
 
 			// check for errors after we’re done iterating over the rows
-			err = rows.Err()
-			if err != nil {
-				appErr = err
-				log.Error("%s: %s %v", IDENT, sql, err)
+			if appErr = rows.Err(); appErr != nil {
+				log.Error("%s: %s (%v) %s", IDENT, sql, args, appErr)
 				return
 			}
-
 		}
 	} else {
-		var err error
-		r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool, table, int(hintId),
-			sql, margs)
-		if err != nil {
-			appErr = err
-			log.Error("%s: %s %v", IDENT, sql, err)
+		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
+			table, int(hintId), sql, margs); appErr != nil {
+			log.Error("%s: %s (%v) %s", IDENT, sql, args, appErr)
 			return
 		}
 	}
 
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
-		pool, table, hintId, sql, args, r)
+		pool, table, hintId, sql, args, *r)
 	return
 }
