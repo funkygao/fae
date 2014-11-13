@@ -10,7 +10,6 @@
         framed: false
         session_timeout: "0s"
         session_slow_threshold: "8s"
-        call_slow_threshold: "3s"
         io_timeout: "3s"
         tcp_nodelay: true
         stats_output_interval: "10m"
@@ -30,6 +29,7 @@
         agent_id: 1
         stats_output_interval: "10m"
         profiler_max_body_size: 600
+        call_slow_threshold: "200ms"
         // 10/1000 = 1%
         profiler_rate: 10
         // multicast address in the range 224.0.0.0 through 239.255.255.255
