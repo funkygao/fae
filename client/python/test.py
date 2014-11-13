@@ -56,10 +56,6 @@ except TApplicationException, e:
 except Exception, e:
     print e, type(e)
 
-# dlog
-#=====
-print '[Client] dlog received:', client.dlog(ctx, 'error', 'us', '{hello: world}'), elapsed()
-
 # lc
 #=====
 print '[Client] lc_set received:', client.lc_set(ctx, 'lc_test_hello', 'abcdefg'), elapsed()
