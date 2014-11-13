@@ -2,15 +2,15 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	log "github.com/funkygao/log4go"
 )
 
 // Ticket server
 func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 	flag int16) (r int64, backwards *rpc.TIdTimeBackwards, appErr error) {
-	this.stats.inc("id.next")
+	const IDENT = "id.next"
+	this.stats.inc(IDENT)
 
-	log.Debug("id.next from %+v", *ctx)
+	profiler := this.getSession(ctx).getProfiler()
 
 	r, appErr = this.idgen.Next()
 	if appErr != nil {
@@ -18,6 +18,7 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 		appErr = nil
 	}
 
+	profiler.do(IDENT, ctx, "{flag^%d} {r^%d}", flag, r)
+
 	return
 }
-
