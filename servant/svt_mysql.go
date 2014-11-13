@@ -10,14 +10,12 @@ import (
 	"strings"
 )
 
-// TODO let caller tell me
-func (this *FunServantImpl) isSelectQuery(sql string) bool {
-	return strings.HasPrefix(strings.ToLower(sql), "select")
-}
-
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	hintId int32, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
-	const IDENT = "my.query"
+	const (
+		IDENT      = "my.query"
+		SQL_SELECT = "SELECT"
+	)
 
 	profiler := this.getSession(ctx).getProfiler()
 	this.stats.inc(IDENT)
@@ -29,13 +27,14 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	r = rpc.NewMysqlResult()
-	if this.isSelectQuery(sql) {
+	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
 			log.Error("%s: %s %v", IDENT, sql, err)
 			return
 		}
+
 		// recycle the underlying connection back to conn pool
 		defer rows.Close()
 
@@ -76,7 +75,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			err = rows.Err()
 			if err != nil {
 				appErr = err
-				log.Error("%s: %v", IDENT, err)
+				log.Error("%s: %s %v", IDENT, sql, err)
 				return
 			}
 
