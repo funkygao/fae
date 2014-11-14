@@ -57,41 +57,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
 
-#### Directories
-
-*   client
-    - multilingual example code of how to call fae
-    - stress test
-*   config
-    - configuration lib shared by engine and servant
-*   etc
-    - the config file 
-*   daemon
-    - the fae deamon
-*   engine
-    - load config file
-    - export internal status through REST api
-    - launch servants
-    - implements thrift rpc server
-    - session based audit/profiler
-    - handles timeout
-    - launch thrift rpc serve
-    - major version controller
-*   http
-    - Plugin based REST interface 
-    - for monitor/control purpose
-*   servant
-    - manages circuit break
-    - call based audit/profiler
-    - RPC server side implementation
-    - peer
-        - other fae daemon that can be auto discovered through multicast
-        - watchdog for health of peers
-        - handles proxied requests from other(peer) fae
-    -   proxy
-        - stub of calling remote fae peers transparently
-        - pooling
-
 ### Capacity Plan
 
 #### Current stats
@@ -175,12 +140,11 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 ### Servants
 
 *   idgen to generate global uniq id
+*   mysql servant
 *   local LRU cache shared among processes
+    - under session sticky
 *   memcache servant
 *   mongodb servant with transaction support
-*   distributed logger servant
-*   idmap servant...
-*   user account servant...
 
 ### Points of failure
 
@@ -238,15 +202,10 @@ php.ini
 
 ### TODO
 
-*   distribution of how many calls per session
 *   session timeout seems not working
-*   latency.call count > servant.calls, why?
 *   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
-*   session timeout, what if php worker?
-*   FunServantImpl.session(ctx).profiler.do
 *   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,
 *   realtime tracking of concurrent sessions by client host
-*   session based profiler sampling, the whole session wholy sampled or not
 *   if mongodb not existent in config file, and mg query arrives, fae dies
 *   rate limit of connection of a given user

@@ -96,7 +96,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 			tcpClient.SetNoDelay(false)
 		}
 
-		log.Trace("New session from: %s", tcpClient.RemoteAddr())
+		log.Trace("session[%s] open", tcpClient.RemoteAddr())
 
 		// store client concurrent connections count
 		this.mu.Lock()
@@ -119,12 +119,12 @@ func (this *TFunServer) handleSession(client interface{}) {
 	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
-		log.Error("Session peer{%s}: %s", remoteAddr, err)
+		log.Error("session[%s]: %s", remoteAddr, err)
 	}
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Trace("Closed session from: %s after %s", remoteAddr, elapsed)
+	log.Trace("session[%s] close after %s", remoteAddr, elapsed)
 
 	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
@@ -148,18 +148,20 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	}()
 
 	var (
-		t1      time.Time
-		elapsed time.Duration
+		t1        time.Time
+		elapsed   time.Duration
+		tcpClient = client.(*thrift.TSocket).Conn().(*net.TCPConn)
+		callsN    int64
 	)
+
 	for {
 		t1 = time.Now()
-		if tcpClient, ok := client.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-			if this.engine.conf.rpc.ioTimeout > 0 { // read + write
-				tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
-			}
+		if this.engine.conf.rpc.ioTimeout > 0 { // read + write
+			tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
 		}
 
 		ok, err := processor.Process(inputProtocol, outputProtocol)
+		callsN++
 
 		elapsed = time.Since(t1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
@@ -168,13 +170,16 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		// check transport error
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
-			// remote client closed transport
+			// remote client closed transport, this is normal end of session
+			log.Trace("session[%s] %d calls", tcpClient.RemoteAddr().String(), callsN)
+			this.engine.stats.CallPerSession.Update(callsN)
 			return nil
 		} else if err != nil {
 			// non-EOF transport err
 			// e,g. connection reset by peer
 			// e,g. broken pipe
 			this.engine.stats.TotalFailedCalls.Inc(1)
+			this.engine.stats.CallPerSession.Update(callsN)
 			return err
 		}
 
@@ -189,6 +194,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		}
 	}
 
+	this.engine.stats.CallPerSession.Update(callsN)
+	log.Trace("session[%s] %d calls", tcpClient.RemoteAddr().String(), callsN)
 	return nil
 }
 
@@ -198,7 +205,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 func (this *TFunServer) monitorClients() {
 	for {
 		for clientIp, concurrentConns := range this.clientConcurrencies {
-			if concurrentConns > 200 { // TODO
+			if concurrentConns > 100 { // TODO
 				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
 			}
 		}
