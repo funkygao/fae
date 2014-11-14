@@ -15,7 +15,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	doc []byte) (r bool, appErr error) {
 	this.stats.inc("mg.insert")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
@@ -65,7 +65,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	docs [][]byte) (r bool, appErr error) {
 	this.stats.inc("mg.inserts")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
@@ -112,7 +112,7 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	query []byte) (r bool, appErr error) {
 	this.stats.inc("mg.del")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
@@ -148,7 +148,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	miss *rpc.TMongoNotFound, appErr error) {
 	this.stats.inc("mg.findOne")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
@@ -219,7 +219,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	orderBy []string) (r [][]byte, appErr error) {
 	this.stats.inc("mg.findAll")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
@@ -283,7 +283,7 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	query []byte, change []byte) (r bool, appErr error) {
 	this.stats.inc("mg.update")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
@@ -334,7 +334,7 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	query []byte, change []byte) (r bool, appErr error) {
 	this.stats.inc("mg.upsert")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		appErr = err
@@ -381,7 +381,7 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	query []byte) (n int32, appErr error) {
 	this.stats.inc("mg.count")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
@@ -417,7 +417,7 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	remove bool, returnNew bool) (r []byte, appErr error) {
 	this.stats.inc("mg.findAndModify")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)

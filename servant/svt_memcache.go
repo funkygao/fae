@@ -14,7 +14,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.set")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Set(pool, &memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
@@ -40,7 +40,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("mc.get")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	it, err := this.mc.Get(pool, key)
 	if err == nil {
 		// cache hit
@@ -70,7 +70,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	expiration int32) (r bool, appErr error) {
 	this.stats.inc("mc.add")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Add(pool, &memcache.Item{Key: key,
 		Value: value.Data, Flags: uint32(value.Flags),
 		Expiration: expiration})
@@ -99,7 +99,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	key string) (r bool, appErr error) {
 	this.stats.inc("mc.del")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Delete(pool, key)
 	if appErr == nil {
 		r = true
@@ -124,7 +124,7 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 	key string, delta int64) (r int64, appErr error) {
 	this.stats.inc("mc.inc")
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	newVal, err := this.mc.Increment(pool, key, delta)
 	if err == nil {

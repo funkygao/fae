@@ -15,7 +15,7 @@ type profiler struct {
 	t1 time.Time // start of each call
 }
 
-func (this *profiler) do(name string, ctx *rpc.Context, format string,
+func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
 	slow := elapsed > config.Servants.CallSlowThreshold
@@ -26,16 +26,14 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	body := fmt.Sprintf(format, args...)
 	if slow {
 		header := fmt.Sprintf("SLOW=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), name, ctx.String())
+			elapsed, time.Since(this.t0), callName, ctx.String())
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
 		header := fmt.Sprintf("T=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), name, ctx.String())
+			elapsed, time.Since(this.t0), callName, ctx.String())
 		log.Debug(header + this.truncatedStr(body))
 	}
 
-	// reset t1
-	this.t1 = time.Now()
 }
 
 func (this *profiler) truncatedStr(val string) string {

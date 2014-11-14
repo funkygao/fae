@@ -11,7 +11,7 @@ type session struct {
 	profiler *profiler
 }
 
-func (this *session) getProfiler() *profiler {
+func (this *session) startProfiler() *profiler {
 	if this.profiler == nil {
 		this.profiler = &profiler{}
 		// TODO 某些web server需要100%采样
@@ -20,6 +20,7 @@ func (this *session) getProfiler() *profiler {
 		this.profiler.t1 = this.profiler.t0
 	}
 
+	this.profiler.t1 = time.Now()
 	return this.profiler
 }
 

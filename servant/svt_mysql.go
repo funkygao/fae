@@ -17,7 +17,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		SQL_SELECT = "SELECT"
 	)
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 	this.stats.inc(IDENT)
 
 	// convert []string to []interface{}

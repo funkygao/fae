@@ -11,7 +11,7 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 	const IDENT = "id.next"
 	this.stats.inc(IDENT)
 
-	profiler := this.getSession(ctx).getProfiler()
+	profiler := this.getSession(ctx).startProfiler()
 
 	r, appErr = this.idgen.Next()
 	if appErr != nil {
