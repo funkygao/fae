@@ -15,7 +15,7 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 
 	r, appErr = this.idgen.Next()
 	if appErr != nil {
-		log.Error("id.next: clock backwards") // TODO add ctx info
+		log.Error("Q=%s %s: clock backwards", IDENT, ctx.String())
 
 		backwards = appErr.(*rpc.TIdTimeBackwards)
 		appErr = nil

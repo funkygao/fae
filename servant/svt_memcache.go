@@ -12,7 +12,9 @@ import (
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
-	this.stats.inc("mc.set")
+	const IDENT = "mc.set"
+
+	this.stats.inc(IDENT)
 
 	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Set(pool, &memcache.Item{Key: key,
@@ -21,10 +23,10 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	if appErr == nil {
 		r = true
 	} else {
-		log.Error("mc.set {key^%s}: %v", key, appErr)
+		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, appErr)
 	}
 
-	profiler.do("mc.set", ctx,
+	profiler.do(IDENT, ctx,
 		"{key^%s val^%s exp^%d} {err^%v r^%v}",
 		key,
 		value,
@@ -38,7 +40,9 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
-	this.stats.inc("mc.get")
+	const IDENT = "mc.get"
+
+	this.stats.inc(IDENT)
 
 	profiler := this.getSession(ctx).startProfiler()
 	it, err := this.mc.Get(pool, key)
@@ -53,10 +57,10 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 		miss.Message = thrift.StringPtr(err.Error()) // optional
 	} else {
 		appErr = err
-		log.Error("mc.get {key^%s}: %v", key, err)
+		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, err)
 	}
 
-	profiler.do("mc.get", ctx,
+	profiler.do(IDENT, ctx,
 		"{key^%s} {miss^%v val^%s}",
 		key,
 		miss,
@@ -68,7 +72,9 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData,
 	expiration int32) (r bool, appErr error) {
-	this.stats.inc("mc.add")
+	const IDENT = "mc.add"
+
+	this.stats.inc(IDENT)
 
 	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Add(pool, &memcache.Item{Key: key,
@@ -80,11 +86,11 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 		if appErr == memcache.ErrNotStored {
 			appErr = nil
 		} else {
-			log.Error("mc.add {key^%s}: %v", key, appErr)
+			log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, appErr)
 		}
 	}
 
-	profiler.do("mc.add", ctx,
+	profiler.do(IDENT, ctx,
 		"{key^%s val^%s exp^%d} {err^%v r^%v}",
 		key,
 		value,
@@ -97,7 +103,9 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 
 func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	key string) (r bool, appErr error) {
-	this.stats.inc("mc.del")
+	const IDENT = "mc.del"
+
+	this.stats.inc(IDENT)
 
 	profiler := this.getSession(ctx).startProfiler()
 	appErr = this.mc.Delete(pool, key)
@@ -107,11 +115,11 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 		if appErr == memcache.ErrCacheMiss {
 			appErr = nil
 		} else {
-			log.Error("mc.del {key^%s}: %v", key, appErr)
+			log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, appErr)
 		}
 	}
 
-	profiler.do("mc.del", ctx,
+	profiler.do(IDENT, ctx,
 		"{key^%s} {err^%v r^%v}",
 		key,
 		appErr,
@@ -122,7 +130,9 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 	key string, delta int64) (r int64, appErr error) {
-	this.stats.inc("mc.inc")
+	const IDENT = "mc.inc"
+
+	this.stats.inc(IDENT)
 
 	profiler := this.getSession(ctx).startProfiler()
 
@@ -130,10 +140,10 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 	if err == nil {
 		r = int64(newVal)
 	} else if err != memcache.ErrCacheMiss {
-		log.Error("mc.inc {key^%s}: %v", key, err)
+		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, err)
 	}
 
-	profiler.do("mc.inc", ctx,
+	profiler.do(IDENT, ctx,
 		"{key^%s delta^%d} {err^%v r^%d}",
 		key,
 		delta,

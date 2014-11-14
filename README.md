@@ -238,7 +238,6 @@ php.ini
 
 ### TODO
 
-*   servant err log add ctx, profiler refactor
 *   distribution of how many calls per session
 *   session timeout seems not working
 *   latency.call count > servant.calls, why?
