@@ -67,10 +67,6 @@ try {
         echo $ex->getMessage(), "\n";
     }
 
-    // dlog
-    echo '[Client] dlog received: ', $client->dlog($ctx, 'error', 'ae', 
-        json_encode(array('hello'=>'world'))), "\n";
-
     // lc
     echo '[Client] lc_set received: ', $client->lc_set($ctx, 'hello-php-lc', 'world 世界'), "\n";
     echo '[Client] lc_get received: ', $client->lc_get($ctx, 'hello-php-lc'), "\n";

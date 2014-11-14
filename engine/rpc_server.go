@@ -96,7 +96,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 			tcpClient.SetNoDelay(false)
 		}
 
-		log.Debug("New session from: %s", tcpClient.RemoteAddr())
+		log.Trace("New session from: %s", tcpClient.RemoteAddr())
 
 		// store client concurrent connections count
 		this.mu.Lock()
@@ -124,7 +124,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Debug("Closed session from: %s after %s", remoteAddr, elapsed)
+	log.Trace("Closed session from: %s after %s", remoteAddr, elapsed)
 
 	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
@@ -180,19 +180,13 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		}
 
 		// it is servant generated TApplicationException
+		// err logging is handled inside servants
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
-			log.Error("Servant call peer{%s}: %s", remoteAddr, err)
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
 			break
-		}
-
-		if elapsed > this.engine.conf.rpc.callSlowThreshold {
-			// slow call
-			this.engine.stats.TotalSlowCalls.Inc(1)
-			log.Warn("SLOW call=%.3fs, peer{%s}", elapsed.Seconds(), remoteAddr)
 		}
 	}
 

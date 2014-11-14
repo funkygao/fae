@@ -38,7 +38,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
             +-----------------------------------------------+
             |                       |                       |     self contained
         +----------------+  +----------------+  +------------------------------+
-        | mongodb servers|  |memcache servers|  | lcache | kvdb | dlog | idgen |
+        | mongodb servers|  |memcache servers|  | lcache | kvdb | idgen | ...  |
         +----------------+  +----------------+  +------------------------------+
 
 ### Why SOA?

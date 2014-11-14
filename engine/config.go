@@ -44,7 +44,6 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 type configRpc struct {
 	listenAddr           string
 	sessionSlowThreshold time.Duration // per session
-	callSlowThreshold    time.Duration // per call
 	sessionTimeout       time.Duration
 	ioTimeout            time.Duration
 	framed               bool
@@ -61,7 +60,6 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	}
 
 	this.sessionSlowThreshold = section.Duration("session_slow_threshold", 10*time.Second)
-	this.callSlowThreshold = section.Duration("call_slow_threshold", 3*time.Second)
 	this.sessionTimeout = section.Duration("session_timeout", 30*time.Second)
 	this.ioTimeout = section.Duration("io_timeout", 2*time.Second)
 	this.statsOutputInterval = section.Duration("stats_output_interval", 10*time.Second)

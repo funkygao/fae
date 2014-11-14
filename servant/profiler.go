@@ -19,14 +19,13 @@ type profiler struct {
 func (this *profiler) do(name string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	slow := elapsed.Seconds() > 3 // TODO config
+	slow := elapsed > config.Servants.CallSlowThreshold
 	if !(slow || this.on) {
 		return
 	}
 
 	body := fmt.Sprintf(format, args...)
-	if slow { // TODO config
-		// slow response
+	if slow {
 		header := fmt.Sprintf("SLOW=%s/%s Q=%s X{%s} ",
 			elapsed, time.Since(this.t0), name, this.contextInfo(ctx))
 		log.Warn(header + this.truncatedStr(body))
@@ -45,6 +44,8 @@ func (this *profiler) contextInfo(ctx *rpc.Context) (r contextInfo) {
 		N         = 3
 		SEPERATOR = "+"
 	)
+
+	// TODO discard Caller
 	p := strings.SplitN(ctx.Caller, SEPERATOR, N)
 	if len(p) != N {
 		return
