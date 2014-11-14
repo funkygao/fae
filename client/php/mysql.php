@@ -36,7 +36,7 @@ use fun\rpc\TMemcacheData;
 
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
-    $sock->setDebug(0);
+    $sock->setDebug(1);
     $sock->setSendTimeout(1000);
     $sock->setRecvTimeout(2500);
     $sock->setNumRetries(1);
@@ -47,7 +47,8 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('caller' => "from php test.php"));
+    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init', 'host' => 'server1', 'ip' => '12.3.2.1'));
+    print_r($ctx);
 
     // mysql select
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'select * from UserInfo where uid>?', array(1));

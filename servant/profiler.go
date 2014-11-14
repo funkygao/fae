@@ -5,7 +5,6 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
-	"strings"
 	"time"
 )
 
@@ -26,35 +25,17 @@ func (this *profiler) do(name string, ctx *rpc.Context, format string,
 
 	body := fmt.Sprintf(format, args...)
 	if slow {
-		header := fmt.Sprintf("SLOW=%s/%s Q=%s X{%s} ",
-			elapsed, time.Since(this.t0), name, this.contextInfo(ctx))
+		header := fmt.Sprintf("SLOW=%s/%s Q=%s %s ",
+			elapsed, time.Since(this.t0), name, ctx.String())
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
-		header := fmt.Sprintf("T=%s/%s Q=%s X{%s} ",
-			elapsed, time.Since(this.t0), name, this.contextInfo(ctx))
+		header := fmt.Sprintf("T=%s/%s Q=%s %s ",
+			elapsed, time.Since(this.t0), name, ctx.String())
 		log.Debug(header + this.truncatedStr(body))
 	}
 
 	// reset t1
 	this.t1 = time.Now()
-}
-
-func (this *profiler) contextInfo(ctx *rpc.Context) (r contextInfo) {
-	const (
-		N         = 3
-		SEPERATOR = "+"
-	)
-
-	// TODO discard Caller
-	p := strings.SplitN(ctx.Caller, SEPERATOR, N)
-	if len(p) != N {
-		return
-	}
-
-	r.ctx = ctx
-	r.httpMethod, r.uri = p[0], p[1]
-
-	return
 }
 
 func (this *profiler) truncatedStr(val string) string {
