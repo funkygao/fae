@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	log "github.com/funkygao/log4go"
 )
 
 // Ticket server
@@ -14,7 +15,7 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 
 	r, appErr = this.idgen.Next()
 	if appErr != nil {
-		log.Error("id.next: clock backwards")
+		log.Error("id.next: clock backwards") // TODO add ctx info
 
 		backwards = appErr.(*rpc.TIdTimeBackwards)
 		appErr = nil

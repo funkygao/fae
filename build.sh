@@ -9,6 +9,11 @@ fi
 VER=0.2.1rc
 ID=$(git rev-parse HEAD | cut -c1-7)
 
+if [[ $1 = "-dw" ]]; then
+    cp -f servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
+    exit
+fi
+
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 

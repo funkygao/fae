@@ -148,9 +148,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	}()
 
 	var (
-		t1         time.Time
-		elapsed    time.Duration
-		remoteAddr = client.(*thrift.TSocket).Conn().RemoteAddr().String()
+		t1      time.Time
+		elapsed time.Duration
 	)
 	for {
 		t1 = time.Now()
