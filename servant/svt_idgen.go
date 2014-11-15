@@ -9,8 +9,12 @@ import (
 func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 	flag int16) (r int64, backwards *rpc.TIdTimeBackwards, appErr error) {
 	const IDENT = "id.next"
-	this.stats.inc(IDENT)
 
+	if appErr = validateContext(ctx); appErr != nil {
+		return
+	}
+
+	this.stats.inc(IDENT)
 	profiler := this.getSession(ctx).startProfiler()
 
 	r, appErr = this.idgen.Next()

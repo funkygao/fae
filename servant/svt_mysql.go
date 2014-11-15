@@ -17,6 +17,10 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		SQL_SELECT = "SELECT"
 	)
 
+	if appErr = validateContext(ctx); appErr != nil {
+		return
+	}
+
 	profiler := this.getSession(ctx).startProfiler()
 	this.stats.inc(IDENT)
 
