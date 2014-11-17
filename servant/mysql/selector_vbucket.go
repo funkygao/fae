@@ -19,7 +19,7 @@ const (
 //
 // how to add a new server:
 // push config to all clients -> to make the new server useful, transfer vbuckets from one server to another, set
-// them to ServerPending state
+// them to ServerPending state on the receiving server
 type VbucketServerSelector struct {
 	conf    *config.ConfigMysql
 	clients map[string]*mysql // key is pool
