@@ -14,6 +14,12 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	doc []byte) (r bool, appErr error) {
 	const IDENT = "mg.insert"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -70,6 +76,12 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	docs [][]byte) (r bool, appErr error) {
 	const IDENT = "mg.inserts"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -122,6 +134,12 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (r bool, appErr error) {
 	const IDENT = "mg.del"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -163,6 +181,12 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	query []byte, fields []byte) (r []byte,
 	miss *rpc.TMongoNotFound, appErr error) {
 	const IDENT = "mg.findOne"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -239,6 +263,12 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	query []byte, fields []byte, limit int32, skip int32,
 	orderBy []string) (r [][]byte, appErr error) {
 	const IDENT = "mg.findAll"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -308,6 +338,12 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	const IDENT = "mg.update"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -364,6 +400,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte) (r bool, appErr error) {
 	const IDENT = "mg.upsert"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -417,6 +459,12 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte) (n int32, appErr error) {
 	const IDENT = "mg.count"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -458,6 +506,12 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	query []byte, change []byte, upsert bool,
 	remove bool, returnNew bool) (r []byte, appErr error) {
 	const IDENT = "mg.findAndModify"
+
+	if this.mg == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()

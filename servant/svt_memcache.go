@@ -14,6 +14,11 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 	value *rpc.TMemcacheData, expiration int32) (r bool, appErr error) {
 	const IDENT = "mc.set"
 
+	if this.mc == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -46,6 +51,11 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	key string) (r *rpc.TMemcacheData,
 	miss *rpc.TCacheMissed, appErr error) {
 	const IDENT = "mc.get"
+
+	if this.mc == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
 
 	this.stats.inc(IDENT)
 
@@ -84,6 +94,11 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 	expiration int32) (r bool, appErr error) {
 	const IDENT = "mc.add"
 
+	if this.mc == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -120,6 +135,11 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 	key string) (r bool, appErr error) {
 	const IDENT = "mc.del"
 
+	if this.mc == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -151,6 +171,11 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 	key string, delta int64) (r int64, appErr error) {
 	const IDENT = "mc.inc"
+
+	if this.mc == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
 
 	this.stats.inc(IDENT)
 

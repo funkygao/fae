@@ -5,6 +5,7 @@ import (
 )
 
 var (
-	ErrNotImplemented = errors.New("Not implemented")
-	ErrInvalidContext = errors.New("Invalid context")
+	ErrNotImplemented    = errors.New("Not implemented")
+	ErrInvalidContext    = errors.New("Invalid context")
+	ErrServantNotStarted = errors.New("Servant not started")
 )

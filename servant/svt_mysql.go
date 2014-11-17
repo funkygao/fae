@@ -17,6 +17,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		SQL_SELECT = "SELECT"
 	)
 
+	if this.my == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
+
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		appErr = err
