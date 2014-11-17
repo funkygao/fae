@@ -154,6 +154,11 @@
                 }
             ]
         }
+
+        couchbase: {
+            server: "http://localhost:8091/"
+        }
+
     }
 
 }

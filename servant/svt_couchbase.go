@@ -6,6 +6,8 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
+// curl localhost:8091/pools/ | python -m json.tool
+
 func (this *FunServantImpl) CbAdd(ctx *rpc.Context, key string, val []byte, expire int) (appErr error) {
 	log.Debug("cb")
 
