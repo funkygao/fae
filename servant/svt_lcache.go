@@ -20,7 +20,12 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 	key string, value []byte) (r bool, appErr error) {
 	this.stats.inc("lc.set")
 
-	profiler := this.getSession(ctx).startProfiler()
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
 	this.lc.Set(key, value)
 	r = true
 	profiler.do("lc.set", ctx,
@@ -34,7 +39,12 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, appErr error) {
 	this.stats.inc("lc.get")
 
-	profiler := this.getSession(ctx).startProfiler()
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
 	result, ok := this.lc.Get(key)
 	if !ok {
 		miss = rpc.NewTCacheMissed()
@@ -52,7 +62,12 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (appErr error) {
 	this.stats.inc("lc.del")
 
-	profiler := this.getSession(ctx).startProfiler()
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
 	this.lc.Del(key)
 	profiler.do("lc.del", ctx,
 		"{key^%s}", key)

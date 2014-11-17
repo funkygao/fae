@@ -10,10 +10,16 @@ import (
 
 type session struct {
 	profiler *profiler
+	ctx      *rpc.Context
 }
 
-func (this *session) startProfiler() *profiler {
+func (this *session) startProfiler() (*profiler, error) {
 	if this.profiler == nil {
+		if this.ctx.Rid == "" || this.ctx.Reason == "" {
+			log.Error("Invalid context: %s", this.ctx.String())
+			return nil, ErrInvalidContext
+		}
+
 		this.profiler = &profiler{}
 		// TODO 某些web server需要100%采样
 		this.profiler.on = sampling.SampleRateSatisfied(config.Servants.ProfilerRate) // rand(1000) <= ProfilerRate
@@ -22,13 +28,13 @@ func (this *session) startProfiler() *profiler {
 	}
 
 	this.profiler.t1 = time.Now()
-	return this.profiler
+	return this.profiler, nil
 }
 
 func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
-		s = &session{}
+		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 
 		log.Trace("new session {rid^%s reason^%s}", ctx.Rid, ctx.Reason)

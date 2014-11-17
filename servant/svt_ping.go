@@ -6,11 +6,8 @@ import (
 )
 
 func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
-	if appErr = validateContext(ctx); appErr != nil {
-		return
-	}
-
-	this.stats.inc("ping")
-	log.Debug("ping from %+v", *ctx)
+	const IDENT = "ping"
+	this.stats.inc(IDENT)
+	log.Debug("%s from %+v", IDENT, *ctx)
 	return "pong", nil
 }

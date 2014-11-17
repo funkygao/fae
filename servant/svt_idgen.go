@@ -10,12 +10,12 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context,
 	flag int16) (r int64, backwards *rpc.TIdTimeBackwards, appErr error) {
 	const IDENT = "id.next"
 
-	if appErr = validateContext(ctx); appErr != nil {
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
 		return
 	}
-
-	this.stats.inc(IDENT)
-	profiler := this.getSession(ctx).startProfiler()
 
 	r, appErr = this.idgen.Next()
 	if appErr != nil {
