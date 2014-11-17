@@ -1,40 +1,70 @@
 package servant
 
 import (
-	//couchbase "github.com/couchbaselabs/go-couchbase"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 )
 
 // curl localhost:8091/pools/ | python -m json.tool
 
-func (this *FunServantImpl) CbAdd(ctx *rpc.Context, key string, val []byte, expire int) (appErr error) {
-	log.Debug("cb")
+func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
+	key string) (r []byte, appErr error) {
+	const IDENT = "cb.get"
+	if this.cb == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
 
-	return nil
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	this.stats.inc(IDENT)
+
+	pool, _ := this.cb.GetPool("default")
+	b, _ := pool.GetBucket(bucket)
+
+	r, appErr = b.GetRaw(key)
+	if appErr != nil {
+		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+	}
+
+	profiler.do(IDENT, ctx,
+		"{bucket^%s key^%s} {r^%s}",
+		bucket, key, string(r))
+
+	return
 }
 
-func (this *FunServantImpl) CbSet(ctx *rpc.Context, key string) (appErr error) {
+func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
+	key string, val []byte, expire int32) (r bool, appErr error) {
+	const IDENT = "cb.set"
+	if this.cb == nil {
+		appErr = ErrServantNotStarted
+		return
+	}
 
-	return nil
-}
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
 
-func (this *FunServantImpl) CbDel(ctx *rpc.Context, key string) (appErr error) {
+	this.stats.inc(IDENT)
 
-	return nil
-}
+	pool, _ := this.cb.GetPool("default")
+	b, _ := pool.GetBucket(bucket)
 
-func (this *FunServantImpl) CbGet(ctx *rpc.Context, key string) (appErr error) {
+	appErr = b.SetRaw(key, int(expire), val)
+	if appErr == nil {
+		r = true
+	}
 
-	return nil
-}
+	profiler.do(IDENT, ctx,
+		"{bucket^%s key^%s} {r^%v}",
+		bucket, key, r)
 
-func (this *FunServantImpl) CbGetBulk(ctx *rpc.Context, key string) (appErr error) {
-
-	return nil
-}
-
-func (this *FunServantImpl) CbInc(ctx *rpc.Context, key string) (appErr error) {
-
-	return nil
+	return
 }
