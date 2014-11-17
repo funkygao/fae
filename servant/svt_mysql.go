@@ -87,6 +87,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			}
 		}
 	} else {
+		// FIXME if sql is 'select * from UesrInfo', runtime will get here
 		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
 			table, int(hintId), sql, margs); appErr != nil {
 			log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
