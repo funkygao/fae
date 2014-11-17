@@ -4,6 +4,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/sampling"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 
@@ -30,6 +31,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 		s = &session{}
 		this.sessions.Set(ctx.Rid, s)
 
+		log.Trace("new session {reason:%s rid:%d}", ctx.Reason, ctx.Rid)
 	}
 
 	return s.(*session)
