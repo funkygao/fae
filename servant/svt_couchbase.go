@@ -6,6 +6,7 @@ import (
 )
 
 // curl localhost:8091/pools/ | python -m json.tool
+// curl localhost:8091/poolsStreaming/default?uuid=ee6009fb8f1ba20b3101a465455828ee
 
 func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 	key string) (r []byte, appErr error) {
@@ -23,8 +24,7 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 
 	this.stats.inc(IDENT)
 
-	pool, _ := this.cb.GetPool("default")
-	b, _ := pool.GetBucket(bucket)
+	b, _ := this.cb.GetBucket(bucket)
 
 	r, appErr = b.GetRaw(key)
 	if appErr != nil {
@@ -32,7 +32,7 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{bucket^%s key^%s} {r^%s}",
+		"{b^%s k^%s} {r^%s}",
 		bucket, key, string(r))
 
 	return
@@ -54,8 +54,10 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 
 	this.stats.inc(IDENT)
 
-	pool, _ := this.cb.GetPool("default")
-	b, _ := pool.GetBucket(bucket)
+	b, err := this.cb.GetBucket(bucket)
+	if err != nil {
+		log.Error(err)
+	}
 
 	appErr = b.SetRaw(key, int(expire), val)
 	if appErr == nil {
@@ -63,8 +65,8 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{bucket^%s key^%s} {r^%v}",
-		bucket, key, r)
+		"{b^%s k^%s v^%s} {r^%v}",
+		bucket, key, string(val), r)
 
 	return
 }

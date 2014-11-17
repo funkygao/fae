@@ -47,11 +47,11 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init', 'host' => 'server1', 'ip' => '12.3.2.1'));
+    $ctx = new Context(array('rid' => "123nfa", 'reason' => 'test.couchbase', 'host' => 'server1', 'ip' => '12.3.2.1'));
     print_r($ctx);
 
     // couchbase get/set
-    $bucket = 'dw';
+    $bucket = 'default';
     $ok = $client->cb_set($ctx, $bucket, 'key1', 'value1', 0);
     var_dump($ok);
 

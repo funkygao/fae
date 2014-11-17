@@ -32,7 +32,7 @@ type FunServantImpl struct {
 	mc    *memcache.ClientPool // memcache pool, auto sharding by key
 	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
 	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	cb    *couchbase.Client
+	cb    *couchbase.Pool
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -92,11 +92,16 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	if this.conf.Couchbase != nil {
-		cb, err := couchbase.Connect(this.conf.Couchbase.Server)
+		client, err := couchbase.Connect(this.conf.Couchbase.Server)
 		if err != nil {
 			log.Error("couchbase: %s", err)
 		} else {
-			this.cb = &cb
+			pool, err := client.GetPool("default") // TODO config
+			if err != nil {
+				log.Error("couchbase: %s", err)
+			} else {
+				this.cb = &pool
+			}
 		}
 	}
 
