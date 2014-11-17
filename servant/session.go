@@ -31,7 +31,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 		s = &session{}
 		this.sessions.Set(ctx.Rid, s)
 
-		log.Trace("new session {reason^%s rid^%s}", ctx.Reason, ctx.Rid)
+		log.Trace("new session {rid^%s reason^%s}", ctx.Rid, ctx.Reason)
 	}
 
 	return s.(*session)
