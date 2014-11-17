@@ -5,6 +5,7 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -31,6 +32,7 @@ type FunServantImpl struct {
 	mc    *memcache.ClientPool // memcache pool, auto sharding by key
 	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
 	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	cb    *couch.Client        // couchbase client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -86,6 +88,14 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			this.conf.Mongodb.DebugHeartbeat {
 			mgo.SetLogger(&mongoProtocolLogger{})
 			mgo.SetDebug(this.conf.Mongodb.DebugProtocol)
+		}
+	}
+
+	if this.conf.Couchbase != nil {
+		var err error
+		this.cb, err = couch.New(this.conf.Couchbase.Server, "default") // TODO config
+		if err != nil {
+			log.Error("couchbase: %s", err)
 		}
 	}
 

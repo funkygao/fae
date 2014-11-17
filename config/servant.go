@@ -29,12 +29,13 @@ type ConfigServant struct {
 	PeerHeartbeatInterval int
 	PeerDeadThreshold     float64
 
-	Mongodb  *ConfigMongodb
-	Memcache *ConfigMemcache
-	Lcache   *ConfigLcache
-	Proxy    *ConfigProxy
-	Mysql    *ConfigMysql
-	Redis    *ConfigRedis // TODO
+	Mongodb   *ConfigMongodb
+	Memcache  *ConfigMemcache
+	Lcache    *ConfigLcache
+	Proxy     *ConfigProxy
+	Mysql     *ConfigMysql
+	Redis     *ConfigRedis // TODO
+	Couchbase *ConfigCouchbase
 }
 
 func LoadServants(cf *conf.Conf) {
@@ -75,6 +76,13 @@ func LoadServants(cf *conf.Conf) {
 	section, err = cf.Section("lcache")
 	if err == nil {
 		Servants.Lcache.loadConfig(section)
+	}
+
+	// couchbase section
+	Servants.Couchbase = new(ConfigCouchbase)
+	section, err = cf.Section("couchbase")
+	if err == nil {
+		Servants.Couchbase.loadConfig(section)
 	}
 
 	// proxy section

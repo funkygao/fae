@@ -202,11 +202,11 @@ php.ini
 
 ### TODO
 
-*   vBucket for cluster sharding
-*   what about each kingdom is a shard?
+*   vBucket for cluster sharding, what about each kingdom is a shard?
 *   session timeout seems not working
 *   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
 *   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,
 *   realtime tracking of concurrent sessions by client host
 *   rate limit of connection of a given user
+*   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write

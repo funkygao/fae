@@ -335,4 +335,22 @@ service FunServant {
         6: list<string> argv
     ),
 
+    //=================
+    // couchbase section
+    //=================
+
+    bool cb_set(
+        1: Context ctx,
+        2: string bucket,
+        3: string key,
+        4: binary val,
+        5: i32 expire,
+    ),
+
+    binary cb_get(
+        1: Context ctx,
+        2: string bucket,
+        3: string key
+    ),
+
 }
