@@ -1,12 +1,13 @@
 package servant
 
 import (
-	couchbase "github.com/couchbaselabs/go-couchbase"
+	//couchbase "github.com/couchbaselabs/go-couchbase"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 )
 
 func (this *FunServantImpl) CbAdd(ctx *rpc.Context, key string, val []byte, expire int) (appErr error) {
+	log.Debug("cb")
 
 	return nil
 }
