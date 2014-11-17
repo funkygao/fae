@@ -17,7 +17,8 @@ func main() {
 	defer client.Recycle()
 
 	ctx := rpc.NewContext()
-	ctx.Caller = "me"
+	ctx.Reason = "me"
+    ctx.Rid = "189"
 	for i := 0; i < 10; i++ {
 		r, _ := client.Ping(ctx)
 

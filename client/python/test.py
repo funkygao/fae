@@ -26,7 +26,7 @@ except TTransportException, e:
 protocol = TBinaryProtocol.TBinaryProtocol(sock)
 
 client = FunServant.Client(protocol)
-ctx = FunServant.Context(caller='POST+/facebook/getPaymentRequestId/+34ca2cf6')
+ctx = FunServant.Context(reason='POST+/facebook/getPaymentRequestId/+34ca2cf6', rid='121')
 
 def elapsed():
     global t1
@@ -74,10 +74,8 @@ userDoc = {
 }
 doc = bson.dumps(userDoc)
 print 'doc:', doc
-print '[Client] mg_insert received:', client.mg_insert(ctx, 'db1', 'usertest', 0, doc), elapsed()
+#print '[Client] mg_insert received:', client.mg_insert(ctx, 'db1', 'usertest', 0, doc), elapsed()
 
-# kvdb
+# my
 #=====
-print '[Client] kvdb_set received:', client.kvdb_set(ctx, 'kvdbtest', 'we are the world'), elapsed()
-print '[Client] kvdb_get received:', client.kvdb_get(ctx, 'kvdbtest'), elapsed()
-print '[Client] kvdb_del received:', client.kvdb_del(ctx, 'kvdbtest'), elapsed()
+print '[Client] my_query received:', client.my_query(ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', ()), elapsed()

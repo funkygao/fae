@@ -47,7 +47,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('caller' => "from php test.php"));
+    $ctx = new Context(array('reason' => "from php test.php", 'rid' => '125'));
 
     // ping
     $return = $client->ping($ctx);
@@ -73,79 +73,76 @@ try {
     echo '[Client] lc_del received: ', $client->lc_del($ctx, 'hello-php-lc'), "\n";
 
     // mg.insert
-    $doc = array(
-        "name" => "funky.php",
-        "gendar" => "M",
-        "abtype" => array(
-            "payment" => "a",
-            "tutorial" => "b",
-        )
-    );
-    echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
-        bson_encode($doc)), "\n";
+    if (0) {
+        $doc = array(
+            "name" => "funky.php",
+            "gendar" => "M",
+            "abtype" => array(
+                "payment" => "a",
+                "tutorial" => "b",
+            )
+        );
+        echo '[Client] mg_insert received: ', $client->mg_insert($ctx, 'db1', 'usertest', 0, 
+            bson_encode($doc)), "\n";
 
-    // mg.inserts
-    $docs = array();
-    $docs[] = bson_encode($doc);
-    $docs[] = bson_encode($doc);
-    echo '[Client] mg_inserts received: ', $client->mg_inserts($ctx, 'db1', 'usertest2', 0, 
-        $docs), "\n";
+        // mg.inserts
+        $docs = array();
+        $docs[] = bson_encode($doc);
+        $docs[] = bson_encode($doc);
+        echo '[Client] mg_inserts received: ', $client->mg_inserts($ctx, 'db1', 'usertest2', 0, 
+            $docs), "\n";
 
-    // mg.findOne
-    try {
-        $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
-            bson_encode(array('snsid' => '100003391571259')), bson_encode(''));
-        echo "[Client] mg_find_one received: \n";
-        print_r(bson_decode($idmap));
-    } catch (TMongoMissed $ex) {
-        echo $ex->getMessage(), "\n";
-    }
-
-    // mg.count
-    echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
-        bson_encode(array('uid' => array('$gte' => 1)))), "\n";
-    echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
-        bson_encode(array('uid' => array('$gte' => 100000)))), "\n";
-
-    // mg.findAll
-    echo "[Client] mg_find_all received: \n";
-    try {
-        $docs = $client->mg_find_all($ctx, 'default', 'idmap', 0,
-            bson_encode(array('uid' => array('$gte' => 1))), bson_encode(array()),
-            0, 0, array());
-        $r = array();
-        foreach ($docs as $doc) {
-            $r[] = bson_decode($doc);
+        // mg.findOne
+        try {
+            $idmap = $client->mg_find_one($ctx, 'default', 'idmap', 0,
+                bson_encode(array('snsid' => '100003391571259')), bson_encode(''));
+            echo "[Client] mg_find_one received: \n";
+            print_r(bson_decode($idmap));
+        } catch (TMongoMissed $ex) {
+            echo $ex->getMessage(), "\n";
         }
-        print_r($r);
-    } catch (TProtocolException $ex) {
-        print_r($ex);
+
+        // mg.count
+        echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
+            bson_encode(array('uid' => array('$gte' => 1)))), "\n";
+        echo "[Client] mg_count received:", $client->mg_count($ctx, 'default', 'idmap', 0,
+            bson_encode(array('uid' => array('$gte' => 100000)))), "\n";
+
+        // mg.findAll
+        echo "[Client] mg_find_all received: \n";
+        try {
+            $docs = $client->mg_find_all($ctx, 'default', 'idmap', 0,
+                bson_encode(array('uid' => array('$gte' => 1))), bson_encode(array()),
+                0, 0, array());
+            $r = array();
+            foreach ($docs as $doc) {
+                $r[] = bson_decode($doc);
+            }
+            print_r($r);
+        } catch (TProtocolException $ex) {
+            print_r($ex);
+        }
+
+        // mg.findAndModify
+        $r = $client->mg_find_and_modify($ctx, 'default', 'idsquence', 0,
+            bson_encode(array('table_name' => 'idMap')),
+            bson_encode(array('$inc' => array('value' => 1))),
+            true,
+            false,
+            true);
+        $val = bson_decode($r);
+        echo "[Client] mg.find_and_modify received: ", $val['value'], "\n";
     }
 
-    // mg.findAndModify
-    $r = $client->mg_find_and_modify($ctx, 'default', 'idsquence', 0,
-        bson_encode(array('table_name' => 'idMap')),
-        bson_encode(array('$inc' => array('value' => 1))),
-        true,
-        false,
-        true);
-    $val = bson_decode($r);
-    echo "[Client] mg.find_and_modify received: ", $val['value'], "\n";
-
     // id.next
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
-
-    // id.next
-    echo "[Client] kvdb_set received:", $client->kvdb_set($ctx, 'php-kvdb-hello', 'you bunny'), "\n";
-    echo "[Client] kvdb_get received:", $client->kvdb_get($ctx, 'php-kvdb-hello'), "\n";
-    echo "[Client] kvdb_del received:", $client->kvdb_del($ctx, 'php-kvdb-hello'), "\n";
 
     // my.query
     for ($i=0; $i<5; $i++) {
-        $rows = $client->my_query($ctx, 'default', 'demo', 1, 'select * from demo', NULL);
+        $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', array());
         echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
-        print_r(json_decode($rows->rows, TRUE));
+        print_r($rows);
     }
 
     $transport->close();
