@@ -3,9 +3,9 @@
 package servant
 
 import (
-	couchbase "github.com/couchbaselabs/go-couchbase"
 	"github.com/funkygao/fae/config"
 	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -32,7 +32,7 @@ type FunServantImpl struct {
 	mc    *memcache.ClientPool // memcache pool, auto sharding by key
 	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
 	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	cb    *couchbase.Pool
+	cb    *couch.Client        // couchbase client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -92,16 +92,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	if this.conf.Couchbase != nil {
-		client, err := couchbase.Connect(this.conf.Couchbase.Server)
+		var err error
+		this.cb, err = couch.New(this.conf.Couchbase.Server, "default") // TODO config
 		if err != nil {
 			log.Error("couchbase: %s", err)
-		} else {
-			pool, err := client.GetPool("default") // TODO config
-			if err != nil {
-				log.Error("couchbase: %s", err)
-			} else {
-				this.cb = &pool
-			}
 		}
 	}
 

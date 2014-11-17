@@ -52,11 +52,12 @@ try {
 
     // couchbase get/set
     $bucket = 'default';
-    $ok = $client->cb_set($ctx, $bucket, 'key1', 'value1', 0);
-    var_dump($ok);
+    for ($i=0; $i<10000; $i++) {
+        $ok = $client->cb_set($ctx, $bucket, 'key1', 'value1', 0);
 
-    $value = $client->cb_get($ctx, $bucket, 'key1');
-    var_dump($value);
+        $value = $client->cb_get($ctx, $bucket, 'key1');
+        //var_dump($value);
+    }
 
     $transport->close();
 } catch (TException $tx) {
