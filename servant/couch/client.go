@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// Couchbase is designed to be a drop-in replacement for an existing memcached server, while
+// adding persistence, replication, failover and dynamic cluster reconfiguration.
 type Client struct {
 	mutex   sync.Mutex
 	pool    couchbase.Pool
