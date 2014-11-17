@@ -57,6 +57,24 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
 
+### Highlights
+
+*   Dynamic cluster reconfiguration
+    - VBucket
+*   Easy extending for more servants(RPC service)
+*   Cluster based servants that can delegate(proxyed) to remote servants based on dup consitent hash
+*   Use multicast to auto discover fae peers for delegation
+*   Highly usage of mem to improve latancy & throughput
+*   Merge recent requests to reduce backend service load
+*   Circuit breaker protection
+*   Fallback to mem when backend storage fails
+    - requires session sticky to work
+    - mem as response, and auto retry backend storage
+    - when threshold retries reached, put to message queue for latter more retries
+*   Easy graceful degrade for OPS
+    - auto
+    - manual
+
 ### VBucket
 
 *   Better than consistent hashing
@@ -131,30 +149,6 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
            |                |
         memcache#6      mongodb#60
 
-### Highlights
-
-*   Easy extending for more servants(RPC service)
-*   Cluster based servants that can delegate(proxyed) to remote servants based on dup consitent hash
-*   Use multicast to auto discover fae peers for delegation
-*   Highly usage of mem to improve latancy & throughput
-*   Merge recent requests to reduce backend service load
-*   Circuit breaker protection
-*   Fallback to mem when backend storage fails
-    - requires session sticky to work
-    - mem as response, and auto retry backend storage
-    - when threshold retries reached, put to message queue for latter more retries
-*   Easy graceful degrade for OPS
-    - auto
-    - manual
-
-### Servants
-
-*   idgen to generate global uniq id
-*   mysql servant
-*   local LRU cache shared among processes
-    - under session sticky
-*   memcache servant
-*   mongodb servant with transaction support
 
 ### Points of failure
 
@@ -184,3 +178,4 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
 *   golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
+
