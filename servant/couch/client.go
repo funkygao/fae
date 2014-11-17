@@ -11,6 +11,8 @@ type Client struct {
 	buckets map[string]*couchbase.Bucket
 }
 
+// Till Couchbase 2.x releases, pool is a placeholder that doesn't have any special meaning
+// Also note that no decisions have been made about what Couchbase will do with pools
 func New(endpoint string, pool string) (this *Client, err error) {
 	c, e := couchbase.Connect(endpoint)
 	if e != nil {
@@ -30,6 +32,9 @@ func New(endpoint string, pool string) (this *Client, err error) {
 	return
 }
 
+// The unit of multi-tenancy in Couchbase is the “bucket”
+// which represents a “virtual Couchbase Server instance” inside a single Couchbase Server cluster
+// Bucket can be treated as database in mysql
 func (this *Client) GetBucket(bucket string) (*couchbase.Bucket, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
