@@ -5,10 +5,21 @@ import (
 	"github.com/funkygao/fae/config"
 )
 
+const (
+	ServerActive      = "active"  // fully oprational
+	ServerDead        = "dead"    // fully non-operational
+	ServerPending     = "pending" // blocks clients, receives replicas
+	ServerReplicating = "replica" // dead to clients, receive replicas, transfer vbuckets from one server to another
+)
+
 // h(key) -> vb -> server
 // servers = ['server1:11211', 'server2:11211', 'server3:11211']
 // vbuckets = [0, 0, 1, 1, 2, 2]
 // server_for_key(key) = servers[vbuckets[hash(key) % vbuckets.length]]
+//
+// how to add a new server:
+// push config to all clients -> to make the new server useful, transfer vbuckets from one server to another, set
+// them to ServerPending state
 type VbucketServerSelector struct {
 	conf    *config.ConfigMysql
 	clients map[string]*mysql // key is pool
