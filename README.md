@@ -57,6 +57,14 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
 
+### VBucket
+
+*   Never service a request on the wrong server
+    - compared with consitent hash
+*   Allow scaling up and down at will
+*   We can hand data sets from one server another atomically
+*   Servers still do not know about each other
+
 ### Capacity Plan
 
 #### Current stats
@@ -160,45 +168,6 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   server software may crash
 *   backend system such as database may become corrupted
 
-### Remarks
-
-*   golang uses /proc/sys/net/core/somaxconn as listener backlog
-    - increase it if you need over 128(default) simultaneous outstanding connections
-
-### Dependencies
-
-hg
-
-    sudo apt-get install mercurial
-
-thrift above 0.9.0 which depends on flex
-
-    sudo apt-get install flex
-
-    go get git.apache.org/thrift.git/lib/go/thrift
-
-    git clone -b 0.9.1 https://github.com/apache/thrift thrift-0.9.1
-    cd thrift-0.9.1
-    ./bootstrap.sh
-    ./configure --prefix=/opt/app/thrift --with-cpp=no --with-erlang=no --with-c_glib=no --with-perl=no --with-ruby=no --with-haskell=no --with-d=no
-    make
-    make -k check
-    sh test/test.sh
-    make install
-
-thrift_protocol.so
-
-    cd thrift/lib/php/src/ext/
-    phpize
-    ./configure --with-php-config=/usr/local/php/bin/php-config
-    make
-    make test
-
-php.ini
-
-    extension="thrift_protocol.so"
-    extension="apc.so"
-
 
 ### TODO
 
@@ -211,3 +180,5 @@ php.ini
 *   rate limit of connection of a given user
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
 *   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
+*   golang uses /proc/sys/net/core/somaxconn as listener backlog
+    - increase it if you need over 128(default) simultaneous outstanding connections
