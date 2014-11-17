@@ -210,3 +210,4 @@ php.ini
 *   realtime tracking of concurrent sessions by client host
 *   rate limit of connection of a given user
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
+*   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
