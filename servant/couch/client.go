@@ -10,6 +10,7 @@ import (
 
 // Couchbase is designed to be a drop-in replacement for an existing memcached server, while
 // adding persistence, replication, failover and dynamic cluster reconfiguration.
+// TODO bucket.GetStats watchdog
 type Client struct {
 	mutex   sync.Mutex
 	pool    couchbase.Pool

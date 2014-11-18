@@ -339,7 +339,28 @@ service FunServant {
     // couchbase section
     //=================
 
-    bool cb_set(
+    void cb_del(
+        1: Context ctx,
+        2: string bucket,
+        3: string key,
+    ),
+
+    void cb_append(
+        1: Context ctx,
+        2: string bucket,
+        3: string key,
+        4: binary val,
+    ),
+
+    bool cb_add(
+        1: Context ctx,
+        2: string bucket,
+        3: string key,
+        4: binary val,
+        5: i32 expire,
+    ),
+
+    void cb_set(
         1: Context ctx,
         2: string bucket,
         3: string key,
@@ -351,6 +372,12 @@ service FunServant {
         1: Context ctx,
         2: string bucket,
         3: string key
+    ),
+
+    map<string, binary> cb_gets(
+        1: Context ctx,
+        2: string bucket,
+        3: list<string> keys
     ),
 
 }
