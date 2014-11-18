@@ -35,8 +35,10 @@ func New(endpoint string, pool string) (this *Client, err error) {
 }
 
 // The unit of multi-tenancy in Couchbase is the “bucket”
-// which represents a “virtual Couchbase Server instance” inside a single Couchbase Server cluster
+// which represents a “virtual Couchbase Server instance” inside a single
+// Couchbase Server cluster
 // Bucket can be treated as database in mysql
+// The limit of the number of buckets that can be configured within a cluster is 10
 func (this *Client) GetBucket(bucket string) (*couchbase.Bucket, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
