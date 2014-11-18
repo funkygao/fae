@@ -61,6 +61,13 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   Dynamic cluster reconfiguration
     - VBucket
+        - Better than consistent hashing
+          - because they are easier to move between servers then individual keys
+        - Never service a request on the wrong server
+          - compared with consitent hash
+        - Allow scaling up and down at will
+        - We can hand data sets from one server another atomically
+        - Servers still do not know about each other
 *   Easy extending for more servants(RPC service)
 *   Cluster based servants that can delegate(proxyed) to remote servants based on dup consitent hash
 *   Use multicast to auto discover fae peers for delegation
@@ -74,16 +81,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Easy graceful degrade for OPS
     - auto
     - manual
-
-### VBucket
-
-*   Better than consistent hashing
-    - because they are easier to move between servers then individual keys
-*   Never service a request on the wrong server
-    - compared with consitent hash
-*   Allow scaling up and down at will
-*   We can hand data sets from one server another atomically
-*   Servers still do not know about each other
 
 ### Capacity Plan
 
