@@ -26,7 +26,7 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 
 	b, _ := this.cb.GetBucket(bucket)
 
-	r, appErr = b.GetRaw(key)
+	r, appErr = b.GetRaw(key) // FIXME 如果不存在，也会抛错，需要额外处理
 	if appErr != nil {
 		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
 	}
@@ -38,6 +38,8 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 	return
 }
 
+// key can be up to 250 chars long, unique within a bucket
+// val can be up to 25MB in size
 func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 	key string, val []byte, expire int32) (r bool, appErr error) {
 	const IDENT = "cb.set"
@@ -59,6 +61,7 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 		log.Error(err)
 	}
 
+	// add, replace, set
 	appErr = b.SetRaw(key, int(expire), val)
 	if appErr == nil {
 		r = true

@@ -21,6 +21,7 @@ const (
 // another, whether the transition was planned (e.g. adding new servers to a cluster) or unexpected (e.g. a server failure)
 //
 // Every key belongs to a vBucket, which maps to a server instance
+// The number of vBuckets is a fixed number
 //
 // key ---------------> server
 // h(key) -> vBucket -> server
