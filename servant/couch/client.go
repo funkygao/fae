@@ -3,7 +3,9 @@ package couch
 import (
 	couchbase "github.com/couchbaselabs/go-couchbase"
 	log "github.com/funkygao/log4go"
+	"math/rand"
 	"sync"
+	"time"
 )
 
 // Couchbase is designed to be a drop-in replacement for an existing memcached server, while
@@ -23,9 +25,11 @@ func New(baseUrls []string, pool string) (this *Client, err error) {
 		e error
 	)
 
-	for _, nodeUrl := range baseUrls {
+	rand.Seed(time.Now().UTC().UnixNano())
+	for _, i := range rand.Perm(len(baseUrls)) { // client side load balance
 		// connect to couchbase cluster: any node in the cluster is ok
 		// internally: GET /pools
+		nodeUrl := baseUrls[i]
 		c, e = couchbase.Connect(nodeUrl) // TODO timeout
 		if e == nil {
 			break
@@ -42,6 +46,7 @@ func New(baseUrls []string, pool string) (this *Client, err error) {
 
 	// internally: GET /pools/default, then GET /pools/default/buckets
 	// get the vBucketServerMap and nodes ip:port in cluster
+	// TODO connct to streamingUri, cluster updates are fetched from that conn
 	p, e = c.GetPool(pool)
 	if e != nil {
 		return nil, e

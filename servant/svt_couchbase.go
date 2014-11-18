@@ -38,6 +38,8 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 	return
 }
 
+// key can be up to 250 chars long, unique within a bucket
+// val can be up to 25MB in size
 func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 	key string, val []byte, expire int32) (r bool, appErr error) {
 	const IDENT = "cb.set"
