@@ -119,12 +119,12 @@ func (this *TFunServer) handleSession(client interface{}) {
 	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
-		log.Error("session[%s]: %s", remoteAddr, err)
+		log.Error("session[%s]: %s", remoteAddr, err.Error())
 	}
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Trace("session[%s] close after %s", remoteAddr, elapsed)
+	log.Trace("session[%s] close in %s", remoteAddr, elapsed)
 
 	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
@@ -171,7 +171,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
-			log.Trace("session[%s] %d calls", tcpClient.RemoteAddr().String(), callsN)
+			log.Trace("session[%s] %d calls: EOF", tcpClient.RemoteAddr().String(), callsN)
 			this.engine.stats.CallPerSession.Update(callsN)
 			return nil
 		} else if err != nil {
@@ -180,6 +180,9 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 			// e,g. broken pipe
 			this.engine.stats.TotalFailedCalls.Inc(1)
 			this.engine.stats.CallPerSession.Update(callsN)
+
+			log.Trace("session[%s] %d calls: %s",
+				tcpClient.RemoteAddr().String(), callsN, err.Error())
 			return err
 		}
 
@@ -187,6 +190,9 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		// err logging is handled inside servants
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
+
+			log.Trace("session[%s] %d calls: %s",
+				tcpClient.RemoteAddr().String(), callsN, err.Error())
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
@@ -195,7 +201,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)
-	log.Trace("session[%s] %d calls", tcpClient.RemoteAddr().String(), callsN)
 	return nil
 }
 
