@@ -128,7 +128,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
-		log.Warn("SLOW session=%s, peer{%s}", elapsed, remoteAddr)
+		log.Warn("session[%s] SLOW %s", remoteAddr, elapsed)
 	}
 }
 
@@ -171,7 +171,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
-			log.Trace("session[%s] %d calls: EOF", tcpClient.RemoteAddr().String(), callsN)
+			log.Trace("session[%s] %d calls EOF", tcpClient.RemoteAddr().String(), callsN)
 			this.engine.stats.CallPerSession.Update(callsN)
 			return nil
 		} else if err != nil {

@@ -2,6 +2,7 @@ package couch
 
 import (
 	couchbase "github.com/couchbaselabs/go-couchbase"
+	log "github.com/funkygao/log4go"
 	"sync"
 )
 
@@ -15,21 +16,35 @@ type Client struct {
 
 // Till Couchbase 2.x releases, pool is a placeholder that doesn't have any special meaning
 // Also note that no decisions have been made about what Couchbase will do with pools
-func New(endpoint string, pool string) (this *Client, err error) {
-	// connect to couchbase cluster: any node in the cluster is ok
-	// internally: GET /pools
-	c, e := couchbase.Connect(endpoint)
+func New(baseUrls []string, pool string) (this *Client, err error) {
+	var (
+		c couchbase.Client
+		p couchbase.Pool
+		e error
+	)
+
+	for _, nodeUrl := range baseUrls {
+		// connect to couchbase cluster: any node in the cluster is ok
+		// internally: GET /pools
+		c, e = couchbase.Connect(nodeUrl) // TODO timeout
+		if e == nil {
+			break
+		}
+
+		// failed to connect to this node in cluster
+		log.Warn("couchbase[%s] connect fail: %s", nodeUrl, e.Error())
+	}
+
 	if e != nil {
-		err = e
-		return
+		// max retry reached
+		return nil, e
 	}
 
 	// internally: GET /pools/default, then GET /pools/default/buckets
 	// get the vBucketServerMap and nodes ip:port in cluster
-	p, e := c.GetPool(pool)
+	p, e = c.GetPool(pool)
 	if e != nil {
-		err = e
-		return
+		return nil, e
 	}
 
 	this = new(Client)

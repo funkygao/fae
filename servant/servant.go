@@ -91,9 +91,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
-	if this.conf.Couchbase != nil {
+	if this.conf.Couchbase != nil && len(this.conf.Couchbase.Servers) > 0 {
 		var err error
-		this.cb, err = couch.New(this.conf.Couchbase.Server, "default") // TODO config
+		// pool is always 'default'
+		this.cb, err = couch.New(this.conf.Couchbase.Servers, "default")
 		if err != nil {
 			log.Error("couchbase: %s", err)
 		}

@@ -59,6 +59,7 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 		log.Error(err)
 	}
 
+	// add, replace, set
 	appErr = b.SetRaw(key, int(expire), val)
 	if appErr == nil {
 		r = true

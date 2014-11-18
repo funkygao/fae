@@ -156,7 +156,9 @@
         }
 
         couchbase: {
-            server: "http://localhost:8091/"
+            servers: [
+                "http://localhost:8091/",
+            ]
         }
 
     }

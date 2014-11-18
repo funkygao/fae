@@ -6,10 +6,10 @@ import (
 )
 
 type ConfigCouchbase struct {
-	Server string // TODO cluster
+	Servers []string
 }
 
 func (this *ConfigCouchbase) loadConfig(cf *conf.Conf) {
-	this.Server = cf.String("server", "http://localhost:8091/")
+	this.Servers = cf.StringList("servers", nil)
 	log.Debug("couchbase: %+v", *this)
 }
