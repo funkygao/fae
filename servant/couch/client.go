@@ -16,12 +16,16 @@ type Client struct {
 // Till Couchbase 2.x releases, pool is a placeholder that doesn't have any special meaning
 // Also note that no decisions have been made about what Couchbase will do with pools
 func New(endpoint string, pool string) (this *Client, err error) {
+	// connect to couchbase cluster: any node in the cluster is ok
+	// internally: GET /pools
 	c, e := couchbase.Connect(endpoint)
 	if e != nil {
 		err = e
 		return
 	}
 
+	// internally: GET /pools/default, then GET /pools/default/buckets
+	// get the vBucketServerMap and nodes ip:port in cluster
 	p, e := c.GetPool(pool)
 	if e != nil {
 		err = e

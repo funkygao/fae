@@ -26,7 +26,7 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 
 	b, _ := this.cb.GetBucket(bucket)
 
-	r, appErr = b.GetRaw(key)
+	r, appErr = b.GetRaw(key) // FIXME 如果不存在，也会抛错，需要额外处理
 	if appErr != nil {
 		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
 	}
