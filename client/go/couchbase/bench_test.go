@@ -3,7 +3,7 @@ package couchbasebench
 import (
 	"testing"
 
-	couchbase "github.com/couchbaselabs/go-couchbase"
+	"github.com/funkygao/couchbase"
 )
 
 func mf(err error, msg string) {

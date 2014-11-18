@@ -1,7 +1,7 @@
 package couch
 
 import (
-	couchbase "github.com/couchbaselabs/go-couchbase"
+	"github.com/funkygao/couchbase"
 	"sync"
 )
 
