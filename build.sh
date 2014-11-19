@@ -14,12 +14,11 @@ if [[ $1 = "-dw" ]]; then
     exit
 fi
 
+FAE_HOME=/sgn/app/fae
 if [[ $1 = "-install" ]]; then
-    mkdir -p /opt/app/fae/bin
-    mkdir -p /opt/app/fae/etc
-    mkdir -p /opt/app/fae/var
-    cp -f bin/faed.linux /opt/app/fae/bin/faed
-    cp -f etc/faed.cf.sample /opt/app/fae/etc/faed.cf
+    mkdir -p $FAE_HOME/bin $FAE_HOME/var $FAE_HOME/etc
+    cp -f bin/faed.linux $FAE_HOME/bin/faed
+    cp -f etc/faed.cf.sample $FAE_HOME/etc/faed.cf
     echo 'Remember to useradd fae before bootup faed'
     exit
 fi
