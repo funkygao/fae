@@ -27,6 +27,11 @@ struct TMemcacheData {
     2: required i32 flags
 }
 
+struct TCouchbaseData {
+    1: required bool missed
+    2: required binary data
+}
+
 struct Context {
 
     /**
@@ -339,7 +344,7 @@ service FunServant {
     // couchbase section
     //=================
 
-    void cb_del(
+    bool cb_del(
         1: Context ctx,
         2: string bucket,
         3: string key,
@@ -368,7 +373,7 @@ service FunServant {
         5: i32 expire,
     ),
 
-    binary cb_get(
+    TCouchbaseData cb_get(
         1: Context ctx,
         2: string bucket,
         3: string key

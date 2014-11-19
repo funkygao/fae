@@ -10,7 +10,7 @@ import (
 // curl localhost:8091/poolsStreaming/default?uuid=ee6009fb8f1ba20b3101a465455828ee
 
 func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
-	key string) (appErr error) {
+	key string) (r bool, appErr error) {
 	const IDENT = "cb.del"
 	if this.cb == nil {
 		appErr = ErrServantNotStarted
@@ -33,17 +33,27 @@ func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
 
 	appErr = b.Delete(key)
 	if appErr != nil {
-		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+		r = false
+
+		if e, ok := appErr.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
+			appErr = nil
+		} else {
+			// unexpected err
+			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, appErr.Error())
+		}
+	} else {
+		// found this item, and deleted successfully
+		r = true
 	}
 
-	profiler.do(IDENT, ctx, "{b^%s k^%s",
-		bucket, key)
+	profiler.do(IDENT, ctx, "{b^%s k^%s} {r^%v}",
+		bucket, key, r)
 
 	return
 }
 
 func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
-	key string) (r []byte, appErr error) {
+	key string) (r *rpc.TCouchbaseData, appErr error) {
 	const IDENT = "cb.get"
 	if this.cb == nil {
 		appErr = ErrServantNotStarted
@@ -64,14 +74,25 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 		return
 	}
 
-	r, appErr = b.GetRaw(key) // FIXME 如果不存在，也会抛错，需要额外处理
+	r = rpc.NewTCouchbaseData()
+	var data []byte
+	data, appErr = b.GetRaw(key)
 	if appErr != nil {
-		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+		r.Missed = true
+
+		if e, ok := appErr.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
+			appErr = nil
+		} else {
+			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, appErr.Error())
+		}
+	} else {
+		r.Data = data
+		r.Missed = false
 	}
 
 	profiler.do(IDENT, ctx,
 		"{b^%s k^%s} {r^%s}",
-		bucket, key, string(r))
+		bucket, key, string(r.Data))
 
 	return
 }
@@ -206,6 +227,7 @@ func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
 
 	var rv map[string]*gomemcached.MCResponse
 	rv, appErr = b.GetBulk(keys)
+	r = make(map[string][]byte)
 	if appErr != nil {
 		log.Error("Q=%s %s: %v %s", IDENT, ctx.String(), keys, appErr)
 	} else {
@@ -215,8 +237,8 @@ func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{b^%s k^%v v^%s} {r^%v}",
-		bucket, keys, r)
+		"{b^%s k^%v} {r^%d}",
+		bucket, keys, len(r))
 
 	return
 }
