@@ -40,7 +40,7 @@
 
         proxy: {
             pool_capacity: 5
-            idle_timeout: "600s"
+            idle_timeout: "10m"
         }
 
         mysql: {
