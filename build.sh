@@ -19,6 +19,7 @@ if [[ $1 = "-install" ]]; then
     mkdir -p $FAE_HOME/bin $FAE_HOME/var $FAE_HOME/etc
     cp -f bin/faed.linux $FAE_HOME/bin/faed
     cp -f etc/faed.cf.sample $FAE_HOME/etc/faed.cf
+    cp -f etc/faed /etc/init.d/faed
     echo 'Done'
     exit
 fi
