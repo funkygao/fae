@@ -2,7 +2,7 @@ package engine
 
 import (
 	"github.com/funkygao/fae/config"
-	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 )
 
 func (this *Engine) stopHttpServ() {
-	rest.StopHttpServ()
+	server.StopHttpServ()
 }
 
 func (this *Engine) launchHttpServ() {
@@ -21,8 +21,8 @@ func (this *Engine) launchHttpServ() {
 		return
 	}
 
-	rest.LaunchHttpServ(this.conf.httpListenAddr, this.conf.pprofListenAddr)
-	rest.RegisterHttpApi("/admin/{cmd}",
+	server.LaunchHttpServ(this.conf.httpListenAddr, this.conf.pprofListenAddr)
+	server.RegisterHttpApi("/admin/{cmd}",
 		func(w http.ResponseWriter, req *http.Request,
 			params map[string]interface{}) (interface{}, error) {
 			return this.handleHttpQuery(w, req, params)
@@ -91,7 +91,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		}
 
 	default:
-		return nil, rest.ErrHttp404
+		return nil, server.ErrHttp404
 	}
 
 	return output, nil

@@ -4,7 +4,6 @@ package servant
 
 import (
 	"github.com/funkygao/fae/config"
-	rest "github.com/funkygao/fae/http"
 	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
@@ -13,6 +12,7 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
+	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
 	"labix.org/v2/mgo"
 	"net/http"
@@ -44,8 +44,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.stats.registerMetrics()
 
 	// http REST
-	if rest.Launched() {
-		rest.RegisterHttpApi("/s/{cmd}",
+	if server.Launched() {
+		server.RegisterHttpApi("/s/{cmd}",
 			func(w http.ResponseWriter, req *http.Request,
 				params map[string]interface{}) (interface{}, error) {
 				return this.handleHttpQuery(w, req, params)

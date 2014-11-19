@@ -1,7 +1,7 @@
 package servant
 
 import (
-	rest "github.com/funkygao/fae/http"
+	"github.com/funkygao/golib/server"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -39,7 +39,7 @@ func (this *FunServantImpl) handleHttpQuery(w http.ResponseWriter, req *http.Req
 		}
 
 	default:
-		return nil, rest.ErrHttp404
+		return nil, server.ErrHttp404
 	}
 
 	return output, nil

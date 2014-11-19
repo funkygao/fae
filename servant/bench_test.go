@@ -3,7 +3,7 @@ package servant
 import (
 	"encoding/json"
 	"github.com/funkygao/fae/config"
-	"github.com/funkygao/fae/http"
+	"github.com/funkygao/golib/server"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	conf "github.com/funkygao/jsconf"
 	"labix.org/v2/mgo/bson"
@@ -15,7 +15,7 @@ func setupServant() *FunServantImpl {
 	cf, _ := conf.Load("../etc/faed.cf")
 	section, _ := cf.Section("servants")
 	config.LoadServants(section)
-	http.LaunchHttpServ(":9999", "")
+	server.LaunchHttpServ(":9999", "")
 	return NewFunServant(config.Servants)
 }
 
