@@ -178,6 +178,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 			// non-EOF transport err
 			// e,g. connection reset by peer
 			// e,g. broken pipe
+			// e,g. read tcp i/o timeout
 			this.engine.stats.TotalFailedCalls.Inc(1)
 			this.engine.stats.CallPerSession.Update(callsN)
 
