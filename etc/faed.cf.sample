@@ -105,7 +105,7 @@
             ]
         }
 
-        mongodb: {
+        mongodb_offline: {
             debug_heartbeat: false
             debug_protocol: false
             shard_base_num: 100000
