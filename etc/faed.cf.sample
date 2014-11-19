@@ -31,7 +31,7 @@
         profiler_max_body_size: 600
         call_slow_threshold: "200ms"
         // 10/1000 = 1%
-        profiler_rate: 10
+        profiler_rate: 1000
         // multicast address in the range 224.0.0.0 through 239.255.255.255
         peer_replicas: 2
         peer_group_addr: "239.255.255.250:1900"
@@ -51,6 +51,16 @@
                 failure_allowance: 5
                 retry_interval: "10s"
             }
+
+            // non sharded pools
+            global_pools: [
+                "ShardLookup",
+                "Global",
+                "Tickets",
+                "AllianceLookup",
+                "WorldLookup",
+            ]
+
             servers: [
                 {
                     pool: "ShardLookup"

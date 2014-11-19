@@ -60,6 +60,7 @@ type ConfigMysql struct {
 	ShardStrategy         string
 	ConnectTimeout        time.Duration
 	IoTimeout             time.Duration
+	GlobalPools           map[string]bool // non-sharded pools
 	MaxIdleConnsPerServer int
 	MaxConnsPerServer     int
 	HeartbeatInterval     int
@@ -85,6 +86,10 @@ func (this *ConfigMysql) Pools() (pools []string) {
 }
 
 func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
+	this.GlobalPools = make(map[string]bool)
+	for _, p := range cf.StringList("global_pools", nil) {
+		this.GlobalPools[p] = true
+	}
 	this.enabled = true
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
