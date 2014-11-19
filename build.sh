@@ -14,6 +14,16 @@ if [[ $1 = "-dw" ]]; then
     exit
 fi
 
+if [[ $1 = "-install" ]]; then
+    mkdir -p /opt/app/fae/bin
+    mkdir -p /opt/app/fae/etc
+    mkdir -p /opt/app/fae/var
+    cp -f bin/faed.linux /opt/app/fae/bin/faed
+    cp -f etc/faed.cf.sample /opt/app/fae/etc/faed.cf
+    echo 'Remember to useradd fae before bootup faed'
+    exit
+fi
+
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
