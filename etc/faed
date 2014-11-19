@@ -28,7 +28,7 @@ fi
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-FAE_HOME=/opt/app/fae
+FAE_HOME=/sgn/app/fae
 DAEMON=$FAE_HOME/bin/faed
 PIDFILE=$FAE_HOME/var/faed.pid
 CONFIGFILE=$FAE_HOME/etc/faed.cf
