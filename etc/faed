@@ -33,6 +33,7 @@ DAEMON=$FAE_HOME/bin/faed
 PIDFILE=$FAE_HOME/var/faed.pid
 CONFIGFILE=$FAE_HOME/etc/faed.cf
 LOGFILE=$FAE_HOME/var/faed.log
+LOCKFILE=$FAE_HOME/var/faed.lock
 
 test -f $DAEMON || exit 0
 test -f $CONFIGFILE || exit 0
@@ -49,7 +50,7 @@ start() {
     ulimit -n 40960
     ulimit -c unlimited
     ulimit -l unlimited
-    daemon --user fae "$DAEMON -conf $CONFIGFILE -level trace -log $LOGFILE -- -noinput -detached > /dev/null 2>&1"
+    daemon --pidfile PIDFILE "/usr/sbin/daemonize $DAEMON -conf $CONFIGFILE -level trace -log $LOGFILE -lockfile $LOCKFILE"
     errcode=$?
     return $errcode
 }
