@@ -22,7 +22,10 @@ func init() {
 	}
 
 	if options.kill {
-		killFaed()
+		if err := server.KillProcess(options.lockFile); err != nil {
+			fmt.Fprintf(os.Stderr, "stop failed: %s", err)
+		}
+
 		os.Exit(0)
 	}
 
