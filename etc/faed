@@ -49,7 +49,7 @@ start() {
     ulimit -n 40960
     ulimit -c unlimited
     ulimit -l unlimited
-    daemon --user fae "$DAEMON -conf $CONFIGFILE -level trace -log $LOGFILE -- -noinput -detached > /var/log/faestart.log 2>&1"
+    daemon --user fae "$DAEMON -conf $CONFIGFILE -level trace -log $LOGFILE -- -noinput -detached > /dev/null 2>&1"
     errcode=$?
     return $errcode
 }
