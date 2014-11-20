@@ -45,7 +45,6 @@ DAEMON_COREFILE_LIMIT=unlimited
 
 start() {
     touch $PIDFILE 
-    chown fae $PIDFILE 
     cd $FAE_HOME
     ulimit -n 40960
     ulimit -c unlimited
