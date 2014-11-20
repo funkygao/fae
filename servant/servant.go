@@ -122,6 +122,8 @@ func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
+	// TODO show most recent stats, reset at some interval
+
 	for _ = range ticker.C {
 		log.Info("rpc: {sessions:%d, calls:%d, avg:%d}",
 			this.sessions.Len(),
