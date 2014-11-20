@@ -128,6 +128,6 @@ func (this *FunServantImpl) showStats() {
 		log.Info("rpc: {sessions:%d, calls:%d, avg:%d}",
 			this.sessions.Len(),
 			this.stats.calls.Total(),
-			this.stats.calls.Total()/int64(this.sessions.Len()))
+			this.stats.calls.Total()/int64(this.sessions.Len()+1))
 	}
 }
