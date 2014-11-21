@@ -2,6 +2,7 @@ package namegen
 
 import (
 	"github.com/funkygao/assert"
+	"math/rand"
 	"testing"
 )
 
@@ -39,5 +40,12 @@ func BenchmarkNextName(b *testing.B) {
 	nm := New(3)
 	for i := 0; i < b.N; i++ {
 		nm.Next()
+	}
+}
+
+func BenchmarkRandInt31(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		rand.Int31n(int32(NameCharMax - NameCharMin))
 	}
 }
