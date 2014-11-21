@@ -33,6 +33,10 @@ func New(slots int) (this *NameGen) {
 	return
 }
 
+func (this *NameGen) slots() int {
+	return len(this.bits)
+}
+
 func (this *NameGen) offset(char uint8) uint {
 	return uint(char - NameCharMin)
 }
@@ -56,7 +60,8 @@ func (this *NameGen) getBit(slot int, char uint8) uint8 {
 
 func (this *NameGen) setBit(slot int, char uint8, value uint8) {
 	index, pos := this.index(char), this.pos(char)
-	if slot > len(this.bits) || char < NameCharMin || char > NameCharMax {
+	if slot > this.slots() || char < NameCharMin || char > NameCharMax {
+		// invalid argument
 		return
 	}
 
@@ -70,16 +75,55 @@ func (this *NameGen) setBit(slot int, char uint8, value uint8) {
 }
 
 func (this *NameGen) Next() string {
-	rv := ""
-	for i := 0; i < len(this.bits); i++ {
-		w := NameCharMin + uint8(rand.Int31n(int32(NameCharMax-NameCharMin)))
-		this.setBit(i, w, 1)
+	var (
+		rv       string
+		randChar uint8
+		busyN    int
+	)
 
-		rv += string(w)
+	for {
+		rv = ""
+		busyN = 0
+		for slot := 0; slot < len(this.bits); slot++ {
+			randChar = NameCharMin + uint8(rand.Int31n(int32(NameCharMax-NameCharMin)))
+			if this.getBit(slot, randChar) != 0 {
+				// this char in this slot is used
+				busyN++
+			}
+
+			rv += string(randChar)
+		}
+
+		if busyN == this.slots() {
+			// this name all bits are busy
+			continue
+		}
+
+		// got it
+		break
 	}
+
+	// set the name bits busy
+	for slot := 0; slot < this.slots(); slot++ {
+		this.setBit(slot, rv[slot], 1)
+	}
+
 	return rv
 }
 
+func (this *NameGen) Contains(s string) bool {
+	if len(s) != this.slots() {
+		return true
+	}
+
+	sum := uint8(8)
+	for slot := 0; slot < this.slots(); slot++ {
+		sum += this.getBit(slot, s[slot])
+	}
+
+	return sum > 0
+}
+
 func (this *NameGen) Size() int {
-	return len(this.bits[0]) * len(this.bits) * 8
+	return len(this.bits[0]) * this.slots() * 8
 }
