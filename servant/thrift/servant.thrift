@@ -385,4 +385,12 @@ service FunServant {
         3: list<string> keys
     ),
 
+    //=================
+    // game section
+    //=================
+
+    string gm_name3(
+        1: Context ctx
+    ),
+
 }

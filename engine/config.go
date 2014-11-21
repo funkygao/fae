@@ -34,10 +34,9 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	// etcd section
 	this.conf.etcd = new(configEtcd)
 	section, err = this.conf.Section("etcd")
-	if err != nil {
-		panic(err)
+	if err == nil {
+		this.conf.etcd.loadConfig(section)
 	}
-	this.conf.etcd.loadConfig(section)
 
 	section, err = this.conf.Section("servants")
 	if err != nil {
