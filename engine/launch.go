@@ -33,6 +33,8 @@ func (this *Engine) ServeForever() {
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
+	go this.startOrchestrator()
+
 	// start the stats counter
 	go this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval)
 

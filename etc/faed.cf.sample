@@ -3,6 +3,12 @@
     pprof_listen_addr: "localhost:6060"
     cpu_num: "max"
 
+    etcd: {
+        servers: [
+            "http://127.0.0.1:4001",
+        ]
+    }
+
     rpc: {
         listen_addr: ":9001"
         // protocol: binary | json | simplejson | compact
