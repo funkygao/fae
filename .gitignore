@@ -33,3 +33,4 @@ faed.lock
 *.class
 etc/faed.cf
 metrics.log
+panic.dump
