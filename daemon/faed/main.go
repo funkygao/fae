@@ -30,7 +30,7 @@ func init() {
 		os.Exit(0)
 	}
 
-	server.SetupLogging(options.logFile, options.logLevel)
+	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
 	// thrift lib use "log", so we also need to customize its behavior
 	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 
