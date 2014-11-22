@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/golib/profile"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
+	log "github.com/funkygao/log4go"
 	_log "log"
 	"os"
 	"runtime/debug"
@@ -68,6 +69,12 @@ func main() {
 
 		defer profile.Start(cf).Stop()
 	}
+
+	log.Info("%s", `
+     ____      __      ____ 
+    ( ___)    /__\    ( ___)
+     )__)    /(__)\    )__) 
+    (__)    (__)(__)  (____)`)
 
 	s := server.NewServer("fae")
 	s.LoadConfig(options.configFile)
