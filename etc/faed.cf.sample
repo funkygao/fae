@@ -1,13 +1,12 @@
 {
+    etcd_servers: [
+        "http://127.0.0.1:4001",
+    ]
+    etcd_self_addr: "127.0.0.1:9001"
+
     http_listen_addr: ":9002"
     pprof_listen_addr: "localhost:6060"
     cpu_num: "max"
-
-    etcd: {
-        servers: [
-            "http://127.0.0.1:4001",
-        ]
-    }
 
     rpc: {
         listen_addr: ":9001"

@@ -10,16 +10,22 @@ import (
 type engineConfig struct {
 	*conf.Conf
 
+	EtcdServers  []string
+	EtcdSelfAddr string
+
 	httpListenAddr  string
 	pprofListenAddr string
 
-	rpc  *configRpc
-	etcd *configEtcd
+	rpc *configRpc
 }
 
 func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	this.conf.Conf = cf
 
+	this.conf.EtcdServers = cf.StringList("etcd_servers", nil)
+	if len(this.conf.EtcdServers) > 0 {
+		this.conf.EtcdSelfAddr = cf.String("etcd_self_addr", "")
+	}
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
 
@@ -31,13 +37,6 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	}
 	this.conf.rpc.loadConfig(section)
 
-	// etcd section
-	this.conf.etcd = new(configEtcd)
-	section, err = this.conf.Section("etcd")
-	if err == nil {
-		this.conf.etcd.loadConfig(section)
-	}
-
 	section, err = this.conf.Section("servants")
 	if err != nil {
 		panic(err)
@@ -47,15 +46,6 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	log.Debug("engine: %+v", *this.conf)
 
 	return this
-}
-
-type configEtcd struct {
-	Servers []string
-}
-
-func (this *configEtcd) loadConfig(cf *conf.Conf) {
-	this.Servers = cf.StringList("servers", nil)
-	log.Debug("etcd: %+v", *this)
 }
 
 type configRpc struct {
