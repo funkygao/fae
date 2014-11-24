@@ -2,8 +2,10 @@ package engine
 
 import (
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/ip"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"strings"
 	"time"
 )
 
@@ -25,6 +27,11 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	this.conf.EtcdServers = cf.StringList("etcd_servers", nil)
 	if len(this.conf.EtcdServers) > 0 {
 		this.conf.EtcdSelfAddr = cf.String("etcd_self_addr", "")
+		if strings.HasPrefix(this.conf.EtcdSelfAddr, ":") {
+			// automatically get local ip addr
+			myIp := ip.LocalIpv4Addrs()[0]
+			this.conf.EtcdSelfAddr = myIp + this.conf.EtcdSelfAddr
+		}
 	}
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
