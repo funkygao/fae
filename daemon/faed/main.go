@@ -23,6 +23,14 @@ func init() {
 	}
 
 	if options.kill {
+		s := server.NewServer("fae")
+		s.LoadConfig(options.configFile)
+		s.Launch()
+
+		engine.NewEngine().
+			LoadConfig(s.Conf).
+			Stop()
+
 		if err := server.KillProcess(options.lockFile); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
 		}

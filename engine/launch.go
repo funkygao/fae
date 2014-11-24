@@ -37,11 +37,6 @@ func (this *Engine) ServeForever() {
 	if this.conf.EtcdSelfAddr != "" {
 		etclib.Init(this.conf.EtcdServers, "dw")
 		etclib.BootFae(this.conf.EtcdSelfAddr)
-
-		defer func() {
-			// FIXME it doesn't work for now
-			etclib.ShutdownFae(this.conf.EtcdSelfAddr)
-		}()
 	}
 
 	// start the stats counter
@@ -53,4 +48,11 @@ func (this *Engine) ServeForever() {
 	<-this.launchRpcServe()
 
 	log.Info("Engine terminated")
+}
+
+func (this *Engine) Stop() {
+	if this.conf.EtcdSelfAddr != "" {
+		etclib.Init(this.conf.EtcdServers, "dw")
+		etclib.ShutdownFae(this.conf.EtcdSelfAddr)
+	}
 }
