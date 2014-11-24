@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
+	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
@@ -25,14 +26,15 @@ type FunServantImpl struct {
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
-	proxy *proxy.Proxy         // remote fae agent
-	peer  *peer.Peer           // topology of cluster
-	idgen *idgen.IdGenerator   // global id generator
-	lc    *cache.LruCache      // local cache
-	mc    *memcache.ClientPool // memcache pool, auto sharding by key
-	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
-	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	cb    *couch.Client        // couchbase client
+	proxy   *proxy.Proxy         // remote fae agent
+	peer    *peer.Peer           // topology of cluster
+	idgen   *idgen.IdGenerator   // global id generator
+	namegen *namegen.NameGen     // name generator, TODO can't be shared
+	lc      *cache.LruCache      // local cache
+	mc      *memcache.ClientPool // memcache pool, auto sharding by key
+	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
+	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	cb      *couch.Client        // couchbase client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -63,6 +65,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// idgen, always present
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
+	// namegen
+	this.namegen = namegen.New(3)
 
 	// local cache
 	if this.conf.Lcache.Enabled() {

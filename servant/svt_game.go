@@ -20,6 +20,8 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		return
 	}
 
+	r = this.namegen.Next()
+
 	profiler.do(IDENT, ctx, "{r^%s}", r)
 
 	return
