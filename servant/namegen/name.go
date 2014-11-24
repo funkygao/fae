@@ -81,6 +81,7 @@ func (this *NameGen) Next() string {
 		busyN    int
 	)
 
+	// TODO if found a busy char, find next non-busy one instead of rand
 	for {
 		rv = ""
 		busyN = 0
