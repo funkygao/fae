@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// TODO space will not be used
+// TODO periodically dump bits to redis, when startup read from redis
 const (
 	NameCharMin = uint8('!') // 33, space is 32
 	NameCharMax = uint8('~') // 126
