@@ -6,16 +6,17 @@ import (
 
 var (
 	options struct {
-		configFile  string
-		showVersion bool
-		logFile     string
-		logLevel    string
-		tick        int
-		cpuprof     bool
-		memprof     bool
-		blockprof   bool
-		lockFile    string
-		kill        bool
+		configFile   string
+		showVersion  bool
+		logFile      string
+		logLevel     string
+		tick         int
+		cpuprof      bool
+		memprof      bool
+		blockprof    bool
+		lockFile     string
+		crashLogFile string
+		kill         bool
 	}
 )
 
@@ -23,6 +24,7 @@ func parseFlags() {
 	flag.BoolVar(&options.kill, "k", false, "kill faed")
 	flag.StringVar(&options.logLevel, "level", "debug", "log level")
 	flag.StringVar(&options.logFile, "log", "stdout", "log file")
+	flag.StringVar(&options.crashLogFile, "crashlog", "panic.dump", "crash log")
 	flag.StringVar(&options.configFile, "conf", "etc/faed.cf", "config file")
 	flag.StringVar(&options.lockFile, "lockfile", "faed.lock", "lockfile path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")

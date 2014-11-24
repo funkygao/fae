@@ -2,7 +2,6 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	log "github.com/funkygao/log4go"
 )
 
 // actor lock
@@ -10,10 +9,22 @@ import (
 // place a new player into a random tile in kingdom map
 // under maintenance
 
-func (this *FunServantImpl) gm_maintain(ctx *rpc.Context, pool string) (appErr error) {
-	log.Info("mysql maintain: %s", pool)
+// get a uniq name with length 3
+func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
+	const IDENT = "gm.name3"
 
-	return nil
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	r = this.namegen.Next()
+
+	profiler.do(IDENT, ctx, "{r^%s}", r)
+
+	return
 }
 
 func (this *FunServantImpl) gm_register(ctx *rpc.Context, udid string) (appErr error) {

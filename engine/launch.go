@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/funkygao/etclib"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
@@ -32,6 +33,16 @@ func (this *Engine) ServeForever() {
 	}
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
+
+	if this.conf.EtcdSelfAddr != "" {
+		etclib.Init(this.conf.EtcdServers, "dw")
+		etclib.BootFae(this.conf.EtcdSelfAddr)
+
+		defer func() {
+			// FIXME it doesn't work for now
+			etclib.ShutdownFae(this.conf.EtcdSelfAddr)
+		}()
+	}
 
 	// start the stats counter
 	go this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval)

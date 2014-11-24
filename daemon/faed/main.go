@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/golib/profile"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
+	log "github.com/funkygao/log4go"
 	_log "log"
 	"os"
 	"runtime/debug"
@@ -29,7 +30,7 @@ func init() {
 		os.Exit(0)
 	}
 
-	server.SetupLogging(options.logFile, options.logLevel)
+	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
 	// thrift lib use "log", so we also need to customize its behavior
 	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 
@@ -68,6 +69,12 @@ func main() {
 
 		defer profile.Start(cf).Stop()
 	}
+
+	log.Info("%s", `
+     ____      __      ____ 
+    ( ___)    /__\    ( ___)
+     )__)    /(__)\    )__) 
+    (__)    (__)(__)  (____)`)
 
 	s := server.NewServer("fae")
 	s.LoadConfig(options.configFile)

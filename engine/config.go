@@ -10,6 +10,9 @@ import (
 type engineConfig struct {
 	*conf.Conf
 
+	EtcdServers  []string
+	EtcdSelfAddr string
+
 	httpListenAddr  string
 	pprofListenAddr string
 
@@ -19,6 +22,10 @@ type engineConfig struct {
 func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	this.conf.Conf = cf
 
+	this.conf.EtcdServers = cf.StringList("etcd_servers", nil)
+	if len(this.conf.EtcdServers) > 0 {
+		this.conf.EtcdSelfAddr = cf.String("etcd_self_addr", "")
+	}
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
 
