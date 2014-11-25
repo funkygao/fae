@@ -27,7 +27,8 @@ type FunServantImpl struct {
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
-	phpLatency metrics.Histogram
+	phpLatency     metrics.Histogram // in ms
+	phpPayloadSize metrics.Histogram // in bytes
 
 	proxy   *proxy.Proxy         // remote fae agent
 	peer    *peer.Peer           // topology of cluster
@@ -51,7 +52,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	// record php latency histogram
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.php", this.phpLatency)
+	metrics.Register("php.latency", this.phpLatency)
+	this.phpPayloadSize = metrics.NewHistogram(
+		metrics.NewExpDecaySample(1028, 0.015))
+	metrics.Register("php.payload", this.phpPayloadSize)
 
 	// http REST
 	if server.Launched() {
