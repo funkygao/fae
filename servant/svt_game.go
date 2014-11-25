@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	log "github.com/funkygao/log4go"
 )
 
 // actor lock
@@ -24,6 +25,13 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 	profiler.do(IDENT, ctx, "{r^%s}", r)
 
+	return
+}
+
+// TODO add reason
+func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32) (appErr error) {
+	this.phpLatency.Update(int64(ms))
+	log.Trace("php: %dms", ms)
 	return
 }
 

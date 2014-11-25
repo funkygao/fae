@@ -43,6 +43,7 @@
         peer_group_addr: "239.255.255.250:1900"
         peer_dead_threshold: 30
         peer_heartbeat_interval: 10
+        php_latency_metrics_file: "php.latency.log"
 
         proxy: {
             pool_capacity: 5

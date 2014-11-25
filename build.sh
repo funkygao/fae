@@ -20,6 +20,7 @@ if [[ $1 = "-install" ]]; then
     cp -f bin/faed.linux $FAE_HOME/bin/faed
     cp -f etc/faed.cf.sample $FAE_HOME/etc/faed.cf
     cp -f etc/faed /etc/init.d/faed
+    echo 'update config: metrics_logfile php_latency_metrics_file'
     echo 'Done'
     exit
 fi

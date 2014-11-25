@@ -15,8 +15,11 @@ import (
 	"github.com/funkygao/golib/idgen"
 	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/metrics"
 	"labix.org/v2/mgo"
+	_log "log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -25,6 +28,8 @@ type FunServantImpl struct {
 
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
+
+	phpLatency metrics.Histogram
 
 	proxy   *proxy.Proxy         // remote fae agent
 	peer    *peer.Peer           // topology of cluster
@@ -44,6 +49,20 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	// stats
 	this.stats = new(servantStats)
 	this.stats.registerMetrics()
+
+	// record php latency histogram
+	this.phpLatency = metrics.NewHistogram(
+		metrics.NewExpDecaySample(1028, 0.015))
+	if cf.PhpLatencyMetricsFile != "" {
+		metricsWriter, err := os.OpenFile(cf.PhpLatencyMetricsFile,
+			os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
+			log.Error("php latency metrics: %s", err)
+		} else {
+			metrics.Log(metrics.DefaultRegistry,
+				time.Minute*10, _log.New(metricsWriter, "", _log.LstdFlags))
+		}
+	}
 
 	// http REST
 	if server.Launched() {
