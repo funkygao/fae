@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/gofmt"
 	log "github.com/funkygao/log4go"
 )
 
@@ -32,7 +33,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	bytes int32) (appErr error) {
 	this.phpLatency.Update(int64(ms))
-	log.Trace("php rid^%s: {%dms, %dB}", ctx.Rid, ms, bytes)
+	log.Trace("php rid^%s: {%dms, %s}", ctx.Rid, ms, gofmt.ByteSize(bytes))
 	return
 }
 
