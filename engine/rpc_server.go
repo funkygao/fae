@@ -161,7 +161,9 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		}
 
 		ok, err := processor.Process(inputProtocol, outputProtocol)
-		callsN++
+		if err == nil {
+			callsN++
+		}
 
 		elapsed = time.Since(t1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
@@ -171,7 +173,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
-			log.Trace("session[%s] %d calls EOF", tcpClient.RemoteAddr().String(), callsN)
+			log.Trace("session[%s] %d calls EOF", tcpClient.RemoteAddr().String(),
+				callsN)
 			this.engine.stats.CallPerSession.Update(callsN)
 			return nil
 		} else if err != nil {
@@ -193,7 +196,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 			this.engine.stats.TotalFailedCalls.Inc(1)
 
 			log.Trace("session[%s] %d calls: %s",
-				tcpClient.RemoteAddr().String(), callsN, err.Error())
+				tcpClient.RemoteAddr().String(),
+				callsN, err.Error())
 		}
 
 		if !ok || !inputProtocol.Transport().Peek() {
