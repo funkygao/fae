@@ -17,9 +17,7 @@ import (
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/metrics"
 	"labix.org/v2/mgo"
-	_log "log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -53,16 +51,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	// record php latency histogram
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
-	if cf.PhpLatencyMetricsFile != "" {
-		metricsWriter, err := os.OpenFile(cf.PhpLatencyMetricsFile,
-			os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-		if err != nil {
-			log.Error("php latency metrics: %s", err)
-		} else {
-			go metrics.Log(metrics.DefaultRegistry,
-				time.Minute*10, _log.New(metricsWriter, "", _log.LstdFlags))
-		}
-	}
+	metrics.Register("latency.php", this.phpLatency)
 
 	// http REST
 	if server.Launched() {
