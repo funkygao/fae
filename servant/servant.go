@@ -59,7 +59,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		if err != nil {
 			log.Error("php latency metrics: %s", err)
 		} else {
-			metrics.Log(metrics.DefaultRegistry,
+			go metrics.Log(metrics.DefaultRegistry,
 				time.Minute*10, _log.New(metricsWriter, "", _log.LstdFlags))
 		}
 	}
