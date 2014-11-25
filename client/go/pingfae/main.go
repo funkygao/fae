@@ -19,7 +19,7 @@ func init() {
 }
 
 func main() {
-	client, err := proxy.New(5, 0).Servant(":9001")
+	client, err := proxy.New(5, 0).Servant(host + ":" + port)
 	if err != nil {
 		panic(err)
 	}
