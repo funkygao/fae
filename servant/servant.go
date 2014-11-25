@@ -43,7 +43,7 @@ type FunServantImpl struct {
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
-	this.sessions = cache.NewLruCache(20 << 10) // TODO config
+	this.sessions = cache.NewLruCache(cf.SessionEntries)
 
 	// stats
 	this.stats = new(servantStats)

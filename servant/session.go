@@ -10,7 +10,19 @@ import (
 
 type session struct {
 	profiler *profiler
-	ctx      *rpc.Context
+	ctx      *rpc.Context // will stay the same during a session
+}
+
+func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
+	s, present := this.sessions.Get(ctx.Rid)
+	if !present {
+		s = &session{ctx: ctx}
+		this.sessions.Set(ctx.Rid, s)
+
+		log.Trace("new session {rid^%s reason^%s}", ctx.Rid, ctx.Reason)
+	}
+
+	return s.(*session)
 }
 
 func (this *session) startProfiler() (*profiler, error) {
@@ -29,16 +41,4 @@ func (this *session) startProfiler() (*profiler, error) {
 
 	this.profiler.t1 = time.Now()
 	return this.profiler, nil
-}
-
-func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
-	s, present := this.sessions.Get(ctx.Rid)
-	if !present {
-		s = &session{ctx: ctx}
-		this.sessions.Set(ctx.Rid, s)
-
-		log.Trace("new session {rid^%s reason^%s}", ctx.Rid, ctx.Reason)
-	}
-
-	return s.(*session)
 }
