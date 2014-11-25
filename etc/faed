@@ -55,7 +55,7 @@ start() {
 }
 
 stop() {
-    daemon "$DAEMON -k -lockfile $LOCKFILE"
+    daemon "$DAEMON -k -lockfile $LOCKFILE -conf $CONFIGFILE"
     errcode=$?
     return $errcode
 }
