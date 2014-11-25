@@ -40,7 +40,8 @@ func (this *Engine) ServeForever() {
 	}
 
 	// start the stats counter
-	go this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval)
+	go this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval,
+		this.conf.metricsLogfile)
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()

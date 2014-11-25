@@ -17,6 +17,7 @@ type engineConfig struct {
 
 	httpListenAddr  string
 	pprofListenAddr string
+	metricsLogfile  string
 
 	rpc *configRpc
 }
@@ -35,6 +36,7 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	}
 	this.conf.httpListenAddr = this.conf.String("http_listen_addr", "")
 	this.conf.pprofListenAddr = this.conf.String("pprof_listen_addr", "")
+	this.conf.metricsLogfile = this.conf.String("metrics_logfile", "metrics.log")
 
 	// rpc section
 	this.conf.rpc = new(configRpc)

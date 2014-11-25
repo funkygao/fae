@@ -61,10 +61,10 @@ func (this engineStats) String() string {
 	return ""
 }
 
-func (this *engineStats) Start(t time.Time, interval time.Duration) {
+func (this *engineStats) Start(t time.Time, interval time.Duration, logfile string) {
 	this.startedAt = t
 
-	metricsWriter, err := os.OpenFile("metrics.log",
+	metricsWriter, err := os.OpenFile(logfile,
 		os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		panic(err)
