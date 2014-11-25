@@ -28,10 +28,11 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	return
 }
 
-// TODO add reason
-func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32) (appErr error) {
+// TODO add reason and histogram of bytes
+func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
+	bytes int32) (appErr error) {
 	this.phpLatency.Update(int64(ms))
-	log.Trace("php rid^%s: %dms", ctx.Rid, ms)
+	log.Trace("php rid^%s: {%dms, %dB}", ctx.Rid, ms, bytes)
 	return
 }
 
