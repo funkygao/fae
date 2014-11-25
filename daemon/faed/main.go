@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+var (
+	engineRunner *engine.Engine
+)
+
 func init() {
 	parseFlags()
 
@@ -90,7 +94,7 @@ func main() {
 
 	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
 
-	engine.NewEngine().
-		LoadConfig(s.Conf).
+	engineRunner = engine.NewEngine()
+	engineRunner.LoadConfig(s.Conf).
 		ServeForever()
 }

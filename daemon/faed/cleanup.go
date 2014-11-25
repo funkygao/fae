@@ -14,6 +14,8 @@ func cleanup() {
 }
 
 func shutdown() {
+	engineRunner.Stop()
+
 	cleanup()
 
 	log.Info("Terminated")
