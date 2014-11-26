@@ -21,7 +21,8 @@ func init() {
 func main() {
 	client, err := proxy.New(5, 0).Servant(host + ":" + port)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer client.Recycle()
 
