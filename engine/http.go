@@ -27,6 +27,25 @@ func (this *Engine) launchHttpServ() {
 			params map[string]interface{}) (interface{}, error) {
 			return this.handleHttpQuery(w, req, params)
 		}).Methods("GET")
+	server.RegisterHttpApi("/h", func(w http.ResponseWriter, req *http.Request,
+		params map[string]interface{}) (interface{}, error) {
+		return this.handleHttpHelpQuery(w, req, params)
+	}).Methods("GET")
+	server.RegisterHttpApi("/help", func(w http.ResponseWriter, req *http.Request,
+		params map[string]interface{}) (interface{}, error) {
+		return this.handleHttpHelpQuery(w, req, params)
+	}).Methods("GET")
+}
+
+func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request,
+	params map[string]interface{}) (interface{}, error) {
+	output := make(map[string]interface{})
+	if this.conf.pprofListenAddr != "" {
+		output["pprof"] = "http://" + this.conf.pprofListenAddr + "/debug/pprof/"
+	}
+
+	output["uris"] = []string{"/admin/h", "/admin/help", "/admin/guide"}
+	return output, nil
 }
 
 func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
