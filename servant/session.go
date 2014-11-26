@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/sampling"
 	log "github.com/funkygao/log4go"
+	"sync/atomic"
 	"time"
 )
 
@@ -16,6 +17,7 @@ type session struct {
 func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
+		atomic.AddInt64(&this.sessionN, 1)
 		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 

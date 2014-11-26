@@ -24,6 +24,7 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
+	sessionN int64
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
@@ -142,8 +143,8 @@ func (this *FunServantImpl) showStats() {
 
 	for _ = range ticker.C {
 		log.Info("rpc: {sessions:%d, calls:%d, avg:%d}",
-			this.sessions.Len(),
+			this.sessionN,
 			this.stats.calls.Total(),
-			this.stats.calls.Total()/int64(this.sessions.Len()+1))
+			this.stats.calls.Total()/int64(this.sessionN+1)) // +1 to avoid divide by zero
 	}
 }
