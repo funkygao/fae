@@ -21,7 +21,11 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 
-		log.Trace("new session {uid^%d rid^%s reason^%s}", ctx.Uid, ctx.Rid, ctx.Reason)
+		var uid int64 = 0
+		if ctx.IsSetUid() {
+			uid = *ctx.Uid
+		}
+		log.Trace("new session {uid^%d rid^%s reason^%s}", uid, ctx.Rid, ctx.Reason)
 	}
 
 	return s.(*session)
