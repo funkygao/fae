@@ -42,13 +42,9 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	this.phpLatency.Update(int64(ms))
 	this.phpPayloadSize.Update(int64(bytes))
 
-	var uid int64 = 0
-	if ctx.IsSetUid() {
-		uid = *ctx.Uid
-	}
 	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
 		ms, gofmt.ByteSize(bytes),
-		uid, ctx.Rid, ctx.Reason)
+		this.extractUid(ctx), ctx.Rid, ctx.Reason)
 
 	return
 }
