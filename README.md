@@ -168,6 +168,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   cluster, ignore self
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   session timeout seems not working
+*   thrift framed transport, also php thrift transport buffer size
 *   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
 *   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,

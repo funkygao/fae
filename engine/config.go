@@ -62,6 +62,7 @@ type configRpc struct {
 	sessionSlowThreshold time.Duration // per session
 	sessionTimeout       time.Duration
 	ioTimeout            time.Duration
+	bufferSize           int // network IO read/write buffer
 	framed               bool
 	protocol             string
 	tcpNoDelay           bool
@@ -80,6 +81,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.ioTimeout = section.Duration("io_timeout", 2*time.Second)
 	this.statsOutputInterval = section.Duration("stats_output_interval", 10*time.Second)
 	this.framed = section.Bool("framed", false)
+	this.bufferSize = section.Int("buffer_size", 4<<10)
 	this.protocol = section.String("protocol", "binary")
 	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
 

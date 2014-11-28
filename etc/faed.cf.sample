@@ -14,6 +14,7 @@
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         framed: false
+        buffer_size: 4096
         session_timeout: "0s"
         session_slow_threshold: "8s"
         io_timeout: "3s"

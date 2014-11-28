@@ -14,8 +14,8 @@ import (
 //
 // Server
 // Processor (compiler genereated)
-// Protocol (JSON/compact/...)
-// Transport (TCP/HTTP/...)
+// Protocol (JSON/compact/...), what is transmitted
+// Transport (TCP/HTTP/...), how is transmitted
 func (this *Engine) launchRpcServe() (done chan interface{}) {
 	var (
 		protocolFactory  thrift.TProtocolFactory
@@ -42,12 +42,16 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		panic(fmt.Sprintf("Invalid protocol: %s", this.conf.rpc.protocol))
 	}
 
+	// client-side Thrift protocol/transport stack must match
+	// the server-side, otherwise you are very likely to get in trouble
 	switch {
 	case this.conf.rpc.framed:
+		// each payload is sent over the wire with a frame header containing its size
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
 
 	default:
-		transportFactory = thrift.NewTBufferedTransportFactory(2 << 10) // TODO
+		// there is no BufferedTransport in Java: only FramedTransport
+		transportFactory = thrift.NewTBufferedTransportFactory(this.conf.rpc.bufferSize)
 	}
 
 	switch {
