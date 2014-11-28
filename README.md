@@ -164,7 +164,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
-*   golib/server profiler disabled
+*   race condition detector
 *   cluster, ignore self
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   session timeout seems not working
