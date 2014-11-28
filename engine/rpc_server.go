@@ -5,8 +5,6 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	log "github.com/funkygao/log4go"
 	"net"
-	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -25,9 +23,7 @@ type TFunServer struct {
 
 	pool *rpcThreadPool
 
-	sessionN            int64 // concurrent sessions
-	mu                  sync.Mutex
-	clientConcurrencies map[string]int
+	sessionN int64 // concurrent sessions
 }
 
 func NewTFunServer(engine *Engine,
@@ -43,16 +39,12 @@ func NewTFunServer(engine *Engine,
 		outputTransportFactory: transportFactory,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
-		clientConcurrencies:    make(map[string]int),
 	}
 	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleSession)
 	engine.rpcThreadPool = this.pool
 
 	// start the thread pool
 	this.pool.Start()
-
-	// any web frontend got stuck?
-	go this.monitorClients()
 
 	return this
 }
@@ -97,19 +89,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 		}
 
 		log.Trace("session[%s] open", tcpClient.RemoteAddr())
-
-		// store client concurrent connections count TODO
-		this.mu.Lock()
-		p := strings.SplitN(tcpClient.RemoteAddr().String(), ":", 2)
-		if len(p) == 2 && p[0] != "" {
-			this.clientConcurrencies[p[0]] += 1
-			defer func() {
-				this.mu.Lock()
-				this.clientConcurrencies[p[0]] -= 1
-				this.mu.Unlock()
-			}()
-		}
-		this.mu.Unlock()
 	} else {
 		log.Error("non tcp conn found, should never happen")
 		return
@@ -207,21 +186,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 
 	this.engine.stats.CallPerSession.Update(callsN)
 	return nil
-}
-
-// if concurrent conns from same client is too high, it means
-// web frontend(php-fpm) got stuck, keep forking children
-// TODO
-func (this *TFunServer) monitorClients() {
-	for {
-		for clientIp, concurrentConns := range this.clientConcurrencies {
-			if concurrentConns > 100 { // TODO
-				log.Warn("Client[%s] may got stuck: %d", clientIp, concurrentConns)
-			}
-		}
-
-		time.Sleep(time.Second * 10)
-	}
 }
 
 func (this *TFunServer) Stop() error {
