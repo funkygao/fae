@@ -49,6 +49,7 @@
         proxy: {
             pool_capacity: 5
             idle_timeout: "10m"
+            self_addr: ":9001"
         }
 
         mysql: {

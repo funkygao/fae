@@ -7,59 +7,60 @@ package proxy
 import (
 	"encoding/json"
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"sync"
 	"time"
 )
 
 type Proxy struct {
-	mutex *sync.Mutex
-
-	capacity    int           // all fae peer share same capacity, weight TODO
-	idleTimeout time.Duration // fae peer in pool idle timeout
-
+	mutex sync.Mutex
+	cf    config.ConfigProxy
 	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr
 }
 
-func New(capacity int, idleTimeout time.Duration) *Proxy {
+func New(cf config.ConfigProxy) *Proxy {
 	this := &Proxy{
-		capacity:    capacity,
-		idleTimeout: idleTimeout,
-		mutex:       new(sync.Mutex),
-		pools:       make(map[string]*funServantPeerPool),
+		cf:    cf,
+		pools: make(map[string]*funServantPeerPool),
 	}
 
 	return this
 }
 
 func (this *Proxy) StartMonitorCluster() {
-	this.loadClusterSnapshot()
+	this.loadClusterPeers()
 	go this.watchClusterPeers()
 }
 
-func (this *Proxy) loadClusterSnapshot() {
+func (this *Proxy) loadClusterPeers() {
 	faeNodes, err := etclib.ClusterNodes(etclib.NODE_FAE)
 	if err != nil {
-		log.Error("loadSnapshot[%s]: %s", etclib.NODE_FAE, err)
+		log.Error("loadClusterPeers: %s", err)
 		return
 	}
 
 	for _, peerAddr := range faeNodes {
-		// TODO discard self fae node
 		// peerAddr is like "12.3.11.2:9001"
+		if peerAddr == this.cf.SelfAddr {
+			continue
+		}
+
 		this.Servant(peerAddr)
 
-		log.Info("Found fae peer: %s", peerAddr)
+		log.Info("Found peer: %s", peerAddr)
 	}
 
-	log.Debug("cluster snapshot: %+v", this.StatsMap())
+	log.Trace("Cluster peers: %+v", this.StatsMap())
 }
 
 func (this *Proxy) watchClusterPeers() {
 	for evt := range etclib.WatchFaeNodes() {
-		log.Trace("cluster evt: %+v", evt)
+		if evt.Addr == this.cf.SelfAddr {
+			continue
+		}
 
-		// TODO if self evt, ignore
+		log.Trace("cluster evt: %+v", evt)
 
 		this.mutex.Lock()
 		switch evt.EventType {
@@ -80,13 +81,14 @@ func (this *Proxy) watchClusterPeers() {
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	if _, ok := this.pools[peerAddr]; !ok {
 		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
-			this.capacity, this.idleTimeout)
+			this.cf.PoolCapacity, this.cf.IdleTimeout)
 		this.pools[peerAddr].Open()
 	}
 
 	return this.pools[peerAddr].Get()
 }
 
+// get all other servants in the cluster
 func (this *Proxy) ClusterServants() map[string]*FunServantPeer {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
