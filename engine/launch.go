@@ -34,6 +34,7 @@ func (this *Engine) ServeForever() {
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
+	// register to etcd
 	if this.conf.EtcdSelfAddr != "" {
 		etclib.Init(this.conf.EtcdServers, "dw")
 		etclib.BootFae(this.conf.EtcdSelfAddr)
