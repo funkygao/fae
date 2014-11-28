@@ -56,6 +56,16 @@ func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
 	return ctx
 }
 
+// append my request id and my host ip to ctx
+func (this *FunServantPeer) HijackContext(ctx *rpc.Context) {
+	atomic.AddInt64(&this.rid, 1)
+	ctx.Rid = ctx.Rid + ":" + strconv.FormatInt(this.rid, 10)
+	this.once.Do(func() {
+		this.myIp = ip.LocalIpv4Addrs()[0]
+	})
+	ctx.Host = ctx.Host + ":" + this.myIp
+}
+
 // a conn pool to a fae endpoint
 type funServantPeerPool struct {
 	serverAddr string

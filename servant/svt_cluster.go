@@ -6,9 +6,9 @@ import (
 )
 
 // get a uniq name with length 3
-func (this *FunServantImpl) ClName3(ctx *rpc.Context,
+func (this *FunServantImpl) SyncName3(ctx *rpc.Context,
 	name string) (r bool, appErr error) {
-	const IDENT = "cl.name3"
+	const IDENT = "sync.name3"
 
 	this.stats.inc(IDENT)
 

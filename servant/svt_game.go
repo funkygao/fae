@@ -7,6 +7,7 @@ import (
 )
 
 // get a uniq name with length 3
+// TODO dump to redis periodically
 func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	const IDENT = "gm.name3"
 
@@ -19,12 +20,13 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 	r = this.namegen.Next()
 
-	// replication of name to peers in cluster
+	// replication of name to peers in cluster in async mode
 	go func() {
 		for _, svt := range this.proxy.ClusterServants() {
 			log.Debug("%s: %s -> %s", IDENT, r, svt.Addr())
 
-			svt.ClName3(svt.NewContext(IDENT, ctx.Uid), r)
+			svt.HijackContext(ctx)
+			svt.SyncName3(ctx, r)
 			svt.Recycle() // VERY important
 		}
 	}()

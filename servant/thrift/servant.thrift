@@ -88,8 +88,14 @@ struct MysqlResult {
  */
 service FunServant {
 
-    // cluster section
-    bool cl_name3(
+    //=================
+    // cluster sync section
+    //=================
+
+    /*
+     * Sync name3 bitmap change.
+     */
+    bool sync_name3(
         1: required Context ctx,
         2: required string name
     ),
