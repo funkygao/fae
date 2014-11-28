@@ -77,8 +77,10 @@ func (this *Proxy) watchClusterPeers() {
 }
 
 // Get or create a fae peer servant based on peer address
-// NOT goroutine safe, must set lock
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
 	if _, ok := this.pools[peerAddr]; !ok {
 		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
 			this.cf.PoolCapacity, this.cf.IdleTimeout)
@@ -89,11 +91,8 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 }
 
 // get all other servants in the cluster
+// FIXME lock, but can't dead lock with this.Servant()
 func (this *Proxy) ClusterServants() map[string]*FunServantPeer {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
-	// TODO ignore self
 	rv := make(map[string]*FunServantPeer)
 	for peerAddr, _ := range this.pools {
 		svt, err := this.Servant(peerAddr)

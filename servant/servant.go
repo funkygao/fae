@@ -34,7 +34,7 @@ type FunServantImpl struct {
 	proxy   *proxy.Proxy         // remote fae agent
 	peer    *peer.Peer           // topology of cluster
 	idgen   *idgen.IdGenerator   // global id generator
-	namegen *namegen.NameGen     // name generator, TODO can't be shared
+	namegen *namegen.NameGen     // name generator
 	lc      *cache.LruCache      // local cache
 	mc      *memcache.ClientPool // memcache pool, auto sharding by key
 	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
