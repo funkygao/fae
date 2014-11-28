@@ -41,7 +41,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
+			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", IDENT,
+				ctx.String(),
+				pool, table,
+				sql, args,
+				appErr)
 			return
 		}
 
@@ -52,7 +56,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
+			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", IDENT,
+				ctx.String(),
+				pool, table,
+				sql, args,
+				appErr)
 			return
 		} else {
 			r.Cols = cols
@@ -64,7 +72,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 					scanArgs[i] = &rawRowValues[i]
 				}
 				if appErr = rows.Scan(scanArgs...); appErr != nil {
-					log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
+					log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", IDENT,
+						ctx.String(),
+						pool, table,
+						sql, args,
+						appErr)
 					return
 				}
 
@@ -82,7 +94,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 			// check for errors after we’re done iterating over the rows
 			if appErr = rows.Err(); appErr != nil {
-				log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
+				log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", IDENT,
+					ctx.String(),
+					pool, table,
+					sql, args,
+					appErr)
 				return
 			}
 		}
@@ -90,7 +106,11 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		// FIXME if sql is 'select * from UesrInfo', runtime will get here
 		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
 			table, int(hintId), sql, margs); appErr != nil {
-			log.Error("Q=%s %s: %s (%v) %s", IDENT, ctx.String(), sql, args, appErr)
+			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", IDENT,
+				ctx.String(),
+				pool, table,
+				sql, args,
+				appErr)
 			return
 		}
 	}
