@@ -1,6 +1,7 @@
 package namegen
 
 import (
+	"errors"
 	"math/rand"
 	"time"
 )
@@ -9,6 +10,10 @@ import (
 const (
 	NameCharMin = uint8('!') // 33, space is 32
 	NameCharMax = uint8('~') // 126
+)
+
+var (
+	ErrNameLen = errors.New("Name length not match slot length")
 )
 
 func init() {
@@ -74,6 +79,18 @@ func (this *NameGen) setBit(slot int, char uint8, value uint8) {
 
 }
 
+func (this *NameGen) SetBusy(name string) error {
+	if len(name) != this.slots() {
+		return ErrNameLen
+	}
+
+	for slot := 0; slot < this.slots(); slot++ {
+		this.setBit(slot, name[slot], 1)
+	}
+
+	return nil
+}
+
 func (this *NameGen) Next() string {
 	var (
 		rv       string
@@ -104,10 +121,7 @@ func (this *NameGen) Next() string {
 		break
 	}
 
-	// set the name bits busy
-	for slot := 0; slot < this.slots(); slot++ {
-		this.setBit(slot, rv[slot], 1)
-	}
+	this.SetBusy(rv)
 
 	return rv
 }
