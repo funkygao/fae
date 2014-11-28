@@ -147,21 +147,6 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
         memcache#6      mongodb#60
 
 
-### Points of failure
-
-*   rpc client app could crash
-*   rpc client hardware could crash
-*   rpc client network card could fail
-*   network contention could cause timeouts
-*   network elements such as routers could fail
-*   transmission errors may lose messages
-*   client and server versions may be incompatable
-*   server network card could fail
-*   server may have hardware problems
-*   server software may crash
-*   backend system such as database may become corrupted
-
-
 ### TODO
 
 *   race condition detector
