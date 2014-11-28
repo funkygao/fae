@@ -9,7 +9,8 @@ import (
 
 // a conn pool to a fae endpoint
 type funServantPeerPool struct {
-	serverAddr  string
+	serverAddr string
+
 	capacity    int
 	idleTimeout time.Duration
 	pool        *pool.ResourcePool
@@ -25,6 +26,7 @@ type FunServantPeer struct {
 
 func (this *FunServantPeer) Close() {
 	this.Transport.Close()
+	this.Recycle()
 }
 
 func (this *FunServantPeer) Recycle() {
@@ -38,7 +40,7 @@ func (this *FunServantPeer) Recycle() {
 func (this *FunServantPeer) NewContext() *rpc.Context {
 	ctx := rpc.NewContext()
 	ctx.Rid = "1"
-	ctx.Reason = "proxy"
+	ctx.Reason = "proxy" // TODO
 	return ctx
 }
 
