@@ -9,7 +9,7 @@ func BenchmarkServantPing(b *testing.B) {
 	servant, _ := proxy.Servant(":9001")
 	defer servant.Transport.Close()
 
-	ctx := servant.NewContext()
+	ctx := servant.NewContext("bench_ping", nil)
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -24,7 +24,7 @@ func BenchmarkServantMcSet(b *testing.B) {
 	servant, _ := proxy.Servant(":9001")
 	defer servant.Transport.Close()
 
-	ctx := servant.NewContext()
+	ctx := servant.NewContext("bench_mcset", nil)
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {

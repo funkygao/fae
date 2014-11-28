@@ -29,10 +29,12 @@ func New(capacity int, idleTimeout time.Duration) *Proxy {
 		pools:       make(map[string]*funServantPeerPool),
 	}
 
+	return this
+}
+
+func (this *Proxy) StartMonitorCluster() {
 	this.loadClusterSnapshot()
 	go this.watchClusterPeers()
-
-	return this
 }
 
 func (this *Proxy) loadClusterSnapshot() {
@@ -74,9 +76,8 @@ func (this *Proxy) watchClusterPeers() {
 }
 
 // Get or create a fae peer servant based on peer address
+// NOT goroutine safe, must set lock
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
 	if _, ok := this.pools[peerAddr]; !ok {
 		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
 			this.capacity, this.idleTimeout)

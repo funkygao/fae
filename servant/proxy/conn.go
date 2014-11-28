@@ -3,18 +3,13 @@ package proxy
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/ip"
 	"github.com/funkygao/golib/pool"
+	"strconv"
+	"sync"
+	"sync/atomic"
 	"time"
 )
-
-// a conn pool to a fae endpoint
-type funServantPeerPool struct {
-	serverAddr string
-
-	capacity    int
-	idleTimeout time.Duration
-	pool        *pool.ResourcePool
-}
 
 // A kind of pool.Resource
 type FunServantPeer struct {
@@ -22,6 +17,12 @@ type FunServantPeer struct {
 	*rpc.FunServantClient
 
 	pool *funServantPeerPool
+
+	once sync.Once
+
+	// ctx related
+	rid  int64
+	myIp string // set only once
 }
 
 func (this *FunServantPeer) Close() {
@@ -37,11 +38,31 @@ func (this *FunServantPeer) Recycle() {
 	}
 }
 
-func (this *FunServantPeer) NewContext() *rpc.Context {
-	ctx := rpc.NewContext()
-	ctx.Rid = "1"
-	ctx.Reason = "proxy" // TODO
+func (this *FunServantPeer) Addr() string {
+	return this.pool.serverAddr
+}
+
+func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
+	ctx := rpc.NewContext() // TODO pool
+	atomic.AddInt64(&this.rid, 1)
+	ctx.Rid = strconv.FormatInt(this.rid, 10)
+	ctx.Reason = reason
+	ctx.Uid = uid
+	this.once.Do(func() {
+		this.myIp = ip.LocalIpv4Addrs()[0]
+	})
+	ctx.Host = this.myIp
+
 	return ctx
+}
+
+// a conn pool to a fae endpoint
+type funServantPeerPool struct {
+	serverAddr string
+
+	capacity    int
+	idleTimeout time.Duration
+	pool        *pool.ResourcePool
 }
 
 func newFunServantPeerPool(serverAddr string, capacity int,
@@ -56,7 +77,7 @@ func (this *funServantPeerPool) connect(serverAddr string) (*rpc.FunServantClien
 	transportFactory := thrift.NewTBufferedTransportFactory(2 << 10)
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
-	transport, err := thrift.NewTSocketTimeout(serverAddr, 0)
+	transport, err := thrift.NewTSocket(serverAddr) // should never timeout
 	if err != nil {
 		return nil, err
 	}

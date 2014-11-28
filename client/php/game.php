@@ -37,8 +37,8 @@ use fun\rpc\TMemcacheData;
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(1);
-    $sock->setSendTimeout(1000);
-    $sock->setRecvTimeout(2500);
+    $sock->setSendTimeout(4000);
+    $sock->setRecvTimeout(4000);
     $sock->setNumRetries(1);
     $transport = new TBufferedTransport($sock, 1024, 1024);
     $protocol = new TBinaryProtocol($transport);

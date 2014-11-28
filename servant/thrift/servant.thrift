@@ -87,6 +87,14 @@ struct MysqlResult {
  * multiplex of service, that will lead to complexity for client.
  */
 service FunServant {
+
+    // cluster section
+    bool cl_name3(
+        1: required Context ctx,
+        2: required string name
+    ),
+
+
     /**
      * Ping.
      *

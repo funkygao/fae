@@ -19,6 +19,16 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 	r = this.namegen.Next()
 
+	// replication of name to peers in cluster
+	go func() {
+		for _, svt := range this.proxy.ClusterServants() {
+			log.Debug("%s: %s -> %s", IDENT, r, svt.Addr())
+
+			svt.ClName3(svt.NewContext(IDENT, ctx.Uid), r)
+			svt.Recycle() // VERY important
+		}
+	}()
+
 	profiler.do(IDENT, ctx, "{r^%s}", r)
 
 	return

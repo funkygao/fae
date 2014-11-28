@@ -98,7 +98,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 		log.Trace("session[%s] open", tcpClient.RemoteAddr())
 
-		// store client concurrent connections count
+		// store client concurrent connections count TODO
 		this.mu.Lock()
 		p := strings.SplitN(tcpClient.RemoteAddr().String(), ":", 2)
 		if len(p) == 2 && p[0] != "" {

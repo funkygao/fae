@@ -72,8 +72,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
 			this.conf.PeerHeartbeatInterval,
 			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
+
 		this.proxy = proxy.New(this.conf.Proxy.PoolCapacity,
 			this.conf.Proxy.IdleTimeout)
+		this.proxy.StartMonitorCluster()
 	}
 
 	// idgen, always present
