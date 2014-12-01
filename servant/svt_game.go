@@ -3,6 +3,7 @@ package servant
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/gofmt"
+	"github.com/funkygao/golib/trie"
 	log "github.com/funkygao/log4go"
 )
 
@@ -45,6 +46,20 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
 		ms, gofmt.ByteSize(bytes),
 		this.extractUid(ctx), ctx.Rid, ctx.Reason)
+
+	return
+}
+
+func (this *FunServantImpl) GmLike(ctx *rpc.Context,
+	name string, mode int8) (r []string, appErr error) {
+	t := trie.NewTrie() // TODO
+	switch mode {
+	case 1:
+		r = t.PrefixSearch(name)
+
+	case 2:
+		r = t.FuzzySearch(name)
+	}
 
 	return
 }
