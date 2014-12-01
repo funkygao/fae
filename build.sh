@@ -8,14 +8,13 @@ fi
 
 VER=0.2.1stable
 ID=$(git rev-parse HEAD | cut -c1-7)
-LDFLAGS="-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
-FAE_HOME=/sgn/app/fae
 
 if [[ $1 = "-dw" ]]; then
     cp -f servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
     exit
 fi
 
+FAE_HOME=/sgn/app/fae
 if [[ $1 = "-install" ]]; then
     mkdir -p $FAE_HOME/bin $FAE_HOME/var $FAE_HOME/etc
     cp -f bin/faed.linux $FAE_HOME/bin/faed
@@ -30,13 +29,14 @@ cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
 if [[ $1 = "-linux" ]]; then
+    #cp -f ../../servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
     #cd $GOROOT/src 
     #sudo CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags $LDFLAGS
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID"
     exit
 else
-    #go build -race -v -ldflags $LDFLAGS
-    go build -ldflags $LDFLAGS
+    #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
+    go build -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
 fi
 
 #---------

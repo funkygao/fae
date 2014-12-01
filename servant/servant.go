@@ -73,7 +73,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			this.conf.PeerHeartbeatInterval,
 			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
 
-		this.proxy = proxy.New(this.conf.Proxy)
+		this.proxy = proxy.New(*this.conf.Proxy)
 		this.proxy.StartMonitorCluster()
 	}
 

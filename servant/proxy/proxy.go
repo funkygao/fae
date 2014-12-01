@@ -10,7 +10,6 @@ import (
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"sync"
-	"time"
 )
 
 type Proxy struct {
