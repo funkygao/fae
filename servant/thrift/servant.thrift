@@ -100,6 +100,32 @@ service FunServant {
         2: required string name
     ),
 
+    //=================
+    // zk section
+    //=================
+
+    bool zk_create(
+        1: required Context ctx,
+        2: required string path,
+        3: required string data
+    ),
+
+    bool zk_set(
+        1: required Context ctx,
+        2: required string path,
+        3: required string data
+    ),
+
+    string zk_get(
+        1: required Context ctx,
+        2: required string path
+    ),
+
+    bool zk_del(
+        1: required Context ctx,
+        2: required string path
+    ),
+
 
     /**
      * Ping.

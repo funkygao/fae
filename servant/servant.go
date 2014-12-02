@@ -74,7 +74,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
 
 		this.proxy = proxy.New(*this.conf.Proxy)
-		this.proxy.StartMonitorCluster()
+		go this.proxy.StartMonitorCluster()
 	}
 
 	// idgen, always present

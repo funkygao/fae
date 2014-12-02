@@ -54,6 +54,11 @@ try {
         echo $client->gm_name3($ctx), "\n";
     }
 
+    $ok = $client->zk_create($ctx, "/maintain/global", "");
+    var_dump($ok);
+    $ok = $client->zk_del($ctx, "/maintain/global");
+    var_dump($ok);
+
     $transport->close();
 } catch (TException $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";

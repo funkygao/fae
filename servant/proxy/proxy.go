@@ -28,49 +28,25 @@ func New(cf config.ConfigProxy) *Proxy {
 }
 
 func (this *Proxy) StartMonitorCluster() {
-	this.loadClusterPeers()
-	go this.watchClusterPeers()
-}
+	peersChan := make(chan []string, 10)
+	go etclib.WatchService(etclib.SERVICE_FAE, peersChan)
 
-func (this *Proxy) loadClusterPeers() {
-	faeNodes, err := etclib.ClusterNodes(etclib.NODE_FAE)
-	if err != nil {
-		log.Error("loadClusterPeers: %s", err)
-		return
-	}
+	for {
+		select {
+		case peers := <-peersChan:
+			log.Trace("Cluster peers updated: %+v", peers)
 
-	for _, peerAddr := range faeNodes {
-		// peerAddr is like "12.3.11.2:9001"
-		if peerAddr == this.cf.SelfAddr {
-			continue
+			this.mutex.Lock()
+			for addr, _ := range this.pools {
+				delete(this.pools, addr)
+			}
+
+			for _, p := range peers {
+				this.Servant(p)
+			}
+			this.mutex.Unlock()
+
 		}
-
-		this.Servant(peerAddr)
-
-		log.Info("Found peer: %s", peerAddr)
-	}
-
-	log.Trace("Cluster peers: %+v", this.StatsMap())
-}
-
-func (this *Proxy) watchClusterPeers() {
-	for evt := range etclib.WatchFaeNodes() {
-		if evt.Addr == this.cf.SelfAddr {
-			continue
-		}
-
-		log.Trace("cluster evt: %+v", evt)
-
-		this.mutex.Lock()
-		switch evt.EventType {
-		case etclib.NODE_EVT_BOOT:
-			this.Servant(evt.Addr)
-
-		case etclib.NODE_EVT_SHUTDOWN:
-			delete(this.pools, evt.Addr)
-		}
-
-		this.mutex.Unlock()
 	}
 
 }
