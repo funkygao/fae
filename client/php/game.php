@@ -56,6 +56,8 @@ try {
 
     $ok = $client->zk_create($ctx, "/maintain/global", "");
     var_dump($ok);
+    $nodes = $client->zk_children($ctx, "/maintain");
+    print_r($nodes);
     $ok = $client->zk_del($ctx, "/maintain/global");
     var_dump($ok);
 

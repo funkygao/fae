@@ -110,13 +110,7 @@ service FunServant {
         3: required string data
     ),
 
-    bool zk_set(
-        1: required Context ctx,
-        2: required string path,
-        3: required string data
-    ),
-
-    string zk_get(
+    list<string> zk_children(
         1: required Context ctx,
         2: required string path
     ),
