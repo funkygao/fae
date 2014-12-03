@@ -40,6 +40,7 @@ func (this *Engine) ServeForever() {
 			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
 		} else {
 			etclib.BootService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+			log.Info("etcd self[%s] registered", this.conf.EtcdSelfAddr)
 		}
 	}
 
@@ -63,5 +64,7 @@ func (this *Engine) Stop() {
 		}
 
 		etclib.ShutdownService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+		etclib.Close()
+		log.Info("etcd self[%s] unregistered", this.conf.EtcdSelfAddr)
 	}
 }
