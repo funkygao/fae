@@ -37,8 +37,8 @@ use fun\rpc\TMemcacheData;
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(1);
-    $sock->setSendTimeout(1000);
-    $sock->setRecvTimeout(2500);
+    $sock->setSendTimeout(4000);
+    $sock->setRecvTimeout(4000);
     $sock->setNumRetries(1);
     $transport = new TBufferedTransport($sock, 1024, 1024);
     $protocol = new TBinaryProtocol($transport);
@@ -53,6 +53,13 @@ try {
     for ($i = 0; $i < 100; $i ++) {
         echo $client->gm_name3($ctx), "\n";
     }
+
+    $ok = $client->zk_create($ctx, "/maintain/global", "");
+    var_dump($ok);
+    $nodes = $client->zk_children($ctx, "/maintain");
+    print_r($nodes);
+    $ok = $client->zk_del($ctx, "/maintain/global");
+    var_dump($ok);
 
     $transport->close();
 } catch (TException $tx) {

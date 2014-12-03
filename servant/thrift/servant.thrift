@@ -87,6 +87,40 @@ struct MysqlResult {
  * multiplex of service, that will lead to complexity for client.
  */
 service FunServant {
+
+    //=================
+    // cluster sync section
+    //=================
+
+    /*
+     * Sync name3 bitmap change.
+     */
+    bool sync_name3(
+        1: required Context ctx,
+        2: required string name
+    ),
+
+    //=================
+    // zk section
+    //=================
+
+    bool zk_create(
+        1: required Context ctx,
+        2: required string path,
+        3: required string data
+    ),
+
+    list<string> zk_children(
+        1: required Context ctx,
+        2: required string path
+    ),
+
+    bool zk_del(
+        1: required Context ctx,
+        2: required string path
+    ),
+
+
     /**
      * Ping.
      *

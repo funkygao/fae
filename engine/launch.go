@@ -36,8 +36,12 @@ func (this *Engine) ServeForever() {
 
 	// register to etcd
 	if this.conf.EtcdSelfAddr != "" {
-		etclib.Init(this.conf.EtcdServers, "dw")
-		etclib.BootFae(this.conf.EtcdSelfAddr)
+		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
+			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
+		} else {
+			etclib.BootService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+			log.Info("etcd self[%s] registered", this.conf.EtcdSelfAddr)
+		}
 	}
 
 	// start the stats counter
@@ -54,7 +58,13 @@ func (this *Engine) ServeForever() {
 
 func (this *Engine) Stop() {
 	if this.conf.EtcdSelfAddr != "" {
-		etclib.Init(this.conf.EtcdServers, "dw")
-		etclib.ShutdownFae(this.conf.EtcdSelfAddr)
+		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
+			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
+			return
+		}
+
+		etclib.ShutdownService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+		etclib.Close()
+		log.Info("etcd self[%s] unregistered", this.conf.EtcdSelfAddr)
 	}
 }

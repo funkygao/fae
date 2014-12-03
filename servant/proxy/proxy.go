@@ -7,90 +7,85 @@ package proxy
 import (
 	"encoding/json"
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"sync"
-	"time"
 )
 
 type Proxy struct {
-	mutex *sync.Mutex
-
-	capacity    int           // all fae peer share same capacity, weight TODO
-	idleTimeout time.Duration // fae peer in pool idle timeout
-
+	mutex sync.Mutex
+	cf    config.ConfigProxy
 	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr
 }
 
-func New(capacity int, idleTimeout time.Duration) *Proxy {
+func New(cf config.ConfigProxy) *Proxy {
 	this := &Proxy{
-		capacity:    capacity,
-		idleTimeout: idleTimeout,
-		mutex:       new(sync.Mutex),
-		pools:       make(map[string]*funServantPeerPool),
+		cf:    cf,
+		pools: make(map[string]*funServantPeerPool),
 	}
-
-	this.loadClusterSnapshot()
-	go this.watchClusterPeers()
 
 	return this
 }
 
-func (this *Proxy) loadClusterSnapshot() {
-	faeNodes, err := etclib.ClusterNodes(etclib.NODE_FAE)
-	if err != nil {
-		log.Error("loadSnapshot[%s]: %s", etclib.NODE_FAE, err)
-		return
+func (this *Proxy) StartMonitorCluster() {
+	peersChan := make(chan []string, 10)
+	go etclib.WatchService(etclib.SERVICE_FAE, peersChan)
+
+	for {
+		select {
+		case peers := <-peersChan:
+			log.Trace("Cluster peers event: %+v", peers)
+
+			newpeers := this.recreatePeers(peers)
+			log.Debug("Cluster lastest peers: %+v", newpeers)
+		}
 	}
 
-	for _, peerAddr := range faeNodes {
-		// TODO discard self fae node
-		// peerAddr is like "12.3.11.2:9001"
-		this.Servant(peerAddr)
-
-		log.Info("Found fae peer: %s", peerAddr)
-	}
-
-	log.Debug("cluster snapshot: %+v", this.StatsMap())
 }
 
-func (this *Proxy) watchClusterPeers() {
-	for evt := range etclib.WatchFaeNodes() {
-		log.Trace("cluster evt: %+v", evt)
+func (this *Proxy) recreatePeers(peers []string) []string {
+	this.mutex.Lock()
 
-		// TODO if self evt, ignore
-
-		this.mutex.Lock()
-		switch evt.EventType {
-		case etclib.NODE_EVT_BOOT:
-			this.Servant(evt.Addr)
-
-		case etclib.NODE_EVT_SHUTDOWN:
-			delete(this.pools, evt.Addr)
+	for addr, _ := range this.pools {
+		if addr == this.cf.SelfAddr {
+			continue
 		}
 
-		this.mutex.Unlock()
+		delete(this.pools, addr)
 	}
 
+	newpeers := make([]string, 0)
+	for _, addr := range peers {
+		if addr == this.cf.SelfAddr {
+			continue
+		}
+
+		this.Servant(addr)
+		newpeers = append(newpeers, addr)
+	}
+
+	this.mutex.Unlock()
+
+	return newpeers
 }
 
 // Get or create a fae peer servant based on peer address
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
+
 	if _, ok := this.pools[peerAddr]; !ok {
 		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
-			this.capacity, this.idleTimeout)
+			this.cf.PoolCapacity, this.cf.IdleTimeout)
 		this.pools[peerAddr].Open()
 	}
 
 	return this.pools[peerAddr].Get()
 }
 
+// get all other servants in the cluster
+// FIXME lock, but can't dead lock with this.Servant()
 func (this *Proxy) ClusterServants() map[string]*FunServantPeer {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
-	// TODO ignore self
 	rv := make(map[string]*FunServantPeer)
 	for peerAddr, _ := range this.pools {
 		svt, err := this.Servant(peerAddr)

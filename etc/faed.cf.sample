@@ -1,6 +1,6 @@
 {
     etcd_servers: [
-        "http://127.0.0.1:4001",
+        "127.0.0.1:2181",
     ]
     etcd_self_addr: ":9001"
 
@@ -14,6 +14,7 @@
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         framed: false
+        buffer_size: 4096
         session_timeout: "0s"
         session_slow_threshold: "8s"
         io_timeout: "3s"
@@ -49,6 +50,7 @@
         proxy: {
             pool_capacity: 5
             idle_timeout: "10m"
+            self_addr: ":9001"
         }
 
         mysql: {

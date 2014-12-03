@@ -34,7 +34,7 @@ type FunServantImpl struct {
 	proxy   *proxy.Proxy         // remote fae agent
 	peer    *peer.Peer           // topology of cluster
 	idgen   *idgen.IdGenerator   // global id generator
-	namegen *namegen.NameGen     // name generator, TODO can't be shared
+	namegen *namegen.NameGen     // name generator
 	lc      *cache.LruCache      // local cache
 	mc      *memcache.ClientPool // memcache pool, auto sharding by key
 	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
@@ -72,8 +72,9 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
 			this.conf.PeerHeartbeatInterval,
 			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
-		this.proxy = proxy.New(this.conf.Proxy.PoolCapacity,
-			this.conf.Proxy.IdleTimeout)
+
+		this.proxy = proxy.New(*this.conf.Proxy)
+		go this.proxy.StartMonitorCluster()
 	}
 
 	// idgen, always present
