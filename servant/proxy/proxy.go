@@ -34,21 +34,39 @@ func (this *Proxy) StartMonitorCluster() {
 	for {
 		select {
 		case peers := <-peersChan:
-			log.Trace("Cluster peers updated: %+v", peers)
+			log.Trace("Cluster peers event: %+v", peers)
 
-			this.mutex.Lock()
-			for addr, _ := range this.pools {
-				delete(this.pools, addr)
-			}
-
-			for _, p := range peers {
-				this.Servant(p)
-			}
-			this.mutex.Unlock()
-
+			newpeers := this.recreatePeers(peers)
+			log.Debug("Cluster lastest peers: %+v", newpeers)
 		}
 	}
 
+}
+
+func (this *Proxy) recreatePeers(peers []string) []string {
+	this.mutex.Lock()
+
+	for addr, _ := range this.pools {
+		if addr == this.cf.SelfAddr {
+			continue
+		}
+
+		delete(this.pools, addr)
+	}
+
+	newpeers := make([]string, 0)
+	for _, addr := range peers {
+		if addr == this.cf.SelfAddr {
+			continue
+		}
+
+		this.Servant(addr)
+		newpeers = append(newpeers, addr)
+	}
+
+	this.mutex.Unlock()
+
+	return newpeers
 }
 
 // Get or create a fae peer servant based on peer address
