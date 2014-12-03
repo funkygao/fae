@@ -67,7 +67,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// remote fae peer proxy
 	this.proxy = proxy.New(*this.conf.Proxy)
-	go this.proxy.StartMonitorCluster()
 
 	// idgen, always present
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
@@ -118,6 +117,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 func (this *FunServantImpl) Start() {
 	this.warmUp()
 	go this.showStats()
+	go this.proxy.StartMonitorCluster()
 }
 
 func (this *FunServantImpl) showStats() {

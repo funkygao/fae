@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/etclib"
 	log "github.com/funkygao/log4go"
 	"net"
 	"sync/atomic"
@@ -54,6 +55,15 @@ func (this *TFunServer) Serve() error {
 	err := this.serverTransport.Listen()
 	if err != nil {
 		return err
+	}
+
+	// register to etcd
+	// once registered, other peers will connect to me
+	// so, must be after Listen ready
+	if this.engine.conf.EtcdSelfAddr != "" {
+		etclib.BootService(this.engine.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+
+		log.Info("etcd self[%s] registered", this.engine.conf.EtcdSelfAddr)
 	}
 
 	for !this.stopped {
