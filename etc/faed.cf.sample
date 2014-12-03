@@ -41,11 +41,6 @@
         call_slow_threshold: "200ms"
         // 10/1000 = 1%
         profiler_rate: 1000
-        // multicast address in the range 224.0.0.0 through 239.255.255.255
-        peer_replicas: 2
-        peer_group_addr: "239.255.255.250:1900"
-        peer_dead_threshold: 30
-        peer_heartbeat_interval: 10
 
         proxy: {
             pool_capacity: 5

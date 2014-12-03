@@ -9,7 +9,6 @@ import (
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
 	"github.com/funkygao/fae/servant/namegen"
-	"github.com/funkygao/fae/servant/peer"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
@@ -32,7 +31,6 @@ type FunServantImpl struct {
 	phpPayloadSize metrics.Histogram // in bytes
 
 	proxy   *proxy.Proxy         // remote fae agent
-	peer    *peer.Peer           // topology of cluster
 	idgen   *idgen.IdGenerator   // global id generator
 	namegen *namegen.NameGen     // name generator
 	lc      *cache.LruCache      // local cache
@@ -67,15 +65,9 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			}).Methods("GET")
 	}
 
-	// remote fae peer
-	if this.conf.PeerEnabled() {
-		this.peer = peer.NewPeer(this.conf.PeerGroupAddr,
-			this.conf.PeerHeartbeatInterval,
-			this.conf.PeerDeadThreshold, this.conf.PeersReplica)
-
-		this.proxy = proxy.New(*this.conf.Proxy)
-		go this.proxy.StartMonitorCluster()
-	}
+	// remote fae peer proxy
+	this.proxy = proxy.New(*this.conf.Proxy)
+	go this.proxy.StartMonitorCluster()
 
 	// idgen, always present
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
@@ -126,14 +118,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 func (this *FunServantImpl) Start() {
 	this.warmUp()
 	go this.showStats()
-
-	if this.peer != nil {
-		if err := this.peer.Start(); err != nil {
-			log.Error("peer start: %v", err)
-			this.peer = nil
-		}
-	}
-
 }
 
 func (this *FunServantImpl) showStats() {
