@@ -33,19 +33,23 @@ func (this *Proxy) StartMonitorCluster() {
 
 	for {
 		select {
-		case peers := <-peersChan:
-			log.Trace("Cluster peers event: %+v", peers)
-
-			newpeers := this.recreatePeers(peers)
-			log.Debug("Cluster lastest peers: %+v", newpeers)
+		case <-peersChan:
+			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
+			log.Trace("Cluster updated all fae nodes: %+v", peers)
+			if err == nil {
+				// no lock, because running within 1 goroutine
+				newpeers := this.recreatePeers(peers)
+				log.Trace("Cluster updated peers: %+v", newpeers)
+			} else {
+				log.Error("Cluster peers: %s", err)
+			}
 		}
 	}
 
+	log.Warn("Cluster monitor died")
 }
 
 func (this *Proxy) recreatePeers(peers []string) []string {
-	this.mutex.Lock()
-
 	for addr, _ := range this.pools {
 		if addr == this.cf.SelfAddr {
 			continue
@@ -63,8 +67,6 @@ func (this *Proxy) recreatePeers(peers []string) []string {
 		this.Servant(addr)
 		newpeers = append(newpeers, addr)
 	}
-
-	this.mutex.Unlock()
 
 	return newpeers
 }
