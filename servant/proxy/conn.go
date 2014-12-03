@@ -85,7 +85,7 @@ func newFunServantPeerPool(serverAddr string, capacity int,
 
 func (this *funServantPeerPool) connect(serverAddr string) (*rpc.FunServantClient,
 	error) {
-	transportFactory := thrift.NewTBufferedTransportFactory(2 << 10)
+	transportFactory := thrift.NewTBufferedTransportFactory(4 << 10) // TODO
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
 	transport, err := thrift.NewTSocket(serverAddr) // should never timeout
