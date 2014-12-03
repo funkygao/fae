@@ -35,11 +35,11 @@ func (this *Proxy) StartMonitorCluster() {
 		select {
 		case <-peersChan:
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
-			log.Trace("Cluster updated all fae nodes: %+v", peers)
 			if err == nil {
 				// no lock, because running within 1 goroutine
-				newpeers := this.recreatePeers(peers)
-				log.Trace("Cluster updated peers: %+v", newpeers)
+				log.Trace("Cluster latest fae nodes: %+v", peers)
+
+				this.recreatePeers(peers)
 			} else {
 				log.Error("Cluster peers: %s", err)
 			}

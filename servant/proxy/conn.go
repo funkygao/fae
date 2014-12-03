@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/ip"
 	"github.com/funkygao/golib/pool"
+	log "github.com/funkygao/log4go"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -95,9 +96,12 @@ func (this *funServantPeerPool) connect(serverAddr string) (*rpc.FunServantClien
 	useTransport := transportFactory.GetTransport(transport)
 	client := rpc.NewFunServantClientFactory(useTransport, protocolFactory)
 	if err := transport.Open(); err != nil {
+		log.Error("conn peer[%s]: %s", serverAddr, err)
+
 		return nil, err
 	}
 
+	log.Trace("peer[%s] connected", serverAddr)
 	return client, nil
 }
 
