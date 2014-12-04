@@ -371,12 +371,22 @@ service FunServant {
     //=================
 
     MysqlResult my_query(
-        1: Context ctx,
+        1: required Context ctx,
         2: string pool,
         3: string table,
         4: i64 hintId,
         5: string sql,
         6: list<string> argv
+    ),
+
+    string my_json_merge(
+        1: required Context ctx,
+        2: string pool,
+        3: string table,
+        4: i64 hintId,
+        5: string sql,
+        6: list<string> argv,
+        7: string key
     ),
 
     //=================

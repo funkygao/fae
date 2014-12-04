@@ -5,8 +5,10 @@ package servant
 
 import (
 	sql_ "database/sql"
+	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/mergemap"
 	"strings"
 )
 
@@ -16,11 +18,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		IDENT      = "my.query"
 		SQL_SELECT = "SELECT"
 	)
-
-	if this.my == nil {
-		appErr = ErrServantNotStarted
-		return
-	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
@@ -118,5 +115,41 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
 		pool, table, hintId, sql, args, *r)
+	return
+}
+
+func (this *FunServantImpl) MyJsonMerge(ctx *rpc.Context, pool string, table string,
+	hintId int64, sql string, args []string, key string) (r string, appErr error) {
+	const IDENT = "my.jsonmerge"
+
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	this.stats.inc(IDENT)
+
+	// rally.slot_info
+	// {"num":4,"info":{"52":41,"54":42}}
+	// info: {uid: march_id}
+
+	// lock the key
+	// select from db the latest json value
+	// merge new json with db json
+	// return merged json value
+	// unlock the key
+
+	// validation?
+
+	// how to get the latest json value?
+	// how to validate?
+
+	this.lockmap.Lock(key)
+	defer this.lockmap.Unlock(key)
+
+	profiler.do(IDENT, ctx,
+		"{key^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%s}",
+		key, pool, table, hintId, sql, args, r)
 	return
 }
