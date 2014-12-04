@@ -115,7 +115,8 @@ func (this *TFunServer) handleSession(client interface{}) {
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	log.Trace("session[%s] close in %s", remoteAddr, elapsed)
 
-	if elapsed > this.engine.conf.rpc.sessionSlowThreshold {
+	if this.engine.conf.rpc.sessionSlowThreshold.Seconds() > 0 &&
+		elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
 		log.Warn("session[%s] SLOW %s", remoteAddr, elapsed)
 	}
