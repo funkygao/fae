@@ -118,9 +118,9 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	return
 }
 
-func (this *FunServantImpl) MyJsonMerge(ctx *rpc.Context, pool string, table string,
-	hintId int64, sql string, args []string, key string) (r string, appErr error) {
-	const IDENT = "my.jsonmerge"
+func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
+	hintId int64, key string, column string, where string) (r *rpc.MysqlMergeResult, appErr error) {
+	const IDENT = "my.merge"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
@@ -129,6 +129,11 @@ func (this *FunServantImpl) MyJsonMerge(ctx *rpc.Context, pool string, table str
 	}
 
 	this.stats.inc(IDENT)
+
+	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
+	queryResult := this.MyQuery(ctx, pool, table, hintId, querySql, nil)
+
+	updateSql := "UPDATE " + table + " SET " + column + "='" + "'" + where
 
 	// rally.slot_info
 	// {"num":4,"info":{"52":41,"54":42}}
@@ -149,7 +154,7 @@ func (this *FunServantImpl) MyJsonMerge(ctx *rpc.Context, pool string, table str
 	defer this.lockmap.Unlock(key)
 
 	profiler.do(IDENT, ctx,
-		"{key^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%s}",
-		key, pool, table, hintId, sql, args, r)
+		"{key^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%+v}",
+		key, pool, table, hintId, sql, args, *r)
 	return
 }

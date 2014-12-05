@@ -79,6 +79,11 @@ struct MysqlResult {
     4:required list<list<string>> rows
 }
 
+struct MysqlMergeResult {
+    1:required bool ok
+    2:required string value
+}
+
 /**
  * Thrift don't support service multiplex, so we have to bury all
  * services into the giant FunServant.
@@ -379,7 +384,7 @@ service FunServant {
         6: list<string> argv
     ),
 
-    string my_json_merge(
+    MysqlMergeResult my_merge(
         1: required Context ctx,
         2: string pool,
         3: string table,
