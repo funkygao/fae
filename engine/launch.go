@@ -17,6 +17,7 @@ func (this *Engine) ServeForever() {
 	this.pid = os.Getpid()
 
 	signal.RegisterSignalHandler(syscall.SIGUSR1, func(sig os.Signal) {
+		// graceful shutdown
 		this.stopRpcServe()
 	})
 

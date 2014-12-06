@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 	"strings"
+	"time"
 )
 
 // thrift internal layer
@@ -109,5 +110,19 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 func (this *Engine) stopRpcServe() {
 	log.Info("RPC server stopping...")
 
-	this.rpcServer.Stop()
+	rpcServer := this.rpcServer.(*TFunServer)
+	rpcServer.Stop()
+
+	// TODO wait all sessions terminate, but what about long conn php workers?
+	if false {
+		for {
+			if rpcServer.sessionN == 0 {
+				break
+			}
+
+			time.Sleep(time.Microsecond * 20)
+		}
+	}
+
+	log.Info("RPC server stopped gracefully")
 }
