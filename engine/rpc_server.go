@@ -68,16 +68,14 @@ func (this *TFunServer) Serve() error {
 
 	for !this.stopped {
 		client, err := this.serverTransport.Accept()
-		if client != nil {
-			this.pool.Dispatch(client)
-		}
-
 		if err != nil {
 			log.Error("Accept: %v", err)
+		} else {
+			this.pool.Dispatch(client)
 		}
 	}
 
-	return errors.New("rpc server stopped")
+	return errors.New("RPC server stopped")
 }
 
 func (this *TFunServer) handleSession(client interface{}) {

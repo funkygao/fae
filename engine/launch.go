@@ -16,7 +16,9 @@ func (this *Engine) ServeForever() {
 	this.hostname, _ = os.Hostname()
 	this.pid = os.Getpid()
 
-	signal.IgnoreSignal(syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGSTOP)
+	signal.RegisterSignalHandler(syscall.SIGUSR1, func(sig os.Signal) {
+		this.stopRpcServe()
+	})
 
 	var (
 		totalCpus int
@@ -55,7 +57,7 @@ func (this *Engine) ServeForever() {
 	log.Info("Engine terminated")
 }
 
-func (this *Engine) Stop() {
+func (this *Engine) UnregisterEtcd() {
 	if this.conf.EtcdSelfAddr != "" {
 		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
 			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
@@ -64,6 +66,7 @@ func (this *Engine) Stop() {
 
 		etclib.ShutdownService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
 		etclib.Close()
+
 		log.Info("etcd self[%s] unregistered", this.conf.EtcdSelfAddr)
 	}
 }

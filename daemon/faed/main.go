@@ -26,6 +26,10 @@ func init() {
 		server.ShowVersionAndExit()
 	}
 
+	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
+	// thrift lib use "log", so we also need to customize its behavior
+	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
+
 	if options.kill {
 		s := server.NewServer("fae")
 		s.LoadConfig(options.configFile)
@@ -33,18 +37,16 @@ func init() {
 
 		engine.NewEngine().
 			LoadConfig(s.Conf).
-			Stop()
+			UnregisterEtcd()
 
-		if err := server.KillProcess(options.lockFile); err != nil {
+		if err := server.SignalProcess(options.lockFile, syscall.SIGUSR1); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
 		}
 
+		cleanup() // TODO wait till that faed process terminates, who will do the cleanup
+
 		os.Exit(0)
 	}
-
-	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
-	// thrift lib use "log", so we also need to customize its behavior
-	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 
 	if options.lockFile != "" {
 		if locking.InstanceLocked(options.lockFile) {

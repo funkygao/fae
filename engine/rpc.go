@@ -105,3 +105,9 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	return done
 }
+
+func (this *Engine) stopRpcServe() {
+	log.Info("RPC server stopping...")
+
+	this.rpcServer.Stop()
+}
