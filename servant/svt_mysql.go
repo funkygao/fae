@@ -151,9 +151,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		return
 	}
 
-	/*
-		this.lockmap.Lock(key)
-		defer this.lockmap.Unlock(key)*/
+	this.lockmap.Lock(key)
+	defer this.lockmap.Unlock(key)
 
 	// do the merge in mem
 	var m1, m2 map[string]interface{}
