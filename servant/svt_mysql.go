@@ -175,6 +175,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		return
 	}
 
+	// TODO who wins if conflict on the same key
 	merged := mergemap.Merge(m1, m2)
 
 	// update db with merged value
