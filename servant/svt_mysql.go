@@ -5,8 +5,9 @@ package servant
 
 import (
 	sql_ "database/sql"
-	"encoding/json"
+	_json "encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	json "github.com/funkygao/go-simplejson"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/mergemap"
 	"strings"
@@ -155,13 +156,29 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	defer this.lockmap.Unlock(key)
 
 	// do the merge in mem
+	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
+	if err != nil {
+		appErr = err
+		return
+	}
+	j2, err := json.NewJson([]byte(jsonVal))
+	if err != nil {
+		appErr = err
+		return
+	}
+
 	var m1, m2 map[string]interface{}
-	json.Unmarshal([]byte(queryResult.Rows[0][0]), &m1)
-	json.Unmarshal([]byte(jsonVal), &m2)
+	if m1, appErr = j1.Map(); appErr != nil {
+		return
+	}
+	if m2, appErr = j2.Map(); appErr != nil {
+		return
+	}
+
 	merged := mergemap.Merge(m1, m2)
 
 	// update db with merged value
-	newVal, err := json.Marshal(merged)
+	newVal, err := _json.Marshal(merged)
 	if err != nil {
 		appErr = err
 		return
