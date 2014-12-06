@@ -48,21 +48,20 @@ try {
     $transport->open();
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init', 'host' => 'server1', 'ip' => '12.3.2.1'));
-    print_r($ctx);
 
     // mysql select
-    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'select * from UserInfo where uid>?', array(1));
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * from UserInfo where uid>?', array(1));
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
     // mysql update
-    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'update UserInfo set power=power+1 where uid=?', array(1));
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1));
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
     // mysql transation
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL);
-    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'update UserInfo set power=power+1 where uid=?', array(1));
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1));
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'COMMIT', NULL);
     //$client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'ROLLBACK', NULL);
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
