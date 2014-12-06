@@ -149,11 +149,12 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   dead loop of sync peers
+    - a -> b, b -> a, a -> b
 *   fae graceful shutdown
     - unregister zk
     - finish all outstanding conns, WaitGroup is ok
     - how to handle php worker long conn?
-
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
 *   race condition detector
