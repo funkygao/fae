@@ -149,6 +149,10 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   fae graceful shutdown
+    - unregister zk
+    - finish all outstanding conns
+
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
 *   race condition detector

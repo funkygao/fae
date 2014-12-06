@@ -12,6 +12,7 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
+	"github.com/funkygao/golib/mutexmap"
 	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/metrics"
@@ -27,6 +28,7 @@ type FunServantImpl struct {
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
+	lockmap        *mutexmap.MutexMap
 	phpLatency     metrics.Histogram // in ms
 	phpPayloadSize metrics.Histogram // in bytes
 
@@ -55,6 +57,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.phpPayloadSize = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("php.payload", this.phpPayloadSize)
+	this.lockmap = mutexmap.New(8 << 20) // 8M
 
 	// http REST
 	if server.Launched() {
