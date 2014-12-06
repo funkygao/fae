@@ -65,7 +65,8 @@ try {
             'alliance_id' => 51,
             'uid' => 50,
         )),
-        'slots_info', json_encode(
+        'slots_info', 
+        json_encode(
             array(
                 'info' => array( 
                     "88"=>99,
