@@ -58,16 +58,16 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 }
 
 type configRpc struct {
-	listenAddr           string
-	sessionSlowThreshold time.Duration // per session
-	sessionTimeout       time.Duration
-	ioTimeout            time.Duration
-	bufferSize           int // network IO read/write buffer
-	framed               bool
-	protocol             string
-	tcpNoDelay           bool
-	statsOutputInterval  time.Duration
-	pm                   configProcessManagement
+	listenAddr             string
+	sessionSlowThreshold   time.Duration // per session
+	sessionTimeout         time.Duration
+	ioTimeout              time.Duration
+	bufferSize             int // network IO read/write buffer
+	framed                 bool
+	protocol               string
+	tcpNoDelay             bool
+	statsOutputInterval    time.Duration
+	maxOutstandingSessions int
 }
 
 func (this *configRpc) loadConfig(section *conf.Conf) {
@@ -84,34 +84,7 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.bufferSize = section.Int("buffer_size", 4<<10)
 	this.protocol = section.String("protocol", "binary")
 	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
-
-	// pm section
-	this.pm = configProcessManagement{}
-	sec, err := section.Section("pm")
-	if err != nil {
-		panic(err)
-	}
-	this.pm.loadConfig(sec)
+	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
 
 	log.Debug("rpc: %+v", *this)
-}
-
-type configProcessManagement struct {
-	mode                   string
-	maxOutstandingSessions int
-	startServers           int
-	minSpareServers        int32
-	spawnServers           int
-}
-
-func (this *configProcessManagement) loadConfig(section *conf.Conf) {
-	this.mode = section.String("mode", "static")
-	this.startServers = section.Int("start_servers", 1000)
-	this.minSpareServers = int32(section.Int("min_spare_servers", 200))
-	this.spawnServers = section.Int("spawn_servers_n", 100)
-	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 2000)
-}
-
-func (this *configProcessManagement) dynamic() bool {
-	return this.mode == "dynamic"
 }

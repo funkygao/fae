@@ -151,7 +151,8 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 *   fae graceful shutdown
     - unregister zk
-    - finish all outstanding conns
+    - finish all outstanding conns, WaitGroup is ok
+    - how to handle php worker long conn?
 
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/

@@ -15,20 +15,12 @@
         protocol: "binary"
         framed: false
         buffer_size: 4096
+        max_outstanding_sessions: 10000
         session_timeout: "0s"
         session_slow_threshold: "8s"
         io_timeout: "3s"
         tcp_nodelay: true
         stats_output_interval: "10m"
-        // process management, learned from php-fpm
-        pm: {
-            max_outstanding_sessions: 10000
-            mode: "static"
-            //mode: "dynamic"
-            start_servers: 1000
-            min_spare_servers: 600
-            spawn_servers_n: 300
-        }
     }
 
     servants: {

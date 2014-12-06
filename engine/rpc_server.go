@@ -41,11 +41,9 @@ func NewTFunServer(engine *Engine,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
 	}
-	this.pool = newRpcThreadPool(this.engine.conf.rpc.pm, this.handleSession)
+	this.pool = newRpcThreadPool(this.engine.conf.rpc.maxOutstandingSessions,
+		this.handleSession)
 	engine.rpcThreadPool = this.pool
-
-	// start the thread pool
-	this.pool.Start()
 
 	return this
 }
