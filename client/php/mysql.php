@@ -60,7 +60,7 @@ try {
     print_r($rows);
 
     // mysql merge blob column
-    $ok = $client->my_merge($ctx, 'AllianceShard', 'Rally', 1, 'alliance_id=51 and uid=50', 
+    $merged = $client->my_merge($ctx, 'AllianceShard', 'Rally', 1, 'alliance_id=51 and uid=50', 
         'Rally:' . json_encode(array(
             'alliance_id' => 51,
             'uid' => 50,
@@ -72,9 +72,8 @@ try {
                     "88"=>99,
                 )
             )));
-    if ($ok) {
-        echo "merge ok\n";
-    }
+    print_r($merged);
+    print_r(json_decode($merged->newVal, TRUE));
 
     // mysql transation
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL);

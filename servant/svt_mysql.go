@@ -127,7 +127,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	hintId int64, where string, key string, column string,
-	jsonVal string) (r bool, appErr error) {
+	jsonVal string) (r *rpc.MysqlMergeResult, appErr error) {
 	const IDENT = "my.merge"
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -177,10 +177,12 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		return
 	}
 
-	r = true
+	r = rpc.NewMysqlMergeResult()
+	r.Ok = true
+	r.NewVal = string(newVal)
 
 	profiler.do(IDENT, ctx,
-		"{key^%s pool^%s table^%s id^%d} {val^%+v r^%v}",
-		key, pool, table, hintId, merged, r)
+		"{key^%s pool^%s table^%s id^%d} {ok^%v val^%s}",
+		key, pool, table, hintId, r.Ok, r.NewVal)
 	return
 }
