@@ -59,6 +59,22 @@ try {
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
+    // mysql merge blob column
+    $ok = $client->my_merge($ctx, 'AllianceShard', 'Rally', 1, 'alliance_id=51 and uid=50', 
+        'Rally:' . json_encode(array(
+            'alliance_id' => 51,
+            'uid' => 50,
+        )),
+        'slots_info', json_encode(
+            array(
+                'info' => array( 
+                    "88"=>99,
+                )
+            )));
+    if ($ok) {
+        echo "merge ok\n";
+    }
+
     // mysql transation
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL);
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1));

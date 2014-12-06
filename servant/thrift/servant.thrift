@@ -32,6 +32,13 @@ struct TCouchbaseData {
     2: required binary data
 }
 
+struct MysqlResult {
+    1:required i64 rowsAffected
+    2:required i64 lastInsertId
+    3:required list<string> cols
+    4:required list<list<string>> rows
+}
+
 struct Context {
 
     /**
@@ -70,18 +77,6 @@ struct Context {
      * Reserved for future.
      */
     10:optional string reserved
-}
-
-struct MysqlResult {
-    1:required i64 rowsAffected
-    2:required i64 lastInsertId
-    3:required list<string> cols
-    4:required list<list<string>> rows
-}
-
-struct MysqlMergeResult {
-    1:required bool ok
-    2:required string value
 }
 
 /**
@@ -384,14 +379,15 @@ service FunServant {
         6: list<string> argv
     ),
 
-    MysqlMergeResult my_merge(
+    bool my_merge(
         1: required Context ctx,
         2: string pool,
         3: string table,
         4: i64 hintId,
-        5: string sql,
-        6: list<string> argv,
-        7: string key
+        5: string where,
+        6: string key,
+        7: string column,
+        8: string jsonValue
     ),
 
     //=================
