@@ -14,7 +14,7 @@ func cleanup() {
 }
 
 func shutdown() {
-	engineRunner.Stop()
+	engineRunner.UnregisterEtcd()
 
 	cleanup()
 

@@ -1,11 +1,5 @@
 package engine
 
-import (
-	log "github.com/funkygao/log4go"
-	"sync/atomic"
-	"time"
-)
-
 type rpcClientHandler func(req interface{})
 
 // Like php-fpm pm pool

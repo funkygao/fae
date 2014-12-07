@@ -96,7 +96,7 @@ func main() {
 
 	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
 
-	engineRunner = engine.NewEngine()
+	engineRunner := engine.NewEngine()
 	engineRunner.LoadConfig(s.Conf).
 		ServeForever()
 }
