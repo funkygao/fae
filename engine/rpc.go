@@ -9,6 +9,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	log "github.com/funkygao/log4go"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -122,10 +123,12 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 }
 
 func (this *Engine) stopRpcServe() {
-	log.Info("RPC server stopping...")
-
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
+
+	outstandingSessions := atomic.LoadInt64(&rpcServer.sessionN)
+	close(this.stopChan)
+	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
 	// TODO wait all sessions terminate, but what about long conn php workers?
 	if false {

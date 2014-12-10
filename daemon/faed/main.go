@@ -35,15 +35,19 @@ func init() {
 		s.LoadConfig(options.configFile)
 		s.Launch()
 
+		// stop new requests
 		engine.NewEngine().
 			LoadConfig(s.Conf).
 			UnregisterEtcd()
 
+		// finish all outstanding RPC sessions
 		if err := server.SignalProcess(options.lockFile, syscall.SIGUSR1); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
 		}
 
 		cleanup() // TODO wait till that faed process terminates, who will do the cleanup
+
+		fmt.Println("faed killed")
 
 		os.Exit(0)
 	}

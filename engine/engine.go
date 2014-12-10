@@ -17,12 +17,15 @@ type Engine struct {
 	stats    *engineStats
 	pid      int
 	hostname string
+
+	stopChan chan bool
 }
 
 func NewEngine() (this *Engine) {
 	this = new(Engine)
 	this.conf = new(engineConfig)
 	this.stats = newEngineStats()
+	this.stopChan = make(chan bool)
 
 	return
 }

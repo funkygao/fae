@@ -44,7 +44,10 @@ func (this *Engine) ServeForever() {
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
-	<-this.launchRpcServe()
+	select {
+	case <-this.launchRpcServe():
+	case <-this.stopChan:
+	}
 
 	log.Info("Engine terminated")
 }
