@@ -15,7 +15,7 @@ type session struct {
 }
 
 func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
-	var DIGIT_REPLACED_WITH = []byte("?") // TODO const
+	const DIGIT_REPLACED_WITH = "?"
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
 		atomic.AddInt64(&this.sessionN, 1)
@@ -23,7 +23,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 		this.sessions.Set(ctx.Rid, s)
 
 		normalizedReason := this.digitNormalizer.ReplaceAll(
-			[]byte(ctx.Reason), DIGIT_REPLACED_WITH)
+			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
 		this.reasonPercent.Inc(string(normalizedReason), 1)
 
 		log.Trace("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
