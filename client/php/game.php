@@ -47,7 +47,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init', 'host' => 'server1', 'ip' => '12.3.2.1'));
+    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
     // game get unique name with len 3
     for ($i = 0; $i < 100; $i ++) {

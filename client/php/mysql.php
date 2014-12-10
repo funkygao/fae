@@ -47,7 +47,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init', 'host' => 'server1', 'ip' => '12.3.2.1'));
+    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.121', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
     // mysql select
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * from UserInfo where uid>?', array(1));
