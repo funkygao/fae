@@ -126,6 +126,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	return
 }
 
+// If conflicts, jsonVal prevails
 func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	hintId int64, where string, key string, column string,
 	jsonVal string) (r *rpc.MysqlMergeResult, appErr error) {
