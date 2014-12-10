@@ -155,6 +155,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
     - unregister zk
     - finish all outstanding conns, WaitGroup is ok
     - how to handle php worker long conn?
+    - https://github.com/facebookgo/grace
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
 *   race condition detector
