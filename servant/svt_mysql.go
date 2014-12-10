@@ -25,7 +25,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	this.stats.inc(IDENT)
 
-	_, r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId, sql, args)
+	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args)
 
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
@@ -49,7 +49,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	// find the column value from db
 	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
-	_, queryResult, err := this.doMyQuery(IDENT, ctx, pool, table, hintId,
+	_, queryResult, err := this.doMyQuery(IDENT, pool, table, hintId,
 		querySql, nil)
 	if err != nil {
 		appErr = err
@@ -96,7 +96,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	updateSql := "UPDATE " + table + " SET " + column + "='" +
 		string(newVal) + "' WHERE " + where
-	_, _, err = this.doMyQuery(IDENT, ctx, pool, table, hintId, updateSql, nil)
+	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql, nil)
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
 		appErr = err
@@ -113,7 +113,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	return
 }
 
-func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
+func (this *FunServantImpl) doMyQuery(ident string,
 	pool string, table string, hintId int64, sql string,
 	args []string) (operation string, r *rpc.MysqlResult, appErr error) {
 	const (
@@ -135,8 +135,8 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", ident,
-				ctx.String(),
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+				ident,
 				pool, table,
 				sql, args,
 				appErr)
@@ -150,8 +150,8 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", ident,
-				ctx.String(),
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+				ident,
 				pool, table,
 				sql, args,
 				appErr)
@@ -166,8 +166,8 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 					scanArgs[i] = &rawRowValues[i]
 				}
 				if appErr = rows.Scan(scanArgs...); appErr != nil {
-					log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", ident,
-						ctx.String(),
+					log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+						ident,
 						pool, table,
 						sql, args,
 						appErr)
@@ -188,8 +188,8 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 
 			// check for errors after we’re done iterating over the rows
 			if appErr = rows.Err(); appErr != nil {
-				log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", ident,
-					ctx.String(),
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+					ident,
 					pool, table,
 					sql, args,
 					appErr)
@@ -202,8 +202,8 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 		// FIXME if sql is 'select * from UesrInfo', runtime will get here
 		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
 			table, int(hintId), sql, margs); appErr != nil {
-			log.Error("Q=%s %s %s[%s]: sql=%s args=(%v) %s", ident,
-				ctx.String(),
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+				ident,
 				pool, table,
 				sql, args,
 				appErr)
