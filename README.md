@@ -149,7 +149,6 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
-*   rpc reason histogram
 *   dead loop of sync peers
     - a -> b, b -> a, a -> b
 *   fae graceful shutdown
@@ -160,13 +159,11 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
 *   race condition detector
-*   cluster, ignore self
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   session timeout seems not working
 *   thrift framed transport, also php thrift transport buffer size
 *   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
-*   stats, e,g. in/out bytes, outstanding sessions, sessions by src ip,
 *   realtime tracking of concurrent sessions by client host
 *   rate limit of connection of a given user
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
