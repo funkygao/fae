@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
@@ -78,6 +79,19 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	}
 	if err != nil {
 		panic(err)
+	}
+
+	// dial zk before startup servants
+	// because proxy servant is dependent upon zk
+	if this.conf.EtcdSelfAddr != "" {
+		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
+			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
+
+			// disable etcd registration
+			this.conf.EtcdSelfAddr = ""
+
+			config.Servants.Proxy.Disable()
+		}
 	}
 
 	// when config loaded, create the servants

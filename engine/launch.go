@@ -44,15 +44,6 @@ func (this *Engine) ServeForever() {
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 
-	if this.conf.EtcdSelfAddr != "" {
-		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
-			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
-
-			// disable etcd registration
-			this.conf.EtcdSelfAddr = ""
-		}
-	}
-
 	<-this.launchRpcServe()
 
 	log.Info("Engine terminated")

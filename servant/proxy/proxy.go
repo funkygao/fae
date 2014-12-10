@@ -27,7 +27,16 @@ func New(cf config.ConfigProxy) *Proxy {
 	return this
 }
 
+func (this *Proxy) Enabled() bool {
+	return this.cf.Enabled()
+}
+
 func (this *Proxy) StartMonitorCluster() {
+	if !this.Enabled() {
+		log.Warn("servant proxy disabled")
+		return
+	}
+
 	peersChan := make(chan []string, 10)
 	go etclib.WatchService(etclib.SERVICE_FAE, peersChan)
 

@@ -37,3 +37,7 @@ func (this *ConfigProxy) loadConfig(cf *conf.Conf) {
 func (this *ConfigProxy) Enabled() bool {
 	return this.enabled
 }
+
+func (this *ConfigProxy) Disable() {
+	this.enabled = false
+}

@@ -149,6 +149,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   rpc reason histogram
 *   dead loop of sync peers
     - a -> b, b -> a, a -> b
 *   fae graceful shutdown
