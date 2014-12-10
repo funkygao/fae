@@ -23,7 +23,7 @@ type FunServantPeer struct {
 
 	// ctx related
 	rid  int64
-	myIp string // set only once
+	myIp string // self ip addr, set only once
 }
 
 func (this *FunServantPeer) Close() {

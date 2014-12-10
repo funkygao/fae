@@ -19,19 +19,14 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		return
 	}
 
-	r = this.namegen.Next()
-
-	// replication of name to peers in cluster in async mode
-	if this.proxy.Enabled() {
-		go func() {
-			for _, svt := range this.proxy.ClusterServants() {
-				log.Debug("%s: %s -> %s", IDENT, r, svt.Addr())
-
-				svt.HijackContext(ctx)
-				svt.SyncName3(ctx, r)
-				svt.Recycle() // VERY important
-			}
-		}()
+	// TODO load/dump to central storage
+	svt := this.proxy.StickyServant(IDENT)
+	if svt == nil {
+		r = this.namegen.Next()
+	} else {
+		svt.HijackContext(ctx)
+		r, appErr = svt.GmName3(ctx)
+		svt.Recycle()
 	}
 
 	profiler.do(IDENT, ctx, "{r^%s}", r)
