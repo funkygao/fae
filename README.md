@@ -149,6 +149,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   what about remote peer conn when shutdown
 *   sticky peer
     - resource pool get conn should be in goroutine
 *   name3 dump/load to central storage

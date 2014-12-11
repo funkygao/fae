@@ -131,7 +131,7 @@ func (this *Engine) stopRpcServe() {
 	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
 	this.svt.Flush()
-	log.Info("servant flush done")
+	log.Info("Servant flush done")
 
 	// TODO wait all sessions terminate, but what about long conn php workers?
 	if false {
