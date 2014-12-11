@@ -106,6 +106,8 @@ func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr str
 		return
 	}
 
+	log.Debug("sticky key[%s] servant peer: %s", key, this.keys[index])
+
 	svt, _ := this.pools[this.keys[index]].Get()
 	return svt, this.keys[index]
 }

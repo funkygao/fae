@@ -65,6 +65,7 @@ func (this *FunServantPeer) HijackContext(ctx *rpc.Context) {
 		this.myIp = ip.LocalIpv4Addrs()[0]
 	})
 	ctx.Host = ctx.Host + ":" + this.myIp
+	*ctx.Sticky = true
 }
 
 // a conn pool to a fae endpoint

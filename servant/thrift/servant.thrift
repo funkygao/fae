@@ -79,6 +79,12 @@ struct Context {
     6:optional string sid
 
     /**
+     * If recv this flag, it means sticky request is sent
+     * and I will be the final servant in the chain
+     */
+    7:optional bool sticky
+
+    /**
      * Reserved for future.
      */
     10:optional string reserved
