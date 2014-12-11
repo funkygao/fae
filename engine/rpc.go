@@ -96,9 +96,9 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	}
 
 	// when config loaded, create the servants
-	svr := servant.NewFunServant(config.Servants)
-	this.rpcProcessor = rpc.NewFunServantProcessor(svr)
-	svr.Start()
+	this.svt = servant.NewFunServant(config.Servants)
+	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
+	this.svt.Start()
 
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
@@ -130,8 +130,7 @@ func (this *Engine) stopRpcServe() {
 	close(this.stopChan)
 	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
-	servant := this.rpcProcessor(*servant.FunServantImpl)
-	servant.Flush()
+	this.svt.Flush()
 	log.Info("servant flush done")
 
 	// TODO wait all sessions terminate, but what about long conn php workers?

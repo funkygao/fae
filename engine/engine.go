@@ -2,6 +2,7 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/servant"
 	"time"
 )
 
@@ -10,6 +11,7 @@ type Engine struct {
 
 	StartedAt time.Time
 
+	svt           *servant.FunServantImpl
 	rpcProcessor  thrift.TProcessor
 	rpcServer     thrift.TServer
 	rpcThreadPool *rpcThreadPool
