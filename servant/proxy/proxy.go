@@ -9,13 +9,15 @@ import (
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
+	"hash/adler32"
 	"sync"
 )
 
 type Proxy struct {
 	mutex sync.Mutex
 	cf    config.ConfigProxy
-	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr
+	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr(self exclusive)
+	keys  []string                       // array of peerAddr
 }
 
 func New(cf config.ConfigProxy) *Proxy {
@@ -48,7 +50,7 @@ func (this *Proxy) StartMonitorCluster() {
 				// no lock, because running within 1 goroutine
 				log.Trace("Cluster latest fae nodes: %+v", peers)
 
-				this.recreatePeers(peers)
+				this.keys = this.recreatePeers(peers)
 			} else {
 				log.Error("Cluster peers: %s", err)
 			}
@@ -92,6 +94,20 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	}
 
 	return this.pools[peerAddr].Get()
+}
+
+// sticky request to remote peer servant by key
+// return nil if I'm the servant for this key
+func (this *Proxy) StickyServant(key string) *FunServantPeer {
+	// adler32 is almost same as crc32, but much 3 times faster
+	checksum := adler32.Checksum([]byte(key))
+	index := int(checksum) % (len(this.keys) + 1) // +1 means including me myself
+	if index == 0 {
+		return nil
+	}
+
+	svt, _ := this.pools[this.keys[index]].Get()
+	return svt
 }
 
 // get all other servants in the cluster

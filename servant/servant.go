@@ -130,6 +130,11 @@ func (this *FunServantImpl) Start() {
 	go this.proxy.StartMonitorCluster()
 }
 
+func (this *FunServantImpl) Flush() {
+	// TODO
+
+}
+
 func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Servants.StatsOutputInterval)
 	defer ticker.Stop()
