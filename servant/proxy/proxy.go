@@ -98,16 +98,16 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
-func (this *Proxy) StickyServant(key string) *FunServantPeer {
+func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr string) {
 	// adler32 is almost same as crc32, but much 3 times faster
 	checksum := adler32.Checksum([]byte(key))
 	index := int(checksum) % (len(this.keys) + 1) // +1 means including me myself
-	if index == 0 {
-		return nil
+	if index == len(this.keys) {
+		return
 	}
 
 	svt, _ := this.pools[this.keys[index]].Get()
-	return svt
+	return svt, this.keys[index]
 }
 
 // get all other servants in the cluster

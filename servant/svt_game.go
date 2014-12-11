@@ -20,10 +20,14 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	}
 
 	// TODO load/dump to central storage
-	svt := this.proxy.StickyServant(IDENT)
+	svt, addr := this.proxy.StickyServant(IDENT)
 	if svt == nil {
+		log.Debug("%s self servant", IDENT)
+
 		r = this.namegen.Next()
 	} else {
+		log.Debug("%s remote servant: %s", IDENT, addr)
+
 		svt.HijackContext(ctx)
 		r, appErr = svt.GmName3(ctx)
 		svt.Recycle()
