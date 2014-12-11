@@ -150,6 +150,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 ### TODO
 
 *   sticky peer
+    - resource pool get conn should be in goroutine
 *   name3 dump/load to central storage
 *   dead loop of sync peers
     - a -> b, b -> a, a -> b
