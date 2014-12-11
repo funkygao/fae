@@ -20,12 +20,12 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	}
 
 	if ctx.IsSetSticky() && *ctx.Sticky {
-		// I' the final servant
+		// I' the final servant, got call from remote peers
 		r = this.namegen.Next()
 	} else {
 		svt, _ := this.proxy.StickyServant(IDENT)
 		if svt == nil {
-			// handle it by myself
+			// handle it by myself, got call locally
 			r = this.namegen.Next()
 		} else {
 			// remote peer servant
