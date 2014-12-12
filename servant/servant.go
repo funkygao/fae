@@ -36,6 +36,8 @@ type FunServantImpl struct {
 	phpPayloadSize metrics.Histogram // in bytes
 	reasonPercent  metrics.PercentCounter
 
+	dbCache *cache.LruCache // query cache
+
 	proxy   *proxy.Proxy         // remote fae agent
 	idgen   *idgen.IdGenerator   // global id generator
 	namegen *namegen.NameGen     // name generator
@@ -49,6 +51,7 @@ type FunServantImpl struct {
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
+	this.dbCache = cache.NewLruCache(this.conf.Mysql.CacheMaxItems)
 	this.lockmap = mutexmap.New(8 << 20) // 8M
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
 

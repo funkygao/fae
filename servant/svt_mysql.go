@@ -4,6 +4,7 @@
 package servant
 
 import (
+	"crypto/sha1"
 	sql_ "database/sql"
 	_json "encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
@@ -14,7 +15,8 @@ import (
 )
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
-	hintId int64, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
+	hintId int64, sql string, args []string, cacheKey string) (r *rpc.MysqlResult,
+	appErr error) {
 	const IDENT = "my.query"
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -25,7 +27,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	this.stats.inc(IDENT)
 
-	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args)
+	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
 
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
@@ -48,9 +50,10 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	this.stats.inc(IDENT)
 
 	// find the column value from db
+	// TODO keep in mem, needn't query db on each call
 	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
 	_, queryResult, err := this.doMyQuery(IDENT, pool, table, hintId,
-		querySql, nil)
+		querySql, nil, "")
 	if err != nil {
 		appErr = err
 		log.Error("%s[%s]: %s", IDENT, querySql, err.Error())
@@ -96,7 +99,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	updateSql := "UPDATE " + table + " SET " + column + "='" +
 		string(newVal) + "' WHERE " + where
-	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql, nil)
+	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql,
+		nil, "")
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
 		appErr = err
@@ -115,7 +119,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 func (this *FunServantImpl) doMyQuery(ident string,
 	pool string, table string, hintId int64, sql string,
-	args []string) (operation string, r *rpc.MysqlResult, appErr error) {
+	args []string, cacheKey string) (operation string,
+	r *rpc.MysqlResult, appErr error) {
 	const (
 		SQL_SELECT = "SELECT"
 		OP_QUERY   = "qry"
@@ -128,10 +133,22 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		margs[i] = arg
 	}
 
+	var cacheKeyHash [sha1.Size]byte
+
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
 		operation = OP_QUERY
 
+		if cacheKey != "" {
+			cacheKeyHash = sha1.Sum([]cacheKey)
+			if cacheValue, present := this.dbCache.Get(cacheKeyHash); present {
+				// cache hit
+				r = cacheValue.(*rpc.MysqlResult)
+				return
+			}
+		}
+
+		// cache miss, do real db query
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
@@ -195,6 +212,11 @@ func (this *FunServantImpl) doMyQuery(ident string,
 					appErr)
 				return
 			}
+
+			// query success, set cache
+			if cacheKey != "" {
+				this.dbCache.Set(cacheKeyHash, r)
+			}
 		}
 	} else {
 		operation = OP_EXEC
@@ -208,6 +230,12 @@ func (this *FunServantImpl) doMyQuery(ident string,
 				sql, args,
 				appErr)
 			return
+		}
+
+		// update success, del cache
+		if cacheKey != "" {
+			cacheKeyHash = sha1.Sum([]cacheKey)
+			this.dbCache.Del(cacheKeyHash)
 		}
 	}
 

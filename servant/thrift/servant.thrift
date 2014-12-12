@@ -375,7 +375,8 @@ service FunServant {
         3: string table,
         4: i64 hintId,
         5: string sql,
-        6: list<string> argv
+        6: list<string> argv,
+        7: string cacheKey
     ),
 
     MysqlMergeResult my_merge(

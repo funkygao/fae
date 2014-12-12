@@ -43,6 +43,7 @@
         mysql: {
             connect_timeout: "4s"
             io_timeout: "10s"
+            cache_max_items: 1073741824
 
             breaker: {
                 failure_allowance: 5

@@ -64,6 +64,7 @@ type ConfigMysql struct {
 	MaxIdleConnsPerServer int
 	MaxConnsPerServer     int
 	HeartbeatInterval     int
+	CacheMaxItems         int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMysqlServer // key is pool
 
@@ -95,6 +96,7 @@ func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
 	this.ConnectTimeout = cf.Duration("connect_timeout", 4*time.Second)
 	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
+	this.CacheMaxItems = cf.Int("cache_max_items", 1<<20)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)
