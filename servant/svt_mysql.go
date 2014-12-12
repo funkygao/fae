@@ -142,7 +142,8 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		if cacheKey != "" {
 			cacheKeyHash = sha1.Sum([]cacheKey)
 			if cacheValue, present := this.dbCache.Get(cacheKeyHash); present {
-				// cache hit
+				log.Debug("%s %s cache hit", ident, cacheKey)
+
 				r = cacheValue.(*rpc.MysqlResult)
 				return
 			}
@@ -215,6 +216,8 @@ func (this *FunServantImpl) doMyQuery(ident string,
 
 			// query success, set cache
 			if cacheKey != "" {
+				log.Debug("%s %s cache miss, now set", ident, cacheKey)
+
 				this.dbCache.Set(cacheKeyHash, r)
 			}
 		}
@@ -234,6 +237,8 @@ func (this *FunServantImpl) doMyQuery(ident string,
 
 		// update success, del cache
 		if cacheKey != "" {
+			log.Debug("%s %s cache deleted", ident, cacheKey)
+
 			cacheKeyHash = sha1.Sum([]cacheKey)
 			this.dbCache.Del(cacheKeyHash)
 		}
