@@ -53,6 +53,10 @@ try {
     $return = $client->ping($ctx);
     echo "[Client] ping received: ", $return, "\n";
 
+    // id.next
+    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
+    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
+
     // mc
     $mcData = new TMemcacheData();
     $mcData->data = 'world 世界';
@@ -133,10 +137,6 @@ try {
         $val = bson_decode($r);
         echo "[Client] mg.find_and_modify received: ", $val['value'], "\n";
     }
-
-    // id.next
-    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
-    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
 
     // my.query
     for ($i=0; $i<5; $i++) {

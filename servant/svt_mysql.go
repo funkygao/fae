@@ -140,7 +140,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		operation = OP_QUERY
 
 		if cacheKey != "" {
-			cacheKeyHash = sha1.Sum([]cacheKey)
+			cacheKeyHash = sha1.Sum([]byte(cacheKey))
 			if cacheValue, present := this.dbCache.Get(cacheKeyHash); present {
 				log.Debug("%s %s cache hit", ident, cacheKey)
 
@@ -239,7 +239,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		if cacheKey != "" {
 			log.Debug("%s %s cache deleted", ident, cacheKey)
 
-			cacheKeyHash = sha1.Sum([]cacheKey)
+			cacheKeyHash = sha1.Sum([]byte(cacheKey))
 			this.dbCache.Del(cacheKeyHash)
 		}
 	}
