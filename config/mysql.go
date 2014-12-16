@@ -17,6 +17,8 @@ type ConfigMysqlServer struct {
 	Charset      string
 	ShardBaseNum int
 
+	conf *ConfigMysql
+
 	dsn string // cache of op result
 }
 
@@ -47,6 +49,9 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
+	if this.conf.ConnectTimeout.Seconds() > 0 {
+		this.dsn += "&timeout=" + this.conf.ConnectTimeout.String()
+	}
 
 	log.Debug("mysql instance: %s", this.dsn)
 }
@@ -59,7 +64,7 @@ type ConfigMysql struct {
 	ShardBaseNum          int
 	ShardStrategy         string
 	ConnectTimeout        time.Duration
-	IoTimeout             time.Duration
+	IoTimeout             time.Duration   // FIXME not used yet
 	GlobalPools           map[string]bool // non-sharded pools
 	MaxIdleConnsPerServer int
 	MaxConnsPerServer     int
@@ -113,6 +118,7 @@ func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
 		}
 
 		server := new(ConfigMysqlServer)
+		server.conf = this
 		server.ShardBaseNum = this.ShardBaseNum
 		server.loadConfig(section)
 		this.Servers[server.Pool] = server
