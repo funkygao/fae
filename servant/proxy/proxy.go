@@ -1,7 +1,3 @@
-/*
-Proxy of remote servant so that we can dispatch request
-to cluster instead of having to serve all by ourselves.
-*/
 package proxy
 
 import (
@@ -9,21 +5,25 @@ import (
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
-	"hash/adler32"
 	"sync"
 )
 
+// Proxy of remote servant so that we can dispatch request
+// to cluster instead of having to serve all by ourselves.
 type Proxy struct {
 	mutex sync.Mutex
 	cf    config.ConfigProxy
-	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr(self exclusive)
-	keys  []string                       // array of peerAddr
+
+	// each fae peer has a socket pool, key is peerAddr(self exclusive)
+	pools    map[string]*funServantPeerPool
+	selector PeerSelector
 }
 
 func New(cf config.ConfigProxy) *Proxy {
 	this := &Proxy{
-		cf:    cf,
-		pools: make(map[string]*funServantPeerPool),
+		cf:       cf,
+		pools:    make(map[string]*funServantPeerPool),
+		selector: newStandardPeerSelector(),
 	}
 
 	return this
@@ -50,7 +50,7 @@ func (this *Proxy) StartMonitorCluster() {
 				// no lock, because running within 1 goroutine
 				log.Trace("Cluster latest fae nodes: %+v", peers)
 
-				this.keys = this.recreatePeers(peers)
+				this.selector.SetPeersAddr(this.recreatePeers(peers))
 			} else {
 				log.Error("Cluster peers: %s", err)
 			}
@@ -99,17 +99,15 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
 func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr string) {
-	// adler32 is almost same as crc32, but much 3 times faster
-	checksum := adler32.Checksum([]byte(key))
-	index := int(checksum) % (len(this.keys) + 1) // +1 means including me myself
-	if index == len(this.keys) {
+	peerAddr = this.selector.PickPeer(key)
+	if peerAddr == "" {
 		return
 	}
 
-	log.Debug("sticky key[%s] servant peer: %s", key, this.keys[index])
+	log.Debug("sticky key[%s] servant peer: %s", key, peerAddr)
 
-	svt, _ := this.pools[this.keys[index]].Get()
-	return svt, this.keys[index]
+	svt, _ := this.pools[peerAddr].Get()
+	return svt, peerAddr
 }
 
 // get all other servants in the cluster
