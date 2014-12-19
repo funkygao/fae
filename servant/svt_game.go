@@ -31,7 +31,11 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 			// remote peer servant
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmName3(ctx)
-			svt.Recycle()
+			if appErr != nil {
+				svt.Close()
+			} else {
+				svt.Recycle()
+			}
 		}
 	}
 

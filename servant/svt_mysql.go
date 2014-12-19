@@ -27,6 +27,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	this.stats.inc(IDENT)
 
+	// TODO delegate remote peer if neccessary
 	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
 
 	profiler.do(IDENT, ctx,

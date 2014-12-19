@@ -28,7 +28,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		log.Printf("session{round^%d seq^%d} %v", round, seq, err)
 		return
 	}
-	defer client.Recycle() // when err occurs, do we still need recyle?
+	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	if sampling(SampleRate) {
 		log.Printf("session{round^%d seq^%d} connected within %s",
