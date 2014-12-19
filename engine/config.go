@@ -52,7 +52,7 @@ func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	}
 	config.LoadServants(section)
 
-	log.Debug("engine: %+v", *this.conf)
+	log.Debug("engine conf: %+v", *this.conf)
 
 	return this
 }
@@ -86,5 +86,5 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
 	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
 
-	log.Debug("rpc: %+v", *this)
+	log.Debug("rpc conf: %+v", *this)
 }
