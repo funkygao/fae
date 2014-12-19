@@ -61,15 +61,9 @@ func (this *Proxy) StartMonitorCluster() {
 }
 
 func (this *Proxy) recreatePeers(peers []string) []string {
-	for addr, _ := range this.pools {
-		if addr == this.cf.SelfAddr {
-			continue
-		}
-
-		delete(this.pools, addr)
-	}
-
 	newpeers := make([]string, 0)
+
+	// add all peers
 	for _, addr := range peers {
 		if addr == this.cf.SelfAddr {
 			continue
@@ -77,6 +71,27 @@ func (this *Proxy) recreatePeers(peers []string) []string {
 
 		this.Servant(addr)
 		newpeers = append(newpeers, addr)
+	}
+
+	// kill died peers
+	for addr, _ := range this.pools {
+		if addr == this.cf.SelfAddr {
+			continue
+		}
+
+		alive := false
+		for _, p := range peers {
+			if p == addr {
+				// still alive
+				alive = true
+				break
+			}
+		}
+
+		if !alive {
+			log.Trace("peer[%s] gone away", addr)
+			delete(this.pools, addr)
+		}
 	}
 
 	return newpeers
@@ -87,7 +102,7 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if _, ok := this.pools[peerAddr]; !ok {
+	if _, present := this.pools[peerAddr]; !present {
 		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
 			this.cf.PoolCapacity, this.cf.IdleTimeout)
 		this.pools[peerAddr].Open()
