@@ -94,6 +94,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 			config.Servants.Proxy.Disable()
 		}
 	}
+	log.Debug("etcd connected")
 
 	// when config loaded, create the servants
 	this.svt = servant.NewFunServant(config.Servants)
@@ -102,7 +103,6 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
-
 	log.Info("RPC server ready at %s:%s", serverNetwork, this.conf.rpc.listenAddr)
 
 	done = make(chan interface{})
