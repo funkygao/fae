@@ -3,6 +3,7 @@ package mysql
 import (
 	"fmt"
 	"github.com/funkygao/fae/config"
+	log "github.com/funkygao/log4go"
 )
 
 type StandardServerSelector struct {
@@ -17,9 +18,10 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	for _, server := range cf.Servers {
 		my := newMysql(server.DSN(), &cf.Breaker)
 		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
+			log.Debug("mysql connecting: %s", server.DSN())
+
 			if my.Open() == nil && my.Ping() == nil {
 				// sql.Open() does not establish any connections to the database
-				// it's lazy
 				// sql.Ping() does
 				break
 			}
