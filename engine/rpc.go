@@ -122,7 +122,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	return done
 }
 
-func (this *Engine) stopRpcServe() {
+func (this *Engine) StopRpcServe() {
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
 
