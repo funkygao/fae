@@ -163,7 +163,7 @@
             ]
         }
 
-        couchbase: {
+        couchbase_offline: {
             servers: [
                 "http://localhost:8091/",
             ]
