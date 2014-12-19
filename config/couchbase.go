@@ -13,3 +13,7 @@ func (this *ConfigCouchbase) loadConfig(cf *conf.Conf) {
 	this.Servers = cf.StringList("servers", nil)
 	log.Debug("couchbase: %+v", *this)
 }
+
+func (this *ConfigCouchbase) Enabled() bool {
+	return len(this.Servers) > 0
+}

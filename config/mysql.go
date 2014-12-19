@@ -99,7 +99,7 @@ func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
 	this.enabled = true
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
-	this.ConnectTimeout = cf.Duration("connect_timeout", 4*time.Second)
+	this.ConnectTimeout = cf.Duration("connect_timeout", 0)
 	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
 	this.CacheMaxItems = cf.Int("cache_max_items", 1<<20)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
