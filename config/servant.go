@@ -83,5 +83,5 @@ func LoadServants(cf *conf.Conf) {
 		Servants.Proxy.loadConfig(section)
 	}
 
-	log.Debug("servants: %+v", *Servants)
+	log.Debug("servants conf: %+v", *Servants)
 }

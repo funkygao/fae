@@ -24,7 +24,6 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 	}
 	this.Pool = section.String("pool", "default")
 
-	log.Debug("memcache instance: %+v", *this)
 }
 
 func (this *ConfigMemcacheServer) Address() string {
@@ -94,5 +93,5 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 	}
 	this.enabled = true
 
-	log.Debug("memcache: %+v", *this)
+	log.Debug("memcache conf: %+v", *this)
 }

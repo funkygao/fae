@@ -30,7 +30,7 @@ func (this *ConfigProxy) loadConfig(cf *conf.Conf) {
 		}
 
 		this.enabled = true
-		log.Debug("proxy: %+v", *this)
+		log.Debug("proxy conf: %+v", *this)
 	}
 }
 

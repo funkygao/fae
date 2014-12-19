@@ -11,7 +11,7 @@ type ConfigCouchbase struct {
 
 func (this *ConfigCouchbase) loadConfig(cf *conf.Conf) {
 	this.Servers = cf.StringList("servers", nil)
-	log.Debug("couchbase: %+v", *this)
+	log.Debug("couchbase conf: %+v", *this)
 }
 
 func (this *ConfigCouchbase) Enabled() bool {

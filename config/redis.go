@@ -24,5 +24,5 @@ func (this *ConfigRedis) loadConfig(cf *conf.Conf) {
 		this.Breaker.loadConfig(section)
 	}
 
-	log.Debug("redis: %+v", *this)
+	log.Debug("redis conf: %+v", *this)
 }

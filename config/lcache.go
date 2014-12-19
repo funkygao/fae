@@ -14,7 +14,7 @@ func (this *ConfigLcache) loadConfig(cf *conf.Conf) {
 	this.LruMaxItems = cf.Int("lru_max_items", 1<<30)
 	this.enabled = true
 
-	log.Debug("lcache: %+v", *this)
+	log.Debug("lcache conf: %+v", *this)
 }
 
 func (this *ConfigLcache) Enabled() bool {

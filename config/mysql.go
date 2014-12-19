@@ -52,8 +52,6 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.conf.ConnectTimeout.Seconds() > 0 {
 		this.dsn += "&timeout=" + this.conf.ConnectTimeout.String()
 	}
-
-	log.Debug("mysql instance: %s", this.dsn)
 }
 
 func (this *ConfigMysqlServer) DSN() string {
@@ -124,5 +122,5 @@ func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
 		this.Servers[server.Pool] = server
 	}
 
-	log.Debug("mysql: %+v", *this)
+	log.Debug("mysql conf: %+v", *this)
 }
