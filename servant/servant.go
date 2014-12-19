@@ -49,6 +49,8 @@ type FunServantImpl struct {
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
+	log.Debug("creating servants...")
+
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
 	this.dbCache = cache.NewLruCache(this.conf.Mysql.CacheMaxItems)
@@ -83,27 +85,32 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// idgen, always present
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
+
 	// namegen
 	this.namegen = namegen.New(3)
 
 	// local cache
 	if this.conf.Lcache.Enabled() {
+		log.Debug("creating servant: lcache")
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
 
 	// memcache
 	if this.conf.Memcache.Enabled() {
+		log.Debug("creating servant: memcache")
 		this.mc = memcache.New(this.conf.Memcache)
 	}
 
 	// mysql
 	if this.conf.Mysql.Enabled() {
+		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
 	}
 
 	// mongodb
 	if this.conf.Mongodb.Enabled() {
+		log.Debug("creating servant: mongodb")
 		this.mg = mongo.New(this.conf.Mongodb)
 
 		if this.conf.Mongodb.DebugProtocol ||
@@ -113,9 +120,9 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
-	if this.conf.Couchbase != nil &&
-		this.conf.Couchbase.Servers != nil &&
-		len(this.conf.Couchbase.Servers) > 0 {
+	if this.conf.Couchbase.Enabled() {
+		log.Debug("creating servant: couchbase")
+
 		var err error
 		// pool is always 'default'
 		this.cb, err = couch.New(this.conf.Couchbase.Servers, "default")
@@ -124,17 +131,20 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
+	log.Debug("servants created")
 	return
 }
 
 func (this *FunServantImpl) Start() {
-	this.warmUp()
 	go this.showStats()
 	go this.proxy.StartMonitorCluster()
+
+	this.warmUp()
 }
 
 func (this *FunServantImpl) Flush() {
 	// TODO
+	log.Debug("flushing servants data...")
 
 }
 
