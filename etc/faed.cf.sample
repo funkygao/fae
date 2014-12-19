@@ -35,7 +35,7 @@
         profiler_rate: 1000
 
         proxy: {
-            pool_capacity: 5
+            pool_capacity: 50
             idle_timeout: "10m"
             self_addr: ":9001"
         }
