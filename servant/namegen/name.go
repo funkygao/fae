@@ -20,6 +20,7 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
+// FIXME should use mutex to protect bitmap
 type NameGen struct {
 	bits [][]byte
 }
