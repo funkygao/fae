@@ -1,44 +1,12 @@
 <?php
 
-ini_set('display_errors', 'On');
-error_reporting(E_ALL);
-
-$GLOBALS['THRIFT_ROOT'] = '/opt/app/thrift/lib/php';
-$GLOBALS['SERVANT_ROOT'] = '../../servant/gen-php/fun/rpc';
-require_once $GLOBALS['THRIFT_ROOT'].'/Thrift.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Base/TBase.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TException.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TTransportException.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TProtocolException.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Exception/TApplicationException.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Protocol/TBinaryProtocol.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/StringFunc/TStringFunc.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/StringFunc/Core.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Factory/TStringFuncFactory.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Type/TType.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Type/TMessageType.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Transport/TSocket.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Transport/TSocketPool.php';
-require_once $GLOBALS['THRIFT_ROOT'].'/Transport/TBufferedTransport.php';
-require_once $GLOBALS['SERVANT_ROOT'].'/FunServant.php';
-require_once $GLOBALS['SERVANT_ROOT'].'/Types.php';
-
-use Thrift\Transport\TSocketPool;
-use Thrift\Transport\TBufferedTransport;
-use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Exception\TTransportException;
-use Thrift\Exception\TProtocolException;
-use fun\rpc\FunServantClient;
-use fun\rpc\Context;
-use fun\rpc\TCacheMissed;
-use fun\rpc\TMongoMissed;
-use fun\rpc\TMemcacheData;
+require_once 'bootstrap.php';
 
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(0);
-    $sock->setSendTimeout(1000);
-    $sock->setRecvTimeout(2500);
+    $sock->setSendTimeout(4000);
+    $sock->setRecvTimeout(4000);
     $sock->setNumRetries(1);
     $transport = new TBufferedTransport($sock, 1024, 1024);
     $protocol = new TBinaryProtocol($transport);
@@ -47,7 +15,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('reason' => "from php test.php", 'rid' => '125'));
+    $ctx = new Context(array('reason' => "phptest", 'rid' => '125'));
 
     // ping
     $return = $client->ping($ctx);
@@ -57,24 +25,35 @@ try {
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
     echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
 
-    // mc
-    $mcData = new TMemcacheData();
-    $mcData->data = 'world 世界';
-    echo '[Client] mc_set received: ', $client->mc_set($ctx, 'default', 'hello-php', $mcData, 120), "\n";
-    echo '[Client] mc_get received: ', print_r($client->mc_get($ctx, 'default', 'hello-php')), "\n";
-    $mcData->data = 0;
-    echo '[Client] mc_add received: ', $client->mc_add($ctx, 'default', 'test:counter:uid', $mcData, 3500), "\n";
-    echo '[Client] mc_inc received: ', $client->mc_increment($ctx, 'default', 'test:counter:uid', 7), "\n";
-    try {
-        echo '[Client] mc_get hello-non-exist received: ', $client->mc_get($ctx, 'default', 'hello-non-exist'), "\n";
-    } catch (TCacheMissed $ex) {
-        echo $ex->getMessage(), "\n";
-    }
-
     // lc
     echo '[Client] lc_set received: ', $client->lc_set($ctx, 'hello-php-lc', 'world 世界'), "\n";
     echo '[Client] lc_get received: ', $client->lc_get($ctx, 'hello-php-lc'), "\n";
     echo '[Client] lc_del received: ', $client->lc_del($ctx, 'hello-php-lc'), "\n";
+
+    // my.query
+    if (1) {
+        for ($i=0; $i<5; $i++) {
+            $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', array());
+            echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
+            print_r($rows);
+        }
+    }
+
+    // mc
+    if (0) {
+        $mcData = new TMemcacheData();
+        $mcData->data = 'world 世界';
+        echo '[Client] mc_set received: ', $client->mc_set($ctx, 'default', 'hello-php', $mcData, 120), "\n";
+        echo '[Client] mc_get received: ', print_r($client->mc_get($ctx, 'default', 'hello-php')), "\n";
+        $mcData->data = 0;
+        echo '[Client] mc_add received: ', $client->mc_add($ctx, 'default', 'test:counter:uid', $mcData, 3500), "\n";
+        echo '[Client] mc_inc received: ', $client->mc_increment($ctx, 'default', 'test:counter:uid', 7), "\n";
+        try {
+            echo '[Client] mc_get hello-non-exist received: ', $client->mc_get($ctx, 'default', 'hello-non-exist'), "\n";
+        } catch (TCacheMissed $ex) {
+            echo 'mc error: ', $ex->getMessage(), "\n";
+        }
+    }
 
     // mg.insert
     if (0) {
@@ -138,14 +117,8 @@ try {
         echo "[Client] mg.find_and_modify received: ", $val['value'], "\n";
     }
 
-    // my.query
-    for ($i=0; $i<5; $i++) {
-        $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', array());
-        echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
-        print_r($rows);
-    }
-
     $transport->close();
-} catch (TException $tx) {
+} catch (Exception $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";
 }
+
