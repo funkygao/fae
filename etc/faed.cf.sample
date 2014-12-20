@@ -36,7 +36,7 @@
 
         proxy: {
             pool_capacity: 50
-            idle_timeout: "10m"
+            idle_timeout: "0s"
             self_addr: ":9001"
         }
 
