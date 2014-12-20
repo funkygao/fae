@@ -116,7 +116,7 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 // return nil if I'm the servant for this key
 func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr string) {
 	peerAddr = this.selector.PickPeer(key)
-	if peerAddr == "" {
+	if peerAddr == this.cf.SelfAddr {
 		return
 	}
 
