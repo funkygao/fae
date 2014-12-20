@@ -12,7 +12,7 @@ import (
 
 // thrift.TServer implementation
 type TFunServer struct {
-	stopped bool
+	quit chan bool
 
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
@@ -33,6 +33,7 @@ func NewTFunServer(engine *Engine,
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory) *TFunServer {
 	this := &TFunServer{
+		quit:                   make(chan bool),
 		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,
@@ -49,7 +50,8 @@ func NewTFunServer(engine *Engine,
 }
 
 func (this *TFunServer) Serve() error {
-	this.stopped = false
+	const stoppedError = "RPC server stopped"
+
 	err := this.serverTransport.Listen()
 	if err != nil {
 		return err
@@ -64,7 +66,15 @@ func (this *TFunServer) Serve() error {
 		log.Info("etcd self[%s] registered", this.engine.conf.EtcdSelfAddr)
 	}
 
-	for !this.stopped {
+	for {
+		select {
+		case <-this.quit:
+			// FIXME new conn will timeout, instead of conn close
+			return errors.New(stoppedError)
+
+		default:
+		}
+
 		client, err := this.serverTransport.Accept()
 		if err != nil {
 			log.Error("Accept: %v", err)
@@ -73,7 +83,7 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return errors.New("RPC server stopped")
+	return errors.New(stoppedError)
 }
 
 func (this *TFunServer) handleSession(client interface{}) {
@@ -196,7 +206,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 }
 
 func (this *TFunServer) Stop() error {
-	this.stopped = true
+	close(this.quit)
 	this.serverTransport.Interrupt()
 	return nil
 }
