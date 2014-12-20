@@ -70,7 +70,7 @@ func (this *Proxy) refreshPeers(peers []string) {
 			continue
 		}
 
-		this.Servant(peerAddr)
+		this.addRemotePeerIfNecessary(peerAddr)
 	}
 
 	// kill died peers
@@ -98,10 +98,8 @@ func (this *Proxy) refreshPeers(peers []string) {
 
 }
 
-// Get or create a fae peer servant based on peer address
-func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
+func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
 
 	if _, present := this.remotePeerPools[peerAddr]; !present {
 		this.remotePeerPools[peerAddr] = newFunServantPeerPool(this.myIp,
@@ -109,38 +107,27 @@ func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 		this.remotePeerPools[peerAddr].Open()
 	}
 
+	this.mutex.Unlock()
+}
+
+// Get or create a fae peer servant based on peer address
+func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
+	this.addRemotePeerIfNecessary(peerAddr)
 	return this.remotePeerPools[peerAddr].Get()
 }
 
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
-func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr string) {
-	peerAddr = this.selector.PickPeer(key)
+func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
+	peerAddr := this.selector.PickPeer(key)
 	if peerAddr == this.cf.SelfAddr {
-		return
+		return nil, nil
 	}
 
-	log.Debug("sticky key[%s] servant peer: %s", key, peerAddr)
+	log.Debug("key[%s]: {peer: %s, txn: %d}", key, peerAddr,
+		this.remotePeerPools[peerAddr].nextTxn())
 
-	svt, _ := this.remotePeerPools[peerAddr].Get()
-	return svt, peerAddr
-}
-
-// get all other servants in the cluster
-// FIXME lock, but can't dead lock with this.Servant()
-func (this *Proxy) ClusterServants() map[string]*FunServantPeer {
-	rv := make(map[string]*FunServantPeer)
-	for peerAddr, _ := range this.remotePeerPools {
-		svt, err := this.Servant(peerAddr)
-		if err != nil {
-			log.Error("peer servant[%s]: %s", peerAddr, err)
-			continue
-		}
-
-		rv[peerAddr] = svt
-	}
-
-	return rv
+	return this.remotePeerPools[peerAddr].Get()
 }
 
 func (this *Proxy) StatsJSON() string {

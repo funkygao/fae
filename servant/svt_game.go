@@ -23,7 +23,13 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		// I' the final servant, got call from remote peers
 		r = this.namegen.Next()
 	} else {
-		svt, _ := this.proxy.StickyServant(IDENT)
+		svt, err := this.proxy.ServantByKey(IDENT)
+		if err != nil {
+			appErr = err
+			log.Error("%s: %s", IDENT, err)
+			return
+		}
+
 		if svt == nil {
 			// handle it by myself, got call locally
 			r = this.namegen.Next()
@@ -32,6 +38,8 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmName3(ctx)
 			if appErr != nil {
+				log.Error("%s: %s", IDENT, appErr)
+
 				svt.Close()
 			} else {
 				svt.Recycle()
