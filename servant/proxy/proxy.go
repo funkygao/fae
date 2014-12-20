@@ -91,8 +91,10 @@ func (this *Proxy) refreshPeers(peers []string) {
 		if !alive {
 			log.Trace("peer[%s] gone away", peerAddr)
 
+			this.mutex.Lock()
 			this.remotePeerPools[peerAddr].Close() // FIXME kill all the conns in this pool?
 			delete(this.remotePeerPools, peerAddr)
+			this.mutex.Unlock()
 		}
 	}
 
