@@ -21,6 +21,11 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
+		if !this.namegen.DbLoaded {
+			this.namegen.DbLoaded = true
+			go this.loadName3Bitmap()
+		}
+
 		r = this.namegen.Next()
 	} else {
 		svt, err := this.proxy.ServantByKey(IDENT)
@@ -32,6 +37,11 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 		if svt == nil {
 			// handle it by myself, got call locally
+			if !this.namegen.DbLoaded {
+				this.namegen.DbLoaded = true
+				go this.loadName3Bitmap()
+			}
+
 			r = this.namegen.Next()
 		} else {
 			// remote peer servant
@@ -50,6 +60,20 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	profiler.do(IDENT, ctx, "{r^%s}", r)
 
 	return
+}
+
+func (this *FunServantImpl) loadName3Bitmap() {
+	log.Trace("loading namegen bitmap from db")
+
+	_, result, err := this.doMyQuery("loadName3Bitmap", "AllianceShard", "Alliance", 0,
+		"SELECT acronym FROM Alliance", nil, "")
+	if err != nil {
+		log.Error("namegen warmup: %s", err)
+	} else {
+		for row := range result.Rows {
+			this.namegen.SetBusy(row[0])
+		}
+	}
 }
 
 // record php request time and payload size in bytes

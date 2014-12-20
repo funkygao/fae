@@ -14,6 +14,7 @@ const (
 
 var (
 	ErrNameLen = errors.New("Name length not match slot length")
+	DbLoaded   = false
 )
 
 func init() {
