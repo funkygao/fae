@@ -1,9 +1,8 @@
-package couchbasebench
+package main
 
 import (
-	"testing"
-
 	"github.com/funkygao/couchbase"
+	"testing"
 )
 
 func mf(err error, msg string) {

@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
@@ -43,10 +44,10 @@ var (
 
 func init() {
 	ctx = rpc.NewContext()
-	ctx.Caller = "POST+/facebook/getPaymentRequestId/+34ca2cf6"
+	ctx.Reason = "POST+/facebook/getPaymentRequestId/+34ca2cf6"
 	ctx.Host = thrift.StringPtr("stress.test.local")
 	ctx.Ip = thrift.StringPtr("127.0.0.1")
-	ctx.Sid = thrift.StringPtr("bcf8f619")
+	ctx.Rid = "bcf8f619"
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
@@ -67,7 +68,8 @@ func parseFlag() {
 func main() {
 	parseFlag()
 
-	proxy := proxy.New(Concurrency, time.Minute*60)
+	cf := config.ConfigProxy{PoolCapacity: 20}
+	proxy := proxy.New(cf)
 	tryServantPool(proxy)
 
 	time.Sleep(time.Second * 2)

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 )
@@ -19,7 +20,8 @@ func init() {
 }
 
 func main() {
-	client, err := proxy.New(5, 0).Servant(host + ":" + port)
+	cf := config.ConfigProxy{PoolCapacity: 1}
+	client, err := proxy.New(cf).Servant(host + ":" + port)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -29,6 +31,11 @@ func main() {
 	ctx := rpc.NewContext()
 	ctx.Reason = "pingfae"
 	ctx.Rid = "1"
-	r, _ := client.Ping(ctx)
-	fmt.Println(r)
+	r, err := client.Ping(ctx)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(r)
+	}
+
 }
