@@ -70,6 +70,7 @@ func (this *TFunServer) Serve() error {
 		select {
 		case <-this.quit:
 			// FIXME new conn will timeout, instead of conn close
+			log.Info("RPC server quit...")
 			return errors.New(stoppedError)
 
 		default:
@@ -124,7 +125,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 	if this.engine.conf.rpc.sessionSlowThreshold.Seconds() > 0 &&
 		elapsed > this.engine.conf.rpc.sessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
-		log.Warn("session[%s] SLOW %s", remoteAddr, elapsed)
 	}
 }
 
