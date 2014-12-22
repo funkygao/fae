@@ -39,7 +39,8 @@ func (this *funServantPeerPool) Open() {
 		return newFunServantPeer(this, client), nil
 	}
 
-	this.pool = pool.NewResourcePool(factory,
+	this.pool = pool.NewResourcePool("FaePeer",
+		factory,
 		this.capacity, this.capacity,
 		this.idleTimeout)
 }
