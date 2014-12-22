@@ -45,17 +45,16 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 			r = this.namegen.Next()
 		} else {
-			peer = svt.Addr()
 			// remote peer servant
+			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmName3(ctx)
 			if appErr != nil {
 				log.Error("%s: %s", IDENT, appErr)
-
 				svt.Close()
-			} else {
-				svt.Recycle()
 			}
+
+			svt.Recycle()
 		}
 	}
 

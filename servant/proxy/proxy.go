@@ -98,7 +98,7 @@ func (this *Proxy) refreshPeers(peers []string) {
 			log.Trace("peer[%s] gone away", peerAddr)
 
 			this.mutex.Lock()
-			this.remotePeerPools[peerAddr].Close() // FIXME kill all the conns in this pool?
+			this.remotePeerPools[peerAddr].Close() // kill all conns in this pool
 			delete(this.remotePeerPools, peerAddr)
 			this.mutex.Unlock()
 		}
@@ -121,6 +121,9 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 // Get or create a fae peer servant based on peer address
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	this.addRemotePeerIfNecessary(peerAddr)
+
+	log.Debug("servant by addr[%s]: {txn: %d}", peerAddr,
+		this.remotePeerPools[peerAddr].nextTxn())
 	return this.remotePeerPools[peerAddr].Get()
 }
 
@@ -132,9 +135,8 @@ func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
 		return nil, nil
 	}
 
-	log.Debug("key[%s]: {peer: %s, txn: %d}", key, peerAddr,
+	log.Debug("sevant by key[%s]: {peer: %s, txn: %d}", key, peerAddr,
 		this.remotePeerPools[peerAddr].nextTxn())
-
 	return this.remotePeerPools[peerAddr].Get()
 }
 

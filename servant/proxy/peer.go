@@ -25,6 +25,7 @@ func newFunServantPeer(p *funServantPeerPool, c *rpc.FunServantClient) *FunServa
 
 func (this *FunServantPeer) Close() {
 	this.Transport.Close()
+	this.Resource = nil
 }
 
 func (this *FunServantPeer) Recycle() {
