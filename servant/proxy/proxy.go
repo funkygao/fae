@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/ip"
 	log "github.com/funkygao/log4go"
+	"github.com/samuel/go-zookeeper/zk"
 	"sync"
 )
 
@@ -44,7 +45,8 @@ func (this *Proxy) StartMonitorCluster() {
 	peersChan := make(chan []string, 10)
 	go etclib.WatchService(etclib.SERVICE_FAE, peersChan)
 
-	for {
+	var zkConnected = true
+	for zkConnected {
 		select {
 		case <-peersChan:
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
@@ -56,11 +58,15 @@ func (this *Proxy) StartMonitorCluster() {
 				this.refreshPeers(peers)
 			} else {
 				log.Error("Cluster peers: %s", err)
+
+				if err == zk.ErrClosing || err == zk.ErrConnectionClosed {
+					zkConnected = false
+				}
 			}
 		}
 	}
 
-	log.Warn("Cluster monitor died")
+	log.Warn("Cluster peers monitor died")
 }
 
 func (this *Proxy) refreshPeers(peers []string) {
