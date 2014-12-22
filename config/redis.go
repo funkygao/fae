@@ -62,6 +62,14 @@ func (this *ConfigRedis) loadConfig(cf *conf.Conf) {
 	log.Debug("redis conf: %+v", *this)
 }
 
+func (this *ConfigRedis) ServersOfPool(pool string) []string {
+	r := make([]string, 0)
+	for addr, _ := range this.Servers[pool] {
+		r = append(r, addr)
+	}
+	return r
+}
+
 func (this *ConfigRedis) Enabled() bool {
 	return len(this.Servers) > 0
 }
