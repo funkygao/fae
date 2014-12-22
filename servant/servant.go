@@ -81,17 +81,22 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	// remote fae peer proxy
+	log.Debug("creating servant: peers proxy, capacity: %d",
+		this.conf.Proxy.PoolCapacity)
 	this.proxy = proxy.New(*this.conf.Proxy)
 
 	// idgen, always present
+	log.Debug("creating servant: idgen")
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
 
 	// namegen
+	log.Debug("creating servant: namegen")
 	this.namegen = namegen.New(3)
 
 	// local cache
 	if this.conf.Lcache.Enabled() {
-		log.Debug("creating servant: lcache")
+		log.Debug("creating servant: lcache, maxIems: %d",
+			this.conf.Lcache.LruMaxItems)
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
