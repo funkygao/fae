@@ -70,7 +70,7 @@ func (this *FunServantImpl) loadName3Bitmap() {
 	if err != nil {
 		log.Error("namegen warmup: %s", err)
 	} else {
-		for row := range result.Rows {
+		for _, row := range result.Rows {
 			this.namegen.SetBusy(row[0])
 		}
 	}
