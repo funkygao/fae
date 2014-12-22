@@ -29,19 +29,22 @@ try {
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.121', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
     // mysql select
-    echo "DEMO SELECT\n";
-    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * from UserInfo where uid>?', array(1), '');
+    echo "\nDEMO SELECT\n";
+    echo "===============================\n";
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT uid from UserInfo where uid>?', array(1), '');
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
     // mysql update
-    echo "DEMO UPDATE\n";
+    echo "\nDEMO UPDATE\n";
+    echo "===============================\n";
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1), 'UserInfo:1');
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
     // mysql merge blob column
-    echo "DEMO MERGE\n";
+    echo "\nDEMO MERGE\n";
+    echo "===============================\n";
     $merged = $client->my_merge($ctx, 'AllianceShard', 'Rally', 1, 'alliance_id=51 and uid=50', 
         'Rally:' . json_encode(array(
             'alliance_id' => 51,
@@ -58,7 +61,8 @@ try {
     print_r(json_decode($merged->newVal, TRUE));
 
     // mysql transation
-    echo "DEMO transtaion\n";
+    echo "\nDEMO transtaion\n";
+    echo "===============================\n";
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL, '');
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1), 'UserInfo:1');
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'COMMIT', NULL, '');
