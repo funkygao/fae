@@ -22,15 +22,3 @@ require_once $GLOBALS['THRIFT_ROOT'].'/Transport/TSocketPool.php';
 require_once $GLOBALS['THRIFT_ROOT'].'/Transport/TBufferedTransport.php';
 require_once $GLOBALS['SERVANT_ROOT'].'/FunServant.php';
 require_once $GLOBALS['SERVANT_ROOT'].'/Types.php';
-
-use Thrift\Transport\TSocketPool;
-use Thrift\Transport\TBufferedTransport;
-use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Exception\TTransportException;
-use Thrift\Exception\TProtocolException;
-use fun\rpc\FunServantClient;
-use fun\rpc\Context;
-use fun\rpc\TCacheMissed;
-use fun\rpc\TMongoMissed;
-use fun\rpc\TMemcacheData;
-

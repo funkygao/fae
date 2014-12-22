@@ -2,8 +2,19 @@
 
 require_once 'bootstrap.php';
 
+use Thrift\Transport\TSocketPool;
+use Thrift\Transport\TBufferedTransport;
+use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Exception\TTransportException;
+use Thrift\Exception\TProtocolException;
+use fun\rpc\FunServantClient;
+use fun\rpc\Context;
+use fun\rpc\TCacheMissed;
+use fun\rpc\TMongoMissed;
+use fun\rpc\TMemcacheData;
+
 try {
-    $sock = new TSocketPool(array('localhost'), array(9001));
+    $sock = new TSocketPool(array('localhost'), array(9011));
     $sock->setDebug(1);
     $sock->setSendTimeout(4000);
     $sock->setRecvTimeout(4000);
