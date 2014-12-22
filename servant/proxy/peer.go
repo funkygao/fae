@@ -23,7 +23,6 @@ func newFunServantPeer(p *funServantPeerPool, c *rpc.FunServantClient) *FunServa
 	return this
 }
 
-// TODO if peer conn broken, call this
 func (this *FunServantPeer) Close() {
 	this.Transport.Close()
 }
@@ -32,13 +31,13 @@ func (this *FunServantPeer) Recycle() {
 	if this.Transport.IsOpen() {
 		this.pool.pool.Put(this)
 	} else {
-		log.Debug("peer[%s] broken session", this.pool.peerAddr)
+		log.Debug("peer[%s] broken", this.pool.peerAddr)
 		this.pool.pool.Put(nil)
 	}
 }
 
 func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
-	ctx := rpc.NewContext() // TODO pool
+	ctx := rpc.NewContext()
 	ctx.Rid = strconv.FormatInt(this.pool.nextTxn(), 10)
 	ctx.Reason = reason
 	ctx.Uid = uid

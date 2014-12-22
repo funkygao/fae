@@ -19,6 +19,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		return
 	}
 
+	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
 		if !this.namegen.DbLoaded {
@@ -44,6 +45,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 			r = this.namegen.Next()
 		} else {
+			peer = svt.Addr()
 			// remote peer servant
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmName3(ctx)
@@ -57,7 +59,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{r^%s}", r)
+	profiler.do(IDENT, ctx, "{p^%s r^%s}", peer, r)
 
 	return
 }

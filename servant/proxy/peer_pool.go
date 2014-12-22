@@ -36,6 +36,8 @@ func (this *funServantPeerPool) Open() {
 			return nil, err
 		}
 
+		log.Trace("peer[%s] connected", this.peerAddr)
+
 		return newFunServantPeer(this, client), nil
 	}
 
@@ -71,8 +73,6 @@ func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 
 		return nil, err
 	}
-
-	log.Trace("peer[%s] connected", peerAddr)
 
 	client := rpc.NewFunServantClientFactory(
 		transportFactory.GetTransport(transport),
