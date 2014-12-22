@@ -4,7 +4,6 @@ package main
 
 import (
 	"flag"
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
@@ -45,8 +44,8 @@ var (
 func init() {
 	ctx = rpc.NewContext()
 	ctx.Reason = "POST+/facebook/getPaymentRequestId/+34ca2cf6"
-	ctx.Host = thrift.StringPtr("stress.test.local")
-	ctx.Ip = thrift.StringPtr("127.0.0.1")
+	ctx.Host = "stress.test.local"
+	ctx.Ip = "127.0.0.1"
 	ctx.Rid = "bcf8f619"
 
 	log.SetOutput(os.Stdout)
