@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
 	_ "github.com/go-sql-driver/mysql"
+	"strings"
 )
 
 // A mysql conn to a single mysql instance
@@ -50,12 +51,43 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 
 	rows, err = this.db.Query(query, args...)
 	if err != nil {
-		this.breaker.Fail()
+		// func (me *MySQLError) Error() string {
+		//     fmt.Sprintf("Error %d: %s", me.Number, me.Message)
+		// }
+		// Error 1054: Unknown column 'curve_internal_id' in 'field list'
+		if this.isSystemError(err) {
+			this.breaker.Fail()
+		}
 	} else {
 		this.breaker.Succeed()
 	}
 
 	return
+}
+
+func (this *mysql) isSystemError(err error) bool {
+	// http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
+	// mysql error code is always 4 digits
+	const (
+		// Error 1054: Unknown column 'curve_internal_id' in 'field list'
+		mysqlErrnoUnknownColumn = "1054"
+
+		// Error 1062: Duplicate entry '1' for key 'PRIMARY'
+		mysqlErrnoDupEntry = "1062"
+	)
+
+	// "Error %d:" skip the leading 6 chars: "Error "
+	var errcode = err.Error()[6:] // TODO confirm mysql err always "Error %d: %s"
+	switch {
+	case strings.HasPrefix(errcode, mysqlErrnoUnknownColumn):
+		return false
+
+	case strings.HasPrefix(errcode, mysqlErrnoDupEntry):
+		return false
+
+	default:
+		return true
+	}
 }
 
 func (this *mysql) QueryRow(query string, args ...interface{}) *sql.Row {
