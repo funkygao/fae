@@ -152,6 +152,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   rpc server stop is using chan to make it really stop, done, not tested
 *   mysql conn timeout not working
 *   what about remote peer conn when shutdown
+*   https://github.com/funkygao/go.serversets
 *   sticky peer
     - resource pool get conn should be in goroutine
 *   name3 dump/load to central storage
