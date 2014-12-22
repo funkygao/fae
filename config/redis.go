@@ -62,7 +62,7 @@ func (this *ConfigRedis) loadConfig(cf *conf.Conf) {
 	log.Debug("redis conf: %+v", *this)
 }
 
-func (this *ConfigRedis) ServersOfPool(pool string) []string {
+func (this *ConfigRedis) PoolServers(pool string) []string {
 	r := make([]string, 0)
 	for addr, _ := range this.Servers[pool] {
 		r = append(r, addr)

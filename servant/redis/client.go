@@ -28,10 +28,10 @@ func New(cf config.ConfigRedis) *Client {
 		RetryTimeout:     cf.Breaker.RetryTimeout}
 	for pool, _ := range this.conf.Servers {
 		this.selectors[pool] = new(ConsistentServerSelector)
-		this.selectors[pool].SetServers(cf.ServersOfPool(pool))
+		this.selectors[pool].SetServers(cf.PoolServers(pool))
 		this.conns[pool] = make(map[string]redis.Pool)
 		this.locks[pool] = make(map[string]*sync.Mutex)
-		for _, addr := range cf.ServersOfPool(pool) {
+		for _, addr := range cf.PoolServers(pool) {
 			this.locks[pool][addr] = &sync.Mutex{}
 
 			this.conns[pool][addr] = &redis.Pool{
