@@ -170,8 +170,10 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   thrift framed transport, also php thrift transport buffer size
 *   maybe profiler sample rate is totally controlled by client
 *   hot configuration reload
+*   NewTBufferedTransportFactory buffer size, and php config buf size
 *   realtime tracking of concurrent sessions by client host
 *   rate limit of connection of a given user
+*   mysql breaker, only system error will fail breaker; is failure allowance consitutive?
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
 *   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
 *   golang uses /proc/sys/net/core/somaxconn as listener backlog
