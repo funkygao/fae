@@ -10,7 +10,6 @@ import (
 	log "github.com/funkygao/log4go"
 	"strings"
 	"sync/atomic"
-	"time"
 )
 
 // thrift internal layer
@@ -131,18 +130,6 @@ func (this *Engine) StopRpcServe() {
 	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
 	this.svt.Flush()
-	log.Info("Servant flush done")
-
-	// TODO wait all sessions terminate, but what about long conn php workers?
-	if false {
-		for {
-			if rpcServer.sessionN == 0 {
-				break
-			}
-
-			time.Sleep(time.Microsecond * 20)
-		}
-	}
 
 	log.Info("RPC server stopped gracefully")
 }
