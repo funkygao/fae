@@ -39,8 +39,6 @@ type ConfigMemcache struct {
 	ReplicaN              int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMemcacheServer // key is host:port(addr)
-
-	enabled bool
 }
 
 func (this *ConfigMemcache) ServerList() []string {
@@ -66,7 +64,7 @@ func (this *ConfigMemcache) Pools() (pools []string) {
 }
 
 func (this *ConfigMemcache) Enabled() bool {
-	return this.enabled
+	return len(this.Servers) > 0
 }
 
 func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
@@ -91,7 +89,6 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 		server.loadConfig(section)
 		this.Servers[server.Address()] = server
 	}
-	this.enabled = true
 
 	log.Debug("memcache conf: %+v", *this)
 }

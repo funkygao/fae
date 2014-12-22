@@ -71,11 +71,10 @@ type ConfigMysql struct {
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMysqlServer // key is pool
 
-	enabled bool
 }
 
 func (this *ConfigMysql) Enabled() bool {
-	return this.enabled
+	return len(this.Servers) > 0
 }
 
 func (this *ConfigMysql) Pools() (pools []string) {
@@ -94,7 +93,6 @@ func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
 	for _, p := range cf.StringList("global_pools", nil) {
 		this.GlobalPools[p] = true
 	}
-	this.enabled = true
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
 	this.ConnectTimeout = cf.Duration("connect_timeout", 0)

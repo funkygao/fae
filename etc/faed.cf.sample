@@ -144,6 +144,25 @@
             lru_max_items: 1073741824
         }
 
+        redis: {
+            breaker: {
+                failure_allowance: 5
+                retry_interval: "10s"
+            }
+            pools: [
+                {
+                    name: "default"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            idle_timeout: "360s"
+                        }
+                    ]
+                }
+            ]
+        }
+
         memcache: {
             hash_strategy: "standard"
             max_conns_per_server: 200

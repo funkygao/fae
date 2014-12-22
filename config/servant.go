@@ -55,6 +55,12 @@ func LoadServants(cf *conf.Conf) {
 		Servants.Mysql.loadConfig(section)
 	}
 
+	Servants.Redis = new(ConfigRedis)
+	section, err = cf.Section("redis")
+	if err == nil {
+		Servants.Redis.loadConfig(section)
+	}
+
 	// memcached section
 	Servants.Memcache = new(ConfigMemcache)
 	section, err = cf.Section("memcache")
