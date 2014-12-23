@@ -77,6 +77,7 @@ func (this *Client) Set(pool string, key string, val interface{}) error {
 		return err
 	}
 
+	// Do(cmd string, args ...interface{}) (reply interface{}, err error)
 	if _, err = conn.Do("SET", key, encodedVal); err != nil {
 		log.Error("redis.set[%s]: %s", key, err)
 	}
