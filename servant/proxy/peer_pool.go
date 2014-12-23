@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/pool"
 	log "github.com/funkygao/log4go"
@@ -13,23 +14,23 @@ import (
 // a conn pool to a single fae remote peer
 type funServantPeerPool struct {
 	peerAddr string
+	myIp     string
 
-	tcpNoDelay  bool
-	capacity    int
-	idleTimeout time.Duration
-	pool        *pool.ResourcePool
+	cf config.ConfigProxy
+
+	pool *pool.ResourcePool
 
 	nextServantId uint64 // each conn in this pool has an id
-
-	// ctx related
-	txn  int64
-	myIp string
+	txn           int64
 }
 
-func newFunServantPeerPool(myIp string, peerAddr string, capacity int,
-	idleTimeout time.Duration, tcpNoDelay bool) (this *funServantPeerPool) {
-	this = &funServantPeerPool{idleTimeout: idleTimeout, capacity: capacity,
-		peerAddr: peerAddr, myIp: myIp, tcpNoDelay: tcpNoDelay}
+func newFunServantPeerPool(myIp string, peerAddr string,
+	cf config.ConfigProxy) (this *funServantPeerPool) {
+	this = &funServantPeerPool{
+		myIp:     myIp,
+		peerAddr: peerAddr,
+		cf:       cf,
+	}
 	return
 }
 
@@ -48,8 +49,8 @@ func (this *funServantPeerPool) Open() {
 
 	this.pool = pool.NewResourcePool("FaePeer",
 		factory,
-		this.capacity, this.capacity,
-		this.idleTimeout)
+		this.cf.PoolCapacity, this.cf.PoolCapacity,
+		this.cf.IdleTimeout)
 }
 
 func (this *funServantPeerPool) Close() {
@@ -65,6 +66,7 @@ func (this *funServantPeerPool) Get() (*FunServantPeer, error) {
 	return fun.(*FunServantPeer), nil
 }
 
+// connect to remote servant peer
 func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 	error) {
 	transportFactory := thrift.NewTBufferedTransportFactory(4 << 10) // TODO
@@ -81,7 +83,7 @@ func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 
 	if tcpConn, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		// nagle's only applies to client rather than server
-		tcpConn.SetNoDelay(this.tcpNoDelay)
+		tcpConn.SetNoDelay(this.cf.TcpNoDelay)
 	}
 
 	client := rpc.NewFunServantClientFactory(
