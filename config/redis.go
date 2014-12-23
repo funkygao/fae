@@ -10,6 +10,7 @@ import (
 type ConfigRedisServer struct {
 	Addr        string // host:port
 	MaxIdle     int
+	MaxActive   int
 	IdleTimeout time.Duration
 }
 
@@ -19,6 +20,7 @@ func (this *ConfigRedisServer) loadConfig(cf *conf.Conf) {
 		panic("Empty redis server addr")
 	}
 	this.MaxIdle = cf.Int("max_idle", 10)
+	this.MaxActive = cf.Int("max_active", this.MaxIdle*2)
 	this.IdleTimeout = cf.Duration("idle_timeout", 10*time.Minute)
 }
 

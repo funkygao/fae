@@ -36,6 +36,7 @@ func New(cf *config.ConfigRedis) *Client {
 
 			this.conns[pool][addr] = &redis.Pool{
 				MaxIdle:     cf.Servers[pool][addr].MaxIdle,
+				MaxActive:   cf.Servers[pool][addr].MaxActive,
 				IdleTimeout: cf.Servers[pool][addr].IdleTimeout,
 				Dial: func() (redis.Conn, error) {
 					c, err := redis.Dial("tcp", addr)
