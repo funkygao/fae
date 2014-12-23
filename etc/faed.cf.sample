@@ -19,7 +19,6 @@
         session_timeout: "0s"
         session_slow_threshold: "8s"
         io_timeout: "3s"
-        tcp_nodelay: true
         stats_output_interval: "10m"
     }
 
@@ -38,6 +37,7 @@
             pool_capacity: 50
             idle_timeout: "0s"
             self_addr: ":9001"
+            tcp_nodelay: true
         }
 
         mysql: {

@@ -111,7 +111,8 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 
 	if _, present := this.remotePeerPools[peerAddr]; !present {
 		this.remotePeerPools[peerAddr] = newFunServantPeerPool(this.myIp,
-			peerAddr, this.cf.PoolCapacity, this.cf.IdleTimeout)
+			peerAddr, this.cf.PoolCapacity, this.cf.IdleTimeout,
+			this.cf.TcpNoDelay)
 		this.remotePeerPools[peerAddr].Open()
 	}
 

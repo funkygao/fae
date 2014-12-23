@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/pool"
 	log "github.com/funkygao/log4go"
+	"net"
 	"sync/atomic"
 	"time"
 )
@@ -13,6 +14,7 @@ import (
 type funServantPeerPool struct {
 	peerAddr string
 
+	tcpNoDelay  bool
 	capacity    int
 	idleTimeout time.Duration
 	pool        *pool.ResourcePool
@@ -25,9 +27,9 @@ type funServantPeerPool struct {
 }
 
 func newFunServantPeerPool(myIp string, peerAddr string, capacity int,
-	idleTimeout time.Duration) (this *funServantPeerPool) {
+	idleTimeout time.Duration, tcpNoDelay bool) (this *funServantPeerPool) {
 	this = &funServantPeerPool{idleTimeout: idleTimeout, capacity: capacity,
-		peerAddr: peerAddr, myIp: myIp}
+		peerAddr: peerAddr, myIp: myIp, tcpNoDelay: tcpNoDelay}
 	return
 }
 
@@ -75,6 +77,11 @@ func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 		log.Error("conn peer[%s]: %s", peerAddr, err)
 
 		return nil, err
+	}
+
+	if tcpConn, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+		// nagle's only applies to client rather than server
+		tcpConn.SetNoDelay(this.tcpNoDelay)
 	}
 
 	client := rpc.NewFunServantClientFactory(

@@ -65,7 +65,6 @@ type configRpc struct {
 	bufferSize             int // network IO read/write buffer
 	framed                 bool
 	protocol               string
-	tcpNoDelay             bool
 	statsOutputInterval    time.Duration
 	maxOutstandingSessions int
 }
@@ -83,7 +82,6 @@ func (this *configRpc) loadConfig(section *conf.Conf) {
 	this.framed = section.Bool("framed", false)
 	this.bufferSize = section.Int("buffer_size", 4<<10)
 	this.protocol = section.String("protocol", "binary")
-	this.tcpNoDelay = section.Bool("tcp_nodelay", true)
 	this.maxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
 
 	log.Debug("rpc conf: %+v", *this)

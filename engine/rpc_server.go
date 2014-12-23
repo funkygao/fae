@@ -100,14 +100,9 @@ func (this *TFunServer) handleSession(client interface{}) {
 	atomic.AddInt64(&this.sessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		if !this.engine.conf.rpc.tcpNoDelay {
-			// golang is tcp no delay by default
-			tcpClient.SetNoDelay(false)
-		}
-
 		log.Trace("session[%s] open", tcpClient.RemoteAddr())
 	} else {
-		log.Error("non tcp conn found, should never happen")
+		log.Error("non tcp conn found, should NEVER happen")
 		return
 	}
 
