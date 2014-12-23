@@ -9,16 +9,19 @@ import (
 
 // A single rpc client connection with remote peer
 type FunServantPeer struct {
+	id uint64
 	pool.Resource
 	*rpc.FunServantClient
 
 	pool *funServantPeerPool
 }
 
-func newFunServantPeer(p *funServantPeerPool, c *rpc.FunServantClient) *FunServantPeer {
+func newFunServantPeer(id uint64, p *funServantPeerPool,
+	c *rpc.FunServantClient) *FunServantPeer {
 	this := new(FunServantPeer)
 	this.FunServantClient = c
 	this.pool = p
+	this.id = id
 	this.Resource = this
 	return this
 }
@@ -26,6 +29,10 @@ func newFunServantPeer(p *funServantPeerPool, c *rpc.FunServantClient) *FunServa
 func (this *FunServantPeer) Close() {
 	this.Transport.Close()
 	this.Resource = nil
+}
+
+func (this *FunServantPeer) Id() uint64 {
+	return this.id
 }
 
 func (this *FunServantPeer) Recycle() {

@@ -17,6 +17,8 @@ type funServantPeerPool struct {
 	idleTimeout time.Duration
 	pool        *pool.ResourcePool
 
+	nextServantId uint64 // each conn in this pool has an id
+
 	// ctx related
 	txn  int64
 	myIp string
@@ -36,9 +38,10 @@ func (this *funServantPeerPool) Open() {
 			return nil, err
 		}
 
-		log.Trace("peer[%s] connected", this.peerAddr)
+		id := atomic.AddUint64(this.nextServantId, 1)
+		log.Trace("peer[%s] connected with id: %d", this.peerAddr, id)
 
-		return newFunServantPeer(this, client), nil
+		return newFunServantPeer(id, this, client), nil
 	}
 
 	this.pool = pool.NewResourcePool("FaePeer",
