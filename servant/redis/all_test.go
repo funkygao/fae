@@ -20,7 +20,7 @@ func TestCRUD(t *testing.T) {
 	s := server.NewServer("test")
 	s.LoadConfig("../../etc/faed.cf")
 	section, _ := s.Conf.Section("servants.redis")
-	cf := config.ConfigRedis{}
+	cf := &config.ConfigRedis{}
 	cf.LoadConfig(section)
 
 	var (

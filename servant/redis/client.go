@@ -18,7 +18,7 @@ type Client struct {
 	conns     map[string]map[string]*redis.Pool // pool:serverAddr:redis.Pool
 }
 
-func New(cf config.ConfigRedis) *Client {
+func New(cf *config.ConfigRedis) *Client {
 	this := new(Client)
 	this.selectors = make(map[string]ServerSelector)
 	this.conns = make(map[string]map[string]*redis.Pool)

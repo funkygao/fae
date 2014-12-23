@@ -10,6 +10,7 @@ import (
 	"github.com/funkygao/fae/servant/mysql"
 	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/proxy"
+	"github.com/funkygao/fae/servant/redis"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
 	"github.com/funkygao/golib/mutexmap"
@@ -45,6 +46,7 @@ type FunServantImpl struct {
 	mc      *memcache.ClientPool // memcache pool, auto sharding by key
 	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
 	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	rd      *redis.Client        // redis pool, auto sharding by pool name
 	cb      *couch.Client        // couchbase client
 }
 
@@ -105,6 +107,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	if this.conf.Memcache.Enabled() {
 		log.Debug("creating servant: memcache")
 		this.mc = memcache.New(this.conf.Memcache)
+	}
+
+	if this.conf.Redis.Enabled() {
+		log.Debug("creating servant: redis")
+		this.rd = redis.New(this.conf.Redis)
 	}
 
 	// mysql
