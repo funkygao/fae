@@ -33,6 +33,7 @@ func (this *ConfigRedis) loadConfig(cf *conf.Conf) {
 		this.Breaker.loadConfig(section)
 	}
 
+	this.Servers = make(map[string]map[string]*ConfigRedisServer)
 	for i := 0; i < len(cf.List("pools", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("pools[%d]", i))
 		if err != nil {
