@@ -31,7 +31,7 @@ func TestCRUD(t *testing.T) {
 
 	c := New(cf)
 	err = c.Get(pool, "hello", &val)
-	assert.Equal(t, ErrorDataNotExists, err)
+	assert.Equal(t, ErrorDataNotExists.Error(), err.Error())
 
 	err = c.Set(pool, "hello", "world")
 	assert.Equal(t, nil, err)

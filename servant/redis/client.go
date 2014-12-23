@@ -59,22 +59,30 @@ func New(cf config.ConfigRedis) *Client {
 func (this *Client) Set(pool string, key string, val interface{}) error {
 	addr := this.addr(pool, key)
 	this.locks[pool][addr].Lock()
-	m, err := msgpack.Marshal(val)
+	encodedVal, err := msgpack.Marshal(val)
 	if err != nil {
 		log.Error("msgpack.marshal %+v: %s", val, err)
 		this.locks[pool][addr].Unlock()
 		return err
 	}
 
-	_, err = this.conns[pool][addr].Get().Do("SET", key, m)
+	conn := this.conns[pool][addr].Get()
+	err = conn.Err()
 	if err != nil {
-		log.Error("redis.set[%s]: %s", key, err)
+		log.Error("redis.set[%s] socket: %s", key, err)
+		this.locks[pool][addr].Unlock()
+		conn.Close()
 		this.breaker.Fail()
-	} else {
-		this.breaker.Succeed()
+		return err
 	}
 
+	if _, err = conn.Do("SET", key, encodedVal); err != nil {
+		log.Error("redis.set[%s]: %s", key, err)
+	}
+
+	this.breaker.Succeed()
 	this.locks[pool][addr].Unlock()
+	conn.Close()
 	return err
 }
 
@@ -82,43 +90,66 @@ func (this *Client) Get(pool string, key string, val interface{}) (err error) {
 	addr := this.addr(pool, key)
 	this.locks[pool][addr].Lock()
 
-	var m []byte
-	m, err = redis.Bytes(this.conns[pool][addr].Get().Do("GET", key))
-	if m == nil {
+	conn := this.conns[pool][addr].Get()
+	err = conn.Err()
+	if err != nil {
+		log.Error("redis.get[%s] socket: %s", key, err)
+		this.locks[pool][addr].Unlock()
+		conn.Close()
+		this.breaker.Fail()
+		return err
+	}
+
+	var encodedVal []byte
+	encodedVal, err = redis.Bytes(conn.Do("GET", key))
+	if encodedVal == nil {
 		err = ErrorDataNotExists
 		this.locks[pool][addr].Unlock()
+		conn.Close()
 		return
 	}
 	if err != nil {
 		log.Error("redis.get[%s]: %s", key, err)
-		this.breaker.Fail()
 		this.locks[pool][addr].Unlock()
+		conn.Close()
 		return
 	}
 
 	this.breaker.Succeed()
-	err = msgpack.Unmarshal(m, val)
+	err = msgpack.Unmarshal(encodedVal, val)
 	if err != nil {
 		log.Error("msgpack.unmarshal %+v: %s", val, err)
 	}
 
 	this.locks[pool][addr].Unlock()
+	conn.Close()
 	return
 }
 
-func (this *Client) Del(pool, key string) error {
+func (this *Client) Del(pool, key string) (err error) {
 	addr := this.addr(pool, key)
 	this.locks[pool][addr].Lock()
 
-	if _, err := this.conns[pool][addr].Get().Do("DEL", key); err != nil {
-		log.Error("redis.del[%s]: %s", key, err)
-		this.breaker.Fail()
+	conn := this.conns[pool][addr].Get()
+	err = conn.Err()
+	if err != nil {
+		log.Error("redis.del[%s] socket: %s", key, err)
 		this.locks[pool][addr].Unlock()
+		conn.Close()
+		this.breaker.Fail()
+		return err
+	}
+
+	if _, err = conn.Do("DEL", key); err != nil {
+		log.Error("redis.del[%s]: %s", key, err)
+		this.locks[pool][addr].Unlock()
+		conn.Close()
 		return err
 	}
 
 	this.breaker.Succeed()
 	this.locks[pool][addr].Unlock()
+	conn.Close()
 	return nil
 }
 
