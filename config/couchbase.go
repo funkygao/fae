@@ -9,7 +9,7 @@ type ConfigCouchbase struct {
 	Servers []string
 }
 
-func (this *ConfigCouchbase) loadConfig(cf *conf.Conf) {
+func (this *ConfigCouchbase) LoadConfig(cf *conf.Conf) {
 	this.Servers = cf.StringList("servers", nil)
 	log.Debug("couchbase conf: %+v", *this)
 }

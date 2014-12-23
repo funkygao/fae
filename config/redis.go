@@ -27,7 +27,7 @@ type ConfigRedis struct {
 	Servers map[string]map[string]*ConfigRedisServer // pool:serverAddr:ConfigRedisServer
 }
 
-func (this *ConfigRedis) loadConfig(cf *conf.Conf) {
+func (this *ConfigRedis) LoadConfig(cf *conf.Conf) {
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)

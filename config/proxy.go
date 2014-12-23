@@ -15,7 +15,7 @@ type ConfigProxy struct {
 	enabled      bool
 }
 
-func (this *ConfigProxy) loadConfig(cf *conf.Conf) {
+func (this *ConfigProxy) LoadConfig(cf *conf.Conf) {
 	this.PoolCapacity = cf.Int("pool_capacity", 10)
 	this.IdleTimeout = cf.Duration("idle_timeout", 600*time.Second)
 	this.SelfAddr = cf.String("self_addr", "")

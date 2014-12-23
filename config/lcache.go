@@ -9,7 +9,7 @@ type ConfigLcache struct {
 	LruMaxItems int
 }
 
-func (this *ConfigLcache) loadConfig(cf *conf.Conf) {
+func (this *ConfigLcache) LoadConfig(cf *conf.Conf) {
 	this.LruMaxItems = cf.Int("lru_max_items", 1<<30)
 
 	log.Debug("lcache conf: %+v", *this)

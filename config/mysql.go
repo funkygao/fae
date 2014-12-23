@@ -88,7 +88,7 @@ func (this *ConfigMysql) Pools() (pools []string) {
 	return
 }
 
-func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
+func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.GlobalPools = make(map[string]bool)
 	for _, p := range cf.StringList("global_pools", nil) {
 		this.GlobalPools[p] = true

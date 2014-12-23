@@ -46,47 +46,47 @@ func LoadServants(cf *conf.Conf) {
 	Servants.Mongodb = new(ConfigMongodb)
 	section, err := cf.Section("mongodb")
 	if err == nil {
-		Servants.Mongodb.loadConfig(section)
+		Servants.Mongodb.LoadConfig(section)
 	}
 
 	Servants.Mysql = new(ConfigMysql)
 	section, err = cf.Section("mysql")
 	if err == nil {
-		Servants.Mysql.loadConfig(section)
+		Servants.Mysql.LoadConfig(section)
 	}
 
 	Servants.Redis = new(ConfigRedis)
 	section, err = cf.Section("redis")
 	if err == nil {
-		Servants.Redis.loadConfig(section)
+		Servants.Redis.LoadConfig(section)
 	}
 
 	// memcached section
 	Servants.Memcache = new(ConfigMemcache)
 	section, err = cf.Section("memcache")
 	if err == nil {
-		Servants.Memcache.loadConfig(section)
+		Servants.Memcache.LoadConfig(section)
 	}
 
 	// lcache section
 	Servants.Lcache = new(ConfigLcache)
 	section, err = cf.Section("lcache")
 	if err == nil {
-		Servants.Lcache.loadConfig(section)
+		Servants.Lcache.LoadConfig(section)
 	}
 
 	// couchbase section
 	Servants.Couchbase = new(ConfigCouchbase)
 	section, err = cf.Section("couchbase")
 	if err == nil {
-		Servants.Couchbase.loadConfig(section)
+		Servants.Couchbase.LoadConfig(section)
 	}
 
 	// proxy section
 	Servants.Proxy = new(ConfigProxy)
 	section, err = cf.Section("proxy")
 	if err == nil {
-		Servants.Proxy.loadConfig(section)
+		Servants.Proxy.LoadConfig(section)
 	}
 
 	log.Debug("servants conf: %+v", *Servants)

@@ -67,7 +67,7 @@ func (this *ConfigMemcache) Enabled() bool {
 	return len(this.Servers) > 0
 }
 
-func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
+func (this *ConfigMemcache) LoadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
 	this.Timeout = cf.Duration("timeout", 4*time.Second)
