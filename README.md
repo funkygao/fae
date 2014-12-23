@@ -153,6 +153,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 *   mysql conn timeout not working
 *   what about remote peer conn when shutdown
 *   https://github.com/funkygao/go.serversets
+*   start 2 fae, kill 1, see if the other can get notified
 *   sticky peer
     - resource pool get conn should be in goroutine
 *   name3 dump/load to central storage
