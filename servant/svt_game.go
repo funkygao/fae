@@ -66,14 +66,13 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 func (this *FunServantImpl) loadName3Bitmap() {
 	log.Trace("loading namegen bitmap from db")
 
-	_, result, err := this.doMyQuery("loadName3Bitmap", "AllianceShard",
-		"Alliance", 0,
+	_, result, err := this.doMyQuery("loadName3Bitmap",
+		"AllianceShard", "Alliance", 0,
 		"SELECT acronym FROM Alliance", nil, "")
 	if err != nil {
 		log.Error("namegen load snapshot: %s", err)
 	} else {
 		for _, row := range result.Rows {
-			log.Debug("alliance tag set busy: %s", row[0])
 			this.namegen.SetBusy(row[0])
 		}
 	}
