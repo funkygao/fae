@@ -64,7 +64,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 }
 
 func (this *FunServantImpl) loadName3Bitmap() {
-	log.Trace("loading namegen bitmap from db")
+	log.Trace("namegen snapshot loading...")
 
 	_, result, err := this.doMyQuery("loadName3Bitmap",
 		"AllianceShard", "Alliance", 0,
@@ -76,6 +76,8 @@ func (this *FunServantImpl) loadName3Bitmap() {
 			this.namegen.SetBusy(row[0])
 		}
 	}
+
+	log.Trace("namegen snapshot loaded")
 }
 
 // record php request time and payload size in bytes
