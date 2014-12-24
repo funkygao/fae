@@ -18,7 +18,7 @@
         max_outstanding_sessions: 10000
         session_timeout: "0s"
         session_slow_threshold: "8s"
-        io_timeout: "3s"
+        io_timeout: "4s"
         stats_output_interval: "10m"
     }
 
@@ -39,6 +39,8 @@
             idle_timeout: "0s"
             diagnostic_interval: "30s"
             borrow_max_seconds: 10
+            buffer_size: 4096
+            io_timeout: "4s"
             tcp_nodelay: true
         }
 
