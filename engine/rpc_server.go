@@ -110,7 +110,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
 	if err := this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
-		log.Error("session[%s]: %s", remoteAddr, err.Error())
 	}
 
 	elapsed := time.Since(t1)
