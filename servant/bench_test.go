@@ -2,9 +2,11 @@ package servant
 
 import (
 	"encoding/json"
+	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
-	"github.com/funkygao/golib/server"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
+	"github.com/funkygao/golib/server"
 	conf "github.com/funkygao/jsconf"
 	"labix.org/v2/mgo/bson"
 	"strings"
@@ -79,5 +81,56 @@ func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
 	var sql = "select * from UserInfo where uid=? and power>?"
 	for i := 0; i < b.N; i++ {
 		strings.HasPrefix(sql, "select")
+	}
+}
+
+func BenchmarkMysqlResultSerializeInMemory(b *testing.B) {
+	b.ReportAllocs()
+
+	transport := thrift.NewTMemoryBuffer()
+	protocol := thrift.NewTBinaryProtocolFactoryDefault()
+	//iprot := protocol.GetProtocol(transport)
+	oprot := protocol.GetProtocol(transport)
+	mysqlResult := rpc.NewMysqlResult()
+	mysqlResult.Cols = make([]string, 0)
+	mysqlResult.Rows = make([][]string, 0)
+	colsN, rowsN := 5, 10
+	for i := 0; i < colsN; i++ {
+		mysqlResult.Cols = append(mysqlResult.Cols, "username")
+	}
+	for i := 0; i < rowsN; i++ {
+		row := make([]string, 0)
+		for j := 0; j < colsN; j++ {
+			row = append(row, "beijing, los angels")
+		}
+
+		mysqlResult.Rows = append(mysqlResult.Rows, row)
+	}
+	b.Logf("%s", mysqlResult.String())
+
+	for i := 0; i < b.N; i++ {
+		mysqlResult.Write(oprot)
+	}
+
+	transport.Close()
+	b.SetBytes(len(mysqlResult.String()))
+}
+
+func BenchmarkPingOnLocalhost(b *testing.B) {
+	b.ReportAllocs()
+
+	cf := config.ConfigProxy{PoolCapacity: 1}
+	client, err := proxy.New(cf).Servant("localhost:9001")
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer client.Recycle()
+
+	ctx := rpc.NewContext()
+	ctx.Reason = "benchmark"
+	ctx.Rid = "1"
+
+	for i := 0; i < b.N; i++ {
+		client.Ping(ctx)
 	}
 }
