@@ -39,8 +39,9 @@ func (this *FunServantPeer) Recycle() {
 	if this.Transport.IsOpen() {
 		this.pool.pool.Put(this)
 	} else {
-		log.Debug("peer[%s] conn broken, repay nil", this.pool.peerAddr)
 		this.pool.pool.Put(nil)
+		log.Debug("peer[%s] conn:%d broken, repay nil",
+			this.pool.peerAddr, this.Id())
 	}
 }
 
