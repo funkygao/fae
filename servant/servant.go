@@ -33,9 +33,9 @@ type FunServantImpl struct {
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
-	phpLatency     metrics.Histogram // in ms
-	phpPayloadSize metrics.Histogram // in bytes
-	reasonPercent  metrics.PercentCounter
+	phpLatency       metrics.Histogram      // in ms
+	phpPayloadSize   metrics.Histogram      // in bytes
+	phpReasonPercent metrics.PercentCounter // user's behavior
 
 	dbCache *cache.LruCache // query cache
 
@@ -70,8 +70,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.phpPayloadSize = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("php.payload", this.phpPayloadSize)
-	this.reasonPercent = metrics.NewPercentCounter()
-	metrics.Register("php.reason", this.reasonPercent)
+	this.phpReasonPercent = metrics.NewPercentCounter()
+	metrics.Register("php.reason", this.phpReasonPercent)
 
 	// http REST
 	if server.Launched() {
