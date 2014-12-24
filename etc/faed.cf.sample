@@ -36,11 +36,11 @@
         proxy: {
             self_addr: ":9001"
             pool_capacity: 50
+            io_timeout: "0s"
             idle_timeout: "0s"
             diagnostic_interval: "30s"
             borrow_max_seconds: 10
             buffer_size: 4096
-            io_timeout: "4s"
             tcp_nodelay: true
         }
 
