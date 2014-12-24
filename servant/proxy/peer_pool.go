@@ -8,7 +8,6 @@ import (
 	log "github.com/funkygao/log4go"
 	"net"
 	"sync/atomic"
-	"time"
 )
 
 // a conn pool to a single fae remote peer
@@ -41,7 +40,7 @@ func (this *funServantPeerPool) Open() {
 			return nil, err
 		}
 
-		id := atomic.AddUint64(this.nextServantId, 1)
+		id := atomic.AddUint64(&this.nextServantId, 1)
 		log.Trace("peer[%s] connected with id: %d", this.peerAddr, id)
 
 		return newFunServantPeer(id, this, client), nil
@@ -81,7 +80,7 @@ func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 		return nil, err
 	}
 
-	if tcpConn, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+	if tcpConn, ok := transport.Conn().(*net.TCPConn); ok {
 		// nagle's only applies to client rather than server
 		tcpConn.SetNoDelay(this.cf.TcpNoDelay)
 	}
