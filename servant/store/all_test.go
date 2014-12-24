@@ -13,14 +13,18 @@ func TestMemStore(t *testing.T) {
 }
 
 func TestRedisStore(t *testing.T) {
+	s := getRedisStore()
+	runStoreTest(t, s)
+}
+
+func getRedisStore() *RedisStore {
 	svr := server.NewServer("test")
 	svr.LoadConfig("../../etc/faed.cf.sample")
 	section, _ := svr.Conf.Section("servants.redis")
 	cf := &config.ConfigRedis{}
 	cf.LoadConfig(section)
 
-	s := NewRedisStore(cf)
-	runStoreTest(t, s)
+	return NewRedisStore("default", cf)
 }
 
 func runStoreTest(t *testing.T, s Store) {
@@ -43,13 +47,7 @@ func runStoreTest(t *testing.T, s Store) {
 func BenchmarkRedisStoreSet(b *testing.B) {
 	b.ReportAllocs()
 
-	svr := server.NewServer("test")
-	svr.LoadConfig("../../etc/faed.cf.sample")
-	section, _ := svr.Conf.Section("servants.redis")
-	cf := &config.ConfigRedis{}
-	cf.LoadConfig(section)
-
-	s := NewRedisStore(cf)
+	s := getRedisStore()
 	k, v := "hello_benchmark", "world_benchmark"
 	for i := 0; i < b.N; i++ {
 		s.Set(k, v)
@@ -61,13 +59,7 @@ func BenchmarkRedisStoreSet(b *testing.B) {
 func BenchmarkRedisStoreGet(b *testing.B) {
 	b.ReportAllocs()
 
-	svr := server.NewServer("test")
-	svr.LoadConfig("../../etc/faed.cf.sample")
-	section, _ := svr.Conf.Section("servants.redis")
-	cf := &config.ConfigRedis{}
-	cf.LoadConfig(section)
-
-	s := NewRedisStore(cf)
+	s := getRedisStore()
 	k, v := "hello_benchmark", "world_benchmark"
 	s.Set(k, v)
 	for i := 0; i < b.N; i++ {
