@@ -125,8 +125,9 @@ func (this *Engine) StopRpcServe() {
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
 
-	outstandingSessions := atomic.LoadInt64(&rpcServer.sessionN)
 	close(this.stopChan)
+
+	outstandingSessions := atomic.LoadInt64(&rpcServer.activeSessionN)
 	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
 	this.svt.Flush()

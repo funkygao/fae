@@ -12,7 +12,8 @@ import (
 
 // thrift.TServer implementation
 type TFunServer struct {
-	quit chan bool
+	quit           chan bool
+	activeSessionN int64
 
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
@@ -23,8 +24,6 @@ type TFunServer struct {
 	outputProtocolFactory  thrift.TProtocolFactory
 
 	pool *rpcThreadPool
-
-	sessionN int64 // concurrent sessions
 }
 
 func NewTFunServer(engine *Engine,
@@ -88,7 +87,7 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleSession(client interface{}) {
-	defer atomic.AddInt64(&this.sessionN, -1)
+	defer atomic.AddInt64(&this.activeSessionN, -1)
 
 	transport, ok := client.(thrift.TTransport)
 	if !ok {
@@ -97,7 +96,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
-	atomic.AddInt64(&this.sessionN, 1)
+	atomic.AddInt64(&this.activeSessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		log.Trace("session[%s] open", tcpClient.RemoteAddr())

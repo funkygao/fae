@@ -29,7 +29,7 @@ type FunServantImpl struct {
 	digitNormalizer *regexp.Regexp
 	lockmap         *mutexmap.MutexMap
 
-	sessionN int64
+	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
