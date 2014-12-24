@@ -13,20 +13,12 @@ func NewMemStore(maxEntries int) *MemStore {
 	return this
 }
 
-func (this *MemStore) Open() {
-
-}
-
-func (this *MemStore) Close() {
-
-}
-
 func (this *MemStore) Get(key string) (interface{}, bool) {
 	return this.data.Get(key)
 }
 
-func (this *MemStore) Put(key string, value interface{}) {
-	this.data.Set(key, value)
+func (this *MemStore) Put(key string, val interface{}) {
+	this.data.Set(key, val)
 }
 
 func (this *MemStore) Del(key string) {

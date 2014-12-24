@@ -2,9 +2,7 @@ package store
 
 // Store of cache
 type Store interface {
-	Open()
-	Close()
 	Get(key string) (val interface{}, present bool)
-	Put(key string, value interface{})
+	Put(key string, val interface{})
 	Del(key string)
 }
