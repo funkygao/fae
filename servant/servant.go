@@ -28,8 +28,9 @@ type FunServantImpl struct {
 
 	digitNormalizer *regexp.Regexp
 
-	lockmap *mutexmap.MutexMap
-	dbCache *cache.LruCache // query cache
+	// stateful mem data related to services
+	mysqlMergeMutexMap *mutexmap.MutexMap
+	dbCache            *cache.LruCache // query cache
 
 	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
@@ -58,7 +59,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
 	this.dbCache = cache.NewLruCache(this.conf.Mysql.CacheMaxItems)
-	this.lockmap = mutexmap.New(8 << 20) // 8M
+	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
 
 	// stats

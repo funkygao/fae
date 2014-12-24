@@ -65,8 +65,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		return
 	}
 
-	this.lockmap.Lock(key)
-	defer this.lockmap.Unlock(key)
+	this.mysqlMergeMutexMap.Lock(key)
+	defer this.mysqlMergeMutexMap.Unlock(key)
 
 	// do the merge in mem
 	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
