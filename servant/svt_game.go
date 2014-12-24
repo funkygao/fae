@@ -77,7 +77,7 @@ func (this *FunServantImpl) loadName3Bitmap() {
 		}
 	}
 
-	log.Trace("namegen snapshot loaded")
+	log.Trace("namegen snapshot loaded: %d rows", len(result.Rows))
 }
 
 // record php request time and payload size in bytes
