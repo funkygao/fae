@@ -27,18 +27,20 @@ type FunServantImpl struct {
 	conf *config.ConfigServant
 
 	digitNormalizer *regexp.Regexp
-	lockmap         *mutexmap.MutexMap
+
+	lockmap *mutexmap.MutexMap
+	dbCache *cache.LruCache // query cache
 
 	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
+	// php client related
 	phpLatency       metrics.Histogram      // in ms
 	phpPayloadSize   metrics.Histogram      // in bytes
 	phpReasonPercent metrics.PercentCounter // user's behavior
 
-	dbCache *cache.LruCache // query cache
-
+	// service drivers
 	proxy   *proxy.Proxy         // remote fae agent
 	idgen   *idgen.IdGenerator   // global id generator
 	namegen *namegen.NameGen     // name generator
