@@ -25,12 +25,12 @@ func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 
 	body := fmt.Sprintf(format, args...)
 	if slow {
-		header := fmt.Sprintf("SLOW=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), callName, ctx.String())
+		header := fmt.Sprintf("SLOW=%s/%s Q=%s ",
+			elapsed, time.Since(this.t0), callName)
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
-		header := fmt.Sprintf("T=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), callName, ctx.String())
+		header := fmt.Sprintf("T=%s/%s Q=%s ",
+			elapsed, time.Since(this.t0), callName)
 		log.Debug(header + this.truncatedStr(body))
 	}
 
