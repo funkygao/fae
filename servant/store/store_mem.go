@@ -17,7 +17,7 @@ func (this *MemStore) Get(key string) (interface{}, bool) {
 	return this.data.Get(key)
 }
 
-func (this *MemStore) Put(key string, val interface{}) {
+func (this *MemStore) Set(key string, val interface{}) {
 	this.data.Set(key, val)
 }
 

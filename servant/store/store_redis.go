@@ -19,14 +19,13 @@ func NewRedisStore(cf *config.ConfigRedis) *RedisStore {
 }
 
 func (this *RedisStore) Get(key string) (val interface{}, present bool) {
-	err := this.redis.Get(POOL, key, &val)
-	if err == redis.ErrorDataNotExists {
-		present = false
+	if err := this.redis.Get(POOL, key, &val); err == nil {
+		present = true
 	}
 	return
 }
 
-func (this *RedisStore) Put(key string, val interface{}) {
+func (this *RedisStore) Set(key string, val interface{}) {
 	this.redis.Set(POOL, key, val)
 }
 

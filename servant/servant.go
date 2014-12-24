@@ -11,6 +11,7 @@ import (
 	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/fae/servant/redis"
+	"github.com/funkygao/fae/servant/store"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
 	"github.com/funkygao/golib/mutexmap"
@@ -30,7 +31,7 @@ type FunServantImpl struct {
 
 	// stateful mem data related to services
 	mysqlMergeMutexMap *mutexmap.MutexMap
-	dbCache            *cache.LruCache // query cache
+	dbCacheStore       store.Store
 
 	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
@@ -58,8 +59,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
-	this.dbCache = cache.NewLruCache(this.conf.Mysql.CacheMaxItems)
-	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
+	this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheMaxItems) // TODO redis?
+	this.mysqlMergeMutexMap = mutexmap.New(8 << 20)                      // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
 
 	// stats
@@ -76,7 +77,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.phpReasonPercent = metrics.NewPercentCounter()
 	metrics.Register("php.reason", this.phpReasonPercent)
 
-	// http REST
+	// http REST to export internal state
 	if server.Launched() {
 		server.RegisterHttpApi("/s/{cmd}",
 			func(w http.ResponseWriter, req *http.Request,
@@ -85,28 +86,21 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			}).Methods("GET")
 	}
 
-	// remote fae peer proxy
-	log.Debug("creating servant: peers proxy, capacity: %d",
-		this.conf.Proxy.PoolCapacity)
+	log.Debug("creating servant: peers proxy")
 	this.proxy = proxy.New(*this.conf.Proxy)
 
-	// idgen, always present
 	log.Debug("creating servant: idgen")
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
 
-	// namegen
 	log.Debug("creating servant: namegen")
 	this.namegen = namegen.New(3)
 
-	// local cache
 	if this.conf.Lcache.Enabled() {
-		log.Debug("creating servant: lcache, maxIems: %d",
-			this.conf.Lcache.LruMaxItems)
+		log.Debug("creating servant: lcache")
 		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
 
-	// memcache
 	if this.conf.Memcache.Enabled() {
 		log.Debug("creating servant: memcache")
 		this.mc = memcache.New(this.conf.Memcache)
@@ -117,17 +111,14 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.rd = redis.New(this.conf.Redis)
 	}
 
-	// mysql
 	if this.conf.Mysql.Enabled() {
 		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
 	}
 
-	// mongodb
 	if this.conf.Mongodb.Enabled() {
 		log.Debug("creating servant: mongodb")
 		this.mg = mongo.New(this.conf.Mongodb)
-
 		if this.conf.Mongodb.DebugProtocol ||
 			this.conf.Mongodb.DebugHeartbeat {
 			mgo.SetLogger(&mongoProtocolLogger{})
@@ -158,9 +149,9 @@ func (this *FunServantImpl) Start() {
 }
 
 func (this *FunServantImpl) Flush() {
+	log.Debug("servants flushing...")
 	// TODO
-	log.Debug("flushing servants data...")
-
+	log.Trace("servants flushed")
 }
 
 func (this *FunServantImpl) showStats() {
