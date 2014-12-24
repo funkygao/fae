@@ -9,10 +9,12 @@ import (
 )
 
 type ConfigProxy struct {
-	PoolCapacity int
-	IdleTimeout  time.Duration
-	SelfAddr     string
-	TcpNoDelay   bool
+	PoolCapacity       int
+	IdleTimeout        time.Duration
+	DiagnosticInterval time.Duration
+	BorrowMaxSeconds   int
+	SelfAddr           string
+	TcpNoDelay         bool
 
 	enabled bool
 }
@@ -21,6 +23,8 @@ func (this *ConfigProxy) LoadConfig(cf *conf.Conf) {
 	this.PoolCapacity = cf.Int("pool_capacity", 10)
 	this.IdleTimeout = cf.Duration("idle_timeout", 600*time.Second)
 	this.SelfAddr = cf.String("self_addr", "")
+	this.BorrowMaxSeconds = cf.Int("borrow_max_seconds", 10)
+	this.DiagnosticInterval = cf.Duration("diagnostic_interval", time.Second*30)
 	this.TcpNoDelay = cf.Bool("tcp_nodelay", true)
 	if this.SelfAddr == "" {
 		log.Warn("empty self_addr in proxy config section")

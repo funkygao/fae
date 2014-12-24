@@ -34,9 +34,11 @@
         profiler_rate: 1000
 
         proxy: {
+            self_addr: ":9001"
             pool_capacity: 50
             idle_timeout: "0s"
-            self_addr: ":9001"
+            diagnostic_interval: "30s"
+            borrow_max_seconds: 10
             tcp_nodelay: true
         }
 
