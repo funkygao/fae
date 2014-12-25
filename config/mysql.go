@@ -110,7 +110,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheStore = cf.String("cache_store", "mem")
 	this.CacheStoreMemMaxItems = cf.Int("cache_store_mem_max_items", 10<<20)
 	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
-	this.CacheKeyHash = cf.Bool("cache_key_hash", true)
+	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)
