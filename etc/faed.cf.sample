@@ -48,6 +48,7 @@
             connect_timeout: "4s"
             io_timeout: "10s"
             cache_store: "mem"
+            cache_key_hash: true
             cache_store_mem_max_items: 1073741824
             cache_store_redis_pool: "db_cache"
 

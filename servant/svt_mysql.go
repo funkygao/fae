@@ -134,14 +134,17 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		margs[i] = arg
 	}
 
-	var cacheKeyHash [sha1.Size]byte
+	var cacheKeyHash = cacheKey
 
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
 		operation = OP_QUERY
 
 		if cacheKey != "" {
-			cacheKeyHash = sha1.Sum([]byte(cacheKey))
+			if this.conf.Mysql.CacheKeyHash {
+				hashSum := sha1.Sum([]byte(cacheKey)) // sha1.Size
+				cacheKeyHash = string(hashSum[:])
+			}
 			if cacheValue, present := this.dbCacheStore.Get(cacheKeyHash); present {
 				log.Debug("Q=%s %s cache hit", ident, cacheKey)
 
@@ -240,7 +243,11 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		if cacheKey != "" {
 			log.Debug("Q=%s %s cache deleted", ident, cacheKey)
 
-			cacheKeyHash = sha1.Sum([]byte(cacheKey))
+			if this.conf.Mysql.CacheKeyHash {
+				hashSum := sha1.Sum([]byte(cacheKey))
+				cacheKeyHash = string(hashSum[:])
+			}
+
 			this.dbCacheStore.Del(cacheKeyHash)
 		}
 	}

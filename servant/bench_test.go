@@ -26,7 +26,8 @@ func BenchmarkMcSet(b *testing.B) {
 	b.ReportAllocs()
 
 	ctx := rpc.NewContext()
-	ctx.Caller = "me"
+	ctx.Reason = "benchmark"
+	ctx.Rid = "1"
 	data := rpc.NewTMemcacheData()
 	data.Data = []byte("bar")
 	for i := 0; i < b.N; i++ {
@@ -113,7 +114,7 @@ func BenchmarkMysqlResultSerializeInMemory(b *testing.B) {
 	}
 
 	transport.Close()
-	b.SetBytes(len(mysqlResult.String()))
+	b.SetBytes(int64(len(mysqlResult.String())))
 }
 
 func BenchmarkPingOnLocalhost(b *testing.B) {
