@@ -47,7 +47,9 @@
         mysql: {
             connect_timeout: "4s"
             io_timeout: "10s"
-            cache_max_items: 1073741824
+            cache_store: "mem"
+            cache_store_mem_max_items: 1073741824
+            cache_store_redis_pool: "db_cache"
 
             breaker: {
                 failure_allowance: 5

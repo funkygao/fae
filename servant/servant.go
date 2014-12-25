@@ -59,8 +59,14 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
-	this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheMaxItems) // TODO redis?
-	this.mysqlMergeMutexMap = mutexmap.New(8 << 20)                      // 8M TODO
+	if this.conf.Mysql.CacheStore == "mem" {
+		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
+	} else if this.conf.Mysql.CacheStore == "redis" {
+		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
+			this.conf.Redis)
+	}
+
+	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
 
 	// stats
