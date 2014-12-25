@@ -37,7 +37,7 @@ func (this *Proxy) Enabled() bool {
 
 func (this *Proxy) StartMonitorCluster() {
 	if !this.Enabled() {
-		log.Warn("servant proxy disabled")
+		log.Warn("servant proxy disabled by proxy config section")
 		return
 	}
 

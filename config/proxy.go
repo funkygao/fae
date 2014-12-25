@@ -31,7 +31,7 @@ func (this *ConfigProxy) LoadConfig(cf *conf.Conf) {
 	this.TcpNoDelay = cf.Bool("tcp_nodelay", true)
 	this.BufferSize = cf.Int("buffer_size", 4<<10)
 	if this.SelfAddr == "" {
-		log.Warn("empty self_addr in proxy config section")
+		log.Warn("empty self_addr in proxy config section, proxy disabled")
 		this.enabled = false
 	} else {
 		parts := strings.SplitN(this.SelfAddr, ":", 2)
