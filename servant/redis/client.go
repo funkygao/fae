@@ -57,6 +57,37 @@ func New(cf *config.ConfigRedis) *Client {
 	return this
 }
 
+func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{}) (newVal interface{}, err error) {
+	addr := this.addr(pool, key)
+	conn := this.conns[pool][addr].Get()
+	err = conn.Err()
+	if err != nil {
+		log.Error("redis.%s[%s] conn: %s", cmd, key, err)
+		conn.Close()
+		this.breaker.Fail()
+		return
+	}
+
+	this.locks[pool][addr].Lock()
+
+	// Do(cmd string, args ...interface{}) (reply interface{}, err error)
+	switch cmd {
+	case "GET":
+		newVal, err = conn.Do(cmd, key)
+
+	case "SET":
+		_, err = conn.Do(cmd, key, val[0])
+	}
+	if err != nil {
+		log.Error("redis.%s[%s]: %s", cmd, key, err)
+	}
+
+	this.breaker.Succeed()
+	this.locks[pool][addr].Unlock()
+	conn.Close() // return to conn pool
+	return
+}
+
 func (this *Client) Set(pool string, key string, val interface{}) error {
 	addr := this.addr(pool, key)
 	this.locks[pool][addr].Lock()

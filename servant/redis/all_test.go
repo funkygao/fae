@@ -18,7 +18,7 @@ func BenchmarkResolveTCPAddr(b *testing.B) {
 
 func TestCRUD(t *testing.T) {
 	s := server.NewServer("test")
-	s.LoadConfig("../../etc/faed.cf")
+	s.LoadConfig("../../etc/faed.cf.sample")
 	section, _ := s.Conf.Section("servants.redis")
 	cf := &config.ConfigRedis{}
 	cf.LoadConfig(section)
@@ -46,4 +46,11 @@ func TestCRUD(t *testing.T) {
 
 	err = c.Del(pool, "hello") // del again
 	assert.Equal(t, nil, err)
+
+	var fooValue interface{}
+	_, err = c.doCmd("SET", pool, "foo", "bar")
+	assert.Equal(t, nil, err)
+	fooValue, err = c.doCmd("GET", pool, "foo")
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "bar", string(fooValue.([]byte)))
 }
