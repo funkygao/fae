@@ -14,7 +14,7 @@ use fun\rpc\TMongoMissed;
 use fun\rpc\TMemcacheData;
 
 try {
-    $sock = new TSocketPool(array('localhost'), array(9001));
+    $sock = new TSocketPool(array('localhost', 'localhost'), array(9001, 9011));
     $sock->setDebug(1);
     $sock->setSendTimeout(4000);
     $sock->setRecvTimeout(4000);
