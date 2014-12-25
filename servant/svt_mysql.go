@@ -31,8 +31,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
 
 	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
-		pool, table, hintId, sql, args, *r)
+		"{pool^%s table^%s id^%d sql^%s args^%+v cache^%s} {r^%#v}",
+		pool, table, hintId, sql, args, cacheKey, *r)
 	return
 }
 
