@@ -32,6 +32,7 @@ type FunServantImpl struct {
 	// stateful mem data related to services
 	mysqlMergeMutexMap *mutexmap.MutexMap
 	dbCacheStore       store.Store
+	dbCacheHits        metrics.PercentCounter
 
 	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
@@ -59,12 +60,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
-	if this.conf.Mysql.CacheStore == "mem" {
-		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
-	} else if this.conf.Mysql.CacheStore == "redis" {
-		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
-			this.conf.Redis)
-	}
 
 	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
@@ -120,6 +115,15 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	if this.conf.Mysql.Enabled() {
 		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
+	}
+
+	this.dbCacheHits = metrics.NewPercentCounter()
+	metrics.Register("db.cache.hits", this.dbCacheHits)
+	if this.conf.Mysql.CacheStore == "mem" {
+		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
+	} else if this.conf.Mysql.CacheStore == "redis" {
+		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
+			this.conf.Redis)
 	}
 
 	if this.conf.Mongodb.Enabled() {
