@@ -6,7 +6,7 @@ if [[ $1 = "-loc" ]]; then
     exit
 fi
 
-VER=0.2.2stable
+VER=0.2.3rc
 ID=$(git rev-parse HEAD | cut -c1-7)
 
 if [[ $1 = "-dw" ]]; then
