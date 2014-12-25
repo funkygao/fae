@@ -4,7 +4,6 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
 	log "github.com/funkygao/log4go"
-	"github.com/funkygao/msgpack"
 	"github.com/funkygao/redigo/redis"
 	"sync"
 	"time"
@@ -62,9 +61,9 @@ func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
 	if err != nil {
-		log.Error("redis.%s[%s] conn: %s", cmd, key, err)
 		conn.Close()
 		this.breaker.Fail()
+		log.Error("redis.%s[%s] conn: %s", cmd, key, err)
 		return
 	}
 
@@ -74,11 +73,17 @@ func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{
 	switch cmd {
 	case "GET":
 		newVal, err = conn.Do(cmd, key)
+		if newVal == nil {
+			err = ErrorDataNotExists
+		}
 
 	case "SET":
 		_, err = conn.Do(cmd, key, val[0])
+
+	case "DEL":
+		_, err = conn.Do(cmd, key)
 	}
-	if err != nil {
+	if err != nil && err != ErrorDataNotExists {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
 	}
 
@@ -89,101 +94,24 @@ func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{
 }
 
 func (this *Client) Set(pool string, key string, val interface{}) error {
-	addr := this.addr(pool, key)
-	this.locks[pool][addr].Lock()
-	encodedVal, err := msgpack.Marshal(val)
-	if err != nil {
-		log.Error("msgpack.marshal %+v: %s", val, err)
-		this.locks[pool][addr].Unlock()
-		return err
-	}
-
-	conn := this.conns[pool][addr].Get()
-	err = conn.Err()
-	if err != nil {
-		log.Error("redis.set[%s] socket: %s", key, err)
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		this.breaker.Fail()
-		return err
-	}
-
-	// Do(cmd string, args ...interface{}) (reply interface{}, err error)
-	if _, err = conn.Do("SET", key, encodedVal); err != nil {
-		log.Error("redis.set[%s]: %s", key, err)
-	}
-
-	this.breaker.Succeed()
-	this.locks[pool][addr].Unlock()
-	conn.Close()
+	_, err := this.doCmd("SET", pool, key, val)
 	return err
 }
 
-func (this *Client) Get(pool string, key string, val interface{}) (err error) {
-	addr := this.addr(pool, key)
-	this.locks[pool][addr].Lock()
-
-	conn := this.conns[pool][addr].Get()
-	err = conn.Err()
-	if err != nil {
-		log.Error("redis.get[%s] socket: %s", key, err)
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		this.breaker.Fail()
-		return err
-	}
-
-	var encodedVal []byte
-	encodedVal, err = redis.Bytes(conn.Do("GET", key))
-	if encodedVal == nil {
-		err = ErrorDataNotExists
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		return
-	}
-	if err != nil {
-		log.Error("redis.get[%s]: %s", key, err)
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		return
-	}
-
-	this.breaker.Succeed()
-	err = msgpack.Unmarshal(encodedVal, val)
-	if err != nil {
-		log.Error("msgpack.unmarshal %+v: %s", val, err)
-	}
-
-	this.locks[pool][addr].Unlock()
-	conn.Close()
+// newVal types are represented using the following Go types:
+// error                   redis.Error
+// integer                 int64
+// simple string           string
+// bulk string             []byte or nil if value not present.
+// array                   []interface{} or nil if value not present
+func (this *Client) Get(pool string, key string) (newVal interface{}, err error) {
+	newVal, err = this.doCmd("GET", pool, key)
 	return
 }
 
 func (this *Client) Del(pool, key string) (err error) {
-	addr := this.addr(pool, key)
-	this.locks[pool][addr].Lock()
-
-	conn := this.conns[pool][addr].Get()
-	err = conn.Err()
-	if err != nil {
-		log.Error("redis.del[%s] socket: %s", key, err)
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		this.breaker.Fail()
-		return err
-	}
-
-	if _, err = conn.Do("DEL", key); err != nil {
-		log.Error("redis.del[%s]: %s", key, err)
-		this.locks[pool][addr].Unlock()
-		conn.Close()
-		return err
-	}
-
-	this.breaker.Succeed()
-	this.locks[pool][addr].Unlock()
-	conn.Close()
-	return nil
+	_, err = this.doCmd("DEL", pool, key)
+	return
 }
 
 func (this *Client) addr(pool, key string) string {

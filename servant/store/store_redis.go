@@ -16,7 +16,8 @@ func NewRedisStore(pool string, cf *config.ConfigRedis) *RedisStore {
 }
 
 func (this *RedisStore) Get(key string) (val interface{}, present bool) {
-	if err := this.redis.Get(this.pool, key, &val); err == nil {
+	var err error
+	if val, err = this.redis.Get(this.pool, key); err == nil {
 		present = true
 	}
 	return
