@@ -149,6 +149,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   add weight for each fae peer, so that sticky peer has smaller weight
 *   rpc server stop is using chan to make it really stop, done, not tested
 *   mysql conn timeout not working
 *   what about remote peer conn when shutdown
