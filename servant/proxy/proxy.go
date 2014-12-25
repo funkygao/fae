@@ -50,7 +50,7 @@ func (this *Proxy) StartMonitorCluster() {
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
 			if err == nil {
 				// no lock, because running within 1 goroutine
-				this.selector.SetPeersAddr(peers)
+				this.selector.SetPeersAddr(peers...)
 				this.refreshPeers(peers)
 				log.Trace("Cluster latest fae nodes: %+v", peers)
 			} else {

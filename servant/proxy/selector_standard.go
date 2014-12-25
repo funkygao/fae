@@ -12,7 +12,7 @@ func newStandardPeerSelector() *StandardPeerSelector {
 	return &StandardPeerSelector{}
 }
 
-func (this *StandardPeerSelector) SetPeersAddr(peerAddrs []string) {
+func (this *StandardPeerSelector) SetPeersAddr(peerAddrs ...string) {
 	this.peerAddrs = peerAddrs
 }
 
