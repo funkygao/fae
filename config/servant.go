@@ -31,6 +31,7 @@ type ConfigServant struct {
 	Mysql     *ConfigMysql
 	Redis     *ConfigRedis // TODO
 	Couchbase *ConfigCouchbase
+	Lock      *ConfigLock
 }
 
 func LoadServants(cf *conf.Conf) {
@@ -73,6 +74,12 @@ func LoadServants(cf *conf.Conf) {
 	section, err = cf.Section("lcache")
 	if err == nil {
 		Servants.Lcache.LoadConfig(section)
+	}
+
+	Servants.Lock = new(ConfigLock)
+	section, err = cf.Section("lock")
+	if err == nil {
+		Servants.Lock.LoadConfig(section)
 	}
 
 	// couchbase section
