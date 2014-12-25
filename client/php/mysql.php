@@ -28,11 +28,16 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.121', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
-    // mysql select
+    // mysql select multiple rows
     echo "\nDEMO SELECT\n";
     echo "===============================\n";
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT uid from UserInfo where uid>?', array(1), '');
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
+    print_r($rows);
+
+    // mysql query cache
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * from UserInfo where uid=?', array(1), 'UserInfo:1');
+    $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * from UserInfo where uid=?', array(1), 'UserInfo:1');
     print_r($rows);
 
     // mysql update
