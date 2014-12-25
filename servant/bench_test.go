@@ -8,6 +8,7 @@ import (
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/server"
 	conf "github.com/funkygao/jsconf"
+	"github.com/funkygao/msgpack"
 	"labix.org/v2/mgo/bson"
 	"strings"
 	"testing"
@@ -85,7 +86,33 @@ func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
 	}
 }
 
-func BenchmarkMysqlResultSerializeInMemory(b *testing.B) {
+func BenchmarkMsgPackSerialize(b *testing.B) {
+	b.ReportAllocs()
+
+	mysqlResult := rpc.NewMysqlResult()
+	mysqlResult.Cols = make([]string, 0)
+	mysqlResult.Rows = make([][]string, 0)
+	colsN, rowsN := 5, 10
+	for i := 0; i < colsN; i++ {
+		mysqlResult.Cols = append(mysqlResult.Cols, "username")
+	}
+	for i := 0; i < rowsN; i++ {
+		row := make([]string, 0)
+		for j := 0; j < colsN; j++ {
+			row = append(row, "beijing, los angels")
+		}
+
+		mysqlResult.Rows = append(mysqlResult.Rows, row)
+	}
+
+	for i := 0; i < b.N; i++ {
+		msgpack.Marshal(mysqlResult)
+	}
+
+	b.SetBytes(int64(len(mysqlResult.String())))
+}
+
+func BenchmarkThriftSerialize(b *testing.B) {
 	b.ReportAllocs()
 
 	transport := thrift.NewTMemoryBuffer()
