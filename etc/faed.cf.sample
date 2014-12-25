@@ -38,7 +38,7 @@
             pool_capacity: 50
             io_timeout: "0s"
             idle_timeout: "0s"
-            diagnostic_interval: "30s"
+            diagnostic_interval: "10s"
             borrow_max_seconds: 10
             buffer_size: 4096
             tcp_nodelay: true
