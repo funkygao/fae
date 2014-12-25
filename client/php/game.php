@@ -14,12 +14,12 @@ use fun\rpc\TMongoMissed;
 use fun\rpc\TMemcacheData;
 
 try {
-    $sock = new TSocketPool(array('localhost'), array(9011));
+    $sock = new TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(1);
-    $sock->setSendTimeout(4000);
-    $sock->setRecvTimeout(4000);
+    $sock->setSendTimeout(400000);
+    $sock->setRecvTimeout(400000);
     $sock->setNumRetries(1);
-    $transport = new TBufferedTransport($sock, 1024, 1024);
+    $transport = new TBufferedTransport($sock, 4096, 4096);
     $protocol = new TBinaryProtocol($transport);
 
     // get our client
@@ -28,9 +28,16 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
+    $t1 = microtime(TRUE);
     // game get unique name with len 3
-    for ($i = 0; $i < 5; $i ++) {
-        echo $client->gm_name3($ctx), "\n";
+    //for ($i = 0; $i < 2; $i ++) {
+    //for ($i = 0; $i < 658; $i ++) {
+    for ($i = 0; $i < 50000000; $i ++) {
+        //$name = $client->ping($ctx);
+        $name = $client->gm_name3($ctx);
+        echo "$i $name\n";
+        //usleep(10000);
+        //sleep(1);
     }
 
     $ok = $client->zk_create($ctx, "/maintain/global", "");
@@ -45,3 +52,4 @@ try {
     print 'Something went wrong: ' . $ex->getMessage() . "\n";
 }
 
+echo microtime(TRUE) - $t1, "\n";
