@@ -22,6 +22,19 @@ func setupServant() *FunServantImpl {
 	return NewFunServant(config.Servants)
 }
 
+// 103 ns/op
+func BenchmarkDefer(b *testing.B) {
+	b.ReportAllocs()
+	f := func() {
+		defer func() {
+
+		}()
+	}
+	for i := 0; i < b.N; i++ {
+		f()
+	}
+}
+
 func BenchmarkMcSet(b *testing.B) {
 	servant := setupServant()
 	b.ReportAllocs()
@@ -147,7 +160,7 @@ func BenchmarkThriftSerialize(b *testing.B) {
 func BenchmarkPingOnLocalhost(b *testing.B) {
 	b.ReportAllocs()
 
-	cf := config.ConfigProxy{PoolCapacity: 1}
+	cf := &config.ConfigProxy{PoolCapacity: 1}
 	client, err := proxy.New(cf).Servant("localhost:9001")
 	if err != nil {
 		b.Fatal(err)
