@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 )
@@ -20,8 +19,7 @@ func init() {
 }
 
 func main() {
-	cf := config.ConfigProxy{PoolCapacity: 1}
-	client, err := proxy.New(cf).Servant(host + ":" + port)
+	client, err := proxy.NewWithDefaultConfig().Servant(host + ":" + port)
 	if err != nil {
 		fmt.Println(err)
 		return
