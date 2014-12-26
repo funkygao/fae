@@ -219,8 +219,8 @@ func (this *FunServantImpl) doMyQuery(ident string,
 				return
 			}
 
-			// query success, set cache
-			if cacheKey != "" {
+			// query success and got data, set cache
+			if cacheKey != "" && len(r.Rows) > 0 {
 				this.dbCacheStore.Set(cacheKeyHash, r)
 
 				this.dbCacheHits.Inc("miss", 1)
