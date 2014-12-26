@@ -4,7 +4,7 @@
     ]
     etcd_self_addr: ":9001"
 
-    http_listen_addr: ":9002"
+    http_listen_addr: ":9101"
     pprof_listen_addr: "localhost:6060"
     cpu_num: "max"
     metrics_logfile: "metrics.log"
@@ -171,7 +171,7 @@
             ]
         }
 
-        memcache: {
+        memcache_offline: {
             hash_strategy: "standard"
             max_conns_per_server: 200
             max_idle_conns_per_server: 20
