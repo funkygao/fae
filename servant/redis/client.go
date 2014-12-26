@@ -56,7 +56,7 @@ func New(cf *config.ConfigRedis) *Client {
 	return this
 }
 
-func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{}) (newVal interface{}, err error) {
+func (this *Client) Call(cmd string, pool string, key string, val ...interface{}) (newVal interface{}, err error) {
 	addr := this.addr(pool, key)
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
@@ -93,9 +93,9 @@ func (this *Client) doCmd(cmd string, pool string, key string, val ...interface{
 	return
 }
 
-func (this *Client) Set(pool string, key string, val interface{}) error {
-	_, err := this.doCmd("SET", pool, key, val)
-	return err
+func (this *Client) Set(pool string, key string, val interface{}) (err error) {
+	_, err = this.Call("SET", pool, key, val)
+	return
 }
 
 // newVal types are represented using the following Go types:
@@ -105,12 +105,12 @@ func (this *Client) Set(pool string, key string, val interface{}) error {
 // bulk string             []byte or nil if value not present.
 // array                   []interface{} or nil if value not present
 func (this *Client) Get(pool string, key string) (newVal interface{}, err error) {
-	newVal, err = this.doCmd("GET", pool, key)
+	newVal, err = this.Call("GET", pool, key)
 	return
 }
 
 func (this *Client) Del(pool, key string) (err error) {
-	_, err = this.doCmd("DEL", pool, key)
+	_, err = this.Call("DEL", pool, key)
 	return
 }
 

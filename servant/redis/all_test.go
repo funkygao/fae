@@ -49,9 +49,9 @@ func TestCRUD(t *testing.T) {
 	assert.Equal(t, nil, err)
 
 	var fooValue interface{}
-	_, err = c.doCmd("SET", pool, "foo", "bar")
+	_, err = c.Call("SET", pool, "foo", "bar")
 	assert.Equal(t, nil, err)
-	fooValue, err = c.doCmd("GET", pool, "foo")
+	fooValue, err = c.Call("GET", pool, "foo")
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "bar", string(fooValue.([]byte)))
 }
