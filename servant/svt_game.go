@@ -8,7 +8,6 @@ import (
 )
 
 // get a uniq name with length 3
-// TODO dump to redis periodically
 func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	const IDENT = "gm.name3"
 
@@ -54,7 +53,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 				svt.Close()
 			}
 
-			svt.Recycle()
+			svt.Recycle() // NEVER forget about this
 		}
 	}
 
