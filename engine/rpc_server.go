@@ -189,6 +189,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 				callsN, err.Error())
 		}
 
+		// Peek: there is more data to be read or the remote side is still open
 		if !ok || !inputProtocol.Transport().Peek() {
 			break
 		}
