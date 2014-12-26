@@ -167,6 +167,16 @@ service FunServant {
     ),
 
     //=================
+    // redis section
+    //=================
+    string rd_call(
+        1: required Context ctx, 
+        2: required string pool,
+        3: required string key, 
+        4. required list<string> args
+    ),
+
+    //=================
     // memcache section
     //=================
 
