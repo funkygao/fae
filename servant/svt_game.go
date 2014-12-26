@@ -104,10 +104,36 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		return
 	}
 
-	// TODO proxy.ServantByKey
-	r = this.lk.Lock(key)
+	var peer string
+	if ctx.IsSetSticky() && *ctx.Sticky {
+		r = this.lk.Lock(key)
+	} else {
+		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
+		if err != nil {
+			appErr = err
+			log.Error("%s {why^%s key^%s}: %s",
+				IDENT, reason, key, err)
+			return
+		}
 
-	profiler.do(IDENT, ctx, "{why^%s key^%s} {r^%v}", reason, key, r)
+		if svt == nil {
+			r = this.lk.Lock(key)
+		} else {
+			peer = svt.Addr()
+			svt.HijackContext(ctx)
+			r, appErr = svt.GmLock(ctx, reason, key)
+			if appErr != nil {
+				log.Error("%s {why^%s key^%s}: %s",
+					IDENT, reason, key, appErr)
+				svt.Close()
+			}
+
+			svt.Recycle()
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s r^%v}",
+		reason, key, peer, r)
 	return
 }
 
@@ -122,9 +148,37 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		return
 	}
 
-	this.lk.Unlock(key)
+	var peer string
+	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.lk.Unlock(key)
+	} else {
+		svt, err := this.proxy.ServantByKey(key)
+		if err != nil {
+			appErr = err
+			log.Error("%s {why^%s key^%s}: %s",
+				IDENT, reason, key, err)
+			return
+		}
 
-	profiler.do(IDENT, ctx, "{why^%s key^%s}", reason, key)
+		if svt == nil {
+			this.lk.Unlock(key)
+		} else {
+			// remote peer servant
+			peer = svt.Addr()
+			svt.HijackContext(ctx)
+			appErr = svt.GmUnlock(ctx, reason, key)
+			if appErr != nil {
+				log.Error("%s {why^%s key^%s}: %s",
+					IDENT, reason, key, appErr)
+				svt.Close()
+			}
+
+			svt.Recycle()
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s}",
+		reason, key, peer)
 	return
 }
 
