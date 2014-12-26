@@ -71,7 +71,7 @@ try {
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'BEGIN', NULL, '');
     $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'UPDATE UserInfo set power=power+1 where uid=?', array(1), 'UserInfo:1');
     $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'COMMIT', NULL, '');
-    //$client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'ROLLBACK', NULL);
+    //$client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'ROLLBACK', NULL, '');
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 

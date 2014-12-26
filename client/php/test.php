@@ -44,7 +44,7 @@ try {
     // my.query
     if (1) {
         for ($i=0; $i<5; $i++) {
-            $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', array());
+            $rows = $client->my_query($ctx, 'UserShard', 'UserInfo', 1, 'SELECT * FROM UserInfo', array(), '');
             echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
             print_r($rows);
         }
