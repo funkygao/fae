@@ -6,15 +6,15 @@ import (
 )
 
 type ConfigLcache struct {
-	LruMaxItems int
+	MaxItems int
 }
 
 func (this *ConfigLcache) LoadConfig(cf *conf.Conf) {
-	this.LruMaxItems = cf.Int("lru_max_items", 1<<30)
+	this.MaxItems = cf.Int("lru_max_items", 1<<30)
 
 	log.Debug("lcache conf: %+v", *this)
 }
 
 func (this *ConfigLcache) Enabled() bool {
-	return this.LruMaxItems > 0
+	return this.MaxItems > 0
 }

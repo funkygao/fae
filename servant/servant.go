@@ -98,7 +98,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	if this.conf.Lcache.Enabled() {
 		log.Debug("creating servant: lcache")
-		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
+		this.lc = cache.NewLruCache(this.conf.Lcache.MaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
 
