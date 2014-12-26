@@ -13,14 +13,14 @@ import (
 // to cluster instead of having to serve all by ourselves.
 type Proxy struct {
 	mutex sync.Mutex
-	cf    config.ConfigProxy
+	cf    *config.ConfigProxy
 	myIp  string
 
 	remotePeerPools map[string]*funServantPeerPool // key is peerAddr
 	selector        PeerSelector
 }
 
-func New(cf config.ConfigProxy) *Proxy {
+func New(cf *config.ConfigProxy) *Proxy {
 	this := &Proxy{
 		cf:              cf,
 		remotePeerPools: make(map[string]*funServantPeerPool),
@@ -29,6 +29,10 @@ func New(cf config.ConfigProxy) *Proxy {
 	}
 
 	return this
+}
+
+func NewWithDefaultConfig() *Proxy {
+	return New(config.NewDefaultProxy())
 }
 
 func (this *Proxy) Enabled() bool {
@@ -105,7 +109,7 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 
 	if _, present := this.remotePeerPools[peerAddr]; !present {
 		this.remotePeerPools[peerAddr] = newFunServantPeerPool(this.myIp,
-			peerAddr, this.cf)
+			peerAddr, *this.cf)
 		this.remotePeerPools[peerAddr].Open()
 	}
 

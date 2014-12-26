@@ -89,14 +89,18 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			}).Methods("GET")
 	}
 
-	log.Debug("creating servant: peers proxy")
-	this.proxy = proxy.New(*this.conf.Proxy)
-
 	log.Debug("creating servant: idgen")
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
 
 	log.Debug("creating servant: namegen")
 	this.namegen = namegen.New(3)
+
+	if this.conf.Proxy.Enabled() {
+		log.Debug("creating servant: proxy")
+		this.proxy = proxy.New(this.conf.Proxy)
+	} else {
+		panic("peers proxy disabled")
+	}
 
 	if this.conf.Lcache.Enabled() {
 		log.Debug("creating servant: lcache")
