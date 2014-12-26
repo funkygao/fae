@@ -28,9 +28,11 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
-    $lockKey = "foo";
-    var_dump($client->gm_lock($ctx, 'just a test', $lockKey));
-    $client->gm_unlock($ctx, 'just a test', $lockKey);
+    for ($i = 0; $i < 500; $i++) {
+        $lockKey = "foo";
+        var_dump($client->gm_lock($ctx, 'just a test', $lockKey));
+        $client->gm_unlock($ctx, 'just a test', $lockKey);
+    }
 
     $t1 = microtime(TRUE);
     // game get unique name with len 3
