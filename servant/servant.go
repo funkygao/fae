@@ -5,6 +5,7 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
+	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -53,6 +54,7 @@ type FunServantImpl struct {
 	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
 	rd      *redis.Client        // redis pool, auto sharding by pool name
 	cb      *couch.Client        // couchbase client
+	lk      *lock.Lock           // lock map
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -100,6 +102,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		log.Debug("creating servant: lcache")
 		this.lc = cache.NewLruCache(this.conf.Lcache.MaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
+	}
+
+	if this.conf.Lock.Enabled() {
+		log.Debug("creating servant: lock")
+		this.lk = lock.New(this.conf.Lock)
 	}
 
 	if this.conf.Memcache.Enabled() {

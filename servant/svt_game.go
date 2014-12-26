@@ -93,6 +93,41 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	return
 }
 
+func (this *FunServantImpl) GmLock(ctx *rpc.Context,
+	reason string, key string) (r bool, appErr error) {
+	const IDENT = "gm.lock"
+
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	// TODO proxy.ServantByKey
+	r = this.lk.Lock(key)
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s} {r^%v}", reason, key, r)
+	return
+}
+
+func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
+	reason string, key string) (appErr error) {
+	const IDENT = "gm.unlock"
+
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	this.lk.Unlock(key)
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s}", reason, key)
+	return
+}
+
 func (this *FunServantImpl) GmLike(ctx *rpc.Context,
 	name string, mode int8) (r []string, appErr error) {
 	t := trie.NewTrie() // TODO

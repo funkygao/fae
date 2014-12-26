@@ -22,6 +22,11 @@ exception TMongoReadOnly {
 exception TIdTimeBackwards {
 }
 
+struct TRedisData {
+    1: required binary data
+    2: required i32 flags
+}
+
 struct TMemcacheData {
     1: required binary data
     2: required i32 flags
@@ -447,6 +452,18 @@ service FunServant {
         1: Context ctx,
         2: i32 latency,
         3: i32 bytes
+    ),
+
+    bool gm_lock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
+    ),
+
+    void gm_unlock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
     ),
 
 }

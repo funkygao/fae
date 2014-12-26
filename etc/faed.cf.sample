@@ -148,7 +148,12 @@
         }
 
         lcache: {
-            lru_max_items: 1073741824
+            max_items: 104857600
+        }
+
+        lock: {
+            max_items: 1048576
+            expires: "5s"
         }
 
         redis: {
