@@ -91,9 +91,10 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 			this.conf.EtcdSelfAddr = ""
 
 			config.Servants.Proxy.Disable()
+		} else {
+			log.Debug("etcd connected")
 		}
 	}
-	log.Debug("etcd connected")
 
 	// when config loaded, create the servants
 	this.svt = servant.NewFunServant(config.Servants)
