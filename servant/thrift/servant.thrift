@@ -171,9 +171,10 @@ service FunServant {
     //=================
     string rd_call(
         1: required Context ctx, 
-        2: required string pool,
-        3: required string key, 
-        4. required list<string> args
+        2: required string cmd,
+        3: required string pool,
+        4: required string key, 
+        5. required list<string> args
     ),
 
     //=================

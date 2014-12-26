@@ -1,6 +1,3 @@
-/*
-memcache key:string, value:[]byte.
-*/
 package servant
 
 import (
