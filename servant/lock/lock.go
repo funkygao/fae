@@ -23,12 +23,12 @@ func New(cf *config.ConfigLock) *Lock {
 
 func (this *Lock) Lock(key string) (success bool) {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
 
 	mtime, present := this.items.Get(key)
 	if !present {
 		this.items.Set(key, time.Now())
 
+		this.mutex.Unlock()
 		return true
 	}
 
@@ -39,9 +39,12 @@ func (this *Lock) Lock(key string) (success bool) {
 
 		// ignore the aged lock, refresh the lock
 		this.items.Set(key, time.Now())
+
+		this.mutex.Unlock()
 		return true
 	}
 
+	this.mutex.Unlock()
 	return false
 }
 
