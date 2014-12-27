@@ -47,6 +47,15 @@ func (this *StandardServerSelector) PickServer(pool string,
 	return this.pickNonShardedServer(pool, table)
 }
 
+func (this *StandardServerSelector) ServerByBucket(bucket string) (*mysql, error) {
+	my, present := this.clients[bucket]
+	if !present {
+		return nil, ErrServerNotFound
+	}
+
+	return my, nil
+}
+
 func (this *StandardServerSelector) Servers() []*mysql {
 	r := make([]*mysql, 0)
 	for _, m := range this.clients {
@@ -54,7 +63,6 @@ func (this *StandardServerSelector) Servers() []*mysql {
 	}
 
 	return r
-
 }
 
 func (this *StandardServerSelector) shardedPool(pool string) bool {

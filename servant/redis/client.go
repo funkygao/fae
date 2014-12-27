@@ -58,6 +58,10 @@ func New(cf *config.ConfigRedis) *Client {
 
 func (this *Client) Call(cmd string, pool string,
 	keysAndArgs ...interface{}) (newVal interface{}, err error) {
+	if this.breaker.Open() {
+		return nil, ErrCircuitOpen
+	}
+
 	key := keysAndArgs[0].(string)
 	addr := this.addr(pool, key)
 	conn := this.conns[pool][addr].Get()

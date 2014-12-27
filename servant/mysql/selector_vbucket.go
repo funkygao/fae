@@ -76,6 +76,10 @@ func (this *VbucketServerSelector) PickServer(pool string,
 	return this.pickNonShardedServer(pool, table)
 }
 
+func (this *VbucketServerSelector) ServerByBucket(bucket string) (*mysql, error) {
+	return nil, ErrServerNotFound
+}
+
 func (this *VbucketServerSelector) Servers() []*mysql {
 	r := make([]*mysql, 0)
 	for _, m := range this.clients {
