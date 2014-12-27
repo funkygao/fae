@@ -107,13 +107,17 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	t1 := time.Now()
 	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
-	if err := this.processRequests(transport); err != nil {
+	var (
+		calls int64
+		err   error
+	)
+	if calls, err = this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
 	}
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Trace("session[%s] close in %s", remoteAddr, elapsed)
+	log.Trace("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
 
 	if this.engine.conf.rpc.sessionSlowThreshold.Seconds() > 0 &&
 		elapsed > this.engine.conf.rpc.sessionSlowThreshold {
@@ -121,7 +125,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport) error {
+func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error) {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
 	outputTransport := this.outputTransportFactory.GetTransport(client)
@@ -162,10 +166,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
-			log.Trace("session[%s] %d calls EOF", tcpClient.RemoteAddr().String(),
-				callsN)
 			this.engine.stats.CallPerSession.Update(callsN)
-			return nil
+			return callsN, nil
 		} else if err != nil {
 			// non-EOF transport err
 			// e,g. connection reset by peer
@@ -174,9 +176,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 			this.engine.stats.TotalFailedCalls.Inc(1)
 			this.engine.stats.CallPerSession.Update(callsN)
 
-			log.Trace("session[%s] %d calls: %s",
-				tcpClient.RemoteAddr().String(), callsN, err.Error())
-			return err
+			return callsN, err
 		}
 
 		// it is servant generated TApplicationException
@@ -196,7 +196,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)
-	return nil
+	return callsN, nil
 }
 
 func (this *TFunServer) Stop() error {
