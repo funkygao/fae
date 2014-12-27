@@ -28,6 +28,12 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
+    // redis
+    $r = $client->rd_call($ctx, 'SET', 'default', 'test_php', array('2,3,4,',));
+    var_dump($r);
+    $r = $client->rd_call($ctx, 'GET', 'default', 'test_php', array());
+    var_dump($r);
+
     for ($i = 0; $i < 500; $i++) {
         $lockKey = "foo";
         var_dump($client->gm_lock($ctx, 'just a test', $lockKey));

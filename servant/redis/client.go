@@ -115,5 +115,6 @@ func (this *Client) Del(pool, key string) (err error) {
 }
 
 func (this *Client) addr(pool, key string) string {
+	// FIXME if pool not exists, will panic
 	return this.selectors[pool].PickServer(key)
 }

@@ -22,14 +22,19 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	for i, v := range args {
 		iargs[i] = v
 	}
-	if val, appErr = this.rd.Call(cmd, pool, key, iargs...); appErr == nil {
-		r = val.(string)
+	if val, appErr = this.rd.Call(cmd, pool, key, iargs...); appErr == nil && val != nil {
+		switch val := val.(type) {
+		case []byte:
+			r = string(val)
+
+		case string:
+			r = val
+		}
 	}
 
 	profiler.do(IDENT, ctx,
-		"{cmd^%s pool^%s key^%s arg^%+v} {err^%v r^%s}",
-		cmd, pool, key, args,
-		appErr, r)
+		"{cmd^%s pool^%s key^%s arg^%+v} {r^%s}",
+		cmd, pool, key, args, r)
 
 	return
 }
