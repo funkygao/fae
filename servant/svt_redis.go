@@ -5,7 +5,7 @@ import (
 )
 
 func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
-	pool string, key string, args []string) (r string, appErr error) {
+	pool string, keysAndArgs []string) (r string, appErr error) {
 	const IDENT = "rd.call"
 
 	this.stats.inc(IDENT)
@@ -18,11 +18,11 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 
 	var val interface{}
 	// cannot use args (type []string) as type []interface {}
-	iargs := make([]interface{}, len(args))
-	for i, v := range args {
+	iargs := make([]interface{}, len(keysAndArgs))
+	for i, v := range keysAndArgs {
 		iargs[i] = v
 	}
-	if val, appErr = this.rd.Call(cmd, pool, key, iargs...); appErr == nil && val != nil {
+	if val, appErr = this.rd.Call(cmd, pool, iargs...); appErr == nil && val != nil {
 		switch val := val.(type) {
 		case []byte:
 			r = string(val)
@@ -33,8 +33,8 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{cmd^%s pool^%s key^%s arg^%+v} {r^%s}",
-		cmd, pool, key, args, r)
+		"{cmd^%s pool^%s key^%s args^%+v} {r^%s}",
+		cmd, pool, keysAndArgs[0], keysAndArgs[1:], r)
 
 	return
 }

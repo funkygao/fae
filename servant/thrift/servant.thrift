@@ -22,11 +22,6 @@ exception TMongoReadOnly {
 exception TIdTimeBackwards {
 }
 
-struct TRedisData {
-    1: required binary data
-    2: required i32 flags
-}
-
 struct TMemcacheData {
     1: required binary data
     2: required i32 flags
@@ -173,8 +168,7 @@ service FunServant {
         1: required Context ctx, 
         2: required string cmd,
         3: required string pool,
-        4: required string key, 
-        5: required list<string> params
+        4: required list<string> keysAndArgs
     ),
 
     //=================

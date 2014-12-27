@@ -56,7 +56,9 @@ func New(cf *config.ConfigRedis) *Client {
 	return this
 }
 
-func (this *Client) Call(cmd string, pool string, key string, val ...interface{}) (newVal interface{}, err error) {
+func (this *Client) Call(cmd string, pool string,
+	keysAndArgs ...interface{}) (newVal interface{}, err error) {
+	key := keysAndArgs[0].(string)
 	addr := this.addr(pool, key)
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
@@ -77,11 +79,8 @@ func (this *Client) Call(cmd string, pool string, key string, val ...interface{}
 			err = ErrorDataNotExists
 		}
 
-	case "SET":
-		_, err = conn.Do(cmd, key, val[0])
-
-	case "DEL":
-		_, err = conn.Do(cmd, key)
+	default:
+		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
 	if err != nil && err != ErrorDataNotExists {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
