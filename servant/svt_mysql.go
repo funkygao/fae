@@ -31,8 +31,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
 
 	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s id^%d sql^%s args^%+v cache^%s} {r^%#v}",
-		pool, table, hintId, sql, args, cacheKey, *r)
+		"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
+		cacheKey, pool, table, hintId, sql, args, *r)
 	return
 }
 
@@ -219,8 +219,8 @@ func (this *FunServantImpl) doMyQuery(ident string,
 				return
 			}
 
-			// query success and got data, set cache
-			if cacheKey != "" && len(r.Rows) > 0 {
+			// query success, set cache: even when empty data returned
+			if cacheKey != "" {
 				this.dbCacheStore.Set(cacheKeyHash, r)
 
 				this.dbCacheHits.Inc("miss", 1)

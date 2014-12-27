@@ -17,7 +17,12 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	}
 
 	var val interface{}
-	if val, appErr = this.rd.Call(cmd, pool, key, args...); appErr == nil {
+	// cannot use args (type []string) as type []interface {}
+	iargs := make([]interface{}, len(args))
+	for i, v := range args {
+		iargs[i] = v
+	}
+	if val, appErr = this.rd.Call(cmd, pool, key, iargs...); appErr == nil {
 		r = val.(string)
 	}
 

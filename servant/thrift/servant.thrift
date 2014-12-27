@@ -174,7 +174,7 @@ service FunServant {
         2: required string cmd,
         3: required string pool,
         4: required string key, 
-        5. required list<string> args
+        5: required list<string> params
     ),
 
     //=================
