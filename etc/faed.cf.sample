@@ -57,6 +57,13 @@
                 retry_interval: "10s"
             }
 
+            lookup_pool: "ShardLookup"
+            lookup_tables: {
+                "UserShard": "UserLookup"
+                "AllianceShard": "AllianceLookup"
+                "ChatShard": "ChatLookup"
+            }
+
             // non sharded pools
             global_pools: [
                 "ShardLookup",
@@ -106,6 +113,14 @@
                     username: "hellofarm"
                     password: "halfquestfarm4321"
                     db: "AllianceShard1"
+                }
+                {
+                    pool: "ChatShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
+                    db: "ChatShard1"
                 }
             ]
         }

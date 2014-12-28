@@ -75,23 +75,11 @@ type ConfigMysql struct {
 	CacheKeyHash          bool
 
 	Breaker ConfigBreaker
-	Servers map[string]*ConfigMysqlServer // key is pool
 
-}
+	LookupPool   string
+	lookupTables conf.Conf
+	Servers      map[string]*ConfigMysqlServer // key is pool
 
-func (this *ConfigMysql) Enabled() bool {
-	return len(this.Servers) > 0
-}
-
-func (this *ConfigMysql) Pools() (pools []string) {
-	poolsMap := make(map[string]bool)
-	for _, server := range this.Servers {
-		poolsMap[server.Pool] = true
-	}
-	for poolName, _ := range poolsMap {
-		pools = append(pools, poolName)
-	}
-	return
 }
 
 func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
@@ -111,9 +99,16 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheStoreMemMaxItems = cf.Int("cache_store_mem_max_items", 10<<20)
 	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
+	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)
+	}
+	section, err = cf.Section("lookup_tables")
+	if err == nil {
+		this.lookupTables = *section
+	} else {
+		//panic("lookup_tables not found in mysql conf")
 	}
 	this.Servers = make(map[string]*ConfigMysqlServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
@@ -130,4 +125,23 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	}
 
 	log.Debug("mysql conf: %+v", *this)
+}
+
+func (this *ConfigMysql) Enabled() bool {
+	return len(this.Servers) > 0
+}
+
+func (this *ConfigMysql) Pools() (pools []string) {
+	poolsMap := make(map[string]bool)
+	for _, server := range this.Servers {
+		poolsMap[server.Pool] = true
+	}
+	for poolName, _ := range poolsMap {
+		pools = append(pools, poolName)
+	}
+	return
+}
+
+func (this *ConfigMysql) LookupTable(pool string) (lookupTable string) {
+	return this.lookupTables.String(pool, "")
 }
