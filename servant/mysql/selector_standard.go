@@ -143,7 +143,7 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		return nil, ErrServerNotFound
 	}
 
-	//this.lookupCache.Set(key, my)
+	this.lookupCache.Set(key, my)
 
 	return my, nil
 }

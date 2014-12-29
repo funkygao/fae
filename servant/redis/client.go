@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"errors"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
 	log "github.com/funkygao/log4go"
@@ -60,6 +61,11 @@ func (this *Client) Call(cmd string, pool string,
 	keysAndArgs ...interface{}) (newVal interface{}, err error) {
 	if this.breaker.Open() {
 		return nil, ErrCircuitOpen
+	}
+
+	if len(keysAndArgs) == 0 {
+		// e,g. cmd=multi
+		return nil, errors.New("redis cmd not implemented:" + cmd)
 	}
 
 	key := keysAndArgs[0].(string)
