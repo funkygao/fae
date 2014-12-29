@@ -159,7 +159,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
@@ -174,7 +174,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
@@ -190,7 +190,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 					scanArgs[i] = &rawRowValues[i]
 				}
 				if appErr = rows.Scan(scanArgs...); appErr != nil {
-					log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+					log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 						ident,
 						pool, table,
 						sql, args,
@@ -212,7 +212,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 
 			// check for errors after we’re done iterating over the rows
 			if appErr = rows.Err(); appErr != nil {
-				log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 					ident,
 					pool, table,
 					sql, args,
@@ -234,7 +234,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		// FIXME if sql is 'select * from UesrInfo', runtime will get here
 		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
 			table, int(hintId), sql, margs); appErr != nil {
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
