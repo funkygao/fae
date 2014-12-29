@@ -1,7 +1,11 @@
 package servant
 
 import (
+	"encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	log "github.com/funkygao/log4go"
+	"github.com/funkygao/redigo/redis"
+	"strconv"
 )
 
 func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
@@ -29,6 +33,23 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 
 		case string:
 			r = val
+
+		case int64:
+			// e,g. hset
+			r = strconv.FormatInt(val, 10)
+
+		case []interface{}:
+			// e,g. hgetall
+			strs, err := redis.Strings(val, nil)
+			if err == nil {
+				bytes, err := json.Marshal(strs)
+				if err == nil {
+					r = string(bytes)
+				}
+			}
+
+		default:
+			log.Error("redis.%s unknown result type: %T", cmd, val)
 		}
 	}
 
