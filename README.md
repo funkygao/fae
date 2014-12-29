@@ -149,7 +149,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
-*   2 self addr
+*   merge proxy.SelfAddr and engine.EtcdSelfAddr
 *   add weight for each fae peer, so that sticky peer has smaller weight
 *   rpc server stop is using chan to make it really stop, done, not tested
 *   mysql conn timeout not working
