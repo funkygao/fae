@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"fmt"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/str"
 	log "github.com/funkygao/log4go"
 )
 
@@ -75,8 +75,42 @@ func (this *StandardServerSelector) shardedPool(pool string) bool {
 
 func (this *StandardServerSelector) pickShardedServer(pool string,
 	table string, hintId int) (*mysql, error) {
-	const SHARD_BASE_NUM = 200000 // TODO move the config
-	bucket := fmt.Sprintf("%s%d", pool, (hintId/SHARD_BASE_NUM)+1)
+	const (
+		sb1 = "SELECT shardId FROM "
+		sb2 = " WHERE entityId=?"
+	)
+
+	my, err := this.ServerByBucket(this.conf.LookupPool)
+	if err != nil {
+		return nil, err
+	}
+
+	sb := str.NewStringBuilder()
+	sb.WriteString(sb1)
+	sb.WriteString(this.conf.LookupTable(pool))
+	sb.WriteString(sb2)
+	rows, err := my.Query(sb.String(), hintId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	// only 1 row in lookup table
+	if !rows.Next() {
+		return nil, ErrShardLookupNotFound
+	}
+
+	var shardId string
+	if err = rows.Scan(&shardId); err != nil {
+		return nil, err
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	//bucket := fmt.Sprintf("%s%d", pool, (hintId/200000)+1)
+	bucket := pool + shardId
 	my, present := this.clients[bucket]
 	if !present {
 		return nil, ErrServerNotFound
