@@ -36,6 +36,9 @@ try {
     $r = $client->rd_call($ctx, 'get', 'default', array('the key'));
     var_dump($r);
     $r = $client->rd_call($ctx, 'del', 'default', array('the key'));
+    $client->rd_call($ctx, 'incr', 'default', array('_counter_for_demo_'));
+    $r = $client->rd_call($ctx, 'get', 'default', array('_counter_for_demo_'));
+    var_dump($r);
 
     for ($i = 0; $i < 500; $i++) {
         $lockKey = "foo";
