@@ -4,6 +4,7 @@ import (
 	"errors"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"net"
 	"sync/atomic"
@@ -41,7 +42,8 @@ func NewTFunServer(engine *Engine,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
 	}
-	this.pool = newRpcThreadPool(this.engine.conf.rpc.maxOutstandingSessions,
+	this.pool = newRpcThreadPool(
+		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	engine.rpcThreadPool = this.pool
 
@@ -59,10 +61,10 @@ func (this *TFunServer) Serve() error {
 	// register to etcd
 	// once registered, other peers will connect to me
 	// so, must be after Listen ready
-	if this.engine.conf.EtcdSelfAddr != "" {
-		etclib.BootService(this.engine.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+	if config.Engine.EtcdSelfAddr != "" {
+		etclib.BootService(config.Engine.EtcdSelfAddr, etclib.SERVICE_FAE)
 
-		log.Info("etcd self[%s] registered", this.engine.conf.EtcdSelfAddr)
+		log.Info("etcd self[%s] registered", config.Engine.EtcdSelfAddr)
 	}
 
 	for {
@@ -119,8 +121,8 @@ func (this *TFunServer) handleSession(client interface{}) {
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	log.Trace("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
 
-	if this.engine.conf.rpc.sessionSlowThreshold.Seconds() > 0 &&
-		elapsed > this.engine.conf.rpc.sessionSlowThreshold {
+	if config.Engine.Rpc.SessionSlowThreshold.Seconds() > 0 &&
+		elapsed > config.Engine.Rpc.SessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
 	}
 }
@@ -149,8 +151,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 
 	for {
 		t1 = time.Now()
-		if this.engine.conf.rpc.ioTimeout > 0 { // read + write
-			tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
+		if config.Engine.Rpc.IoTimeout > 0 { // read + write
+			tcpClient.SetDeadline(time.Now().Add(config.Engine.Rpc.IoTimeout))
 		}
 
 		ok, err := processor.Process(inputProtocol, outputProtocol)

@@ -176,7 +176,7 @@ func (this *FunServantImpl) Flush() {
 }
 
 func (this *FunServantImpl) showStats() {
-	ticker := time.NewTicker(config.Servants.StatsOutputInterval)
+	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
 	// TODO show most recent stats, reset at some interval

@@ -18,7 +18,7 @@ type profiler struct {
 func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	slow := elapsed > config.Servants.CallSlowThreshold
+	slow := elapsed > config.Engine.Servants.CallSlowThreshold
 	if !(slow || this.on) {
 		return
 	}
@@ -37,9 +37,9 @@ func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 }
 
 func (this *profiler) truncatedStr(val string) string {
-	if len(val) < config.Servants.ProfilerMaxBodySize {
+	if len(val) < config.Engine.Servants.ProfilerMaxBodySize {
 		return val
 	}
 
-	return val[:config.Servants.ProfilerMaxBodySize] + "..."
+	return val[:config.Engine.Servants.ProfilerMaxBodySize] + "..."
 }

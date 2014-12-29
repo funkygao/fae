@@ -2,6 +2,7 @@ package engine
 
 import (
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
@@ -26,7 +27,7 @@ func (this *Engine) ServeForever() {
 		maxProcs  int
 	)
 	totalCpus = runtime.NumCPU()
-	cpuNumConfig := this.conf.String("cpu_num", "auto")
+	cpuNumConfig := config.Engine.String("cpu_num", "auto")
 	if cpuNumConfig == "auto" {
 		maxProcs = totalCpus/2 + 1
 	} else if cpuNumConfig == "max" {
@@ -38,8 +39,9 @@ func (this *Engine) ServeForever() {
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
 	// start the stats counter
-	go this.stats.Start(this.StartedAt, this.conf.rpc.statsOutputInterval,
-		this.conf.metricsLogfile)
+	go this.stats.Start(this.StartedAt,
+		config.Engine.Rpc.StatsOutputInterval,
+		config.Engine.MetricsLogfile)
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()
@@ -53,17 +55,17 @@ func (this *Engine) ServeForever() {
 }
 
 func (this *Engine) UnregisterEtcd() {
-	if this.conf.EtcdSelfAddr != "" {
+	if config.Engine.EtcdSelfAddr != "" {
 		if !etclib.IsConnected() {
-			if err := etclib.Dial(this.conf.EtcdServers); err != nil {
-				log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
+			if err := etclib.Dial(config.Engine.EtcdServers); err != nil {
+				log.Error("etcd[%+v]: %s", config.Engine.EtcdServers, err)
 				return
 			}
 		}
 
-		etclib.ShutdownService(this.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+		etclib.ShutdownService(config.Engine.EtcdSelfAddr, etclib.SERVICE_FAE)
 		etclib.Close()
 
-		log.Info("etcd self[%s] unregistered", this.conf.EtcdSelfAddr)
+		log.Info("etcd self[%s] unregistered", config.Engine.EtcdSelfAddr)
 	}
 }
