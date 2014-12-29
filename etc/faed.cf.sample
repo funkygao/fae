@@ -58,11 +58,13 @@
                 retry_interval: "10s"
             }
 
+            lookup_cache_max_items: 1048576
             lookup_pool: "ShardLookup"
             lookup_tables: {
                 "UserShard": "UserLookup"
                 "AllianceShard": "AllianceLookup"
                 "ChatShard": "ChatLookup"
+                "WorldShard": "WorldLookup"
             }
 
             // non sharded pools
