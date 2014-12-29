@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/assert"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/str"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -19,6 +20,16 @@ func BenchmarkEndsWithDigit(b *testing.B) {
 	s := newStandardServerSelector(new(config.ConfigMysql))
 	for i := 0; i < b.N; i++ {
 		s.endsWithDigit("UserShard1")
+	}
+}
+
+// 143 ns/op
+func BenchmarkStrconvItoa(b *testing.B) {
+	b.ReportAllocs()
+	pool := "UserShard"
+	hintId := 12
+	for i := 0; i < b.N; i++ {
+		_ = pool + strconv.Itoa(hintId)
 	}
 }
 

@@ -2,18 +2,23 @@ package mysql
 
 import (
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/str"
 	log "github.com/funkygao/log4go"
+	"strconv"
 )
 
 type StandardServerSelector struct {
 	conf    *config.ConfigMysql
 	clients map[string]*mysql // key is pool
+
+	lookupCache *cache.LruCache // {pool+hintId: *mysql}
 }
 
 func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSelector) {
 	this = new(StandardServerSelector)
 	this.conf = cf
+	this.lookupCache = cache.NewLruCache(cf.LookupCacheMaxItems)
 	this.clients = make(map[string]*mysql)
 	for _, server := range cf.Servers {
 		my := newMysql(server.DSN(), &cf.Breaker)
@@ -80,6 +85,16 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		sb2 = " WHERE entityId=?"
 	)
 
+	// FIXME how to handle cache kick?
+	// TODO itoa is too slow, 143 ns/op, use int as cache key
+	key := pool + strconv.Itoa(hintId)
+	if conn, present := this.lookupCache.Get(key); present {
+		log.Debug("lookupCache[%s] hit", key)
+		return conn.(*mysql), nil
+	} else {
+		log.Debug("lookupCache[%s] miss", key)
+	}
+
 	my, err := this.ServerByBucket(this.conf.LookupPool)
 	if err != nil {
 		return nil, err
@@ -115,6 +130,8 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 	if !present {
 		return nil, ErrServerNotFound
 	}
+
+	//this.lookupCache.Set(key, my)
 
 	return my, nil
 }

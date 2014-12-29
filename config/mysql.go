@@ -76,9 +76,10 @@ type ConfigMysql struct {
 
 	Breaker ConfigBreaker
 
-	LookupPool   string
-	lookupTables conf.Conf
-	Servers      map[string]*ConfigMysqlServer // key is pool
+	LookupCacheMaxItems int
+	LookupPool          string
+	lookupTables        conf.Conf
+	Servers             map[string]*ConfigMysqlServer // key is pool
 
 }
 
@@ -100,6 +101,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
 	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
+	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1048576)
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)
