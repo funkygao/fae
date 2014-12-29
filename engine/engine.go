@@ -31,7 +31,7 @@ func NewEngine() (this *Engine) {
 	return
 }
 
-func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
-	config.LoadEngineConfig(cf)
+func (this *Engine) LoadConfig(configFile string, cf *conf.Conf) *Engine {
+	config.LoadEngineConfig(configFile, cf)
 	return this
 }

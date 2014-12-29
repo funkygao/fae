@@ -37,7 +37,7 @@ func init() {
 
 		// stop new requests
 		engine.NewEngine().
-			LoadConfig(s.Conf).
+			LoadConfig(options.configFile, s.Conf).
 			UnregisterEtcd()
 
 		// finish all outstanding RPC sessions
@@ -103,6 +103,6 @@ func main() {
 		engineRunner.StopRpcServe()
 	})
 
-	engineRunner.LoadConfig(s.Conf).
+	engineRunner.LoadConfig(options.configFile, s.Conf).
 		ServeForever()
 }

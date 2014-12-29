@@ -4,12 +4,17 @@ import (
 	"github.com/funkygao/golib/ip"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
+	"os"
 	"strings"
+	"time"
 )
 
 // the root of config, which will load sections one by one
 type ConfigEngine struct {
 	*conf.Conf
+
+	configFile         string
+	configFileLastStat os.FileInfo
 
 	EtcdServers  []string
 	EtcdSelfAddr string
@@ -18,13 +23,10 @@ type ConfigEngine struct {
 	PprofListenAddr string
 	MetricsLogfile  string
 
+	ReloadWatchdogInterval time.Duration
+
 	Rpc      *ConfigRpc
 	Servants *ConfigServant
-}
-
-func LoadEngineConfig(cf *conf.Conf) {
-	Engine = new(ConfigEngine)
-	Engine.LoadConfig(cf)
 }
 
 func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
@@ -42,6 +44,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	this.HttpListenAddr = this.String("http_listen_addr", "")
 	this.PprofListenAddr = this.String("pprof_listen_addr", "")
 	this.MetricsLogfile = this.String("metrics_logfile", "metrics.log")
+	this.ReloadWatchdogInterval = this.Duration("reload_watchdog_interval", time.Second)
 
 	// rpc section
 	this.Rpc = new(ConfigRpc)
