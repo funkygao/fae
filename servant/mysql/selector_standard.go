@@ -78,6 +78,20 @@ func (this *StandardServerSelector) shardedPool(pool string) bool {
 	return true
 }
 
+func (this *StandardServerSelector) KickLookupCache(pool string, hintId int) {
+	if !this.shardedPool(pool) {
+		return
+	}
+
+	this.lookupCache.Del(this.lookupCacheKey(pool, hintId))
+}
+
+func (this *StandardServerSelector) lookupCacheKey(pool string, hintId int) string {
+	// FIXME how to handle cache kick?
+	// TODO itoa is too slow, 143 ns/op, use int as cache key
+	return pool + strconv.Itoa(hintId)
+}
+
 func (this *StandardServerSelector) pickShardedServer(pool string,
 	table string, hintId int) (*mysql, error) {
 	const (
@@ -85,9 +99,7 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		sb2 = " WHERE entityId=?"
 	)
 
-	// FIXME how to handle cache kick?
-	// TODO itoa is too slow, 143 ns/op, use int as cache key
-	key := pool + strconv.Itoa(hintId)
+	key := this.lookupCacheKey(pool, hintId)
 	if conn, present := this.lookupCache.Get(key); present {
 		log.Debug("lookupCache[%s] hit", key)
 		return conn.(*mysql), nil

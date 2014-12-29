@@ -42,6 +42,10 @@ func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 	return my.ExecSql(sql, args...)
 }
 
+func (this *MysqlCluster) KickLookupCache(pool string, hintId int) {
+	this.selector.KickLookupCache(pool, hintId)
+}
+
 func (this *MysqlCluster) Warmup() {
 	var (
 		err error

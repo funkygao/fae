@@ -124,6 +124,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 	r *rpc.MysqlResult, appErr error) {
 	const (
 		SQL_SELECT = "SELECT"
+		SQL_UPDATE = "UPDATE"
 		OP_QUERY   = "qry"
 		OP_EXEC    = "exc"
 	)
@@ -239,6 +240,11 @@ func (this *FunServantImpl) doMyQuery(ident string,
 				sql, args,
 				appErr)
 			return
+		}
+
+		if !strings.HasPrefix(sql, SQL_UPDATE) {
+			// insert or delete TODO
+			this.my.KickLookupCache(pool, int(hintId))
 		}
 
 		// update success, del cache
