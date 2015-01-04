@@ -24,7 +24,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 
 		normalizedReason := this.digitNormalizer.ReplaceAll(
 			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
-		this.reasonPercent.Inc(string(normalizedReason), 1)
+		this.phpReasonPercent.Inc(string(normalizedReason), 1)
 
 		log.Trace("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
 			ctx.Rid, ctx.Reason)
@@ -42,7 +42,7 @@ func (this *session) startProfiler() (*profiler, error) {
 
 		this.profiler = &profiler{}
 		// TODO 某些web server需要100%采样
-		this.profiler.on = sampling.SampleRateSatisfied(config.Servants.ProfilerRate) // rand(1000) <= ProfilerRate
+		this.profiler.on = sampling.SampleRateSatisfied(config.Engine.Servants.ProfilerRate) // rand(1000) <= ProfilerRate
 		this.profiler.t0 = time.Now()
 		this.profiler.t1 = this.profiler.t0
 	}

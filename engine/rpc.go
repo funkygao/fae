@@ -10,7 +10,6 @@ import (
 	log "github.com/funkygao/log4go"
 	"strings"
 	"sync/atomic"
-	"time"
 )
 
 // thrift internal layer
@@ -28,7 +27,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		serverNetwork    string
 	)
 
-	switch this.conf.rpc.protocol {
+	switch config.Engine.Rpc.Protocol {
 	case "binary":
 		protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
 
@@ -42,40 +41,41 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		protocolFactory = thrift.NewTCompactProtocolFactory()
 
 	default:
-		panic(fmt.Sprintf("Invalid protocol: %s", this.conf.rpc.protocol))
+		panic(fmt.Sprintf("Invalid protocol: %s", config.Engine.Rpc.Protocol))
 	}
 
 	// client-side Thrift protocol/transport stack must match
 	// the server-side, otherwise you are very likely to get in trouble
 	switch {
-	case this.conf.rpc.framed:
+	case config.Engine.Rpc.Framed:
 		// each payload is sent over the wire with a frame header containing its size
 		transportFactory = thrift.NewTFramedTransportFactory(transportFactory)
 
 	default:
 		// there is no BufferedTransport in Java: only FramedTransport
-		transportFactory = thrift.NewTBufferedTransportFactory(this.conf.rpc.bufferSize)
+		transportFactory = thrift.NewTBufferedTransportFactory(
+			config.Engine.Rpc.BufferSize)
 	}
 
 	switch {
-	case strings.Contains(this.conf.rpc.listenAddr, "/"):
+	case strings.Contains(config.Engine.Rpc.ListenAddr, "/"):
 		serverNetwork = "unix"
-		if this.conf.rpc.sessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
 			serverTransport, err = NewTUnixSocketTimeout(
-				this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
 			serverTransport, err = NewTUnixSocket(
-				this.conf.rpc.listenAddr)
+				config.Engine.Rpc.ListenAddr)
 		}
 
 	default:
 		serverNetwork = "tcp"
-		if this.conf.rpc.sessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
 			serverTransport, err = thrift.NewTServerSocketTimeout(
-				this.conf.rpc.listenAddr, this.conf.rpc.sessionTimeout)
+				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
 			serverTransport, err = thrift.NewTServerSocket(
-				this.conf.rpc.listenAddr)
+				config.Engine.Rpc.ListenAddr)
 		}
 	}
 	if err != nil {
@@ -84,26 +84,26 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	// dial zk before startup servants
 	// because proxy servant is dependent upon zk
-	if this.conf.EtcdSelfAddr != "" {
-		if err := etclib.Dial(this.conf.EtcdServers); err != nil {
-			log.Error("etcd[%+v]: %s", this.conf.EtcdServers, err)
+	if config.Engine.EtcdSelfAddr != "" {
+		if err := etclib.Dial(config.Engine.EtcdServers); err != nil {
+			log.Error("etcd[%+v] disabled: %s", config.Engine.EtcdServers, err)
 
 			// disable etcd registration
-			this.conf.EtcdSelfAddr = ""
-
-			config.Servants.Proxy.Disable()
+			config.Engine.EtcdSelfAddr = ""
+			config.Engine.Servants.Proxy.Disable()
+		} else {
+			log.Debug("etcd connected")
 		}
 	}
 
 	// when config loaded, create the servants
-	this.svt = servant.NewFunServant(config.Servants)
+	this.svt = servant.NewFunServant(config.Engine.Servants)
 	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
 	this.svt.Start()
 
 	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
-
-	log.Info("RPC server ready at %s:%s", serverNetwork, this.conf.rpc.listenAddr)
+	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 
 	done = make(chan interface{})
 	go func() {
@@ -122,27 +122,16 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	return done
 }
 
-func (this *Engine) stopRpcServe() {
+func (this *Engine) StopRpcServe() {
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
 
-	outstandingSessions := atomic.LoadInt64(&rpcServer.sessionN)
 	close(this.stopChan)
+
+	outstandingSessions := atomic.LoadInt64(&rpcServer.activeSessionN)
 	log.Warn("RPC outstanding sessions: %d", outstandingSessions)
 
 	this.svt.Flush()
-	log.Info("Servant flush done")
-
-	// TODO wait all sessions terminate, but what about long conn php workers?
-	if false {
-		for {
-			if rpcServer.sessionN == 0 {
-				break
-			}
-
-			time.Sleep(time.Microsecond * 20)
-		}
-	}
 
 	log.Info("RPC server stopped gracefully")
 }

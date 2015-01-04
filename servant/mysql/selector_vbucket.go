@@ -67,6 +67,10 @@ func newVbucketServerSelector(cf *config.ConfigMysql) (this *VbucketServerSelect
 	return
 }
 
+func (this *VbucketServerSelector) KickLookupCache(pool string, hintId int) {
+
+}
+
 func (this *VbucketServerSelector) PickServer(pool string,
 	table string, hintId int) (*mysql, error) {
 	if this.shardedPool(pool) {
@@ -74,6 +78,10 @@ func (this *VbucketServerSelector) PickServer(pool string,
 	}
 
 	return this.pickNonShardedServer(pool, table)
+}
+
+func (this *VbucketServerSelector) ServerByBucket(bucket string) (*mysql, error) {
+	return nil, ErrServerNotFound
 }
 
 func (this *VbucketServerSelector) Servers() []*mysql {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"net"
 	"sync/atomic"
@@ -12,7 +13,8 @@ import (
 
 // thrift.TServer implementation
 type TFunServer struct {
-	stopped bool
+	quit           chan bool
+	activeSessionN int64
 
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
@@ -23,8 +25,6 @@ type TFunServer struct {
 	outputProtocolFactory  thrift.TProtocolFactory
 
 	pool *rpcThreadPool
-
-	sessionN int64 // concurrent sessions
 }
 
 func NewTFunServer(engine *Engine,
@@ -33,6 +33,7 @@ func NewTFunServer(engine *Engine,
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory) *TFunServer {
 	this := &TFunServer{
+		quit:                   make(chan bool),
 		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,
@@ -41,7 +42,8 @@ func NewTFunServer(engine *Engine,
 		inputProtocolFactory:   protocolFactory,
 		outputProtocolFactory:  protocolFactory,
 	}
-	this.pool = newRpcThreadPool(this.engine.conf.rpc.maxOutstandingSessions,
+	this.pool = newRpcThreadPool(
+		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	engine.rpcThreadPool = this.pool
 
@@ -49,7 +51,8 @@ func NewTFunServer(engine *Engine,
 }
 
 func (this *TFunServer) Serve() error {
-	this.stopped = false
+	const stoppedError = "RPC server stopped"
+
 	err := this.serverTransport.Listen()
 	if err != nil {
 		return err
@@ -58,13 +61,22 @@ func (this *TFunServer) Serve() error {
 	// register to etcd
 	// once registered, other peers will connect to me
 	// so, must be after Listen ready
-	if this.engine.conf.EtcdSelfAddr != "" {
-		etclib.BootService(this.engine.conf.EtcdSelfAddr, etclib.SERVICE_FAE)
+	if config.Engine.EtcdSelfAddr != "" {
+		etclib.BootService(config.Engine.EtcdSelfAddr, etclib.SERVICE_FAE)
 
-		log.Info("etcd self[%s] registered", this.engine.conf.EtcdSelfAddr)
+		log.Info("etcd self[%s] registered", config.Engine.EtcdSelfAddr)
 	}
 
-	for !this.stopped {
+	for {
+		select {
+		case <-this.quit:
+			// FIXME new conn will timeout, instead of conn close
+			log.Info("RPC server quit...")
+			return errors.New(stoppedError)
+
+		default:
+		}
+
 		client, err := this.serverTransport.Accept()
 		if err != nil {
 			log.Error("Accept: %v", err)
@@ -73,11 +85,11 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return errors.New("RPC server stopped")
+	return errors.New(stoppedError)
 }
 
 func (this *TFunServer) handleSession(client interface{}) {
-	defer atomic.AddInt64(&this.sessionN, -1)
+	defer atomic.AddInt64(&this.activeSessionN, -1)
 
 	transport, ok := client.(thrift.TTransport)
 	if !ok {
@@ -86,39 +98,36 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
-	atomic.AddInt64(&this.sessionN, 1)
+	atomic.AddInt64(&this.activeSessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		if !this.engine.conf.rpc.tcpNoDelay {
-			// golang is tcp no delay by default
-			tcpClient.SetNoDelay(false)
-		}
-
 		log.Trace("session[%s] open", tcpClient.RemoteAddr())
 	} else {
-		log.Error("non tcp conn found, should never happen")
+		log.Error("non tcp conn found, should NEVER happen")
 		return
 	}
 
 	t1 := time.Now()
 	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
-	if err := this.processRequests(transport); err != nil {
+	var (
+		calls int64
+		err   error
+	)
+	if calls, err = this.processRequests(transport); err != nil {
 		this.engine.stats.TotalFailedSessions.Inc(1)
-		log.Error("session[%s]: %s", remoteAddr, err.Error())
 	}
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Trace("session[%s] close in %s", remoteAddr, elapsed)
+	log.Trace("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
 
-	if this.engine.conf.rpc.sessionSlowThreshold.Seconds() > 0 &&
-		elapsed > this.engine.conf.rpc.sessionSlowThreshold {
+	if config.Engine.Rpc.SessionSlowThreshold.Seconds() > 0 &&
+		elapsed > config.Engine.Rpc.SessionSlowThreshold {
 		this.engine.stats.TotalSlowSessions.Inc(1)
-		log.Warn("session[%s] SLOW %s", remoteAddr, elapsed)
 	}
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport) error {
+func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error) {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
 	outputTransport := this.outputTransportFactory.GetTransport(client)
@@ -142,8 +151,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 
 	for {
 		t1 = time.Now()
-		if this.engine.conf.rpc.ioTimeout > 0 { // read + write
-			tcpClient.SetDeadline(time.Now().Add(this.engine.conf.rpc.ioTimeout))
+		if config.Engine.Rpc.IoTimeout > 0 { // read + write
+			tcpClient.SetDeadline(time.Now().Add(config.Engine.Rpc.IoTimeout))
 		}
 
 		ok, err := processor.Process(inputProtocol, outputProtocol)
@@ -159,10 +168,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 		if err, ok := err.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
-			log.Trace("session[%s] %d calls EOF", tcpClient.RemoteAddr().String(),
-				callsN)
 			this.engine.stats.CallPerSession.Update(callsN)
-			return nil
+			return callsN, nil
 		} else if err != nil {
 			// non-EOF transport err
 			// e,g. connection reset by peer
@@ -171,9 +178,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 			this.engine.stats.TotalFailedCalls.Inc(1)
 			this.engine.stats.CallPerSession.Update(callsN)
 
-			log.Trace("session[%s] %d calls: %s",
-				tcpClient.RemoteAddr().String(), callsN, err.Error())
-			return err
+			return callsN, err
 		}
 
 		// it is servant generated TApplicationException
@@ -186,17 +191,18 @@ func (this *TFunServer) processRequests(client thrift.TTransport) error {
 				callsN, err.Error())
 		}
 
+		// Peek: there is more data to be read or the remote side is still open
 		if !ok || !inputProtocol.Transport().Peek() {
 			break
 		}
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)
-	return nil
+	return callsN, nil
 }
 
 func (this *TFunServer) Stop() error {
-	this.stopped = true
+	close(this.quit)
 	this.serverTransport.Interrupt()
 	return nil
 }

@@ -16,11 +16,11 @@ func (this *Engine) stopHttpServ() {
 }
 
 func (this *Engine) launchHttpServ() {
-	if this.conf.httpListenAddr == "" {
+	if config.Engine.HttpListenAddr == "" {
 		return
 	}
 
-	server.LaunchHttpServ(this.conf.httpListenAddr, this.conf.pprofListenAddr)
+	server.LaunchHttpServ(config.Engine.HttpListenAddr, config.Engine.PprofListenAddr)
 	server.RegisterHttpApi("/admin/{cmd}",
 		func(w http.ResponseWriter, req *http.Request,
 			params map[string]interface{}) (interface{}, error) {
@@ -39,8 +39,8 @@ func (this *Engine) launchHttpServ() {
 func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request,
 	params map[string]interface{}) (interface{}, error) {
 	output := make(map[string]interface{})
-	if this.conf.pprofListenAddr != "" {
-		output["pprof"] = "http://" + this.conf.pprofListenAddr + "/debug/pprof/"
+	if config.Engine.PprofListenAddr != "" {
+		output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
 	}
 
 	output["uris"] = []string{"/admin/h", "/admin/help", "/admin/guide"}
@@ -86,8 +86,9 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["mem"] = *this.stats.memStats
 
 	case "conf":
-		output["engine"] = *this.conf
-		output["servants"] = *config.Servants
+		output["engine"] = *config.Engine
+		output["rpc"] = *config.Engine.Rpc
+		output["servants"] = *config.Engine.Servants
 
 	case "guide", "help", "h":
 		output["uris"] = []string{
@@ -99,8 +100,8 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 			"/admin/mem",
 			"/admin/conf",
 		}
-		if this.conf.pprofListenAddr != "" {
-			output["pprof"] = "http://" + this.conf.pprofListenAddr + "/debug/pprof/"
+		if config.Engine.PprofListenAddr != "" {
+			output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
 		}
 
 	default:

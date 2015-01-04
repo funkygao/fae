@@ -8,7 +8,6 @@ import (
 )
 
 // get a uniq name with length 3
-// TODO dump to redis periodically
 func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	const IDENT = "gm.name3"
 
@@ -19,25 +18,65 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		return
 	}
 
+	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
+		if !this.namegen.DbLoaded {
+			this.namegen.DbLoaded = true
+			go this.loadName3Bitmap()
+		}
+
 		r = this.namegen.Next()
 	} else {
-		svt, _ := this.proxy.StickyServant(IDENT)
+		svt, err := this.proxy.ServantByKey(IDENT)
+		if err != nil {
+			appErr = err
+			log.Error("%s: %s", IDENT, err)
+			return
+		}
+
 		if svt == nil {
 			// handle it by myself, got call locally
+			if !this.namegen.DbLoaded {
+				this.namegen.DbLoaded = true
+				go this.loadName3Bitmap()
+			}
+
 			r = this.namegen.Next()
 		} else {
 			// remote peer servant
+			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmName3(ctx)
-			svt.Recycle()
+			if appErr != nil {
+				log.Error("%s: %s", IDENT, appErr)
+				svt.Close()
+			}
+
+			svt.Recycle() // NEVER forget about this
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{r^%s}", r)
+	profiler.do(IDENT, ctx, "{p^%s r^%s}", peer, r)
 
 	return
+}
+
+func (this *FunServantImpl) loadName3Bitmap() {
+	log.Trace("namegen snapshot loading...")
+
+	_, result, err := this.doMyQuery("loadName3Bitmap",
+		"AllianceShard", "Alliance", 0,
+		"SELECT acronym FROM Alliance", nil, "")
+	if err != nil {
+		log.Error("namegen load snapshot: %s", err)
+	} else {
+		for _, row := range result.Rows {
+			this.namegen.SetBusy(row[0])
+		}
+	}
+
+	log.Trace("namegen snapshot loaded: %d rows", len(result.Rows))
 }
 
 // record php request time and payload size in bytes
@@ -50,6 +89,95 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 		ms, gofmt.ByteSize(bytes),
 		this.extractUid(ctx), ctx.Rid, ctx.Reason)
 
+	return
+}
+
+func (this *FunServantImpl) GmLock(ctx *rpc.Context,
+	reason string, key string) (r bool, appErr error) {
+	const IDENT = "gm.lock"
+
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	var peer string
+	if ctx.IsSetSticky() && *ctx.Sticky {
+		r = this.lk.Lock(key)
+	} else {
+		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
+		if err != nil {
+			appErr = err
+			log.Error("%s {why^%s key^%s}: %s",
+				IDENT, reason, key, err)
+			return
+		}
+
+		if svt == nil {
+			r = this.lk.Lock(key)
+		} else {
+			peer = svt.Addr()
+			svt.HijackContext(ctx)
+			r, appErr = svt.GmLock(ctx, reason, key)
+			if appErr != nil {
+				log.Error("%s {why^%s key^%s}: %s",
+					IDENT, reason, key, appErr)
+				svt.Close()
+			}
+
+			svt.Recycle()
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s r^%v}",
+		reason, key, peer, r)
+	return
+}
+
+func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
+	reason string, key string) (appErr error) {
+	const IDENT = "gm.unlock"
+
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	var peer string
+	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.lk.Unlock(key)
+	} else {
+		svt, err := this.proxy.ServantByKey(key)
+		if err != nil {
+			appErr = err
+			log.Error("%s {why^%s key^%s}: %s",
+				IDENT, reason, key, err)
+			return
+		}
+
+		if svt == nil {
+			this.lk.Unlock(key)
+		} else {
+			// remote peer servant
+			peer = svt.Addr()
+			svt.HijackContext(ctx)
+			appErr = svt.GmUnlock(ctx, reason, key)
+			if appErr != nil {
+				log.Error("%s {why^%s key^%s}: %s",
+					IDENT, reason, key, appErr)
+				svt.Close()
+			}
+
+			svt.Recycle()
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s}",
+		reason, key, peer)
 	return
 }
 

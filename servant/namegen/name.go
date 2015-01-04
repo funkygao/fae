@@ -20,12 +20,15 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
+// FIXME should use mutex to protect bitmap
 type NameGen struct {
-	bits [][]byte
+	bits     [][]byte
+	DbLoaded bool
 }
 
 func New(slots int) (this *NameGen) {
 	this = new(NameGen)
+	this.DbLoaded = false
 	this.bits = make([][]byte, slots)
 	for i, _ := range this.bits {
 		this.bits[i] = make([]byte, (NameCharMax-NameCharMin)/8+1)

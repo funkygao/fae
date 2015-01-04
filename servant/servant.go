@@ -5,11 +5,14 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
+	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
 	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/proxy"
+	"github.com/funkygao/fae/servant/redis"
+	"github.com/funkygao/fae/servant/store"
 	"github.com/funkygao/golib/cache"
 	"github.com/funkygao/golib/idgen"
 	"github.com/funkygao/golib/mutexmap"
@@ -26,16 +29,22 @@ type FunServantImpl struct {
 	conf *config.ConfigServant
 
 	digitNormalizer *regexp.Regexp
-	lockmap         *mutexmap.MutexMap
 
-	sessionN int64
+	// stateful mem data related to services
+	mysqlMergeMutexMap *mutexmap.MutexMap
+	dbCacheStore       store.Store
+	dbCacheHits        metrics.PercentCounter
+
+	sessionN int64           // total sessions served since boot
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
-	phpLatency     metrics.Histogram // in ms
-	phpPayloadSize metrics.Histogram // in bytes
-	reasonPercent  metrics.PercentCounter
+	// php client related
+	phpLatency       metrics.Histogram      // in ms
+	phpPayloadSize   metrics.Histogram      // in bytes
+	phpReasonPercent metrics.PercentCounter // user's behavior
 
+	// service drivers
 	proxy   *proxy.Proxy         // remote fae agent
 	idgen   *idgen.IdGenerator   // global id generator
 	namegen *namegen.NameGen     // name generator
@@ -43,13 +52,18 @@ type FunServantImpl struct {
 	mc      *memcache.ClientPool // memcache pool, auto sharding by key
 	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
 	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	rd      *redis.Client        // redis pool, auto sharding by pool name
 	cb      *couch.Client        // couchbase client
+	lk      *lock.Lock           // lock map
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
+	log.Debug("creating servants...")
+
 	this = &FunServantImpl{conf: cf}
 	this.sessions = cache.NewLruCache(cf.SessionEntries)
-	this.lockmap = mutexmap.New(8 << 20) // 8M
+
+	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
 
 	// stats
@@ -63,10 +77,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.phpPayloadSize = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("php.payload", this.phpPayloadSize)
-	this.reasonPercent = metrics.NewPercentCounter()
-	metrics.Register("php.reason", this.reasonPercent)
+	this.phpReasonPercent = metrics.NewPercentCounter()
+	metrics.Register("php.reason", this.phpReasonPercent)
 
-	// http REST
+	// http REST to export internal state
 	if server.Launched() {
 		server.RegisterHttpApi("/s/{cmd}",
 			func(w http.ResponseWriter, req *http.Request,
@@ -75,34 +89,57 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			}).Methods("GET")
 	}
 
-	// remote fae peer proxy
-	this.proxy = proxy.New(*this.conf.Proxy)
-
-	// idgen, always present
+	log.Debug("creating servant: idgen")
 	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
-	// namegen
+
+	log.Debug("creating servant: namegen")
 	this.namegen = namegen.New(3)
 
-	// local cache
+	if this.conf.Proxy.Enabled() {
+		log.Debug("creating servant: proxy")
+		this.proxy = proxy.New(this.conf.Proxy)
+	} else {
+		panic("peers proxy disabled")
+	}
+
 	if this.conf.Lcache.Enabled() {
-		this.lc = cache.NewLruCache(this.conf.Lcache.LruMaxItems)
+		log.Debug("creating servant: lcache")
+		this.lc = cache.NewLruCache(this.conf.Lcache.MaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
 	}
 
-	// memcache
+	if this.conf.Lock.Enabled() {
+		log.Debug("creating servant: lock")
+		this.lk = lock.New(this.conf.Lock)
+	}
+
 	if this.conf.Memcache.Enabled() {
+		log.Debug("creating servant: memcache")
 		this.mc = memcache.New(this.conf.Memcache)
 	}
 
-	// mysql
+	if this.conf.Redis.Enabled() {
+		log.Debug("creating servant: redis")
+		this.rd = redis.New(this.conf.Redis)
+	}
+
 	if this.conf.Mysql.Enabled() {
+		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
 	}
 
-	// mongodb
-	if this.conf.Mongodb.Enabled() {
-		this.mg = mongo.New(this.conf.Mongodb)
+	this.dbCacheHits = metrics.NewPercentCounter()
+	metrics.Register("db.cache.hits", this.dbCacheHits)
+	if this.conf.Mysql.CacheStore == "mem" {
+		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
+	} else if this.conf.Mysql.CacheStore == "redis" {
+		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
+			this.conf.Redis)
+	}
 
+	if this.conf.Mongodb.Enabled() {
+		log.Debug("creating servant: mongodb")
+		this.mg = mongo.New(this.conf.Mongodb)
 		if this.conf.Mongodb.DebugProtocol ||
 			this.conf.Mongodb.DebugHeartbeat {
 			mgo.SetLogger(&mongoProtocolLogger{})
@@ -110,9 +147,9 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
-	if this.conf.Couchbase != nil &&
-		this.conf.Couchbase.Servers != nil &&
-		len(this.conf.Couchbase.Servers) > 0 {
+	if this.conf.Couchbase.Enabled() {
+		log.Debug("creating servant: couchbase")
+
 		var err error
 		// pool is always 'default'
 		this.cb, err = couch.New(this.conf.Couchbase.Servers, "default")
@@ -121,22 +158,25 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
+	log.Debug("servants created")
 	return
 }
 
 func (this *FunServantImpl) Start() {
-	this.warmUp()
 	go this.showStats()
 	go this.proxy.StartMonitorCluster()
+
+	this.warmUp()
 }
 
 func (this *FunServantImpl) Flush() {
+	log.Debug("servants flushing...")
 	// TODO
-
+	log.Trace("servants flushed")
 }
 
 func (this *FunServantImpl) showStats() {
-	ticker := time.NewTicker(config.Servants.StatsOutputInterval)
+	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
 	// TODO show most recent stats, reset at some interval

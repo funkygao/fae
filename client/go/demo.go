@@ -10,17 +10,20 @@ import (
 func main() {
 	t1 := time.Now()
 
-	client, err := proxy.New(5, 0).Servant(":9001")
+	client, err := proxy.NewWithDefaultConfig().Servant(":9001")
 	if err != nil {
 		panic(err)
 	}
 	defer client.Recycle()
 
 	ctx := rpc.NewContext()
-	ctx.Reason = "me"
-    ctx.Rid = "189"
+	ctx.Reason = "gotest"
+	ctx.Rid = "189"
 	for i := 0; i < 10; i++ {
-		r, _ := client.Ping(ctx)
+		r, err := client.Ping(ctx)
+		if err != nil {
+			panic(err)
+		}
 
 		fmt.Println(r, time.Since(t1))
 		t1 = time.Now()

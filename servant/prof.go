@@ -18,28 +18,28 @@ type profiler struct {
 func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 	args ...interface{}) {
 	elapsed := time.Since(this.t1)
-	slow := elapsed > config.Servants.CallSlowThreshold
+	slow := elapsed > config.Engine.Servants.CallSlowThreshold
 	if !(slow || this.on) {
 		return
 	}
 
 	body := fmt.Sprintf(format, args...)
 	if slow {
-		header := fmt.Sprintf("SLOW=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), callName, ctx.String())
+		header := fmt.Sprintf("SLOW=%s/%s Q=%s ",
+			elapsed, time.Since(this.t0), callName)
 		log.Warn(header + this.truncatedStr(body))
 	} else if this.on {
-		header := fmt.Sprintf("T=%s/%s Q=%s %s ",
-			elapsed, time.Since(this.t0), callName, ctx.String())
+		header := fmt.Sprintf("T=%s/%s Q=%s ",
+			elapsed, time.Since(this.t0), callName)
 		log.Debug(header + this.truncatedStr(body))
 	}
 
 }
 
 func (this *profiler) truncatedStr(val string) string {
-	if len(val) < config.Servants.ProfilerMaxBodySize {
+	if len(val) < config.Engine.Servants.ProfilerMaxBodySize {
 		return val
 	}
 
-	return val[:config.Servants.ProfilerMaxBodySize] + "..."
+	return val[:config.Engine.Servants.ProfilerMaxBodySize] + "..."
 }

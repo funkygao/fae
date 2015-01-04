@@ -1,32 +1,38 @@
-/*
-Proxy of remote servant so that we can dispatch request
-to cluster instead of having to serve all by ourselves.
-*/
 package proxy
 
 import (
 	"encoding/json"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/ip"
 	log "github.com/funkygao/log4go"
-	"hash/adler32"
 	"sync"
 )
 
+// Proxy of remote servant so that we can dispatch request
+// to cluster instead of having to serve all by ourselves.
 type Proxy struct {
 	mutex sync.Mutex
-	cf    config.ConfigProxy
-	pools map[string]*funServantPeerPool // each fae peer has a pool, key is peerAddr(self exclusive)
-	keys  []string                       // array of peerAddr
+	cf    *config.ConfigProxy
+	myIp  string
+
+	remotePeerPools map[string]*funServantPeerPool // key is peerAddr
+	selector        PeerSelector
 }
 
-func New(cf config.ConfigProxy) *Proxy {
+func New(cf *config.ConfigProxy) *Proxy {
 	this := &Proxy{
-		cf:    cf,
-		pools: make(map[string]*funServantPeerPool),
+		cf:              cf,
+		remotePeerPools: make(map[string]*funServantPeerPool),
+		selector:        newStandardPeerSelector(),
+		myIp:            ip.LocalIpv4Addrs()[0],
 	}
 
 	return this
+}
+
+func NewWithDefaultConfig() *Proxy {
+	return New(config.NewDefaultProxy())
 }
 
 func (this *Proxy) Enabled() bool {
@@ -35,7 +41,7 @@ func (this *Proxy) Enabled() bool {
 
 func (this *Proxy) StartMonitorCluster() {
 	if !this.Enabled() {
-		log.Warn("servant proxy disabled")
+		log.Warn("servant proxy disabled by proxy config section")
 		return
 	}
 
@@ -48,90 +54,93 @@ func (this *Proxy) StartMonitorCluster() {
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
 			if err == nil {
 				// no lock, because running within 1 goroutine
+				this.selector.SetPeersAddr(peers...)
+				this.refreshPeers(peers)
 				log.Trace("Cluster latest fae nodes: %+v", peers)
-
-				this.keys = this.recreatePeers(peers)
 			} else {
 				log.Error("Cluster peers: %s", err)
 			}
 		}
 	}
 
-	log.Warn("Cluster monitor died")
+	// should never get here
+	log.Warn("Cluster peers monitor died")
 }
 
-func (this *Proxy) recreatePeers(peers []string) []string {
-	for addr, _ := range this.pools {
-		if addr == this.cf.SelfAddr {
+func (this *Proxy) refreshPeers(peers []string) {
+	// add all latest peers
+	for _, peerAddr := range peers {
+		if peerAddr == this.cf.SelfAddr {
 			continue
 		}
 
-		delete(this.pools, addr)
+		this.addRemotePeerIfNecessary(peerAddr)
 	}
 
-	newpeers := make([]string, 0)
-	for _, addr := range peers {
-		if addr == this.cf.SelfAddr {
+	// kill died peers
+	for peerAddr, _ := range this.remotePeerPools {
+		if peerAddr == this.cf.SelfAddr {
 			continue
 		}
 
-		this.Servant(addr)
-		newpeers = append(newpeers, addr)
+		alive := false
+		for _, p := range peers {
+			if p == peerAddr {
+				// still alive
+				alive = true
+				break
+			}
+		}
+
+		if !alive {
+			log.Trace("peer[%s] gone away", peerAddr)
+
+			this.mutex.Lock()
+			this.remotePeerPools[peerAddr].Close() // kill all conns in this pool
+			delete(this.remotePeerPools, peerAddr)
+			this.mutex.Unlock()
+		}
 	}
 
-	return newpeers
+}
+
+func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
+	this.mutex.Lock()
+
+	if _, present := this.remotePeerPools[peerAddr]; !present {
+		this.remotePeerPools[peerAddr] = newFunServantPeerPool(this.myIp,
+			peerAddr, *this.cf)
+		this.remotePeerPools[peerAddr].Open()
+	}
+
+	this.mutex.Unlock()
 }
 
 // Get or create a fae peer servant based on peer address
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
+	this.addRemotePeerIfNecessary(peerAddr)
 
-	if _, ok := this.pools[peerAddr]; !ok {
-		this.pools[peerAddr] = newFunServantPeerPool(peerAddr,
-			this.cf.PoolCapacity, this.cf.IdleTimeout)
-		this.pools[peerAddr].Open()
-	}
-
-	return this.pools[peerAddr].Get()
+	log.Debug("servant by addr[%s]: {txn: %d}", peerAddr,
+		this.remotePeerPools[peerAddr].nextTxn())
+	return this.remotePeerPools[peerAddr].Get()
 }
 
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
-func (this *Proxy) StickyServant(key string) (peer *FunServantPeer, peerAddr string) {
-	// adler32 is almost same as crc32, but much 3 times faster
-	checksum := adler32.Checksum([]byte(key))
-	index := int(checksum) % (len(this.keys) + 1) // +1 means including me myself
-	if index == len(this.keys) {
-		return
+func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
+	peerAddr := this.selector.PickPeer(key)
+	if peerAddr == this.cf.SelfAddr {
+		return nil, nil
 	}
 
-	log.Debug("sticky key[%s] servant peer: %s", key, this.keys[index])
-
-	svt, _ := this.pools[this.keys[index]].Get()
-	return svt, this.keys[index]
-}
-
-// get all other servants in the cluster
-// FIXME lock, but can't dead lock with this.Servant()
-func (this *Proxy) ClusterServants() map[string]*FunServantPeer {
-	rv := make(map[string]*FunServantPeer)
-	for peerAddr, _ := range this.pools {
-		svt, err := this.Servant(peerAddr)
-		if err != nil {
-			log.Error("peer servant[%s]: %s", peerAddr, err)
-			continue
-		}
-
-		rv[peerAddr] = svt
-	}
-
-	return rv
+	log.Debug("sevant by key[%s]: {peer: %s, txn: %d}", key, peerAddr,
+		this.remotePeerPools[peerAddr].nextTxn())
+	return this.remotePeerPools[peerAddr].Get()
 }
 
 func (this *Proxy) StatsJSON() string {
 	m := make(map[string]string)
-	for addr, pool := range this.pools {
+	for addr, pool := range this.remotePeerPools {
 		m[addr] = pool.pool.StatsJSON()
 	}
 
@@ -141,7 +150,7 @@ func (this *Proxy) StatsJSON() string {
 
 func (this *Proxy) StatsMap() map[string]string {
 	m := make(map[string]string)
-	for addr, pool := range this.pools {
+	for addr, pool := range this.remotePeerPools {
 		m[addr] = pool.pool.StatsJSON()
 	}
 

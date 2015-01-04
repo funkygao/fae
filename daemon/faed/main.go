@@ -37,7 +37,7 @@ func init() {
 
 		// stop new requests
 		engine.NewEngine().
-			LoadConfig(s.Conf).
+			LoadConfig(options.configFile, s.Conf).
 			UnregisterEtcd()
 
 		// finish all outstanding RPC sessions
@@ -57,12 +57,9 @@ func init() {
 			fmt.Fprintf(os.Stderr, "Another instance is running, exit...\n")
 			os.Exit(1)
 		}
+
 		locking.LockInstance(options.lockFile)
 	}
-
-	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
-		shutdown()
-	})
 
 }
 
@@ -101,6 +98,11 @@ func main() {
 	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
 
 	engineRunner = engine.NewEngine()
-	engineRunner.LoadConfig(s.Conf).
+	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
+		shutdown()
+		engineRunner.StopRpcServe()
+	})
+
+	engineRunner.LoadConfig(options.configFile, s.Conf).
 		ServeForever()
 }

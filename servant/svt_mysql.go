@@ -4,6 +4,7 @@
 package servant
 
 import (
+	"crypto/sha1"
 	sql_ "database/sql"
 	_json "encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
@@ -14,7 +15,8 @@ import (
 )
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
-	hintId int64, sql string, args []string) (r *rpc.MysqlResult, appErr error) {
+	hintId int64, sql string, args []string, cacheKey string) (r *rpc.MysqlResult,
+	appErr error) {
 	const IDENT = "my.query"
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -25,11 +27,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	this.stats.inc(IDENT)
 
-	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args)
+	// TODO delegate remote peer if neccessary
+	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
 
 	profiler.do(IDENT, ctx,
-		"{pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
-		pool, table, hintId, sql, args, *r)
+		"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%#v}",
+		cacheKey, pool, table, hintId, sql, args, *r)
 	return
 }
 
@@ -48,9 +51,10 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	this.stats.inc(IDENT)
 
 	// find the column value from db
+	// TODO keep in mem, needn't query db on each call
 	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
 	_, queryResult, err := this.doMyQuery(IDENT, pool, table, hintId,
-		querySql, nil)
+		querySql, nil, "")
 	if err != nil {
 		appErr = err
 		log.Error("%s[%s]: %s", IDENT, querySql, err.Error())
@@ -61,8 +65,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		return
 	}
 
-	this.lockmap.Lock(key)
-	defer this.lockmap.Unlock(key)
+	this.mysqlMergeMutexMap.Lock(key)
+	defer this.mysqlMergeMutexMap.Unlock(key)
 
 	// do the merge in mem
 	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
@@ -96,7 +100,8 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	updateSql := "UPDATE " + table + " SET " + column + "='" +
 		string(newVal) + "' WHERE " + where
-	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql, nil)
+	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql,
+		nil, "")
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
 		appErr = err
@@ -115,9 +120,11 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 func (this *FunServantImpl) doMyQuery(ident string,
 	pool string, table string, hintId int64, sql string,
-	args []string) (operation string, r *rpc.MysqlResult, appErr error) {
+	args []string, cacheKey string) (operation string,
+	r *rpc.MysqlResult, appErr error) {
 	const (
 		SQL_SELECT = "SELECT"
+		SQL_UPDATE = "UPDATE"
 		OP_QUERY   = "qry"
 		OP_EXEC    = "exc"
 	)
@@ -128,14 +135,31 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		margs[i] = arg
 	}
 
+	var cacheKeyHash = cacheKey
+
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
 		operation = OP_QUERY
 
+		if cacheKey != "" {
+			if this.conf.Mysql.CacheKeyHash {
+				hashSum := sha1.Sum([]byte(cacheKey)) // sha1.Size
+				cacheKeyHash = string(hashSum[:])
+			}
+
+			if cacheValue, present := this.dbCacheStore.Get(cacheKeyHash); present {
+				log.Debug("Q=%s cache[%s] hit", ident, cacheKey)
+				this.dbCacheHits.Inc("hit", 1)
+				r = cacheValue.(*rpc.MysqlResult)
+				return
+			}
+		}
+
+		// cache miss, do real db query
 		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
@@ -150,7 +174,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		cols, err := rows.Columns()
 		if err != nil {
 			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
@@ -166,7 +190,7 @@ func (this *FunServantImpl) doMyQuery(ident string,
 					scanArgs[i] = &rawRowValues[i]
 				}
 				if appErr = rows.Scan(scanArgs...); appErr != nil {
-					log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+					log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 						ident,
 						pool, table,
 						sql, args,
@@ -188,12 +212,20 @@ func (this *FunServantImpl) doMyQuery(ident string,
 
 			// check for errors after we’re done iterating over the rows
 			if appErr = rows.Err(); appErr != nil {
-				log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 					ident,
 					pool, table,
 					sql, args,
 					appErr)
 				return
+			}
+
+			// query success, set cache: even when empty data returned
+			if cacheKey != "" {
+				this.dbCacheStore.Set(cacheKeyHash, r)
+
+				this.dbCacheHits.Inc("miss", 1)
+				log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
 			}
 		}
 	} else {
@@ -202,12 +234,29 @@ func (this *FunServantImpl) doMyQuery(ident string,
 		// FIXME if sql is 'select * from UesrInfo', runtime will get here
 		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
 			table, int(hintId), sql, margs); appErr != nil {
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v) %s",
+			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
 				appErr)
 			return
+		}
+
+		if !strings.HasPrefix(sql, SQL_UPDATE) {
+			// insert or delete TODO
+			this.my.KickLookupCache(pool, int(hintId))
+		}
+
+		// update success, del cache
+		if cacheKey != "" {
+			if this.conf.Mysql.CacheKeyHash {
+				hashSum := sha1.Sum([]byte(cacheKey))
+				cacheKeyHash = string(hashSum[:])
+			}
+			this.dbCacheStore.Del(cacheKeyHash)
+
+			this.dbCacheHits.Inc("kicked", 1)
+			log.Debug("Q=%s cache[%s] kicked", ident, cacheKey)
 		}
 	}
 

@@ -19,7 +19,7 @@ func init() {
 }
 
 func main() {
-	client, err := proxy.New(5, 0).Servant(host + ":" + port)
+	client, err := proxy.NewWithDefaultConfig().Servant(host + ":" + port)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -29,6 +29,11 @@ func main() {
 	ctx := rpc.NewContext()
 	ctx.Reason = "pingfae"
 	ctx.Rid = "1"
-	r, _ := client.Ping(ctx)
-	fmt.Println(r)
+	r, err := client.Ping(ctx)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(r)
+	}
+
 }

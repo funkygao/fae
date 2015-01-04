@@ -24,7 +24,6 @@ func (this *ConfigMemcacheServer) loadConfig(section *conf.Conf) {
 	}
 	this.Pool = section.String("pool", "default")
 
-	log.Debug("memcache instance: %+v", *this)
 }
 
 func (this *ConfigMemcacheServer) Address() string {
@@ -40,8 +39,6 @@ type ConfigMemcache struct {
 	ReplicaN              int
 	Breaker               ConfigBreaker
 	Servers               map[string]*ConfigMemcacheServer // key is host:port(addr)
-
-	enabled bool
 }
 
 func (this *ConfigMemcache) ServerList() []string {
@@ -67,10 +64,10 @@ func (this *ConfigMemcache) Pools() (pools []string) {
 }
 
 func (this *ConfigMemcache) Enabled() bool {
-	return this.enabled
+	return len(this.Servers) > 0
 }
 
-func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
+func (this *ConfigMemcache) LoadConfig(cf *conf.Conf) {
 	this.Servers = make(map[string]*ConfigMemcacheServer)
 	this.HashStrategy = cf.String("hash_strategy", "standard")
 	this.Timeout = cf.Duration("timeout", 4*time.Second)
@@ -92,7 +89,6 @@ func (this *ConfigMemcache) loadConfig(cf *conf.Conf) {
 		server.loadConfig(section)
 		this.Servers[server.Address()] = server
 	}
-	this.enabled = true
 
-	log.Debug("memcache: %+v", *this)
+	log.Debug("memcache conf: %+v", *this)
 }

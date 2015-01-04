@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
-	"github.com/funkygao/golib/fixture"
 	"labix.org/v2/mgo/bson"
 	"log"
 	"math/rand"
@@ -28,7 +27,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		log.Printf("session{round^%d seq^%d} %v", round, seq, err)
 		return
 	}
-	defer client.Recycle() // when err occurs, do we still need recyle?
+	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	if sampling(SampleRate) {
 		log.Printf("session{round^%d seq^%d} connected within %s",
@@ -123,25 +122,6 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 		}
 
-		if Cmd&CallKvdb != 0 {
-			// key 20B, value 1KB
-			key := fixture.RandomByteSlice(20)
-			_, err = client.KvdbSet(ctx, key,
-				fixture.RandomByteSlice(1<<10))
-			if err != nil {
-				report.incCallErr()
-				log.Printf("session{round^%d seq^%d kvdb_set} %v", round, seq, err)
-			} else {
-				report.incCallOk()
-			}
-
-			if _, err = client.KvdbGet(ctx, key); err != nil {
-				log.Printf("session{round^%d seq^%d kvdb_get} %v", round, seq, err)
-				report.incCallErr()
-			} else {
-				report.incCallOk()
-			}
-		}
 	}
 
 	if sampling(SampleRate) {

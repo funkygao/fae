@@ -17,6 +17,8 @@ type ConfigMysqlServer struct {
 	Charset      string
 	ShardBaseNum int
 
+	conf *ConfigMysql
+
 	dsn string // cache of op result
 }
 
@@ -47,8 +49,9 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
-
-	log.Debug("mysql instance: %s", this.dsn)
+	if this.conf.ConnectTimeout.Seconds() > 0 {
+		this.dsn += "&timeout=" + this.conf.ConnectTimeout.String()
+	}
 }
 
 func (this *ConfigMysqlServer) DSN() string {
@@ -59,19 +62,75 @@ type ConfigMysql struct {
 	ShardBaseNum          int
 	ShardStrategy         string
 	ConnectTimeout        time.Duration
-	IoTimeout             time.Duration
+	IoTimeout             time.Duration   // FIXME not used yet
 	GlobalPools           map[string]bool // non-sharded pools
 	MaxIdleConnsPerServer int
 	MaxConnsPerServer     int
 	HeartbeatInterval     int
-	Breaker               ConfigBreaker
-	Servers               map[string]*ConfigMysqlServer // key is pool
 
-	enabled bool
+	// cache related
+	CacheStore            string
+	CacheStoreRedisPool   string
+	CacheStoreMemMaxItems int
+	CacheKeyHash          bool
+
+	Breaker ConfigBreaker
+
+	LookupCacheMaxItems int
+	LookupPool          string
+	lookupTables        conf.Conf
+	Servers             map[string]*ConfigMysqlServer // key is pool
+
+}
+
+func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
+	this.GlobalPools = make(map[string]bool)
+	for _, p := range cf.StringList("global_pools", nil) {
+		this.GlobalPools[p] = true
+	}
+	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
+	this.ShardStrategy = cf.String("shard_strategy", "standard")
+	this.ConnectTimeout = cf.Duration("connect_timeout", 0)
+	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
+	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
+	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
+		this.MaxIdleConnsPerServer*5)
+	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
+	this.CacheStore = cf.String("cache_store", "mem")
+	this.CacheStoreMemMaxItems = cf.Int("cache_store_mem_max_items", 10<<20)
+	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
+	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
+	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
+	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1048576)
+	section, err := cf.Section("breaker")
+	if err == nil {
+		this.Breaker.loadConfig(section)
+	}
+	section, err = cf.Section("lookup_tables")
+	if err == nil {
+		this.lookupTables = *section
+	} else {
+		//panic("lookup_tables not found in mysql conf")
+	}
+	this.Servers = make(map[string]*ConfigMysqlServer)
+	for i := 0; i < len(cf.List("servers", nil)); i++ {
+		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
+		if err != nil {
+			panic(err)
+		}
+
+		server := new(ConfigMysqlServer)
+		server.conf = this
+		server.ShardBaseNum = this.ShardBaseNum
+		server.loadConfig(section)
+		this.Servers[server.Pool] = server
+	}
+
+	log.Debug("mysql conf: %+v", *this)
 }
 
 func (this *ConfigMysql) Enabled() bool {
-	return this.enabled
+	return len(this.Servers) > 0
 }
 
 func (this *ConfigMysql) Pools() (pools []string) {
@@ -85,36 +144,6 @@ func (this *ConfigMysql) Pools() (pools []string) {
 	return
 }
 
-func (this *ConfigMysql) loadConfig(cf *conf.Conf) {
-	this.GlobalPools = make(map[string]bool)
-	for _, p := range cf.StringList("global_pools", nil) {
-		this.GlobalPools[p] = true
-	}
-	this.enabled = true
-	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
-	this.ShardStrategy = cf.String("shard_strategy", "standard")
-	this.ConnectTimeout = cf.Duration("connect_timeout", 4*time.Second)
-	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
-	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
-	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
-		this.MaxIdleConnsPerServer*5)
-	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
-	section, err := cf.Section("breaker")
-	if err == nil {
-		this.Breaker.loadConfig(section)
-	}
-	this.Servers = make(map[string]*ConfigMysqlServer)
-	for i := 0; i < len(cf.List("servers", nil)); i++ {
-		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
-		if err != nil {
-			panic(err)
-		}
-
-		server := new(ConfigMysqlServer)
-		server.ShardBaseNum = this.ShardBaseNum
-		server.loadConfig(section)
-		this.Servers[server.Pool] = server
-	}
-
-	log.Debug("mysql: %+v", *this)
+func (this *ConfigMysql) LookupTable(pool string) (lookupTable string) {
+	return this.lookupTables.String(pool, "")
 }

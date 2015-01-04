@@ -4,7 +4,8 @@
     ]
     etcd_self_addr: ":9001"
 
-    http_listen_addr: ":9002"
+    reload_watchdog_interval: "1s"
+    http_listen_addr: ":9101"
     pprof_listen_addr: "localhost:6060"
     cpu_num: "max"
     metrics_logfile: "metrics.log"
@@ -18,8 +19,7 @@
         max_outstanding_sessions: 10000
         session_timeout: "0s"
         session_slow_threshold: "8s"
-        io_timeout: "3s"
-        tcp_nodelay: true
+        io_timeout: "4s"
         stats_output_interval: "10m"
     }
 
@@ -35,18 +35,36 @@
         profiler_rate: 1000
 
         proxy: {
-            pool_capacity: 5
-            idle_timeout: "10m"
             self_addr: ":9001"
+            pool_capacity: 50
+            io_timeout: "0s"
+            idle_timeout: "0s"
+            diagnostic_interval: "10s"
+            borrow_max_seconds: 10
+            buffer_size: 4096
+            tcp_nodelay: true
         }
 
         mysql: {
             connect_timeout: "4s"
             io_timeout: "10s"
+            cache_store: "mem"
+            cache_key_hash: false
+            cache_store_mem_max_items: 1073741824
+            cache_store_redis_pool: "db_cache"
 
             breaker: {
                 failure_allowance: 5
                 retry_interval: "10s"
+            }
+
+            lookup_cache_max_items: 1048576
+            lookup_pool: "ShardLookup"
+            lookup_tables: {
+                "UserShard": "UserLookup"
+                "AllianceShard": "AllianceLookup"
+                "ChatShard": "ChatLookup"
+                "WorldShard": "WorldLookup"
             }
 
             // non sharded pools
@@ -99,6 +117,14 @@
                     password: "halfquestfarm4321"
                     db: "AllianceShard1"
                 }
+                {
+                    pool: "ChatShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
+                    db: "ChatShard1"
+                }
             ]
         }
 
@@ -140,10 +166,35 @@
         }
 
         lcache: {
-            lru_max_items: 1073741824
+            max_items: 104857600
         }
 
-        memcache: {
+        lock: {
+            max_items: 1048576
+            expires: "5s"
+        }
+
+        redis: {
+            breaker: {
+                failure_allowance: 5
+                retry_interval: "10s"
+            }
+            pools: [
+                {
+                    name: "default"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 10
+                            idle_timeout: "360s"
+                        }
+                    ]
+                }
+            ]
+        }
+
+        memcache_offline: {
             hash_strategy: "standard"
             max_conns_per_server: 200
             max_idle_conns_per_server: 20
@@ -162,7 +213,7 @@
             ]
         }
 
-        couchbase: {
+        couchbase_offline: {
             servers: [
                 "http://localhost:8091/",
             ]

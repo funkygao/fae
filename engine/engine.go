@@ -2,13 +2,13 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
+	conf "github.com/funkygao/jsconf"
 	"time"
 )
 
 type Engine struct {
-	conf *engineConfig
-
 	StartedAt time.Time
 
 	svt           *servant.FunServantImpl
@@ -25,9 +25,13 @@ type Engine struct {
 
 func NewEngine() (this *Engine) {
 	this = new(Engine)
-	this.conf = new(engineConfig)
 	this.stats = newEngineStats()
 	this.stopChan = make(chan bool)
 
 	return
+}
+
+func (this *Engine) LoadConfig(configFile string, cf *conf.Conf) *Engine {
+	config.LoadEngineConfig(configFile, cf)
+	return this
 }

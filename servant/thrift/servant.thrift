@@ -162,6 +162,16 @@ service FunServant {
     ),
 
     //=================
+    // redis section
+    //=================
+    string rd_call(
+        1: required Context ctx, 
+        2: required string cmd,
+        3: required string pool,
+        4: required list<string> keysAndArgs
+    ),
+
+    //=================
     // memcache section
     //=================
 
@@ -375,7 +385,8 @@ service FunServant {
         3: string table,
         4: i64 hintId,
         5: string sql,
-        6: list<string> argv
+        6: list<string> argv,
+        7: string cacheKey
     ),
 
     MysqlMergeResult my_merge(
@@ -446,6 +457,18 @@ service FunServant {
         1: Context ctx,
         2: i32 latency,
         3: i32 bytes
+    ),
+
+    bool gm_lock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
+    ),
+
+    void gm_unlock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
     ),
 
 }

@@ -1,6 +1,12 @@
 package servant
 
+import (
+	log "github.com/funkygao/log4go"
+)
+
 func (this *FunServantImpl) warmUp() {
+	log.Debug("warming up...")
+
 	if this.mg != nil {
 		go this.mg.Warmup()
 	}
@@ -13,4 +19,5 @@ func (this *FunServantImpl) warmUp() {
 		this.my.Warmup()
 	}
 
+	log.Debug("warmup done")
 }

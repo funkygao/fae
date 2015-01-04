@@ -45,7 +45,6 @@ func (this *ConfigMongodbServer) loadConfig(section *conf.Conf) {
 		this.uri += "?replicaSet=" + this.ReplicaSet
 	}
 
-	log.Debug("mongodb instance: %+v", *this)
 }
 
 func (this *ConfigMongodbServer) Uri() string {
@@ -70,7 +69,7 @@ func (this *ConfigMongodb) Enabled() bool {
 	return len(this.Servers) > 0
 }
 
-func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
+func (this *ConfigMongodb) LoadConfig(cf *conf.Conf) {
 	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.DebugProtocol = cf.Bool("debug_protocol", false)
 	this.DebugHeartbeat = cf.Bool("debug_heartbeat", false)
@@ -98,5 +97,5 @@ func (this *ConfigMongodb) loadConfig(cf *conf.Conf) {
 		this.Servers[server.Pool] = server
 	}
 
-	log.Debug("mongodb: %+v", *this)
+	log.Debug("mongodb conf: %+v", *this)
 }
