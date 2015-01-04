@@ -64,7 +64,7 @@ func (this *Client) Call(cmd string, pool string,
 	}
 
 	if len(keysAndArgs) == 0 {
-		// e,g. cmd=multi
+		// e,g. cmd=multi | exec | discard
 		return nil, errors.New("redis cmd not implemented:" + cmd)
 	}
 
