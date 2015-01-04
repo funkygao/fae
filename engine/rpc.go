@@ -86,11 +86,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	// because proxy servant is dependent upon zk
 	if config.Engine.EtcdSelfAddr != "" {
 		if err := etclib.Dial(config.Engine.EtcdServers); err != nil {
-			log.Error("etcd[%+v] disabled: %s", config.Engine.EtcdServers, err)
-
-			// disable etcd registration
-			config.Engine.EtcdSelfAddr = ""
-			config.Engine.Servants.Proxy.Disable()
+			panic(err)
 		} else {
 			log.Debug("etcd connected")
 		}
