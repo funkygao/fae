@@ -26,7 +26,7 @@ type ConfigServant struct {
 	Lock      *ConfigLock
 }
 
-func (this *ConfigServant) LoadConfig(cf *conf.Conf) {
+func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
 	this.DataCenterId = cf.Int("data_center_id", 1)
 	this.AgentId = cf.Int("agent_id", 1)
 	this.SessionEntries = cf.Int("session_entries", 20<<10)
@@ -85,7 +85,7 @@ func (this *ConfigServant) LoadConfig(cf *conf.Conf) {
 	this.Proxy = new(ConfigProxy)
 	section, err = cf.Section("proxy")
 	if err == nil {
-		this.Proxy.LoadConfig(section)
+		this.Proxy.LoadConfig(selfAddr, section)
 	}
 
 	log.Debug("servants conf: %+v", *this)

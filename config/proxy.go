@@ -34,15 +34,15 @@ func NewDefaultProxy() *ConfigProxy {
 	}
 }
 
-func (this *ConfigProxy) LoadConfig(cf *conf.Conf) {
+func (this *ConfigProxy) LoadConfig(selfAddr string, cf *conf.Conf) {
 	this.PoolCapacity = cf.Int("pool_capacity", 10)
 	this.IdleTimeout = cf.Duration("idle_timeout", 0)
-	this.SelfAddr = cf.String("self_addr", ":0")
 	this.IoTimeout = cf.Duration("io_timeout", time.Second*10)
 	this.BorrowMaxSeconds = cf.Int("borrow_max_seconds", 10)
 	this.DiagnosticInterval = cf.Duration("diagnostic_interval", time.Second*10)
 	this.TcpNoDelay = cf.Bool("tcp_nodelay", true)
 	this.BufferSize = cf.Int("buffer_size", 4<<10)
+	this.SelfAddr = selfAddr
 	if this.SelfAddr == "" {
 		log.Warn("proxy conf: %+v, empty self_addr: proxy disabled", *this)
 		this.enabled = false

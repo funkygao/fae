@@ -2,7 +2,6 @@
     etcd_servers: [
         "127.0.0.1:2181",
     ]
-    etcd_self_addr: ":9001"
 
     reload_watchdog_interval: "1s"
     http_listen_addr: ":9101"
@@ -35,7 +34,6 @@
         profiler_rate: 1000
 
         proxy: {
-            self_addr: ":9001"
             pool_capacity: 50
             io_timeout: "0s"
             idle_timeout: "0s"

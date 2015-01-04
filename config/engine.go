@@ -32,15 +32,6 @@ type ConfigEngine struct {
 func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	this.Conf = cf
 
-	this.EtcdServers = cf.StringList("etcd_servers", nil)
-	if len(this.EtcdServers) > 0 {
-		this.EtcdSelfAddr = cf.String("etcd_self_addr", "")
-		if strings.HasPrefix(this.EtcdSelfAddr, ":") {
-			// automatically get local ip addr
-			myIp := ip.LocalIpv4Addrs()[0]
-			this.EtcdSelfAddr = myIp + this.EtcdSelfAddr
-		}
-	}
 	this.HttpListenAddr = this.String("http_listen_addr", "")
 	this.PprofListenAddr = this.String("pprof_listen_addr", "")
 	this.MetricsLogfile = this.String("metrics_logfile", "metrics.log")
@@ -54,12 +45,23 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	}
 	this.Rpc.LoadConfig(section)
 
+	// servants section
 	this.Servants = new(ConfigServant)
 	section, err = this.Section("servants")
 	if err != nil {
 		panic(err)
 	}
-	this.Servants.LoadConfig(section)
+	this.Servants.LoadConfig(this.Rpc.ListenAddr, section)
+
+	// after load all configs, calculate EtcdSelfAddr
+	this.EtcdServers = cf.StringList("etcd_servers", nil)
+	if len(this.EtcdServers) > 0 {
+		this.EtcdSelfAddr = this.Rpc.ListenAddr
+		if strings.HasPrefix(this.EtcdSelfAddr, ":") {
+			// automatically get local ip addr
+			this.EtcdSelfAddr = ip.LocalIpv4Addrs()[0] + this.EtcdSelfAddr
+		}
+	}
 
 	log.Debug("engine conf: %+v", *this.Conf)
 }
