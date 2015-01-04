@@ -144,6 +144,8 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 	}
 
 	this.lookupCache.Set(key, my)
+	log.Debug("lookupCache[%s] set shardId: %s, %s: %s", key, shardId,
+		bucket, my.dsn)
 
 	return my, nil
 }

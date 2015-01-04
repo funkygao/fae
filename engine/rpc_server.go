@@ -182,13 +182,10 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		}
 
 		// it is servant generated TApplicationException
-		// err logging is handled inside servants
+		// e,g Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE entityId=?' at line 1
 		if err != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
-
-			log.Trace("session[%s] %d calls: %s",
-				tcpClient.RemoteAddr().String(),
-				callsN, err.Error())
+			return callsN, err
 		}
 
 		// Peek: there is more data to be read or the remote side is still open
