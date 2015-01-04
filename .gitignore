@@ -32,5 +32,6 @@ client/go/stress/stress
 faed.lock
 *.class
 etc/faed.cf
+client/go/pingfae/pingfae
 metrics.log
 panic.dump
