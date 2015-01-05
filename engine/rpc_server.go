@@ -102,7 +102,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	atomic.AddInt64(&this.activeSessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		log.Trace("session[%s] open", tcpClient.RemoteAddr())
+		log.Debug("session[%s] open", tcpClient.RemoteAddr())
 	} else {
 		log.Error("non tcp conn found, should NEVER happen")
 		return
