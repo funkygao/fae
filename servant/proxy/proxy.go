@@ -156,6 +156,15 @@ func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
 	return this.remotePeerPools[peerAddr].Get()
 }
 
+// peer addresses in the cluster
+func (this *Proxy) ClusterPeers() []string {
+	addrs := make([]string, 0)
+	for addr, _ := range this.remotePeerPools {
+		addrs = append(addrs, addr)
+	}
+	return addrs
+}
+
 func (this *Proxy) StatsJSON() string {
 	m := make(map[string]string)
 	for addr, pool := range this.remotePeerPools {
