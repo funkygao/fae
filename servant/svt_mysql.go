@@ -29,10 +29,14 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	// TODO delegate remote peer if neccessary
 	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
+	var rows = len(r.Rows)
+	if r.RowsAffected > 0 {
+		rows = int(r.RowsAffected)
+	}
 
 	profiler.do(IDENT, ctx,
-		"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {r^%+v}",
-		cacheKey, pool, table, hintId, sql, args, *r)
+		"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d r^%+v}",
+		cacheKey, pool, table, hintId, sql, args, rows, *r)
 	return
 }
 
