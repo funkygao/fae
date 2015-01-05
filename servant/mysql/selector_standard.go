@@ -85,7 +85,7 @@ func (this *StandardServerSelector) KickLookupCache(pool string, hintId int) {
 
 	key := this.lookupCacheKey(pool, hintId)
 	this.lookupCache.Del(key)
-	log.Debug("lookupCache[%s] kicked", key)
+	log.Trace("lookupCache[%s] kicked", key)
 }
 
 func (this *StandardServerSelector) lookupCacheKey(pool string, hintId int) string {
@@ -153,8 +153,8 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 	}
 
 	this.lookupCache.Set(key, my)
-	log.Debug("lookupCache[%s] set shardId: %s, %s: %s", key, shardId,
-		bucket, my.dsn)
+	log.Trace("lookupCache[%s] set {pool^%s}",
+		key, bucket)
 
 	return my, nil
 }
