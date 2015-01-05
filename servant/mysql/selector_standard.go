@@ -101,22 +101,30 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		sb2 = " WHERE entityId=?"
 	)
 
+	// get mysql conn from cache
 	key := this.lookupCacheKey(pool, hintId)
 	if conn, present := this.lookupCache.Get(key); present {
 		return conn.(*mysql), nil
 	}
 
+	// cache missed, get lookup mysql conn
 	my, err := this.ServerByBucket(this.conf.LookupPool)
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO maybe string concat is better performant
 	sb := str.NewStringBuilder()
 	sb.WriteString(sb1)
-	sb.WriteString(this.conf.LookupTable(pool))
+	lookupTable := this.conf.LookupTable(pool)
+	if lookupTable == "" {
+		return nil, ErrLookupTableNotFound
+	}
+	sb.WriteString(lookupTable)
 	sb.WriteString(sb2)
 	rows, err := my.Query(sb.String(), hintId)
 	if err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 
@@ -129,9 +137,11 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 
 	var shardId string
 	if err = rows.Scan(&shardId); err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 	if err = rows.Err(); err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 
