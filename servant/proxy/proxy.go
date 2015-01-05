@@ -16,8 +16,8 @@ type Proxy struct {
 	cf    *config.ConfigProxy
 	myIp  string
 
-	clusterFound bool
-	clusterChan  chan bool
+	clusterTopologyReady bool
+	clusterTopologyChan  chan bool
 
 	remotePeerPools map[string]*funServantPeerPool // key is peerAddr
 	selector        PeerSelector
@@ -25,12 +25,12 @@ type Proxy struct {
 
 func New(cf *config.ConfigProxy) *Proxy {
 	this := &Proxy{
-		cf:              cf,
-		remotePeerPools: make(map[string]*funServantPeerPool),
-		selector:        newStandardPeerSelector(),
-		myIp:            ip.LocalIpv4Addrs()[0],
-		clusterFound:    false,
-		clusterChan:     make(chan bool),
+		cf:                   cf,
+		remotePeerPools:      make(map[string]*funServantPeerPool),
+		selector:             newStandardPeerSelector(),
+		myIp:                 ip.LocalIpv4Addrs()[0],
+		clusterTopologyReady: false,
+		clusterTopologyChan:  make(chan bool),
 	}
 
 	return this
@@ -61,9 +61,9 @@ func (this *Proxy) StartMonitorCluster() {
 				// no lock, because running within 1 goroutine
 				this.selector.SetPeersAddr(peers...)
 				this.refreshPeers(peers)
-				if !this.clusterFound {
-					this.clusterFound = true
-					close(this.clusterChan)
+				if !this.clusterTopologyReady {
+					this.clusterTopologyReady = true
+					close(this.clusterTopologyChan)
 				}
 
 				log.Trace("Cluster latest fae nodes: %+v", peers)
@@ -77,12 +77,12 @@ func (this *Proxy) StartMonitorCluster() {
 	log.Warn("Cluster peers monitor died")
 }
 
-func (this *Proxy) AwaitClusterReady() {
-	if this.clusterFound {
+func (this *Proxy) AwaitClusterTopologyReady() {
+	if this.clusterTopologyReady {
 		return
 	}
 
-	<-this.clusterChan
+	<-this.clusterTopologyChan
 }
 
 func (this *Proxy) refreshPeers(peers []string) {
