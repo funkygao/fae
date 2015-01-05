@@ -34,6 +34,8 @@ func (this *MysqlCluster) Query(pool string, table string, hintId int,
 func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 	sql string, args []interface{}) (afftectedRows int64,
 	lastInsertId int64, err error) {
+	this.selector.KickLookupCache(pool, hintId)
+
 	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return 0, 0, err
