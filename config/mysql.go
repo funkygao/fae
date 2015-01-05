@@ -110,7 +110,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	if err == nil {
 		this.lookupTables = *section
 	} else {
-		//panic("lookup_tables not found in mysql conf")
+		panic(err)
 	}
 	this.Servers = make(map[string]*ConfigMysqlServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {

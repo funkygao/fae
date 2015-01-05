@@ -79,17 +79,19 @@ func (this *StandardServerSelector) shardedPool(pool string) bool {
 }
 
 func (this *StandardServerSelector) KickLookupCache(pool string, hintId int) {
-	if !this.shardedPool(pool) {
+	if pool != this.conf.LookupPool || hintId == 0 {
 		return
 	}
 
-	this.lookupCache.Del(this.lookupCacheKey(pool, hintId))
+	key := this.lookupCacheKey(pool, hintId)
+	this.lookupCache.Del(key)
+	log.Debug("lookupCache[%s] kicked", key)
 }
 
 func (this *StandardServerSelector) lookupCacheKey(pool string, hintId int) string {
 	// FIXME how to handle cache kick?
 	// TODO itoa is too slow, 143 ns/op, use int as cache key
-	return pool + strconv.Itoa(hintId)
+	return pool + ":" + strconv.Itoa(hintId)
 }
 
 func (this *StandardServerSelector) pickShardedServer(pool string,
@@ -99,25 +101,30 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		sb2 = " WHERE entityId=?"
 	)
 
+	// get mysql conn from cache
 	key := this.lookupCacheKey(pool, hintId)
 	if conn, present := this.lookupCache.Get(key); present {
-		log.Debug("lookupCache[%s] hit", key)
 		return conn.(*mysql), nil
-	} else {
-		log.Debug("lookupCache[%s] miss", key)
 	}
 
+	// cache missed, get lookup mysql conn
 	my, err := this.ServerByBucket(this.conf.LookupPool)
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO maybe string concat is better performant
 	sb := str.NewStringBuilder()
 	sb.WriteString(sb1)
-	sb.WriteString(this.conf.LookupTable(pool))
+	lookupTable := this.conf.LookupTable(pool)
+	if lookupTable == "" {
+		return nil, ErrLookupTableNotFound
+	}
+	sb.WriteString(lookupTable)
 	sb.WriteString(sb2)
 	rows, err := my.Query(sb.String(), hintId)
 	if err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 
@@ -130,9 +137,11 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 
 	var shardId string
 	if err = rows.Scan(&shardId); err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 	if err = rows.Err(); err != nil {
+		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
 	}
 

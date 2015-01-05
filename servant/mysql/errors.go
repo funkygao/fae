@@ -9,4 +9,5 @@ var (
 	ErrServerNotFound      = errors.New("mysql: server not found")
 	ErrCircuitOpen         = errors.New("mysql: circuit open")
 	ErrShardLookupNotFound = errors.New("mysql: shardId not found in shard lookup table")
+	ErrLookupTableNotFound = errors.New("mysql: lookup table not configured")
 )
