@@ -93,6 +93,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	transport, ok := client.(thrift.TTransport)
 	if !ok {
+		// should never happen
 		log.Error("Invalid client: %#v", client)
 		return
 	}
