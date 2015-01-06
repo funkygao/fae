@@ -73,9 +73,9 @@ func pingCluster(proxy *proxy.Proxy) {
 		ctx.Rid = RID
 		pong, err := client.Ping(ctx)
 		if err != nil {
-			fmt.Printf("%16s: %s\n", peerAddr, err)
+			fmt.Printf("%21s: %s\n", peerAddr, err)
 		} else {
-			fmt.Printf("%16s: %s\n", peerAddr, pong)
+			fmt.Printf("%21s: %s\n", peerAddr, pong)
 		}
 
 		client.Close()
