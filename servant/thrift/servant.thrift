@@ -459,6 +459,18 @@ service FunServant {
         3: i32 bytes
     ),
 
+    bool gm_lock_user(
+        1: Context ctx,
+        2: string reason,
+        3: i64 uid
+    ),
+
+    void gm_unlock_user(
+        1: Context ctx,
+        2: string reason,
+        3: i64 uid
+    ),
+
     bool gm_lock(
         1: Context ctx,
         2: string reason,
