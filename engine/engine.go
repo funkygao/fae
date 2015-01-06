@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	conf "github.com/funkygao/jsconf"

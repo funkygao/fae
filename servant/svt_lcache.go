@@ -4,7 +4,7 @@ local cache key:string, value:[]byte.
 package servant
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/cache"
 	log "github.com/funkygao/log4go"
