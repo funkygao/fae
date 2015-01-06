@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
+	log "github.com/funkygao/log4go"
 )
 
 const (
@@ -15,12 +17,16 @@ const (
 var (
 	host string
 	port string
+	zk   string
 )
 
 func init() {
 	flag.StringVar(&host, "host", "", "host name of faed")
 	flag.StringVar(&port, "port", "", "fae port")
+	flag.StringVar(&zk, "zk", "localhost:2181", "zookeeper server addr")
 	flag.Parse()
+
+	log.AddFilter("stdout", log.INFO, log.NewConsoleLogWriter())
 }
 
 func main() {
@@ -51,10 +57,11 @@ func main() {
 }
 
 func pingCluster(proxy *proxy.Proxy) {
+	etclib.Dial([]string{zk})
 	go proxy.StartMonitorCluster()
-	this.client.AwaitClusterTopologyReady()
+	proxy.AwaitClusterTopologyReady()
 
-	for peerAddr := range proxy.ClusterPeers() {
+	for _, peerAddr := range proxy.ClusterPeers() {
 		client, err := proxy.Servant(peerAddr)
 		if err != nil {
 			fmt.Printf("%s: %s\n", peerAddr, err)
@@ -71,7 +78,7 @@ func pingCluster(proxy *proxy.Proxy) {
 			fmt.Printf("%16s: %s\n", peerAddr, pong)
 		}
 
-		client.Recyle()
+		client.Recycle()
 	}
 
 }
