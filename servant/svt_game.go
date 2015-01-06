@@ -92,16 +92,6 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	return
 }
 
-func (this *FunServantImpl) GmLockUser(ctx *rpc.Context,
-	reason string, uid int64) (r bool, appErr error) {
-	return
-}
-
-func (this *FunServantImpl) GmUnlockUser(ctx *rpc.Context,
-	reason string, uid int64) (appErr error) {
-	return
-}
-
 func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 	reason string, key string) (r bool, appErr error) {
 	const IDENT = "gm.lock"
