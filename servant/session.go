@@ -26,7 +26,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
 		this.phpReasonPercent.Inc(string(normalizedReason), 1)
 
-		log.Trace("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
+		log.Debug("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
 			ctx.Rid, ctx.Reason)
 	}
 
