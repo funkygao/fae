@@ -66,8 +66,8 @@ func (this *FunServantImpl) loadName3Bitmap() {
 	log.Trace("namegen snapshot loading...")
 
 	_, result, err := this.doMyQuery("loadName3Bitmap",
-		"AllianceShard", "Alliance", 0,
-		"SELECT acronym FROM Alliance", nil, "")
+		"ShardLookup", "AllianceLookup", 0,
+		"SELECT acronym FROM AllianceLookup", nil, "")
 	if err != nil {
 		log.Error("namegen load snapshot: %s", err)
 	} else {
