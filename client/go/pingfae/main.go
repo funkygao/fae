@@ -78,7 +78,7 @@ func pingCluster(proxy *proxy.Proxy) {
 			fmt.Printf("%16s: %s\n", peerAddr, pong)
 		}
 
-		client.Recycle()
+		client.Close()
 	}
 
 }
