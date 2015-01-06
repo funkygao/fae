@@ -110,7 +110,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
 			appErr = err
-			log.Error("%s {why^%s key^%s}: %s",
+			log.Error("%s {reason^%s key^%s}: %s",
 				IDENT, reason, key, err)
 			return
 		}
@@ -122,7 +122,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmLock(ctx, reason, key)
 			if appErr != nil {
-				log.Error("%s {why^%s key^%s}: %s",
+				log.Error("%s {reason^%s key^%s}: %s",
 					IDENT, reason, key, appErr)
 				svt.Close()
 			}
@@ -131,7 +131,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s r^%v}",
+	profiler.do(IDENT, ctx, "{reason^%s key^%s} {p^%s r^%v}",
 		reason, key, peer, r)
 	return
 }
@@ -154,7 +154,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
 			appErr = err
-			log.Error("%s {why^%s key^%s}: %s",
+			log.Error("%s {reason^%s key^%s}: %s",
 				IDENT, reason, key, err)
 			return
 		}
@@ -167,7 +167,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			appErr = svt.GmUnlock(ctx, reason, key)
 			if appErr != nil {
-				log.Error("%s {why^%s key^%s}: %s",
+				log.Error("%s {reason^%s key^%s}: %s",
 					IDENT, reason, key, appErr)
 				svt.Close()
 			}
@@ -176,7 +176,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{why^%s key^%s} {p^%s}",
+	profiler.do(IDENT, ctx, "{reason^%s key^%s} {p^%s}",
 		reason, key, peer)
 	return
 }
