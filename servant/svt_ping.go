@@ -1,7 +1,9 @@
 package servant
 
 import (
+	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/server"
 )
 
 func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
@@ -15,6 +17,8 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
 
 	this.stats.inc(IDENT)
 
+	r = fmt.Sprintf("pong, %s", server.BuildID)
+
 	profiler.do(IDENT, ctx, "pong")
-	return "pong", nil
+	return
 }
