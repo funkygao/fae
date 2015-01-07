@@ -31,7 +31,7 @@
         profiler_max_body_size: 600
         call_slow_threshold: "200ms"
         // 10/1000 = 1%
-        profiler_rate: 1000
+        profiler_rate: 1
 
         proxy: {
             pool_capacity: 50

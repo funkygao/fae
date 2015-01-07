@@ -31,7 +31,7 @@ func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 	} else if this.on {
 		header := fmt.Sprintf("T=%s/%s Q=%s ",
 			elapsed, time.Since(this.t0), callName)
-		log.Debug(header + this.truncatedStr(body))
+		log.Trace(header + this.truncatedStr(body))
 	}
 
 }
