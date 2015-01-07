@@ -78,6 +78,8 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		rusage := syscall.Rusage{}
 		syscall.Getrusage(0, &rusage)
 		output["rusage"] = rusage
+		output["ver"] = server.VERSION
+		output["build_id"] = server.BuildID
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()
