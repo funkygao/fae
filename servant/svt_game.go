@@ -133,6 +133,11 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 
 	profiler.do(IDENT, ctx, "{reason^%s key^%s} {p^%s r^%v}",
 		reason, key, peer, r)
+
+	if !r {
+		log.Warn("lock failed: {reason^%s key^%s} {p^%s}", reason, key, peer)
+	}
+
 	return
 }
 
