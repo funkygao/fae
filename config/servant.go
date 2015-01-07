@@ -7,8 +7,7 @@ import (
 )
 
 type ConfigServant struct {
-	DataCenterId int
-	AgentId      int
+	IdgenWorkerId int // TODO dynamic calculated
 
 	CallSlowThreshold   time.Duration
 	StatsOutputInterval time.Duration
@@ -27,8 +26,7 @@ type ConfigServant struct {
 }
 
 func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
-	this.DataCenterId = cf.Int("data_center_id", 1)
-	this.AgentId = cf.Int("agent_id", 1)
+	this.IdgenWorkerId = cf.Int("idgen_worker_id", 1)
 	this.SessionEntries = cf.Int("session_entries", 20<<10)
 	this.CallSlowThreshold = cf.Duration("call_slow_threshold", 2*time.Second)
 	this.StatsOutputInterval = cf.Duration("stats_output_interval", 10*time.Minute)

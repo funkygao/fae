@@ -90,7 +90,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	log.Debug("creating servant: idgen")
-	this.idgen = idgen.NewIdGenerator(this.conf.DataCenterId, this.conf.AgentId)
+	var err error
+	this.idgen, err = idgen.NewIdGenerator(this.conf.IdgenWorkerId)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Debug("creating servant: namegen")
 	this.namegen = namegen.New(3)

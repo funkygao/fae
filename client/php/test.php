@@ -33,8 +33,10 @@ try {
     echo "[Client] ping received: ", $return, "\n";
 
     // id.next
-    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
-    echo "[Client] id_next received:", $client->id_next($ctx, 0), "\n";
+    echo "[Client] id_next received:", $client->id_next($ctx), "\n";
+    echo "[Client] id_next received:", $client->id_next($ctx), "\n";
+    echo "[Client] id_next_with_tag received:", $client->id_next_with_tag($ctx, 5), "\n";
+    echo "[Client] id_next_with_tag received:", $client->id_next_with_tag($ctx, 10), "\n";
 
     // lc
     echo '[Client] lc_set received: ', $client->lc_set($ctx, 'hello-php-lc', 'world 世界'), "\n";

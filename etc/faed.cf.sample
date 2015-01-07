@@ -23,8 +23,7 @@
     }
 
     servants: {
-        data_center_id: 1
-        agent_id: 1
+        idgen_worker_id: 1
 
         session_entries: 20000
         stats_output_interval: "10m"

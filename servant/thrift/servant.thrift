@@ -134,9 +134,13 @@ service FunServant {
      */
     i64 id_next(
         1: required Context ctx
-        2: i16 flag
     ) throws (
         1: TIdTimeBackwards backwards
+    ),
+
+    i64 id_next_with_tag(
+        1: required Context ctx,
+        2: i16 tag
     ),
 
     //=================
