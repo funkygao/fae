@@ -76,6 +76,14 @@
 
             servers: [
                 {
+                    pool: "Global"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
+                    db: "Global"
+                }
+                {
                     pool: "ShardLookup"
                     host: "127.0.0.1"
                     port: 3306
