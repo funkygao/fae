@@ -41,7 +41,7 @@ func (this *funServantPeerPool) Open() {
 		}
 
 		id := atomic.AddUint64(&this.nextServantId, 1)
-		log.Trace("peer[%s] connected with id: %d", this.peerAddr, id)
+		log.Trace("peer[%s] connected with txn: %d", this.peerAddr, id)
 
 		return newFunServantPeer(id, this, client), nil
 	}
