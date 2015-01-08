@@ -71,12 +71,17 @@ func (this *ConfigEngine) runWatchdog() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		stat, _ := os.Stat(Engine.configFile)
-		if stat.ModTime() != Engine.configFileLastStat.ModTime() {
-			Engine.configFileLastStat = stat
+		stat, _ := os.Stat(this.configFile)
+		if stat.ModTime() != this.configFileLastStat.ModTime() {
+			this.configFileLastStat = stat
 
-			// TODO
-			log.Info("config[%s] reloaded", Engine.configFile)
+			cf, err := conf.Load(this.configFile)
+			if err != nil {
+				panic(err)
+			}
+
+			this.LoadConfig(cf)
+			log.Info("config[%s] reloaded", this.configFile)
 
 		}
 	}
