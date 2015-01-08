@@ -40,6 +40,7 @@ func (this *FunServantPeer) Recycle() {
 	if this.Transport.IsOpen() {
 		this.pool.pool.Put(this)
 	} else {
+		this.pool.pool.Kill(this)
 		this.pool.pool.Put(nil)
 	}
 }
