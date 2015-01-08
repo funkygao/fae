@@ -92,8 +92,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			cacheKey, pool, table, hintId, sql, args, peer, appErr)
 	} else {
 		profiler.do(IDENT, ctx,
-			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d p^%s r^%+v}",
-			cacheKey, pool, table, hintId, sql, args, rows, peer, *r)
+			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {p^%s rows^%d r^%+v}",
+			cacheKey, pool, table, hintId, sql, args, peer, rows, *r)
 	}
 
 	return
