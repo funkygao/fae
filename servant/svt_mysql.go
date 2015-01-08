@@ -28,7 +28,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	this.stats.inc(IDENT)
 
 	// TODO delegate remote peer if neccessary
-	_, r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId, sql, args, cacheKey)
+	r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+		sql, args, cacheKey)
 	var rows = len(r.Rows)
 	if r.RowsAffected > 0 {
 		rows = int(r.RowsAffected)
@@ -43,8 +44,41 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 	cacheKey string) (appErr error) {
 	const IDENT = "my.evict"
+
 	this.stats.inc(IDENT)
-	this.dbCacheStore.Del(cacheKey)
+
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	var peer string
+	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.dbCacheStore.Del(cacheKey)
+	} else {
+		svt, err := this.proxy.ServantByKey(cacheKey)
+		if err != nil {
+			appErr = err
+			return
+		}
+
+		if svt == nil {
+			this.dbCacheStore.Del(cacheKey)
+		} else {
+			peer = svt.Addr()
+			svt.HijackContext(ctx)
+			appErr = svt.MyEvict(ctx, cacheKey)
+			if appErr != nil {
+				svt.Close()
+			}
+
+			svt.Recycle()
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{key^%s} {p^%s}", cacheKey, peer)
+
 	return
 }
 
@@ -65,7 +99,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	// find the column value from db
 	// TODO keep in mem, needn't query db on each call
 	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
-	_, queryResult, err := this.doMyQuery(IDENT, ctx, pool, table, hintId,
+	queryResult, err := this.doMyQuery(IDENT, ctx, pool, table, hintId,
 		querySql, nil, "")
 	if err != nil {
 		appErr = err
@@ -112,7 +146,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	updateSql := "UPDATE " + table + " SET " + column + "='" +
 		string(newVal) + "' WHERE " + where
-	_, _, err = this.doMyQuery(IDENT, ctx, pool, table, hintId, updateSql,
+	_, err = this.doMyQuery(IDENT, ctx, pool, table, hintId, updateSql,
 		nil, "")
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
@@ -133,19 +167,16 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 // TODO ServantByKey(cacheKey)
 func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 	pool string, table string, hintId int64, sql string,
-	args []string, cacheKey string) (operation string,
-	r *rpc.MysqlResult, appErr error) {
+	args []string, cacheKey string) (r *rpc.MysqlResult, appErr error) {
 	const (
 		SQL_SELECT = "SELECT"
 		SQL_UPDATE = "UPDATE"
-		OP_QUERY   = "qry"
-		OP_EXEC    = "exc"
 	)
 
 	// convert []string to []interface{}
-	margs := make([]interface{}, len(args), len(args))
+	iargs := make([]interface{}, len(args), len(args))
 	for i, arg := range args {
-		margs[i] = arg
+		iargs[i] = arg
 	}
 
 	var cacheKeyHash = cacheKey
@@ -156,74 +187,64 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
-		operation = OP_QUERY
+		appErr = this.doMySelect(r, ident, ctx, pool, table, hintId,
+			sql, args, iargs, cacheKeyHash)
+	} else {
+		appErr = this.doMyExec(r, ident, ctx, pool, table, hintId,
+			sql, args, iargs, cacheKeyHash)
+	}
 
-		if cacheKeyHash != "" {
-			if cacheValue, present := this.dbCacheStore.Get(cacheKeyHash); present {
-				log.Debug("Q=%s cache[%s] hit", ident, cacheKey)
-				this.dbCacheHits.Inc("hit", 1)
-				r = cacheValue.(*rpc.MysqlResult)
-				return
-			}
-		}
+	return
+}
 
-		// cache miss, do real db query
-		rows, err := this.my.Query(pool, table, int(hintId), sql, margs)
-		if err != nil {
-			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-				ident,
-				pool, table,
-				sql, args,
-				appErr)
+func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
+	ident string, ctx *rpc.Context,
+	pool string, table string, hintId int64, sql string,
+	args []string, iargs []interface{}, cacheKey string) (appErr error) {
+	if cacheKey != "" {
+		if cacheValue, present := this.dbCacheStore.Get(cacheKey); present {
+			log.Debug("Q=%s cache[%s] hit", ident, cacheKey)
+			this.dbCacheHits.Inc("hit", 1)
+			r = cacheValue.(*rpc.MysqlResult)
 			return
 		}
+	}
 
-		// recycle the underlying connection back to conn pool
-		defer rows.Close()
+	// cache miss, do real db query
+	rows, err := this.my.Query(pool, table, int(hintId), sql, iargs)
+	if err != nil {
+		appErr = err
+		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+			ident,
+			pool, table,
+			sql, args,
+			appErr)
+		return
+	}
 
-		// pack the result
-		cols, err := rows.Columns()
-		if err != nil {
-			appErr = err
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-				ident,
-				pool, table,
-				sql, args,
-				appErr)
-			return
-		} else {
-			r.Cols = cols
-			r.Rows = make([][]string, 0)
-			for rows.Next() {
-				rawRowValues := make([]sql_.RawBytes, len(cols))
-				scanArgs := make([]interface{}, len(cols))
-				for i, _ := range cols {
-					scanArgs[i] = &rawRowValues[i]
-				}
-				if appErr = rows.Scan(scanArgs...); appErr != nil {
-					log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-						ident,
-						pool, table,
-						sql, args,
-						appErr)
-					return
-				}
+	// recycle the underlying connection back to conn pool
+	defer rows.Close()
 
-				rowValues := make([]string, len(cols))
-				for i, raw := range rawRowValues {
-					if raw == nil {
-						rowValues[i] = "NULL"
-					} else {
-						rowValues[i] = string(raw)
-					}
-				}
-
-				r.Rows = append(r.Rows, rowValues)
+	// pack the result
+	cols, err := rows.Columns()
+	if err != nil {
+		appErr = err
+		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+			ident,
+			pool, table,
+			sql, args,
+			appErr)
+		return
+	} else {
+		r.Cols = cols
+		r.Rows = make([][]string, 0)
+		for rows.Next() {
+			rawRowValues := make([]sql_.RawBytes, len(cols))
+			scanArgs := make([]interface{}, len(cols))
+			for i, _ := range cols {
+				scanArgs[i] = &rawRowValues[i]
 			}
-
-			// check for errors after we’re done iterating over the rows
-			if appErr = rows.Err(); appErr != nil {
+			if appErr = rows.Scan(scanArgs...); appErr != nil {
 				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 					ident,
 					pool, table,
@@ -232,20 +253,20 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 				return
 			}
 
-			// query success, set cache: even when empty data returned
-			if cacheKey != "" {
-				this.dbCacheStore.Set(cacheKeyHash, r)
-
-				this.dbCacheHits.Inc("miss", 1)
-				log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
+			rowValues := make([]string, len(cols))
+			for i, raw := range rawRowValues {
+				if raw == nil {
+					rowValues[i] = "NULL"
+				} else {
+					rowValues[i] = string(raw)
+				}
 			}
-		}
-	} else {
-		operation = OP_EXEC
 
-		// FIXME if sql is 'select * from UesrInfo', runtime will get here
-		if r.RowsAffected, r.LastInsertId, appErr = this.my.Exec(pool,
-			table, int(hintId), sql, margs); appErr != nil {
+			r.Rows = append(r.Rows, rowValues)
+		}
+
+		// check for errors after we’re done iterating over the rows
+		if appErr = rows.Err(); appErr != nil {
 			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
@@ -254,13 +275,35 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 			return
 		}
 
-		// update success, del cache
-		if cacheKeyHash != "" {
-			this.dbCacheStore.Del(cacheKeyHash)
+		// query success, set cache: even when empty data returned
+		if cacheKey != "" {
+			this.dbCacheStore.Set(cacheKey, r)
 
-			this.dbCacheHits.Inc("kicked", 1)
-			log.Debug("Q=%s cache[%s] kicked", ident, cacheKey)
+			this.dbCacheHits.Inc("miss", 1)
+			log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
 		}
+	}
+
+	return
+}
+
+func (this *FunServantImpl) doMyExec(r *rpc.MysqlResult,
+	ident string, ctx *rpc.Context,
+	pool string, table string, hintId int64, sql string,
+	args []string, iargs []interface{}, cacheKey string) (err error) {
+	if r.RowsAffected, r.LastInsertId, err = this.my.Exec(pool,
+		table, int(hintId), sql, iargs); err != nil {
+		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+			ident, pool, table, sql, args, err)
+		return
+	}
+
+	// update success, del cache
+	if cacheKey != "" {
+		this.dbCacheStore.Del(cacheKey)
+
+		this.dbCacheHits.Inc("kicked", 1)
+		log.Debug("Q=%s cache[%s] kicked", ident, cacheKey)
 	}
 
 	return

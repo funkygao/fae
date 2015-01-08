@@ -65,7 +65,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 	log.Trace("namegen snapshot loading...")
 
-	_, result, err := this.doMyQuery("loadName3Bitmap", ctx,
+	result, err := this.doMyQuery("loadName3Bitmap", ctx,
 		"ShardLookup", "AllianceLookup", 0,
 		"SELECT acronym FROM AllianceLookup", nil, "")
 	if err != nil {
