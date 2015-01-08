@@ -23,7 +23,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		// I' the final servant, got call from remote peers
 		if !this.namegen.DbLoaded {
 			this.namegen.DbLoaded = true
-			go this.loadName3Bitmap()
+			go this.loadName3Bitmap(ctx)
 		}
 
 		r = this.namegen.Next()
@@ -39,7 +39,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 			// handle it by myself, got call locally
 			if !this.namegen.DbLoaded {
 				this.namegen.DbLoaded = true
-				go this.loadName3Bitmap()
+				go this.loadName3Bitmap(ctx)
 			}
 
 			r = this.namegen.Next()
@@ -62,10 +62,10 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	return
 }
 
-func (this *FunServantImpl) loadName3Bitmap() {
+func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 	log.Trace("namegen snapshot loading...")
 
-	_, result, err := this.doMyQuery("loadName3Bitmap",
+	_, result, err := this.doMyQuery("loadName3Bitmap", ctx,
 		"ShardLookup", "AllianceLookup", 0,
 		"SELECT acronym FROM AllianceLookup", nil, "")
 	if err != nil {

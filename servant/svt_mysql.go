@@ -28,7 +28,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	this.stats.inc(IDENT)
 
 	// TODO delegate remote peer if neccessary
-	_, r, appErr = this.doMyQuery(IDENT, pool, table, hintId, sql, args, cacheKey)
+	_, r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId, sql, args, cacheKey)
 	var rows = len(r.Rows)
 	if r.RowsAffected > 0 {
 		rows = int(r.RowsAffected)
@@ -65,7 +65,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	// find the column value from db
 	// TODO keep in mem, needn't query db on each call
 	querySql := "SELECT " + column + " FROM " + table + " WHERE " + where
-	_, queryResult, err := this.doMyQuery(IDENT, pool, table, hintId,
+	_, queryResult, err := this.doMyQuery(IDENT, ctx, pool, table, hintId,
 		querySql, nil, "")
 	if err != nil {
 		appErr = err
@@ -112,7 +112,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 
 	updateSql := "UPDATE " + table + " SET " + column + "='" +
 		string(newVal) + "' WHERE " + where
-	_, _, err = this.doMyQuery(IDENT, pool, table, hintId, updateSql,
+	_, _, err = this.doMyQuery(IDENT, ctx, pool, table, hintId, updateSql,
 		nil, "")
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
@@ -131,7 +131,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 }
 
 // TODO ServantByKey(cacheKey)
-func (this *FunServantImpl) doMyQuery(ident string,
+func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 	pool string, table string, hintId int64, sql string,
 	args []string, cacheKey string) (operation string,
 	r *rpc.MysqlResult, appErr error) {
