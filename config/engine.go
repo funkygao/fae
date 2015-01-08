@@ -80,9 +80,8 @@ func (this *ConfigEngine) runWatchdog() {
 				panic(err)
 			}
 
-			this.LoadConfig(cf)
 			log.Info("config[%s] reloaded", this.configFile)
-
+			this.LoadConfig(cf)
 		}
 	}
 
