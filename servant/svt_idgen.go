@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/idgen"
 	log "github.com/funkygao/log4go"
 )
 
@@ -44,5 +45,12 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 
 	profiler.do(IDENT, ctx, "{tag^%d} {r^%d}", tag, r)
 
+	return
+}
+
+func (this *FunServantImpl) IdDecode(ctx *rpc.Context,
+	id int64) (r []int64, appErr error) {
+	ts, tag, wid, seq := idgen.DecodeId(id)
+	r = []int64{ts, tag, wid, seq}
 	return
 }

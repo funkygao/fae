@@ -143,6 +143,11 @@ service FunServant {
         2: i16 tag
     ),
 
+    list<i64> id_decode(
+        1: required Context ctx,
+        2: i64 id
+    ),
+
     //=================
     // lcache section
     //=================
