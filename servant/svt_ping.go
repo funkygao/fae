@@ -17,7 +17,7 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
 
 	this.stats.inc(IDENT)
 
-	r = fmt.Sprintf("pong, %s", server.BuildID)
+	r = fmt.Sprintf("pong, %s, myid:%d", server.BuildID, this.conf.IdgenWorkerId)
 
 	profiler.do(IDENT, ctx, "pong")
 	return
