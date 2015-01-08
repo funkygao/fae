@@ -138,7 +138,7 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
 	this.addRemotePeerIfNecessary(peerAddr)
 
-	log.Debug("servant by addr[%s]: {txn: %d}", peerAddr,
+	log.Debug("servant by addr[%s]: {txn:%d}", peerAddr,
 		this.remotePeerPools[peerAddr].nextTxn())
 	return this.remotePeerPools[peerAddr].Get()
 }
@@ -151,7 +151,7 @@ func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
 		return nil, nil
 	}
 
-	log.Debug("sevant by key[%s]: {peer: %s, txn: %d}", key, peerAddr,
+	log.Debug("sevant by key[%s]: {peer:%s, txn:%d}", key, peerAddr,
 		this.remotePeerPools[peerAddr].nextTxn())
 	return this.remotePeerPools[peerAddr].Get()
 }

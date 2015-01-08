@@ -27,6 +27,7 @@ func newFunServantPeer(id uint64, p *funServantPeerPool,
 }
 
 func (this *FunServantPeer) Close() {
+	log.Debug("peer[%s] conn txn:%d closed", this.pool.peerAddr, this.Id())
 	this.Transport.Close()
 	this.Resource = nil
 }
@@ -40,8 +41,6 @@ func (this *FunServantPeer) Recycle() {
 		this.pool.pool.Put(this)
 	} else {
 		this.pool.pool.Put(nil)
-		log.Debug("peer[%s] conn:%d broken, repay nil",
-			this.pool.peerAddr, this.Id())
 	}
 }
 

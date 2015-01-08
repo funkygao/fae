@@ -27,17 +27,75 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	this.stats.inc(IDENT)
 
-	// TODO delegate remote peer if neccessary
-	r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
-		sql, args, cacheKey)
-	var rows = len(r.Rows)
-	if r.RowsAffected > 0 {
-		rows = int(r.RowsAffected)
+	var (
+		cacheKeyHash = cacheKey
+		peer         string
+		rows         int
+	)
+
+	if cacheKey != "" && this.conf.Mysql.CacheKeyHash {
+		hashSum := sha1.Sum([]byte(cacheKey)) // sha1.Size
+		cacheKeyHash = string(hashSum[:])
 	}
 
-	profiler.do(IDENT, ctx,
-		"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d r^%+v}",
-		cacheKey, pool, table, hintId, sql, args, rows, *r)
+	if cacheKeyHash == "" {
+		r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+			sql, args, cacheKeyHash)
+		rows = len(r.Rows)
+		if r.RowsAffected > 0 {
+			rows = int(r.RowsAffected)
+		}
+	} else {
+		if ctx.IsSetSticky() && *ctx.Sticky {
+			r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+				sql, args, cacheKeyHash)
+			rows = len(r.Rows)
+			if r.RowsAffected > 0 {
+				rows = int(r.RowsAffected)
+			}
+		} else {
+			svt, err := this.proxy.ServantByKey(cacheKey)
+			if err != nil {
+				appErr = err
+				return
+			}
+
+			if svt == nil {
+				r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+					sql, args, cacheKeyHash)
+				rows = len(r.Rows)
+				if r.RowsAffected > 0 {
+					rows = int(r.RowsAffected)
+				}
+			} else {
+				// dispatch to peer
+				peer = svt.Addr()
+				svt.HijackContext(ctx)
+				r, appErr = svt.MyQuery(ctx, pool, table, hintId, sql, args, cacheKey)
+				if appErr != nil {
+					svt.Close()
+				} else {
+					rows = len(r.Rows)
+					if r.RowsAffected > 0 {
+						rows = int(r.RowsAffected)
+					}
+				}
+
+				svt.Recycle() // NEVER forget about this
+			}
+		}
+	}
+
+	if appErr != nil {
+		profiler.do(IDENT, ctx,
+			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {p^%s err^%s}",
+			cacheKey, pool, table, hintId, sql, args, peer, appErr)
+	} else {
+		profiler.do(IDENT, ctx,
+			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d p^%s r^%+v}",
+			cacheKey, pool, table, hintId, sql, args, rows, peer, *r)
+	}
+
 	return
 }
 
@@ -179,19 +237,13 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 		iargs[i] = arg
 	}
 
-	var cacheKeyHash = cacheKey
-	if cacheKey != "" && this.conf.Mysql.CacheKeyHash {
-		hashSum := sha1.Sum([]byte(cacheKey)) // sha1.Size
-		cacheKeyHash = string(hashSum[:])
-	}
-
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
 		appErr = this.doMySelect(r, ident, ctx, pool, table, hintId,
-			sql, args, iargs, cacheKeyHash)
+			sql, args, iargs, cacheKey)
 	} else {
 		appErr = this.doMyExec(r, ident, ctx, pool, table, hintId,
-			sql, args, iargs, cacheKeyHash)
+			sql, args, iargs, cacheKey)
 	}
 
 	return
