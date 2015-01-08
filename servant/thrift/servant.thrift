@@ -409,6 +409,11 @@ service FunServant {
         8: string jsonValue
     ),
 
+    void my_evict(
+        1: required Context ctx,
+        2: string cacheKey
+    ),
+
     //=================
     // couchbase section
     //=================

@@ -50,6 +50,8 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 
 func (this *FunServantImpl) IdDecode(ctx *rpc.Context,
 	id int64) (r []int64, appErr error) {
+	const IDENT = "id.decode"
+	this.stats.inc(IDENT)
 	ts, tag, wid, seq := idgen.DecodeId(id)
 	r = []int64{ts, tag, wid, seq}
 	return

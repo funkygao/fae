@@ -40,6 +40,14 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	return
 }
 
+func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
+	cacheKey string) (appErr error) {
+	const IDENT = "my.evict"
+	this.stats.inc(IDENT)
+	this.dbCacheStore.Del(cacheKey)
+	return
+}
+
 // If conflicts, jsonVal prevails
 func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	hintId int64, where string, key string, column string,
@@ -122,6 +130,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	return
 }
 
+// TODO ServantByKey(cacheKey)
 func (this *FunServantImpl) doMyQuery(ident string,
 	pool string, table string, hintId int64, sql string,
 	args []string, cacheKey string) (operation string,

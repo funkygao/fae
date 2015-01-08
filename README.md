@@ -149,6 +149,7 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
+*   mysql cache peer picking
 *   merge proxy.SelfAddr and engine.EtcdSelfAddr
 *   hot reload config
 *   add weight for each fae peer, so that sticky peer has smaller weight
