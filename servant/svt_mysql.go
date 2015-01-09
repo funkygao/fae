@@ -257,7 +257,7 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 		if cacheValue, present := this.dbCacheStore.Get(cacheKey); present {
 			log.Debug("Q=%s cache[%s] hit", ident, cacheKey)
 			this.dbCacheHits.Inc("hit", 1)
-			r = cacheValue.(*rpc.MysqlResult)
+			*r = *(cacheValue.(*rpc.MysqlResult))
 			return
 		}
 	}
