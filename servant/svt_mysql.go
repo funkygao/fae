@@ -88,12 +88,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 
 	if appErr != nil {
 		profiler.do(IDENT, ctx,
-			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {p^%s err^%s}",
-			cacheKey, pool, table, hintId, sql, args, peer, appErr)
+			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {err^%s}",
+			peer, cacheKey, pool, table, hintId, sql, args, appErr)
 	} else {
 		profiler.do(IDENT, ctx,
-			"{cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {p^%s rows^%d r^%+v}",
-			cacheKey, pool, table, hintId, sql, args, peer, rows, *r)
+			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d r^%+v}",
+			peer, cacheKey, pool, table, hintId, sql, args, rows, *r)
 	}
 
 	return

@@ -46,7 +46,7 @@ func (this *funServantPeerPool) Open() {
 		return newFunServantPeer(id, this, client), nil
 	}
 
-	this.pool = pool.NewResourcePool("FaePeer", factory,
+	this.pool = pool.NewResourcePool("peer", factory,
 		this.cf.PoolCapacity, this.cf.PoolCapacity, this.cf.IdleTimeout,
 		this.cf.DiagnosticInterval, this.cf.BorrowMaxSeconds)
 }

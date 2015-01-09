@@ -151,8 +151,7 @@ func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
 		return nil, nil
 	}
 
-	log.Debug("sevant by key[%s]: {peer:%s, txn:%d}", key, peerAddr,
-		this.remotePeerPools[peerAddr].nextTxn())
+	this.remotePeerPools[peerAddr].nextTxn()
 	return this.remotePeerPools[peerAddr].Get()
 }
 

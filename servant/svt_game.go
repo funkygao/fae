@@ -57,7 +57,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{p^%s r^%s}", peer, r)
+	profiler.do(IDENT, ctx, "P=%s {r^%s}", peer, r)
 
 	return
 }
@@ -131,11 +131,11 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{reason^%s key^%s} {p^%s r^%v}",
-		reason, key, peer, r)
+	profiler.do(IDENT, ctx, "P=%s {reason^%s key^%s} {r^%v}",
+		peer, reason, key, r)
 
 	if !r {
-		log.Warn("lock failed: {reason^%s key^%s} {p^%s}", reason, key, peer)
+		log.Warn("P=%s lock failed: {reason^%s key^%s}", peer, reason, key)
 	}
 
 	return
@@ -159,8 +159,6 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
 			appErr = err
-			log.Error("%s {reason^%s key^%s}: %s",
-				IDENT, reason, key, err)
 			return
 		}
 
@@ -172,8 +170,6 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			appErr = svt.GmUnlock(ctx, reason, key)
 			if appErr != nil {
-				log.Error("%s {reason^%s key^%s}: %s",
-					IDENT, reason, key, appErr)
 				svt.Close()
 			}
 
@@ -181,8 +177,8 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		}
 	}
 
-	profiler.do(IDENT, ctx, "{reason^%s key^%s} {p^%s}",
-		reason, key, peer)
+	profiler.do(IDENT, ctx, "P=%s {reason^%s key^%s}",
+		peer, reason, key)
 	return
 }
 
