@@ -110,8 +110,6 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
 			appErr = err
-			log.Error("%s {reason^%s key^%s}: %s",
-				IDENT, reason, key, err)
 			return
 		}
 
@@ -122,8 +120,6 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			r, appErr = svt.GmLock(ctx, reason, key)
 			if appErr != nil {
-				log.Error("%s {reason^%s key^%s}: %s",
-					IDENT, reason, key, appErr)
 				svt.Close()
 			}
 
