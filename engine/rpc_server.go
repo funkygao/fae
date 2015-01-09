@@ -120,7 +120,11 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	log.Trace("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
+	if err != nil {
+		log.Error("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
+	} else {
+		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
+	}
 
 	if config.Engine.Rpc.SessionSlowThreshold.Seconds() > 0 &&
 		elapsed > config.Engine.Rpc.SessionSlowThreshold {
