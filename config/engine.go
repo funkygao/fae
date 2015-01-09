@@ -27,6 +27,8 @@ type ConfigEngine struct {
 
 	Rpc      *ConfigRpc
 	Servants *ConfigServant
+
+	ReloadedChan chan ConfigEngine
 }
 
 func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
@@ -82,6 +84,7 @@ func (this *ConfigEngine) runWatchdog() {
 
 			log.Info("config[%s] reloaded", this.configFile)
 			this.LoadConfig(cf)
+			this.ReloadedChan <- *this
 		}
 	}
 

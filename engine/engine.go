@@ -5,6 +5,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	conf "github.com/funkygao/jsconf"
+	log "github.com/funkygao/log4go"
 	"time"
 )
 
@@ -34,4 +35,14 @@ func NewEngine() (this *Engine) {
 func (this *Engine) LoadConfig(configFile string, cf *conf.Conf) *Engine {
 	config.LoadEngineConfig(configFile, cf)
 	return this
+}
+
+func (this *Engine) watchConfigReloaded() {
+	for {
+		select {
+		case cf := <-config.Engine.ReloadedChan:
+			log.Debug("hot reloaded: %+v", cf.Conf)
+		}
+
+	}
 }
