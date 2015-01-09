@@ -42,6 +42,9 @@ func (this *Engine) watchConfigReloaded() {
 		select {
 		case cf := <-config.Engine.ReloadedChan:
 			log.Debug("hot reloaded: %+v", cf.Conf)
+
+		case <-this.stopChan:
+			return
 		}
 
 	}
