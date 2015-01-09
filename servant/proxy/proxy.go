@@ -58,15 +58,20 @@ func (this *Proxy) StartMonitorCluster() {
 		case <-peersChan:
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
 			if err == nil {
-				// no lock, because running within 1 goroutine
-				this.selector.SetPeersAddr(peers...)
-				this.refreshPeers(peers)
-				if !this.clusterTopologyReady {
-					this.clusterTopologyReady = true
-					close(this.clusterTopologyChan)
-				}
+				if len(peers) == 0 {
+					// TODO panic?
+					log.Error("Cluster fae etcd died: found no peers")
+				} else {
+					// no lock, because running within 1 goroutine
+					this.selector.SetPeersAddr(peers...)
+					this.refreshPeers(peers)
+					if !this.clusterTopologyReady {
+						this.clusterTopologyReady = true
+						close(this.clusterTopologyChan)
+					}
 
-				log.Trace("Cluster latest fae nodes: %+v", peers)
+					log.Trace("Cluster latest fae nodes: %+v", peers)
+				}
 			} else {
 				log.Error("Cluster peers: %s", err)
 			}
