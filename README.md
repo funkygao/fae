@@ -149,21 +149,16 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 ### TODO
 
-*   maybe profiler sample rate is totally controlled by client
-*   mysql cache peer picking
-*   hot reload config
-*   add weight for each fae peer, so that sticky peer has smaller weight
 *   mysql conn timeout not working
+*   vBucket for cluster sharding, what about each kingdom is a shard?
 *   what about remote peer conn when shutdown?
+*   hot reload config
 *   fae graceful shutdown
-    - unregister zk
-    - finish all outstanding conns, WaitGroup is ok
-    - how to handle php worker long conn?
     - https://github.com/facebookgo/grace
+*   maybe profiler sample rate is totally controlled by client
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
 *   race condition detector
-*   vBucket for cluster sharding, what about each kingdom is a shard?
 *   NewTBufferedTransportFactory buffer size, and php config buf size
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
 *   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
