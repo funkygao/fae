@@ -1,4 +1,4 @@
-package lock
+package game
 
 import (
 	"github.com/funkygao/assert"
@@ -9,7 +9,7 @@ import (
 
 func TestLockBasic(t *testing.T) {
 	cf := &config.ConfigLock{MaxItems: 10, Expires: 10 * time.Second}
-	l := New(cf)
+	l := newLock(cf)
 	k1 := "hello"
 	k2 := "world"
 
@@ -28,7 +28,7 @@ func TestLockBasic(t *testing.T) {
 
 func TestLockExpires(t *testing.T) {
 	cf := &config.ConfigLock{MaxItems: 10, Expires: 1 * time.Second}
-	l := New(cf)
+	l := newLock(cf)
 	k := "hello"
 	l.Lock(k)
 	assert.Equal(t, false, l.Lock(k))
@@ -38,7 +38,7 @@ func TestLockExpires(t *testing.T) {
 
 func BenchmarkLockBasic(b *testing.B) {
 	cf := &config.ConfigLock{MaxItems: 10, Expires: 10 * time.Second}
-	l := New(cf)
+	l := newLock(cf)
 	k := "haha"
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {

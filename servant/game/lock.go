@@ -1,4 +1,4 @@
-package lock
+package game
 
 import (
 	"github.com/funkygao/fae/config"
@@ -15,7 +15,7 @@ type Lock struct {
 	mutex sync.Mutex      // lru get/set is safe, but we need more lock span
 }
 
-func New(cf *config.ConfigLock) *Lock {
+func newLock(cf *config.ConfigLock) *Lock {
 	this := &Lock{cf: cf}
 	this.items = cache.NewLruCache(cf.MaxItems)
 	return this

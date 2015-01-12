@@ -97,8 +97,8 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 // record php request time and payload size in bytes
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	bytes int32) (appErr error) {
-	this.phpLatency.Update(int64(ms))
-	this.phpPayloadSize.Update(int64(bytes))
+	this.game.UpdatePhpLatency(int64(ms))
+	this.game.UpdatePhpPayloadSize(int64(bytes))
 
 	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
 		ms, gofmt.ByteSize(bytes),
@@ -120,7 +120,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
-		r = this.lk.Lock(key)
+		r = this.game.Lock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
@@ -129,7 +129,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		}
 
 		if svt == nil {
-			r = this.lk.Lock(key)
+			r = this.game.Lock(key)
 		} else {
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
@@ -165,7 +165,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
-		this.lk.Unlock(key)
+		this.game.Unlock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
@@ -174,7 +174,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		}
 
 		if svt == nil {
-			this.lk.Unlock(key)
+			this.game.Unlock(key)
 		} else {
 			// remote peer servant
 			peer = svt.Addr()
