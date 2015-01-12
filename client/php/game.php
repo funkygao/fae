@@ -30,9 +30,8 @@ try {
 
     for ($i=0; $i<100; $i++) {
         list($k, $x, $y) = $client->gm_reg_tile($ctx);
-        echo "$k \n";
+        echo "reg with k: $k \n";
     }
-    exit;
 
     // redis
     $r = $client->rd_call($ctx, 'get', 'default', array('_not_existent_key'));
