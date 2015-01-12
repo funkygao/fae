@@ -20,7 +20,7 @@ func New(cf *config.ConfigGame) *Game {
 	this := new(Game)
 	this.nameGen = newNameGen(cf.NamegenLength)
 	this.lock = newLock(cf)
-	this.register = newRegister(5) // TODO
+	this.register = newRegister(cf.MaxPlayersPerKingdom, cf.RedisServerAddr)
 
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))

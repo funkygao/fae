@@ -28,6 +28,12 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
+    for ($i=0; $i<100; $i++) {
+        list($k, $x, $y) = $client->gm_reg_tile($ctx);
+        echo "$k \n";
+    }
+    exit;
+
     // redis
     $r = $client->rd_call($ctx, 'get', 'default', array('_not_existent_key'));
     var_dump($r);
