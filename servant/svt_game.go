@@ -16,6 +16,9 @@ func (this *FunServantImpl) GmRegTile(ctx *rpc.Context) (r []int64, appErr error
 		return
 	}
 
+	k, x, y := this.game.RegTile()
+	r = []int64{int64(k), int64(x), int64(y)}
+
 	var peer string // TODO
 	profiler.do(IDENT, ctx, "P=%s {r^%+v}", peer, r)
 
