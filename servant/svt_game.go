@@ -7,7 +7,7 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) GmRegTile(ctx *rpc.Context) (r []int64, appErr error) {
+func (this *FunServantImpl) GmRegKingdom(ctx *rpc.Context) (r int64, appErr error) {
 	const IDENT = "gm.regtile"
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -16,11 +16,9 @@ func (this *FunServantImpl) GmRegTile(ctx *rpc.Context) (r []int64, appErr error
 		return
 	}
 
-	k, x, y := this.game.RegTile()
-	r = []int64{int64(k), int64(x), int64(y)}
+	r = int64(this.game.RegKingdom())
 
-	var peer string // TODO
-	profiler.do(IDENT, ctx, "P=%s {r^%+v}", peer, r)
+	profiler.do(IDENT, ctx, "{r^%+v}", r)
 
 	return
 }

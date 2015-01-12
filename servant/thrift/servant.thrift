@@ -485,8 +485,8 @@ service FunServant {
         3: string key
     ),
 
-    // [k, x, y]
-    list<i64> gm_reg_tile(
+    // k
+    i64 gm_reg_kingdom(
         1: Context ctx
     ),
 

@@ -12,8 +12,6 @@ type Register struct {
 	redis *redis.Pool
 	mutex sync.Mutex
 
-	tiles map[int]map[int]bool
-
 	maxPlayersPerKingdom int
 	k                    int // currently all players register to this kingdom
 }
@@ -21,7 +19,6 @@ type Register struct {
 func newRegister(maxPlayersPerKingdom int, redisAddr string) *Register {
 	this := new(Register)
 	this.maxPlayersPerKingdom = maxPlayersPerKingdom
-	this.tiles = make(map[int]map[int]bool)
 	this.redis = &redis.Pool{
 		MaxIdle:     5, // TODO
 		MaxActive:   10,
@@ -63,7 +60,7 @@ func (this *Register) loadSnapshot() {
 	log.Debug("%s done, k:%d", IDENT, this.k)
 }
 
-func (this *Register) RegTile() (k, x, y int) {
+func (this *Register) RegKingdom() (k int) {
 	const IDENT = "regtile"
 
 	this.mutex.Lock()
@@ -81,10 +78,16 @@ func (this *Register) RegTile() (k, x, y int) {
 
 	if n > this.maxPlayersPerKingdom {
 		this.k++
-		redisConn.Do("INCR", "reg.k.curr")
+		_, err = redisConn.Do("INCR", "reg.k.curr")
+		if err != nil {
+			log.Error("incr[reg.k.curr]: %s", err)
+		}
 
 		key = fmt.Sprintf("reg.k.%d", this.k)
-		redisConn.Do("INCR", key)
+		_, err = redisConn.Do("INCR", key)
+		if err != nil {
+			log.Error("incr[%s]: %s", key, err)
+		}
 
 		log.Info("creating new kingdom: %d", this.k)
 	}

@@ -56,6 +56,6 @@ func (this *Game) UpdatePhpPayloadSize(bytes int64) {
 	this.phpPayloadSize.Update(bytes)
 }
 
-func (this *Game) RegTile() (k, x, y int) {
-	return this.register.RegTile()
+func (this *Game) RegKingdom() (k int) {
+	return this.register.RegKingdom()
 }
