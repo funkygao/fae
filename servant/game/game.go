@@ -16,11 +16,11 @@ type Game struct {
 	phpPayloadSize metrics.Histogram // in bytes
 }
 
-func New(nameSlot int, lk *config.ConfigLock) *Game {
+func New(cf *config.ConfigGame) *Game {
 	this := new(Game)
-	this.nameGen = newNameGen(nameSlot)
-	this.lock = newLock(lk)
-	this.register = newRegister()
+	this.nameGen = newNameGen(cf.NamegenLength)
+	this.lock = newLock(cf)
+	this.register = newRegister(5) // TODO
 
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))

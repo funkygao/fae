@@ -86,7 +86,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	log.Debug("creating servant: game")
-	this.game = game.New(3, this.conf.Lock)
+	this.game = game.New(this.conf.Game)
 
 	if this.conf.Proxy.Enabled() {
 		log.Debug("creating servant: proxy")
