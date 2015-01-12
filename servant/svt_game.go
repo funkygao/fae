@@ -7,7 +7,7 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) GmRegKingdom(ctx *rpc.Context) (r int64, appErr error) {
+func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64, appErr error) {
 	const IDENT = "gm.regtile"
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -16,9 +16,9 @@ func (this *FunServantImpl) GmRegKingdom(ctx *rpc.Context) (r int64, appErr erro
 		return
 	}
 
-	r = int64(this.game.RegKingdom())
+	r = int64(this.game.Register(typ))
 
-	profiler.do(IDENT, ctx, "{r^%+v}", r)
+	profiler.do(IDENT, ctx, "{type^%s} {r^%+v}", typ, r)
 
 	return
 }

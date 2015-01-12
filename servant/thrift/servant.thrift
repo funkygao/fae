@@ -486,8 +486,9 @@ service FunServant {
     ),
 
     // k
-    i64 gm_reg_kingdom(
-        1: Context ctx
+    i64 gm_reg(
+        1: Context ctx,
+        2: string typ
     ),
 
 }
