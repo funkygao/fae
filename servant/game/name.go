@@ -1,4 +1,4 @@
-package namegen
+package game
 
 import (
 	"errors"
@@ -26,7 +26,7 @@ type NameGen struct {
 	DbLoaded bool
 }
 
-func New(slots int) (this *NameGen) {
+func newNameGen(slots int) (this *NameGen) {
 	this = new(NameGen)
 	this.DbLoaded = false
 	this.bits = make([][]byte, slots)

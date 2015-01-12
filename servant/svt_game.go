@@ -7,6 +7,21 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
+func (this *FunServantImpl) GmRegTile(ctx *rpc.Context) (r []int64, appErr error) {
+	const IDENT = "gm.regtile"
+	this.stats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		appErr = err
+		return
+	}
+
+	var peer string // TODO
+	profiler.do(IDENT, ctx, "P=%s {r^%+v}", peer, r)
+
+	return
+}
+
 // get a uniq name with length 3
 func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	const IDENT = "gm.name3"
@@ -21,12 +36,12 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
-		if !this.namegen.DbLoaded {
-			this.namegen.DbLoaded = true
+		if !this.game.NameDbLoaded {
+			this.game.NameDbLoaded = true
 			go this.loadName3Bitmap(ctx)
 		}
 
-		r = this.namegen.Next()
+		r = this.game.NextName()
 	} else {
 		svt, err := this.proxy.ServantByKey(IDENT)
 		if err != nil {
@@ -37,12 +52,12 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 
 		if svt == nil {
 			// handle it by myself, got call locally
-			if !this.namegen.DbLoaded {
-				this.namegen.DbLoaded = true
+			if !this.game.NameDbLoaded {
+				this.game.NameDbLoaded = true
 				go this.loadName3Bitmap(ctx)
 			}
 
-			r = this.namegen.Next()
+			r = this.game.NextName()
 		} else {
 			// remote peer servant
 			peer = svt.Addr()
@@ -72,7 +87,7 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 		log.Error("namegen load snapshot: %s", err)
 	} else {
 		for _, row := range result.Rows {
-			this.namegen.SetBusy(row[0])
+			this.game.SetNameBusy(row[0])
 		}
 	}
 

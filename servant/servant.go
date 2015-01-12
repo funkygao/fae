@@ -5,11 +5,11 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
+	"github.com/funkygao/fae/servant/game"
 	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
-	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/fae/servant/redis"
 	"github.com/funkygao/fae/servant/store"
@@ -45,16 +45,16 @@ type FunServantImpl struct {
 	phpReasonPercent metrics.PercentCounter // user's behavior
 
 	// service drivers
-	proxy   *proxy.Proxy         // remote fae agent
-	idgen   *idgen.IdGenerator   // global id generator
-	namegen *namegen.NameGen     // name generator
-	lc      *cache.LruCache      // local cache
-	mc      *memcache.ClientPool // memcache pool, auto sharding by key
-	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
-	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	rd      *redis.Client        // redis pool, auto sharding by pool name
-	cb      *couch.Client        // couchbase client
-	lk      *lock.Lock           // lock map
+	proxy *proxy.Proxy         // remote fae agent
+	idgen *idgen.IdGenerator   // global id generator
+	game  *game.Game           // game engine
+	lc    *cache.LruCache      // local cache
+	mc    *memcache.ClientPool // memcache pool, auto sharding by key
+	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
+	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	rd    *redis.Client        // redis pool, auto sharding by pool name
+	cb    *couch.Client        // couchbase client
+	lk    *lock.Lock           // lock map
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -96,8 +96,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		panic(err)
 	}
 
-	log.Debug("creating servant: namegen")
-	this.namegen = namegen.New(3)
+	log.Debug("creating servant: game")
+	this.game = game.New(3)
 
 	if this.conf.Proxy.Enabled() {
 		log.Debug("creating servant: proxy")

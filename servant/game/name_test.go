@@ -1,4 +1,4 @@
-package namegen
+package game
 
 import (
 	"github.com/funkygao/assert"
@@ -9,7 +9,7 @@ import (
 
 func TestName3(t *testing.T) {
 	slots := 3
-	nm := New(slots)
+	nm := newNameGen(slots)
 	v1 := nm.Next()
 	v2 := nm.Next()
 	assert.NotEqual(t, v1, v2)
@@ -22,7 +22,7 @@ func TestName3(t *testing.T) {
 }
 
 func TestNotDuplicatedName(t *testing.T) {
-	nm := New(3)
+	nm := newNameGen(3)
 	total := 0
 
 	for i := 0; i < int(math.Pow(float64(NameCharMax-NameCharMin), 3)); i++ {
@@ -39,7 +39,7 @@ func TestNotDuplicatedName(t *testing.T) {
 // 827 ns/op
 func BenchmarkNextName(b *testing.B) {
 	b.ReportAllocs()
-	nm := New(3)
+	nm := newNameGen(3)
 	for i := 0; i < b.N; i++ {
 		nm.Next()
 	}
