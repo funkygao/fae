@@ -1,5 +1,13 @@
 package game
 
-func (this *Game) RegTile() (k, x, y int) {
+type Register struct {
+}
+
+func newRegister() *Register {
+	this := new(Register)
+	return this
+}
+
+func (this *Register) RegTile() (k, x, y int) {
 	return
 }

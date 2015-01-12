@@ -9,7 +9,8 @@ type Game struct {
 	nameGen      *NameGen
 	NameDbLoaded bool
 
-	lock *Lock
+	lock     *Lock
+	register *Register
 
 	phpLatency     metrics.Histogram // in ms
 	phpPayloadSize metrics.Histogram // in bytes
@@ -19,6 +20,7 @@ func New(nameSlot int, lk *config.ConfigLock) *Game {
 	this := new(Game)
 	this.nameGen = newNameGen(nameSlot)
 	this.lock = newLock(lk)
+	this.register = newRegister()
 
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
@@ -26,6 +28,7 @@ func New(nameSlot int, lk *config.ConfigLock) *Game {
 	this.phpPayloadSize = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("php.payload", this.phpPayloadSize)
+
 	return this
 }
 
@@ -51,4 +54,8 @@ func (this *Game) UpdatePhpLatency(latency int64) {
 
 func (this *Game) UpdatePhpPayloadSize(bytes int64) {
 	this.phpPayloadSize.Update(bytes)
+}
+
+func (this *Game) RegTile() (k, x, y int) {
+	return this.register.RegTile()
 }
