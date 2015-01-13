@@ -29,7 +29,7 @@ try {
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
     for ($i=0; $i<100; $i++) {
-        $k = $client->gm_reg_kingdom($ctx);
+        $k = $client->gm_register($ctx, 'k');
         echo "reg with k: $k \n";
     }
 

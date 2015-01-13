@@ -25,13 +25,13 @@ type Register struct {
 	redis *redis.Pool
 	mutex sync.Mutex
 
-	currentShards map[string]int // key is user|alliance|kingdom
+	currentShards map[string]int64 // key is reg type
 }
 
 func newRegister(cf *config.ConfigGame) *Register {
 	this := new(Register)
 	this.cf = cf
-	this.currentShards = make(map[string]int)
+	this.currentShards = make(map[string]int64)
 	this.redis = &redis.Pool{
 		MaxIdle:     5, // TODO
 		MaxActive:   10,
@@ -66,7 +66,7 @@ func (this *Register) loadSnapshot() {
 	var err error
 	for _, typ := range regTypes {
 		key := this.currentKey(typ)
-		this.currentShards[typ], err = redis.Int(redisConn.Do("GET", key))
+		this.currentShards[typ], err = redis.Int64(redisConn.Do("GET", key))
 		if err != nil && err == redis.ErrNil {
 			this.currentShards[typ] = 1
 			redisConn.Do("SET", key, this.currentShards[typ]) // TODO check err
@@ -76,7 +76,7 @@ func (this *Register) loadSnapshot() {
 	log.Debug("%s done, %+v", IDENT, this.currentShards)
 }
 
-func (this *Register) Register(typ string) (int, error) {
+func (this *Register) Register(typ string) (int64, error) {
 	const IDENT = "register"
 
 	this.mutex.Lock()

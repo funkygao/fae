@@ -8,7 +8,7 @@ import (
 )
 
 func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64, appErr error) {
-	const IDENT = "gm.regtile"
+	const IDENT = "gm.reg"
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
@@ -16,7 +16,7 @@ func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64, a
 		return
 	}
 
-	r = int64(this.game.Register(typ))
+	r, appErr = this.game.Register(typ)
 
 	profiler.do(IDENT, ctx, "{type^%s} {r^%+v}", typ, r)
 

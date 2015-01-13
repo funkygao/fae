@@ -485,8 +485,7 @@ service FunServant {
         3: string key
     ),
 
-    // k
-    i64 gm_reg(
+    i64 gm_register(
         1: Context ctx,
         2: string typ
     ),
