@@ -1,4 +1,4 @@
-package lock
+package game
 
 import (
 	"github.com/funkygao/fae/config"
@@ -9,15 +9,15 @@ import (
 )
 
 type Lock struct {
-	cf *config.ConfigLock
+	cf *config.ConfigGame
 
 	items *cache.LruCache // key: mtime
 	mutex sync.Mutex      // lru get/set is safe, but we need more lock span
 }
 
-func New(cf *config.ConfigLock) *Lock {
+func newLock(cf *config.ConfigGame) *Lock {
 	this := &Lock{cf: cf}
-	this.items = cache.NewLruCache(cf.MaxItems)
+	this.items = cache.NewLruCache(cf.LockMaxItems)
 	return this
 }
 
@@ -34,7 +34,7 @@ func (this *Lock) Lock(key string) (success bool) {
 
 	// present, check expires
 	elapsed := time.Since(mtime.(time.Time))
-	if this.cf.Expires > 0 && elapsed > this.cf.Expires {
+	if this.cf.LockExpires > 0 && elapsed > this.cf.LockExpires {
 		log.Warn("lock[%s] expires: %s, kicked", key, elapsed)
 
 		// ignore the aged lock, refresh the lock

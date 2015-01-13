@@ -22,7 +22,7 @@ type ConfigServant struct {
 	Mysql     *ConfigMysql
 	Redis     *ConfigRedis // TODO
 	Couchbase *ConfigCouchbase
-	Lock      *ConfigLock
+	Game      *ConfigGame
 }
 
 func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
@@ -66,10 +66,10 @@ func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
 		this.Lcache.LoadConfig(section)
 	}
 
-	this.Lock = new(ConfigLock)
-	section, err = cf.Section("lock")
+	this.Game = new(ConfigGame)
+	section, err = cf.Section("game")
 	if err == nil {
-		this.Lock.LoadConfig(section)
+		this.Game.LoadConfig(section)
 	}
 
 	// couchbase section

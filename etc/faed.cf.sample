@@ -29,7 +29,7 @@
         stats_output_interval: "10m"
         profiler_max_body_size: 600
         call_slow_threshold: "200ms"
-        // 10/1000 = 1%
+        // 100/10000 = 1%
         profiler_rate: 1
 
         proxy: {
@@ -174,9 +174,16 @@
             max_items: 104857600
         }
 
-        lock: {
-            max_items: 1048576
-            expires: "5s"
+        game: {
+            shard_split_strategy: {
+                kingdom: 18000
+                user: 20000
+                alliance: 2000
+            }
+            namegen_length: 3
+            lock_max_items: 1048576
+            lock_expires: "5s"
+            redis_server_addr: "127.0.0.1:6379"
         }
 
         redis: {

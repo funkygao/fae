@@ -5,11 +5,10 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
-	"github.com/funkygao/fae/servant/lock"
+	"github.com/funkygao/fae/servant/game"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
-	"github.com/funkygao/fae/servant/namegen"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/fae/servant/redis"
 	"github.com/funkygao/fae/servant/store"
@@ -28,7 +27,8 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	digitNormalizer *regexp.Regexp
+	digitNormalizer  *regexp.Regexp
+	phpReasonPercent metrics.PercentCounter // user's behavior
 
 	// stateful mem data related to services
 	mysqlMergeMutexMap *mutexmap.MutexMap
@@ -39,22 +39,16 @@ type FunServantImpl struct {
 	sessions *cache.LruCache // state kept for sessions FIXME kill it
 	stats    *servantStats   // stats
 
-	// php client related
-	phpLatency       metrics.Histogram      // in ms
-	phpPayloadSize   metrics.Histogram      // in bytes
-	phpReasonPercent metrics.PercentCounter // user's behavior
+	proxy *proxy.Proxy // remote fae agent
 
-	// service drivers
-	proxy   *proxy.Proxy         // remote fae agent
-	idgen   *idgen.IdGenerator   // global id generator
-	namegen *namegen.NameGen     // name generator
-	lc      *cache.LruCache      // local cache
-	mc      *memcache.ClientPool // memcache pool, auto sharding by key
-	mg      *mongo.Client        // mongodb pool, auto sharding by shardId
-	my      *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
-	rd      *redis.Client        // redis pool, auto sharding by pool name
-	cb      *couch.Client        // couchbase client
-	lk      *lock.Lock           // lock map
+	idgen *idgen.IdGenerator   // global id generator
+	game  *game.Game           // game engine
+	lc    *cache.LruCache      // local cache
+	mc    *memcache.ClientPool // memcache pool, auto sharding by key
+	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
+	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
+	rd    *redis.Client        // redis pool, auto sharding by pool name
+	cb    *couch.Client        // couchbase client
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -71,12 +65,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.stats.registerMetrics()
 
 	// record php latency histogram
-	this.phpLatency = metrics.NewHistogram(
-		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("php.latency", this.phpLatency)
-	this.phpPayloadSize = metrics.NewHistogram(
-		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("php.payload", this.phpPayloadSize)
+
 	this.phpReasonPercent = metrics.NewPercentCounter()
 	metrics.Register("php.reason", this.phpReasonPercent)
 
@@ -96,8 +85,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		panic(err)
 	}
 
-	log.Debug("creating servant: namegen")
-	this.namegen = namegen.New(3)
+	log.Debug("creating servant: game")
+	this.game = game.New(this.conf.Game)
 
 	if this.conf.Proxy.Enabled() {
 		log.Debug("creating servant: proxy")
@@ -110,11 +99,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		log.Debug("creating servant: lcache")
 		this.lc = cache.NewLruCache(this.conf.Lcache.MaxItems)
 		this.lc.OnEvicted = this.onLcLruEvicted
-	}
-
-	if this.conf.Lock.Enabled() {
-		log.Debug("creating servant: lock")
-		this.lk = lock.New(this.conf.Lock)
 	}
 
 	if this.conf.Memcache.Enabled() {

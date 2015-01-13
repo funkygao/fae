@@ -28,6 +28,11 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
+    for ($i=0; $i<100; $i++) {
+        $k = $client->gm_register($ctx, 'k');
+        echo "reg with k: $k \n";
+    }
+
     // redis
     $r = $client->rd_call($ctx, 'get', 'default', array('_not_existent_key'));
     var_dump($r);
