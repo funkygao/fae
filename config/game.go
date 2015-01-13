@@ -32,10 +32,12 @@ type ConfigGameShardSplit struct {
 	Kingdom  int
 	User     int
 	Alliance int // how many alliances per shard
+	Chat     int
 }
 
 func (this *ConfigGameShardSplit) loadConfig(cf *conf.Conf) {
 	this.Kingdom = cf.Int("kingdom", 18000)
 	this.User = cf.Int("user", 200000)
+	this.Chat = cf.Int("chat", 2000000)
 	this.Alliance = cf.Int("alliance", 200000/50) // TODO
 }

@@ -179,6 +179,7 @@
                 kingdom: 18000
                 user: 20000
                 alliance: 2000
+                chat: 2000000
             }
             namegen_length: 3
             lock_max_items: 1048576

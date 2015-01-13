@@ -13,10 +13,11 @@ const (
 	REG_USER     = "u"
 	REG_KINGDOM  = "k"
 	REG_ALLIANCE = "a"
+	REG_CHAT     = "c"
 )
 
 var (
-	regTypes = []string{REG_USER, REG_KINGDOM, REG_ALLIANCE}
+	regTypes = []string{REG_USER, REG_KINGDOM, REG_ALLIANCE, REG_CHAT}
 )
 
 type Register struct {
@@ -102,6 +103,9 @@ func (this *Register) Register(typ string) (int64, error) {
 
 	case REG_KINGDOM:
 		splitThreshold = this.cf.ShardSplit.Kingdom
+
+	case REG_CHAT:
+		splitThreshold = this.cf.ShardSplit.Chat
 
 	default:
 		return 0, ErrInvalidRegType
