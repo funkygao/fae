@@ -57,6 +57,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
 
+### Terms
+
+*   Engine
+*   Servant
+*   Peer
+
 ### Highlights
 
 *   Self manageable cluster
@@ -72,6 +78,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Easy extending for more servants(RPC service)
 *   Highly usage of mem to improve latancy & throughput
 *   Circuit breaker protection
+*   Full realtime internal stats export via http
 *   Smart metrics with low overhead
 *   Easy graceful degrade for OPS
     - auto
