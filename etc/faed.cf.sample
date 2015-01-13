@@ -177,7 +177,7 @@
         game: {
             shard_split_strategy: {
                 kingdom: 18000
-                user: 20000
+                user: 200000
                 alliance: 2000
                 chat: 2000000
             }
