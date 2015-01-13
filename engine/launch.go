@@ -43,8 +43,6 @@ func (this *Engine) ServeForever() {
 		config.Engine.Rpc.StatsOutputInterval,
 		config.Engine.MetricsLogfile)
 
-	go this.watchConfigReloaded()
-
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 

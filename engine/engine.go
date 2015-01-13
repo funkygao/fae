@@ -36,16 +36,3 @@ func (this *Engine) LoadConfig(configFile string, cf *conf.Conf) *Engine {
 	config.LoadEngineConfig(configFile, cf)
 	return this
 }
-
-func (this *Engine) watchConfigReloaded() {
-	for {
-		select {
-		case cf := <-config.Engine.ReloadedChan:
-			log.Debug("hot reloaded: %+v", cf.Conf)
-
-		case <-this.stopChan:
-			return
-		}
-
-	}
-}

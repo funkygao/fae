@@ -59,14 +59,15 @@ func (this *ConfigMysqlServer) DSN() string {
 }
 
 type ConfigMysql struct {
-	ShardBaseNum          int
-	ShardStrategy         string
-	ConnectTimeout        time.Duration
-	IoTimeout             time.Duration   // FIXME not used yet
-	GlobalPools           map[string]bool // non-sharded pools
-	MaxIdleConnsPerServer int
-	MaxConnsPerServer     int
-	HeartbeatInterval     int
+	ShardBaseNum                 int
+	ShardStrategy                string
+	ConnectTimeout               time.Duration
+	IoTimeout                    time.Duration   // FIXME not used yet
+	GlobalPools                  map[string]bool // non-sharded pools
+	MaxIdleConnsPerServer        int
+	MaxConnsPerServer            int
+	HeartbeatInterval            int
+	JsonMergeMaxOutstandingItems int
 
 	// cache related
 	CacheStore            string
@@ -101,6 +102,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
 	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
+	this.JsonMergeMaxOutstandingItems = cf.Int("json_merge_max_outstanding_items", 8<<20)
 	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1048576)
 	section, err := cf.Section("breaker")
 	if err == nil {

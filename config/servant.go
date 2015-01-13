@@ -13,7 +13,7 @@ type ConfigServant struct {
 	StatsOutputInterval time.Duration
 	ProfilerMaxBodySize int
 	ProfilerRate        int
-	SessionEntries      int // LRU cache volumn
+	SessionMaxItems     int // LRU cache volumn
 
 	Mongodb   *ConfigMongodb
 	Memcache  *ConfigMemcache
@@ -27,7 +27,7 @@ type ConfigServant struct {
 
 func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
 	this.IdgenWorkerId = cf.Int("idgen_worker_id", 1)
-	this.SessionEntries = cf.Int("session_entries", 20<<10)
+	this.SessionMaxItems = cf.Int("session_max_items", 20<<10)
 	this.CallSlowThreshold = cf.Duration("call_slow_threshold", 2*time.Second)
 	this.StatsOutputInterval = cf.Duration("stats_output_interval", 10*time.Minute)
 	this.ProfilerMaxBodySize = cf.Int("profiler_max_body_size", 1<<10)

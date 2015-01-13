@@ -25,7 +25,7 @@
     servants: {
         idgen_worker_id: 1
 
-        session_entries: 20000
+        session_max_items: 20000
         stats_output_interval: "10m"
         profiler_max_body_size: 600
         call_slow_threshold: "200ms"
@@ -49,6 +49,7 @@
             cache_key_hash: false
             cache_store_mem_max_items: 1073741824
             cache_store_redis_pool: "db_cache"
+            json_merge_max_outstanding_items: 8388608
 
             breaker: {
                 failure_allowance: 5

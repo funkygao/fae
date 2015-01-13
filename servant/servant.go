@@ -52,22 +52,8 @@ type FunServantImpl struct {
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
-	log.Debug("creating servants...")
-
 	this = &FunServantImpl{conf: cf}
-	this.sessions = cache.NewLruCache(cf.SessionEntries)
-
-	this.mysqlMergeMutexMap = mutexmap.New(8 << 20) // 8M TODO
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
-
-	// stats
-	this.stats = new(servantStats)
-	this.stats.registerMetrics()
-
-	// record php latency histogram
-
-	this.phpReasonPercent = metrics.NewPercentCounter()
-	metrics.Register("php.reason", this.phpReasonPercent)
 
 	// http REST to export internal state
 	if server.Launched() {
@@ -78,6 +64,49 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 			}).Methods("GET")
 	}
 
+	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
+	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
+
+	// stats
+	this.stats = new(servantStats)
+	this.stats.registerMetrics()
+	this.phpReasonPercent = metrics.NewPercentCounter()
+	metrics.Register("php.reason", this.phpReasonPercent)
+	this.dbCacheHits = metrics.NewPercentCounter()
+	metrics.Register("db.cache.hits", this.dbCacheHits)
+
+	// proxy can dynamically auto discover peers
+	if this.conf.Proxy.Enabled() {
+		log.Debug("creating servant: proxy")
+		this.proxy = proxy.New(this.conf.Proxy)
+	} else {
+		panic("peers proxy required")
+	}
+
+	this.createServants(cf)
+
+	return
+}
+
+func (this *FunServantImpl) Start() {
+	go this.showStats()
+	go this.proxy.StartMonitorCluster()
+	go this.watchConfigReloaded()
+
+	this.warmUp()
+}
+
+func (this *FunServantImpl) Flush() {
+	log.Debug("servants flushing...")
+	// TODO
+	log.Trace("servants flushed")
+}
+
+func (this *FunServantImpl) createServants(cf *config.ConfigServant) {
+	log.Info("creating servants...")
+
+	this.conf = cf
+
 	log.Debug("creating servant: idgen")
 	var err error
 	this.idgen, err = idgen.NewIdGenerator(this.conf.IdgenWorkerId)
@@ -87,13 +116,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	log.Debug("creating servant: game")
 	this.game = game.New(this.conf.Game)
-
-	if this.conf.Proxy.Enabled() {
-		log.Debug("creating servant: proxy")
-		this.proxy = proxy.New(this.conf.Proxy)
-	} else {
-		panic("peers proxy disabled")
-	}
 
 	if this.conf.Lcache.Enabled() {
 		log.Debug("creating servant: lcache")
@@ -116,8 +138,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		this.my = mysql.New(this.conf.Mysql)
 	}
 
-	this.dbCacheHits = metrics.NewPercentCounter()
-	metrics.Register("db.cache.hits", this.dbCacheHits)
 	if this.conf.Mysql.CacheStore == "mem" {
 		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
 	} else if this.conf.Mysql.CacheStore == "redis" {
@@ -146,21 +166,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		}
 	}
 
-	log.Debug("servants created")
-	return
-}
-
-func (this *FunServantImpl) Start() {
-	go this.showStats()
-	go this.proxy.StartMonitorCluster()
-
-	this.warmUp()
-}
-
-func (this *FunServantImpl) Flush() {
-	log.Debug("servants flushing...")
-	// TODO
-	log.Trace("servants flushed")
+	log.Info("servants created")
 }
 
 func (this *FunServantImpl) showStats() {
@@ -174,5 +180,14 @@ func (this *FunServantImpl) showStats() {
 			this.sessionN,
 			this.stats.calls.Total(),
 			this.stats.calls.Total()/int64(this.sessionN+1)) // +1 to avoid divide by zero
+	}
+}
+
+func (this *FunServantImpl) watchConfigReloaded() {
+	for {
+		select {
+		case cf := <-config.Engine.ReloadedChan:
+			this.createServants(cf.Servants)
+		}
 	}
 }
