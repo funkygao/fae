@@ -70,6 +70,8 @@ func (this *ConfigServant) LoadConfig(selfAddr string, cf *conf.Conf) {
 	section, err = cf.Section("game")
 	if err == nil {
 		this.Game.LoadConfig(section)
+	} else {
+		panic("empty game section")
 	}
 
 	// couchbase section
