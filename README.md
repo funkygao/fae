@@ -151,7 +151,6 @@ If a single fae is deployed for the whole cluster, its capacity requirement:
 
 *   mysql conn timeout not working
 *   vBucket for cluster sharding, what about each kingdom is a shard?
-*   what about remote peer conn when shutdown?
 *   hot reload config
 *   fae graceful shutdown
     - https://github.com/facebookgo/grace
