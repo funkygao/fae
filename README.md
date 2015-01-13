@@ -95,6 +95,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   maybe profiler sample rate is totally controlled by client
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
+    - default zk session timeout: 2 * tickTime ~ 20 * tickTime
 *   race condition detector
 *   NewTBufferedTransportFactory buffer size, and php config buf size
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
