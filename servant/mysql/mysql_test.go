@@ -32,7 +32,7 @@ func BenchmarkSqlQuery(b *testing.B) {
 	my.Open()
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, e := my.Query("select * from UserInfo where uid=?", 1)
+		_, e := my.Query("SELECT * FROM UserInfo WHERE uid=?", 1)
 		if e != nil {
 			err = e
 		}
@@ -50,7 +50,7 @@ func BenchmarkSqlExec(b *testing.B) {
 	my.Open()
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, _, e := my.ExecSql("update UserInfo set power=? where uid=?", 12, 1)
+		_, _, e := my.ExecSql("UPDATE UserInfo SET gold=? WHERE uid=?", 12, 1)
 		if e != nil {
 			err = e
 		}
