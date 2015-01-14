@@ -59,7 +59,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallIdGen != 0 {
-			_, _, err = client.IdNext(ctx, 0)
+			_, _, err = client.IdNext(ctx)
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d idgen} %v", round, seq, err)

@@ -4,10 +4,11 @@ package main
 
 import (
 	"flag"
-	"github.com/funkygao/fae/config"
+	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
+	"github.com/funkygao/golib/server"
 	"log"
 	"os"
 	"sync"
@@ -39,14 +40,17 @@ var (
 	Cmd             int
 	host            string
 	verbose         int
+	zk              string
 )
 
 func init() {
 	ctx = rpc.NewContext()
-	ctx.Reason = "POST+/facebook/getPaymentRequestId/+34ca2cf6"
+	ctx.Reason = "stress.go"
 	ctx.Host = "stress.test.local"
 	ctx.Ip = "127.0.0.1"
 	ctx.Rid = "bcf8f619"
+
+	server.SetupLogging("var/test.log", "info", "var/panic.dump")
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
@@ -60,6 +64,7 @@ func parseFlag() {
 	flag.IntVar(&Rounds, "n", 10, "rounds")
 	flag.StringVar(&host, "h", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
+	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.Usage = showUsage
 	flag.Parse()
 }
@@ -67,11 +72,14 @@ func parseFlag() {
 func main() {
 	parseFlag()
 
-	cf := config.ConfigProxy{PoolCapacity: 20}
-	proxy := proxy.New(cf)
-	tryServantPool(proxy)
+	proxy := proxy.NewWithDefaultConfig()
+	etclib.Dial([]string{zk})
+	go proxy.StartMonitorCluster()
+	proxy.AwaitClusterTopologyReady()
 
-	time.Sleep(time.Second * 2)
+	// test pool
+	testServantPool(proxy)
+	pause("pool tested")
 
 	go report.run()
 
