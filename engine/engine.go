@@ -5,7 +5,6 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	conf "github.com/funkygao/jsconf"
-	log "github.com/funkygao/log4go"
 	"time"
 )
 

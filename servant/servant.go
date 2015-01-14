@@ -20,6 +20,7 @@ import (
 	"github.com/funkygao/metrics"
 	"labix.org/v2/mgo"
 	"net/http"
+	"reflect"
 	"regexp"
 	"time"
 )
@@ -83,7 +84,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 		panic("peers proxy required")
 	}
 
-	this.createServants(cf)
+	this.createServants()
 
 	return
 }
@@ -102,10 +103,8 @@ func (this *FunServantImpl) Flush() {
 	log.Trace("servants flushed")
 }
 
-func (this *FunServantImpl) createServants(cf *config.ConfigServant) {
+func (this *FunServantImpl) createServants() {
 	log.Info("creating servants...")
-
-	this.conf = cf
 
 	log.Debug("creating servant: idgen")
 	var err error
@@ -138,11 +137,16 @@ func (this *FunServantImpl) createServants(cf *config.ConfigServant) {
 		this.my = mysql.New(this.conf.Mysql)
 	}
 
-	if this.conf.Mysql.CacheStore == "mem" {
+	switch this.conf.Mysql.CacheStore {
+	case "mem":
 		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
-	} else if this.conf.Mysql.CacheStore == "redis" {
+
+	case "redis":
 		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
 			this.conf.Redis)
+
+	default:
+		panic("unknown cache store")
 	}
 
 	if this.conf.Mongodb.Enabled() {
@@ -169,6 +173,84 @@ func (this *FunServantImpl) createServants(cf *config.ConfigServant) {
 	log.Info("servants created")
 }
 
+// TODO kill some servant if new conf turns it off
+func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
+	log.Info("recreating servants...")
+
+	if this.conf.IdgenWorkerId != cf.IdgenWorkerId {
+		log.Debug("recreating servant: idgen")
+		var err error
+		this.idgen, err = idgen.NewIdGenerator(cf.IdgenWorkerId)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
+		log.Debug("recreating servant: game")
+		this.game = game.New(cf.Game)
+	}
+
+	if cf.Lcache.Enabled() &&
+		this.conf.Lcache.MaxItems != cf.Lcache.MaxItems {
+		log.Debug("recreating servant: lcache")
+		this.lc = cache.NewLruCache(cf.Lcache.MaxItems)
+		this.lc.OnEvicted = this.onLcLruEvicted
+	}
+
+	if cf.Memcache.Enabled() &&
+		!reflect.DeepEqual(*this.conf.Memcache, *cf.Memcache) {
+		log.Debug("recreating servant: memcache")
+		this.mc = memcache.New(cf.Memcache)
+	}
+
+	if cf.Redis.Enabled() &&
+		!reflect.DeepEqual(*this.conf.Redis, *cf.Redis) {
+		log.Debug("recreating servant: redis")
+		this.rd = redis.New(cf.Redis)
+	}
+
+	if cf.Mysql.Enabled() &&
+		!reflect.DeepEqual(*this.conf.Mysql, *cf.Mysql) {
+		log.Debug("recreating servant: mysql")
+		this.my = mysql.New(cf.Mysql)
+
+		switch cf.Mysql.CacheStore {
+		case "mem":
+			this.dbCacheStore = store.NewMemStore(cf.Mysql.CacheStoreMemMaxItems)
+
+		case "redis":
+			this.dbCacheStore = store.NewRedisStore(cf.Mysql.CacheStoreRedisPool,
+				cf.Redis)
+
+		default:
+			panic("unknown cache store")
+		}
+	}
+
+	if cf.Mongodb.Enabled() &&
+		!reflect.DeepEqual(*this.conf.Mongodb, *cf.Mongodb) {
+		log.Debug("recreating servant: mongodb")
+		this.mg = mongo.New(cf.Mongodb)
+	}
+
+	if cf.Couchbase.Enabled() &&
+		!reflect.DeepEqual(*this.conf.Couchbase, *cf.Couchbase) {
+		log.Debug("recreating servant: couchbase")
+
+		var err error
+		// pool is always 'default'
+		this.cb, err = couch.New(cf.Couchbase.Servers, "default")
+		if err != nil {
+			log.Error("couchbase: %s", err)
+		}
+	}
+
+	this.conf = cf
+
+	log.Info("servants recreated")
+}
+
 func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
@@ -187,7 +269,7 @@ func (this *FunServantImpl) watchConfigReloaded() {
 	for {
 		select {
 		case cf := <-config.Engine.ReloadedChan:
-			this.createServants(cf.Servants)
+			this.recreateServants(cf.Servants)
 		}
 	}
 }
