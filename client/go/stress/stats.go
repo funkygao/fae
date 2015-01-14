@@ -10,7 +10,6 @@ import (
 type stats struct {
 	concurrentN int32
 	sessionN    int32 // aggregated sessions
-	totalCalls  int64
 	callErrs    int64
 	callOk      int64
 	connErrs    int64
@@ -32,29 +31,24 @@ func (this *stats) incConnErrs() {
 	atomic.AddInt64(&this.connErrs, 1)
 }
 
-func (this *stats) modifyConcurrency(delta int32) {
+func (this *stats) updateConcurrency(delta int32) {
 	atomic.AddInt32(&this.concurrentN, delta)
 }
 
 func (this *stats) run() {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
 	var lastCalls int64
-	for {
-		if lastCalls != 0 {
-			log.Printf("sessions: %5d concurrency: %5d calls:%12s cps: %9s errs: %9s",
-				this.sessionN,
-				this.concurrentN,
-				gofmt.Comma(this.callOk),
-				gofmt.Comma(this.callOk-lastCalls),
-				gofmt.Comma(this.callErrs))
-		} else {
-			log.Printf("sessions: %5d concurrency: %5d calls: %12s",
-				this.sessionN,
-				this.concurrentN,
-				gofmt.Comma(this.callOk))
-		}
+	for _ = range ticker.C {
+		log.Printf("********** sessions:%d concurrency:%d calls:%s qps:%s errs:%s",
+			atomic.LoadInt32(&this.sessionN),
+			atomic.LoadInt32(&this.concurrentN),
+			gofmt.Comma(atomic.LoadInt64(&this.callOk)),
+			gofmt.Comma(this.callOk-lastCalls),
+			gofmt.Comma(this.callErrs))
 
 		lastCalls = this.callOk
-
-		time.Sleep(time.Second)
 	}
+
 }

@@ -12,32 +12,31 @@ import (
 )
 
 func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
-	defer wg.Done()
-
-	if sampling(SampleRate) {
-		log.Printf("session{round^%d seq^%d} started", round, seq)
-	}
-
+	report.updateConcurrency(1)
 	report.incSessions()
+	defer func() {
+		wg.Done()
+		report.updateConcurrency(-1)
+	}()
 
 	t1 := time.Now()
 	client, err := proxy.Servant(host + ":9001")
 	if err != nil {
 		report.incConnErrs()
-		log.Printf("session{round^%d seq^%d} %v", round, seq, err)
+		log.Printf("session{round^%d seq^%d} error: %v", round, seq, err)
 		return
 	}
 	defer client.Recycle() // when err occurs, do we still need recycle?
 
+	var enableLog = false
 	if sampling(SampleRate) {
+		enableLog = true
+	}
+
+	if enableLog {
 		log.Printf("session{round^%d seq^%d} connected within %s",
 			round, seq, time.Since(t1))
 	}
-
-	report.modifyConcurrency(1)
-	defer func() {
-		report.modifyConcurrency(-1)
-	}()
 
 	var (
 		key     string
@@ -124,8 +123,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 	}
 
-	if sampling(SampleRate) {
-		log.Printf("session{round^%d seq^%d} finished", round, seq)
+	if enableLog {
+		log.Printf("session{round^%d seq^%d} done", round, seq)
 	}
 
 }
