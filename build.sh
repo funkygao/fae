@@ -25,6 +25,15 @@ if [[ $1 = "-install" ]]; then
     exit
 fi
 
+if [[ $1 = "-cpu" ]]; then
+    go tool pprof ./daemon/faed/faed prof/cpu.pprof
+    exit
+fi
+if [[ $1 = "-mem" ]]; then
+    go tool pprof ./daemon/faed/faed prof/mem.pprof
+    exit
+fi
+
 cd $(dirname $0)/servant; make
 cd ../daemon/faed
 
