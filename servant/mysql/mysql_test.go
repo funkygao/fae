@@ -25,3 +25,21 @@ func BenchmarkIsSystemError(b *testing.B) {
 		m.isSystemError(err)
 	}
 }
+
+func BenchmarkSqlQuery(b *testing.B) {
+	b.ReportAllocs()
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(127.0.0.1:3306)/ChatShard1?charset=utf8&timeout=4s", nil)
+	my.Open()
+	var err error
+	for i := 0; i < b.N; i++ {
+		_, e := my.Query("select * from UserInfo where uid=?", 1)
+		if e != nil {
+			err = e
+		}
+	}
+
+	if err != nil {
+		b.Log(err)
+	}
+
+}
