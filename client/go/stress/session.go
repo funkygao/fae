@@ -29,7 +29,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	var enableLog = false
-	if sampling(SampleRate) {
+	if sampling(SampleRate) || Concurrency == 1 {
 		enableLog = true
 	}
 

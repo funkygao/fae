@@ -22,10 +22,11 @@ func init() {
 	ctx.Ip = "127.0.0.1"
 	ctx.Rid = "bcf8f619"
 
-	server.SetupLogging("var/test.log", "info", "var/panic.dump")
+	parseFlag()
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
+	server.SetupLogging("var/test.log", "info", "var/panic.dump")
 }
 
 func parseFlag() {
@@ -34,7 +35,7 @@ func parseFlag() {
 	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
 	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
-	flag.StringVar(&host, "h", "localhost", "rpc server host")
+	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.Usage = showUsage
@@ -42,8 +43,6 @@ func parseFlag() {
 }
 
 func main() {
-	parseFlag()
-
 	proxy := proxy.NewWithDefaultConfig()
 	etclib.Dial([]string{zk})
 	go proxy.StartMonitorCluster()
