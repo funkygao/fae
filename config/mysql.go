@@ -8,14 +8,13 @@ import (
 )
 
 type ConfigMysqlServer struct {
-	Pool         string
-	Host         string
-	Port         string
-	User         string
-	Pass         string
-	DbName       string
-	Charset      string
-	ShardBaseNum int
+	Pool    string
+	Host    string
+	Port    string
+	User    string
+	Pass    string
+	DbName  string
+	Charset string
 
 	conf *ConfigMysql
 
@@ -27,7 +26,6 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	this.Host = section.String("host", "")
 	this.Port = section.String("port", "3306")
 	this.DbName = section.String("db", "")
-	this.ShardBaseNum = section.Int("shard_base_num", this.ShardBaseNum)
 	this.User = section.String("username", "")
 	this.Pass = section.String("password", "")
 	this.Charset = section.String("charset", "utf8")
@@ -49,8 +47,8 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
-	if this.conf.ConnectTimeout.Seconds() > 0 {
-		this.dsn += "&timeout=" + this.conf.ConnectTimeout.String()
+	if this.conf.Timeout.Seconds() > 0 {
+		this.dsn += "&timeout=" + this.conf.Timeout.String()
 	}
 }
 
@@ -59,14 +57,12 @@ func (this *ConfigMysqlServer) DSN() string {
 }
 
 type ConfigMysql struct {
-	ShardBaseNum                 int
 	ShardStrategy                string
-	ConnectTimeout               time.Duration
-	IoTimeout                    time.Duration   // FIXME not used yet
+	Timeout                      time.Duration
 	GlobalPools                  map[string]bool // non-sharded pools
 	MaxIdleConnsPerServer        int
 	MaxConnsPerServer            int
-	HeartbeatInterval            int
+	HeartbeatInterval            int // TODO
 	JsonMergeMaxOutstandingItems int
 
 	// cache related
@@ -89,10 +85,8 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	for _, p := range cf.StringList("global_pools", nil) {
 		this.GlobalPools[p] = true
 	}
-	this.ShardBaseNum = cf.Int("shard_base_num", 100000)
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
-	this.ConnectTimeout = cf.Duration("connect_timeout", 0)
-	this.IoTimeout = cf.Duration("io_timeout", 30*time.Second)
+	this.Timeout = cf.Duration("timeout", 10*time.Second)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)
@@ -123,7 +117,6 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 
 		server := new(ConfigMysqlServer)
 		server.conf = this
-		server.ShardBaseNum = this.ShardBaseNum
 		server.loadConfig(section)
 		this.Servers[server.Pool] = server
 	}

@@ -14,8 +14,14 @@ type MysqlCluster struct {
 func New(cf *config.ConfigMysql) *MysqlCluster {
 	this := new(MysqlCluster)
 	switch cf.ShardStrategy {
-	default:
+	case "standard":
 		this.selector = newStandardServerSelector(cf)
+
+	case "vbucket":
+		panic("vbucket mysql sharding not implemented")
+
+	default:
+		panic("unknown mysql sharding type: " + cf.ShardStrategy)
 	}
 
 	return this

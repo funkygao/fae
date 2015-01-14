@@ -43,8 +43,7 @@
         }
 
         mysql: {
-            connect_timeout: "4s"
-            io_timeout: "10s"
+            timeout: "10s"
             max_idle_conns_per_server: 5
             max_conns_per_server: 20
             cache_store: "mem"
@@ -52,6 +51,7 @@
             cache_store_mem_max_items: 1073741824
             cache_store_redis_pool: "db_cache"
             json_merge_max_outstanding_items: 8388608
+            shard_strategy: "standard"
 
             breaker: {
                 failure_allowance: 5

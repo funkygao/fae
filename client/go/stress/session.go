@@ -141,7 +141,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallMysql != 0 {
-			r, err := client.MyQuery(ctx, "UserShard", "UserInfo", 2,
+			// with cache
+			r, err := client.MyQuery(ctx, "UserShard", "UserInfo", 1,
 				"SELECT * FROM UserInfo WHERE uid=?",
 				[]string{"1"}, "user:1")
 			if err != nil {
@@ -152,6 +153,17 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 					log.Printf("session{round^%d seq^%d mysql}: %+v",
 						round, seq, r)
 				}
+				report.incCallOk()
+			}
+
+			// without cache
+			_, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
+				"SELECT * FROM UserInfo WHERE uid=?",
+				[]string{"1"}, "")
+			if err != nil {
+				report.incCallErr()
+				log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+			} else {
 				report.incCallOk()
 			}
 		}
