@@ -77,7 +77,6 @@ type ConfigMysql struct {
 	LookupPool          string
 	lookupTables        conf.Conf
 	Servers             map[string]*ConfigMysqlServer // key is pool
-
 }
 
 func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
@@ -108,6 +107,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	} else {
 		panic(err)
 	}
+
 	this.Servers = make(map[string]*ConfigMysqlServer)
 	for i := 0; i < len(cf.List("servers", nil)); i++ {
 		section, err := cf.Section(fmt.Sprintf("servers[%d]", i))
