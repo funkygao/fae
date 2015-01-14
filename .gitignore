@@ -20,6 +20,7 @@ _testmain.go
 .DS_Store
 *.exe
 
+prof/
 servant/gen-php/
 servant/gen-go/
 servant/gen-py/
