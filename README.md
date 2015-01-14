@@ -87,6 +87,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### TODO
 
 *   mysql conn timeout not working
+*   mysql prepare stmt caching
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   hot reload config
 *   more strict test on zookeeper failure
