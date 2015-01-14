@@ -43,3 +43,21 @@ func BenchmarkSqlQuery(b *testing.B) {
 	}
 
 }
+
+func BenchmarkSqlExec(b *testing.B) {
+	b.ReportAllocs()
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(127.0.0.1:3306)/ChatShard1?charset=utf8&timeout=4s", nil)
+	my.Open()
+	var err error
+	for i := 0; i < b.N; i++ {
+		_, _, e := my.ExecSql("update UserInfo set power=? where uid=?", 12, 1)
+		if e != nil {
+			err = e
+		}
+	}
+
+	if err != nil {
+		b.Log(err)
+	}
+
+}
