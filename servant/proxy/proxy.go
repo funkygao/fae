@@ -70,7 +70,7 @@ func (this *Proxy) StartMonitorCluster() {
 						close(this.clusterTopologyChan)
 					}
 
-					log.Trace("Cluster latest fae nodes: %+v", peers)
+					log.Info("Cluster latest fae nodes: %+v", peers)
 				}
 			} else {
 				log.Error("Cluster peers: %s", err)
