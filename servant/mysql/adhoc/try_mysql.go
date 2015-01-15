@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	_ "github.com/funkygao/mysql"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"sync"
@@ -16,6 +18,7 @@ const (
 	QUERY       = "SELECT * FROM UserInfo WHERE uid=?"
 	SCAN_ROWS   = false
 	USE_PREPARE = false
+	DEBUG_ADDR  = "127.0.0.1:8765"
 
 	CONN_MAX_IDLE = 5
 	CONN_MAX_OPEN = 20
@@ -33,6 +36,9 @@ func init() {
 }
 
 func main() {
+	log.Printf("debug addr: %s/debug/pprof/", DEBUG_ADDR)
+	go http.ListenAndServe(DEBUG_ADDR, nil)
+
 	t1 := time.Now()
 	for i := 0; i < PARALLAL; i++ {
 		wg.Add(1)
@@ -62,7 +68,7 @@ func runDb(seq int) {
 		db.SetMaxOpenConns(CONN_MAX_OPEN)
 	}
 
-	const N = 5000
+	const N = 50000
 	t1 := time.Now()
 	var rows *sql.Rows
 	for i := 0; i < N; i++ {
