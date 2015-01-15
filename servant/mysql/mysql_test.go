@@ -28,36 +28,30 @@ func BenchmarkIsSystemError(b *testing.B) {
 
 func BenchmarkSqlQuery(b *testing.B) {
 	b.ReportAllocs()
-	my := newMysql("hellofarm:halfquestfarm4321@tcp(127.0.0.1:3306)/ChatShard1?charset=utf8&timeout=4s", nil)
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", nil)
 	my.Open()
-	var err error
+	//my.db.SetMaxIdleConns(100)
+	//my.db.SetMaxOpenConns(1000)
 	for i := 0; i < b.N; i++ {
 		_, e := my.Query("SELECT * FROM UserInfo WHERE uid=?", 1)
 		if e != nil {
-			err = e
+			b.Log(e)
 		}
-	}
-
-	if err != nil {
-		b.Log(err)
 	}
 
 }
 
 func BenchmarkSqlExec(b *testing.B) {
 	b.ReportAllocs()
-	my := newMysql("hellofarm:halfquestfarm4321@tcp(127.0.0.1:3306)/ChatShard1?charset=utf8&timeout=4s", nil)
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", nil)
 	my.Open()
-	var err error
+	//my.db.SetMaxIdleConns(100)
+	//my.db.SetMaxOpenConns(1000)
 	for i := 0; i < b.N; i++ {
 		_, _, e := my.ExecSql("UPDATE UserInfo SET gold=? WHERE uid=?", 12, 1)
 		if e != nil {
-			err = e
+			b.Log(e)
 		}
-	}
-
-	if err != nil {
-		b.Log(err)
 	}
 
 }
