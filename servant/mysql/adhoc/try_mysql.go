@@ -12,9 +12,10 @@ import (
 
 const (
 	//DSN = "hellofarm:halfquestfarm4321@tcp(192.168.23.120:3306)/UserShard1?charset=utf8&timeout=10s"
-	DSN       = "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s"
-	QUERY     = "SELECT * FROM UserInfo WHERE uid=?"
-	SCAN_ROWS = false
+	DSN         = "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s"
+	QUERY       = "SELECT * FROM UserInfo WHERE uid=?"
+	SCAN_ROWS   = false
+	USE_PREPARE = false
 
 	CONN_MAX_IDLE = 5
 	CONN_MAX_OPEN = 20
@@ -63,8 +64,20 @@ func runDb(seq int) {
 
 	const N = 5000
 	t1 := time.Now()
+	var rows *sql.Rows
 	for i := 0; i < N; i++ {
-		rows, err := db.Query(QUERY, 1)
+		if !USE_PREPARE {
+			rows, err = db.Query(QUERY, 1)
+		} else {
+			stmt, e := db.Prepare(QUERY)
+			if e != nil {
+				log.Printf("%d[%d]: %s", i+1, seq, e)
+				return
+			}
+			rows, err = stmt.Query(1)
+			defer stmt.Close()
+		}
+
 		if err != nil {
 			log.Printf("%d[%d]: %s", i+1, seq, err)
 			return
