@@ -10,16 +10,30 @@ import (
 	"time"
 )
 
-var wg sync.WaitGroup
+const (
+	//DSN = "hellofarm:halfquestfarm4321@tcp(192.168.23.120:3306)/UserShard1?charset=utf8&timeout=10s"
+	DSN       = "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s"
+	QUERY     = "SELECT * FROM UserInfo WHERE uid=?"
+	SCAN_ROWS = false
+
+	CONN_MAX_IDLE = 5
+	CONN_MAX_OPEN = 20
+
+	PARALLAL = 100
+)
+
+var (
+	wg sync.WaitGroup
+)
 
 func init() {
-	runtime.GOMAXPROCS(8)
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
 func main() {
 	t1 := time.Now()
-	for i := 0; i < 100; i++ {
+	for i := 0; i < PARALLAL; i++ {
 		wg.Add(1)
 		go runDb(i)
 	}
@@ -30,34 +44,36 @@ func main() {
 	log.Println(time.Since(t1))
 }
 
-func runDb(no int) {
+func runDb(seq int) {
 	defer wg.Done()
 
-	db, err := sql.Open("mysql", "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s")
-	//db, err := sql.Open("mysql", "hellofarm:halfquestfarm4321@tcp(192.168.23.120:3306)/UserShard1?charset=utf8&timeout=10s")
+	db, err := sql.Open("mysql", DSN)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 	defer db.Close()
 
-	//db.SetMaxIdleConns(5)
-	//db.SetMaxOpenConns(20)
+	if CONN_MAX_IDLE > 0 {
+		db.SetMaxIdleConns(CONN_MAX_IDLE)
+	}
+	if CONN_MAX_OPEN > 0 {
+		db.SetMaxOpenConns(CONN_MAX_OPEN)
+	}
 
-	query := "SELECT * FROM UserInfo WHERE uid=?"
 	const N = 5000
 	t1 := time.Now()
 	for i := 0; i < N; i++ {
-		rows, err := db.Query(query, 1)
+		rows, err := db.Query(QUERY, 1)
 		if err != nil {
-			log.Printf("%d[%d]: %s", i+1, no, err)
+			log.Printf("%d[%d]: %s", i+1, seq, err)
 			return
 		}
 
-		if false {
+		if SCAN_ROWS {
 			cols, err := rows.Columns()
 			if err != nil {
-				log.Printf("%d: %s", i+1, err)
+				log.Printf("%d[%d]: %s", i+1, seq, err)
 				return
 			}
 
@@ -70,7 +86,7 @@ func runDb(no int) {
 					scanArgs[i] = &rawRowValues[i]
 				}
 				if appErr := rows.Scan(scanArgs...); appErr != nil {
-					log.Printf("%s", appErr)
+					log.Printf("%d[%d]: %s", i+1, seq, appErr)
 					return
 				}
 
@@ -86,7 +102,7 @@ func runDb(no int) {
 			}
 
 			if rows.Err() != nil {
-				log.Println(rows.Err())
+				log.Printf("%d[%d]: %s", i+1, seq, rows.Err())
 				return
 			}
 
@@ -96,6 +112,5 @@ func runDb(no int) {
 		rows.Close()
 	}
 
-	db.Close()
-	log.Println(no, time.Since(t1), time.Since(t1)/N)
+	log.Println(seq, time.Since(t1), time.Since(t1)/N)
 }
