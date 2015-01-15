@@ -36,6 +36,10 @@ func (this *FunServantPeer) Id() uint64 {
 	return this.id
 }
 
+func (this *FunServantPeer) IsOpen() bool {
+	return this.Transport.IsOpen()
+}
+
 func (this *FunServantPeer) Recycle() {
 	if this.Transport.IsOpen() {
 		this.pool.pool.Put(this)

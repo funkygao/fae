@@ -4,74 +4,53 @@ package main
 
 import (
 	"flag"
-	"github.com/funkygao/fae/config"
+	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
+	"github.com/funkygao/golib/server"
 	"log"
 	"os"
 	"sync"
 	"time"
 )
 
-const (
-	CallPing = 1 << iota
-	CallIdGen
-	CallLCache
-	CallMemcache
-	CallMongo
-	CallKvdb
-
-	CallPingIdgen   = CallPing | CallIdGen
-	CallIdgenLcache = CallIdGen | CallLCache
-
-	MC_POOL = "default"
-)
-
-var (
-	report stats
-	ctx    *rpc.Context
-
-	SampleRate      int
-	Concurrency     int
-	Rounds          int // sessions=Rounds*Concurrency
-	LoopsPerSession int // calls=sessions*LoopsPerSession
-	Cmd             int
-	host            string
-	verbose         int
-)
-
 func init() {
 	ctx = rpc.NewContext()
-	ctx.Reason = "POST+/facebook/getPaymentRequestId/+34ca2cf6"
+	ctx.Reason = "stress.go"
 	ctx.Host = "stress.test.local"
 	ctx.Ip = "127.0.0.1"
 	ctx.Rid = "bcf8f619"
 
+	parseFlag()
+
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
+	server.SetupLogging("var/test.log", "info", "var/panic.dump")
 }
 
 func parseFlag() {
 	flag.IntVar(&LoopsPerSession, "loop", 1, "loops for each session")
 	flag.IntVar(&Concurrency, "c", 3000, "concurrent num")
 	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
-	flag.IntVar(&Cmd, "x", CallPing, "bitwise rpc calls")
+	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
-	flag.StringVar(&host, "h", "localhost", "rpc server host")
+	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
+	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.Usage = showUsage
 	flag.Parse()
 }
 
 func main() {
-	parseFlag()
+	proxy := proxy.NewWithDefaultConfig()
+	etclib.Dial([]string{zk})
+	go proxy.StartMonitorCluster()
+	proxy.AwaitClusterTopologyReady()
 
-	cf := config.ConfigProxy{PoolCapacity: 20}
-	proxy := proxy.New(cf)
-	tryServantPool(proxy)
-
-	time.Sleep(time.Second * 2)
+	// test pool
+	testServantPool(proxy)
+	pause("pool tested")
 
 	go report.run()
 

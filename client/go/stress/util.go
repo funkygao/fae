@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"strings"
 )
 
@@ -25,4 +28,11 @@ func showUsage() {
 	fmt.Printf("%16s %3d\n", "CallKvdb", CallKvdb)
 	fmt.Printf("%16s %3d\n", "Ping+Idgen", CallPingIdgen)
 	fmt.Printf("%16s %3d\n", "Lcache+Idgen", CallIdgenLcache)
+}
+
+func pause(prompt string) {
+	log.Println(prompt)
+	log.Println()
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
 }
