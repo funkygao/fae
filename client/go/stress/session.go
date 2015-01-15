@@ -157,15 +157,18 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 
 			// without cache
-			_, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
-				"SELECT * FROM UserInfo WHERE uid=?",
-				[]string{"1"}, "")
-			if err != nil {
-				report.incCallErr()
-				log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
-			} else {
-				report.incCallOk()
+			if false {
+				_, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
+					"SELECT * FROM UserInfo WHERE uid=?",
+					[]string{"1"}, "")
+				if err != nil {
+					report.incCallErr()
+					log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+				} else {
+					report.incCallOk()
+				}
 			}
+
 		}
 
 		continue // TODO
