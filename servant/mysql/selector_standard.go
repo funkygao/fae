@@ -101,6 +101,10 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		sb2 = " WHERE entityId=?"
 	)
 
+	if hintId == 0 {
+		return nil, ErrInvalidHintId
+	}
+
 	// get mysql conn from cache
 	key := this.lookupCacheKey(pool, hintId)
 	if conn, present := this.lookupCache.Get(key); present {
