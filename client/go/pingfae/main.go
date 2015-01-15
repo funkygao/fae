@@ -57,11 +57,20 @@ func main() {
 }
 
 func pingCluster(proxy *proxy.Proxy) {
-	etclib.Dial([]string{zk})
+	if err := etclib.Dial([]string{zk}); err != nil {
+		fmt.Printf("zk: %s", err.Error())
+		return
+	}
 	go proxy.StartMonitorCluster()
 	proxy.AwaitClusterTopologyReady()
 
-	for _, peerAddr := range proxy.ClusterPeers() {
+	peers := proxy.ClusterPeers()
+	if len(peers) == 0 {
+		fmt.Println("found no fae peers")
+		return
+	}
+
+	for _, peerAddr := range peers {
 		client, err := proxy.Servant(peerAddr)
 		if err != nil {
 			fmt.Printf("%s: %s\n", peerAddr, err)
