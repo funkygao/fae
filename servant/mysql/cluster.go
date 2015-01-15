@@ -50,6 +50,15 @@ func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 	return my.ExecSql(sql, args...)
 }
 
+func (this *MysqlCluster) Close() (err error) {
+	for _, my := range this.selector.Servers() {
+		if e := my.db.Close(); e != nil {
+			err = e
+		}
+	}
+	return
+}
+
 func (this *MysqlCluster) KickLookupCache(pool string, hintId int) {
 	this.selector.KickLookupCache(pool, hintId)
 }
