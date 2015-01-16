@@ -16,14 +16,17 @@ const (
 	//DSN = "hellofarm:halfquestfarm4321@tcp(192.168.23.120:3306)/UserShard1?charset=utf8&timeout=10s"
 	DSN         = "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s"
 	QUERY       = "SELECT * FROM UserInfo WHERE uid=?"
-	SCAN_ROWS   = false
+	SCAN_ROWS   = true
+	SHOW_ROWS   = false
 	USE_PREPARE = false
-	DEBUG_ADDR  = "127.0.0.1:8765"
+
+	DEBUG_ADDR = "127.0.0.1:8765"
 
 	CONN_MAX_IDLE = 5
 	CONN_MAX_OPEN = 20
 
-	PARALLAL = 100
+	PARALLAL = 1
+	LOOPS    = 1000000
 )
 
 var (
@@ -68,10 +71,9 @@ func runDb(seq int) {
 		db.SetMaxOpenConns(CONN_MAX_OPEN)
 	}
 
-	const N = 50000
 	t1 := time.Now()
 	var rows *sql.Rows
-	for i := 0; i < N; i++ {
+	for i := 0; i < LOOPS; i++ {
 		if !USE_PREPARE {
 			rows, err = db.Query(QUERY, 1)
 		} else {
@@ -125,11 +127,14 @@ func runDb(seq int) {
 				return
 			}
 
-			//log.Printf("%+v", rowData)
+			if SHOW_ROWS {
+				log.Printf("%d[%d]: %+v", i+1, seq, rowData)
+			}
+
 		}
 
 		rows.Close()
 	}
 
-	log.Println(seq, time.Since(t1), time.Since(t1)/N)
+	log.Printf("[%3d] %18s %18s", seq, time.Since(t1), time.Since(t1)/LOOPS)
 }
