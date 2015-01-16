@@ -60,7 +60,7 @@ func (this *Proxy) StartMonitorCluster() {
 			if err == nil {
 				if len(peers) == 0 {
 					// TODO panic?
-					log.Error("Cluster fae etcd died: found no peers")
+					log.Error("Cluster fae etcd died: empty peers")
 				} else {
 					// no lock, because running within 1 goroutine
 					this.selector.SetPeersAddr(peers...)
