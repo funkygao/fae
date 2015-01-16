@@ -84,7 +84,6 @@ func runDb(seq int) {
 		defer stmt.Close()
 	}
 	for i := 0; i < LOOPS; i++ {
-		time.Sleep(time.Second * 10)
 		if !USE_PREPARE {
 			rows, err = db.Query(QUERY, 1)
 		} else {
