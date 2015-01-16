@@ -17,7 +17,7 @@ const (
 	DSN         = "hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?timeout=4s"
 	QUERY       = "SELECT * FROM UserInfo WHERE uid=?"
 	SCAN_ROWS   = true
-	SHOW_ROWS   = true
+	SHOW_ROWS   = false
 	USE_PREPARE = true
 
 	DEBUG_ADDR = "127.0.0.1:8765"
@@ -25,8 +25,8 @@ const (
 	CONN_MAX_IDLE = 5
 	CONN_MAX_OPEN = 20
 
-	PARALLAL = 1
-	LOOPS    = 1000000
+	PARALLAL = 100
+	LOOPS    = 1000
 )
 
 var (
