@@ -86,8 +86,10 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
-*   mysql conn timeout not working
 *   mysql prepare stmt caching
+    - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
+    - CLIENT_NO_SCHEMA, don't allow database.table.column
+*   too many round trips between fae and mysql
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   hot reload config
 *   more strict test on zookeeper failure

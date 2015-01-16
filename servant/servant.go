@@ -100,6 +100,7 @@ func (this *FunServantImpl) Start() {
 func (this *FunServantImpl) Flush() {
 	log.Debug("servants flushing...")
 	// TODO
+	this.my.Close()
 	log.Trace("servants flushed")
 }
 

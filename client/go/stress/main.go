@@ -33,7 +33,7 @@ func parseFlag() {
 	flag.IntVar(&LoopsPerSession, "loop", 1, "loops for each session")
 	flag.IntVar(&Concurrency, "c", 3000, "concurrent num")
 	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
-	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
+	flag.IntVar(&Cmd, "x", CallMysql, "bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")

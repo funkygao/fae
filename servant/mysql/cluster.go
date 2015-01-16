@@ -47,7 +47,7 @@ func (this *MysqlCluster) Exec(pool string, table string, hintId int,
 		return 0, 0, err
 	}
 
-	return my.ExecSql(sql, args...)
+	return my.Exec(sql, args...)
 }
 
 func (this *MysqlCluster) Close() (err error) {

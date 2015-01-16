@@ -26,24 +26,31 @@ func BenchmarkIsSystemError(b *testing.B) {
 	}
 }
 
+// 242102251 ns/op	    3427 B/op	      40 allocs/op
+// mysql_test.go:40: dial tcp 192.168.23.163:3306: i/o timeout
 func BenchmarkSqlQuery(b *testing.B) {
 	b.ReportAllocs()
-	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", nil)
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", 0, nil)
 	my.Open()
 	//my.db.SetMaxIdleConns(100)
-	//my.db.SetMaxOpenConns(1000)
+	//my.db.SetMaxOpenConns(30)
+	query := "SELECT * FROM UserInfo WHERE uid=?"
 	for i := 0; i < b.N; i++ {
-		_, e := my.Query("SELECT * FROM UserInfo WHERE uid=?", 1)
+		rows, e := my.Query(query, 1)
 		if e != nil {
 			b.Log(e)
+		} else {
+			rows.Close()
 		}
+
 	}
 
 }
 
-func BenchmarkSqlExec(b *testing.B) {
+// 1005303 ns/op	     275 B/op	      16 allocs/op
+func Benc1hmarkSqlExec(b *testing.B) {
 	b.ReportAllocs()
-	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", nil)
+	my := newMysql("hellofarm:halfquestfarm4321@tcp(192.168.23.163:3306)/UserShard1?charset=utf8&timeout=4s", 0, nil)
 	my.Open()
 	//my.db.SetMaxIdleConns(100)
 	//my.db.SetMaxOpenConns(1000)

@@ -46,7 +46,7 @@ func newVbucketServerSelector(cf *config.ConfigMysql) (this *VbucketServerSelect
 	this.conf = cf
 	this.clients = make(map[string]*mysql)
 	for _, server := range cf.Servers {
-		my := newMysql(server.DSN(), &cf.Breaker)
+		my := newMysql(server.DSN(), cf.CachePrepareStmtMaxItems, &cf.Breaker)
 		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
 			if my.Open() == nil && my.Ping() == nil {
 				// sql.Open() does not establish any connections to the database

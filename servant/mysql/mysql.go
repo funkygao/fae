@@ -4,20 +4,24 @@ import (
 	"database/sql"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
-	_ "github.com/go-sql-driver/mysql"
-	"strings"
+	"github.com/funkygao/golib/cache"
+	log "github.com/funkygao/log4go"
+	_ "github.com/funkygao/mysql"
+	"sync"
 	"time"
 )
 
 // A mysql conn to a single mysql instance
 // Conn pool is natively supported by golang
 type mysql struct {
-	dsn     string
-	db      *sql.DB
-	breaker *breaker.Consecutive
+	dsn        string
+	db         *sql.DB         // a pool of connections to a single db instance
+	stmtsStore *cache.LruCache // {query: stmt}
+	mutex      sync.Mutex
+	breaker    *breaker.Consecutive
 }
 
-func newMysql(dsn string, bc *config.ConfigBreaker) *mysql {
+func newMysql(dsn string, maxStmtCached int, bc *config.ConfigBreaker) *mysql {
 	this := new(mysql)
 	if bc == nil {
 		bc = &config.ConfigBreaker{
@@ -29,6 +33,9 @@ func newMysql(dsn string, bc *config.ConfigBreaker) *mysql {
 	this.breaker = &breaker.Consecutive{
 		FailureAllowance: bc.FailureAllowance,
 		RetryTimeout:     bc.RetryTimeout}
+	if maxStmtCached > 0 {
+		this.stmtsStore = cache.NewLruCache(maxStmtCached)
+	}
 
 	return this
 }
@@ -59,12 +66,36 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 		return nil, ErrCircuitOpen
 	}
 
-	rows, err = this.db.Query(query, args...)
+	var stmt *sql.Stmt = nil
+	if this.stmtsStore != nil {
+		if stmtc, present := this.stmtsStore.Get(query); present {
+			stmt = stmtc.(*sql.Stmt)
+		} else {
+			// FIXME thundering hurd
+			stmt, err = this.db.Prepare(query)
+			if err != nil {
+				if this.isSystemError(err) {
+					this.breaker.Fail()
+				}
+
+				return nil, err
+			}
+
+			this.mutex.Lock()
+			this.stmtsStore.Set(query, stmt)
+			this.mutex.Unlock()
+			log.Debug("[%s] stmt cache[%s] set", this.dsn, query)
+		}
+	}
+
+	// Under the hood, db.Query() actually prepares, executes, and closes
+	// a prepared statement. That's three round-trips to the database.
+	if stmt != nil {
+		rows, err = stmt.Query(args...)
+	} else {
+		rows, err = this.db.Query(query, args...)
+	}
 	if err != nil {
-		// func (me *MySQLError) Error() string {
-		//     fmt.Sprintf("Error %d: %s", me.Number, me.Message)
-		// }
-		// Error 1054: Unknown column 'curve_internal_id' in 'field list'
 		if this.isSystemError(err) {
 			this.breaker.Fail()
 		}
@@ -75,7 +106,7 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 	return
 }
 
-func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int64,
+func (this *mysql) Exec(query string, args ...interface{}) (afftectedRows int64,
 	lastInsertId int64, err error) {
 	if this.db == nil {
 		return 0, 0, ErrNotOpen
@@ -103,26 +134,11 @@ func (this *mysql) ExecSql(query string, args ...interface{}) (afftectedRows int
 }
 
 func (this *mysql) isSystemError(err error) bool {
-	// http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
-	// mysql error code is always 4 digits
-	const (
-		// Error 1054: Unknown column 'curve_internal_id' in 'field list'
-		mysqlErrnoUnknownColumn = "1054"
-
-		// Error 1062: Duplicate entry '1' for key 'PRIMARY'
-		mysqlErrnoDupEntry = "1062"
-	)
-
 	// "Error %d:" skip the leading 6 chars: "Error "
-	var errcode = err.Error()[6:] // TODO confirm mysql err always "Error %d: %s"
-	switch {
-	case strings.HasPrefix(errcode, mysqlErrnoUnknownColumn):
+	var errcode = err.Error()[6:10] // TODO confirm mysql err always "Error %d: %s"
+	if _, present := mysqlNonSystemErrors[errcode]; present {
 		return false
-
-	case strings.HasPrefix(errcode, mysqlErrnoDupEntry):
-		return false
-
-	default:
-		return true
 	}
+
+	return true
 }

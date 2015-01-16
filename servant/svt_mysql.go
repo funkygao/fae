@@ -266,11 +266,6 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 	rows, err := this.my.Query(pool, table, int(hintId), sql, iargs)
 	if err != nil {
 		appErr = err
-		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-			ident,
-			pool, table,
-			sql, args,
-			appErr)
 		return
 	}
 

@@ -21,7 +21,7 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 	this.lookupCache = cache.NewLruCache(cf.LookupCacheMaxItems)
 	this.clients = make(map[string]*mysql)
 	for _, server := range cf.Servers {
-		my := newMysql(server.DSN(), &cf.Breaker)
+		my := newMysql(server.DSN(), cf.CachePrepareStmtMaxItems, &cf.Breaker)
 		for retries := uint(0); retries < cf.Breaker.FailureAllowance; retries++ {
 			log.Debug("mysql connecting: %s", server.DSN())
 

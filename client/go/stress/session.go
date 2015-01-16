@@ -45,6 +45,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d ping}: %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				report.incCallOk()
 				if enableLog {
@@ -61,6 +63,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d lc_set} %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				report.incCallOk()
 			}
@@ -69,6 +73,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d lc_get} %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				report.incCallOk()
 				if enableLog {
@@ -84,6 +90,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d idgen}: %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				if enableLog {
 					log.Printf("session{round^%d seq^%d idgen}: %d",
@@ -105,6 +113,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d GmName3}: %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				if enableLog {
 					log.Printf("session{round^%d seq^%d GmName3}: %s",
@@ -131,6 +141,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if err != nil {
 				report.incCallErr()
 				log.Printf("session{round^%d seq^%d GmRegister}: %v", round, seq, err)
+				client.Close()
+				return
 			} else {
 				if enableLog {
 					log.Printf("session{round^%d seq^%d GmRegister}: %d",
@@ -142,28 +154,34 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 		if Cmd&CallMysql != 0 {
 			// with cache
-			r, err := client.MyQuery(ctx, "UserShard", "UserInfo", 1,
-				"SELECT * FROM UserInfo WHERE uid=?",
-				[]string{"1"}, "user:1")
-			if err != nil {
-				report.incCallErr()
-				log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
-			} else {
-				if enableLog {
-					log.Printf("session{round^%d seq^%d mysql}: %+v",
-						round, seq, r)
+			if false {
+				r, err := client.MyQuery(ctx, "UserShard", "UserInfo", 1,
+					"SELECT * FROM UserInfo WHERE uid=?",
+					[]string{"1"}, "user:1")
+				if err != nil {
+					report.incCallErr()
+					log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+					client.Close()
+					return
+				} else {
+					if enableLog {
+						log.Printf("session{round^%d seq^%d mysql}: %+v",
+							round, seq, r)
+					}
+					report.incCallOk()
 				}
-				report.incCallOk()
 			}
 
 			// without cache
-			if false {
+			if true {
 				_, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
 					"SELECT * FROM UserInfo WHERE uid=?",
 					[]string{"1"}, "")
 				if err != nil {
 					report.incCallErr()
 					log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+					client.Close()
+					return
 				} else {
 					report.incCallOk()
 				}
