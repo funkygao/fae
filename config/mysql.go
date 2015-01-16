@@ -64,6 +64,7 @@ type ConfigMysql struct {
 	MaxConnsPerServer            int
 	HeartbeatInterval            int // TODO
 	JsonMergeMaxOutstandingItems int
+	CachePrepareStmtMaxItems     int // 0 means disabled
 
 	// cache related
 	CacheStore            string
@@ -89,6 +90,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)
+	this.CachePrepareStmtMaxItems = cf.Int("cache_prepare_stmt_max_items", 0)
 	this.HeartbeatInterval = cf.Int("heartbeat_interval", 120)
 	this.CacheStore = cf.String("cache_store", "mem")
 	this.CacheStoreMemMaxItems = cf.Int("cache_store_mem_max_items", 10<<20)

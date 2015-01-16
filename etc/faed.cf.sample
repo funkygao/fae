@@ -46,6 +46,7 @@
             timeout: "10s"
             max_idle_conns_per_server: 5
             max_conns_per_server: 20
+            cache_prepare_stmt_max_items: 1024
             cache_store: "mem"
             cache_key_hash: false
             cache_store_mem_max_items: 1073741824
