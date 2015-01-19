@@ -132,6 +132,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 }
 
+// FIXME if error occurs, fae will actively close this session: halt on first exception
 func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error) {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
