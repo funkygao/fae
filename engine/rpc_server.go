@@ -99,10 +99,15 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 
 	this.engine.stats.SessionPerSecond.Mark(1)
-	atomic.AddInt64(&this.activeSessionN, 1)
+	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		log.Debug("session[%s] open", tcpClient.RemoteAddr())
+		if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
+			log.Warn("session[%s] open, too many sessions: %d",
+				tcpClient.RemoteAddr(), currentSessionN)
+		} else {
+			log.Debug("session[%s] open", tcpClient.RemoteAddr())
+		}
 	} else {
 		log.Error("non tcp conn found, should NEVER happen")
 		return
