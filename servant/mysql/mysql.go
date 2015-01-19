@@ -35,6 +35,13 @@ func newMysql(dsn string, maxStmtCached int, bc *config.ConfigBreaker) *mysql {
 		RetryTimeout:     bc.RetryTimeout}
 	if maxStmtCached > 0 {
 		this.stmtsStore = cache.NewLruCache(maxStmtCached)
+		this.stmtsStore.OnEvicted = func(key cache.Key, value interface{}) {
+			query := key.(string)
+			stmt := value.(*sql.Stmt)
+			stmt.Close()
+
+			log.Debug("[%s] stmt[%s] closed", this.dsn, query)
+		}
 	}
 
 	return this
@@ -84,7 +91,7 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 			this.mutex.Lock()
 			this.stmtsStore.Set(query, stmt)
 			this.mutex.Unlock()
-			log.Debug("[%s] stmt cache[%s] set", this.dsn, query)
+			log.Debug("[%s] stmt[%s] open", this.dsn, query)
 		}
 	}
 
