@@ -157,60 +157,75 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 	}()
 
 	var (
-		t1        time.Time
-		elapsed   time.Duration
-		tcpClient = client.(*thrift.TSocket).Conn().(*net.TCPConn)
-		callsN    int64
+		rpcIoTimeout = config.Engine.Rpc.IoTimeout
+		t1           time.Time
+		elapsed      time.Duration
+		tcpClient    = client.(*thrift.TSocket).Conn().(*net.TCPConn)
+		callsN       int64
+		lastErr      error
 	)
 
 	for {
 		t1 = time.Now()
-		if config.Engine.Rpc.IoTimeout > 0 { // read + write
-			tcpClient.SetDeadline(time.Now().Add(config.Engine.Rpc.IoTimeout))
+		if rpcIoTimeout > 0 { // read + write
+			tcpClient.SetDeadline(t1.Add(rpcIoTimeout))
 		}
 
-		ok, ex := processor.Process(inputProtocol, outputProtocol)
-		if ex == nil {
-			callsN++
-		}
+		_, ex := processor.Process(inputProtocol, outputProtocol)
+		callsN++
 
 		elapsed = time.Since(t1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
 		this.engine.stats.CallPerSecond.Mark(1)
 
-		// check transport error
-		if err, isTransportEx := ex.(thrift.TTransportException); isTransportEx &&
-			err.TypeId() == thrift.END_OF_FILE {
-			// remote client closed transport, this is normal end of session
-			this.engine.stats.CallPerSession.Update(callsN)
-			return callsN, nil
-		} else if err != nil {
-			// non-EOF transport err
-			// e,g. connection reset by peer
-			// e,g. broken pipe
-			// e,g. read tcp i/o timeout
-			this.engine.stats.TotalFailedCalls.Inc(1)
+		if ex == nil {
+			// rpc func called/Processed without any error
+			continue
+		}
+
+		// exception thrown, maybe system wise or app wise
+
+		/*
+			thrift exceptions
+
+			TException
+				|
+				|- TApplicationException
+				|- TProtocolException (BAD_VERSION), it should never be thrown, we skip it
+				|- TTransportException
+		*/
+		err, isTransportEx := ex.(thrift.TTransportException)
+		if isTransportEx {
+			if err.TypeId() != thrift.END_OF_FILE {
+				// END_OF_FILE: remote client closed transport, this is normal end of session
+
+				// non-EOF transport err
+				// e,g. connection reset by peer
+				// e,g. broken pipe
+				// e,g. read tcp i/o timeout
+				this.engine.stats.TotalFailedCalls.Inc(1)
+			}
+
 			this.engine.stats.CallPerSession.Update(callsN)
 
+			// for transport err, server always stop the session
 			return callsN, err
 		}
 
-		// it is servant generated TApplicationException
-		// e,g Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE entityId=?' at line 1
-		if ex != nil {
-			this.engine.stats.TotalFailedCalls.Inc(1)
-			callsN++
-			return callsN, ex // TODO stop the session?
-		}
+		// TProtocolException should never happen
+		// so ex MUST be servant generated TApplicationException
+		// e,g Error 1064: You have an error in your SQL syntax
+		this.engine.stats.TotalFailedCalls.Inc(1)
+		lastErr = ex // remember the latest app err
 
-		// Peek: there is more data to be read or the remote side is still open
-		if !ok || !inputProtocol.Transport().Peek() {
-			break // TODO stop the session?
+		// Peek: there is more data to be read or the remote side is still open?
+		if !inputProtocol.Transport().Peek() {
+			break
 		}
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)
-	return callsN, nil
+	return callsN, lastErr
 }
 
 func (this *TFunServer) Stop() error {
