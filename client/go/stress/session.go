@@ -17,6 +17,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer func() {
 		wg.Done()
 		report.updateConcurrency(-1)
+		//log.Printf("session{round^%d seq^%d} done", round, seq)
 	}()
 
 	t1 := time.Now()
@@ -57,7 +58,6 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 				if enableLog {
 					log.Printf("session{round^%d seq^%d ping}: %v", round, seq, r)
 				}
-
 			}
 		}
 
@@ -159,7 +159,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 		if Cmd&CallMysql != 0 {
 			// with cache
-			if false {
+			if true {
 				r, err := client.MyQuery(ctx, "UserShard", "UserInfo", 1,
 					"SELECT * FROM UserInfo WHERE uid=?",
 					[]string{"1"}, "user:1")

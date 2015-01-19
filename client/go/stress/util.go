@@ -25,7 +25,8 @@ func showUsage() {
 	fmt.Printf("%16s %3d\n", "CallLCache", CallLCache)
 	fmt.Printf("%16s %3d\n", "CallMemcache", CallMemcache)
 	fmt.Printf("%16s %3d\n", "CallMongo", CallMongo)
-	fmt.Printf("%16s %3d\n", "CallKvdb", CallKvdb)
+	fmt.Printf("%16s %3d\n", "CallGame", CallGame)
+	fmt.Printf("%16s %3d\n", "CallMysql", CallMysql)
 	fmt.Printf("%16s %3d\n", "Ping+Idgen", CallPingIdgen)
 	fmt.Printf("%16s %3d\n", "Lcache+Idgen", CallIdgenLcache)
 }

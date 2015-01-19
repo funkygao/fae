@@ -6,7 +6,6 @@ const (
 	CallLCache
 	CallMemcache
 	CallMongo
-	CallKvdb
 	CallMysql
 	CallGame
 
