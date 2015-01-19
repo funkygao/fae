@@ -171,7 +171,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		this.engine.stats.CallPerSecond.Mark(1)
 
 		// check transport error
-		if err, ok := ex.(thrift.TTransportException); ok &&
+		if err, isTransportEx := ex.(thrift.TTransportException); isTransportEx &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
 			this.engine.stats.CallPerSession.Update(callsN)
@@ -191,12 +191,12 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		// e,g Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE entityId=?' at line 1
 		if ex != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
-			return callsN, ex
+			return callsN, ex // TODO stop the session?
 		}
 
 		// Peek: there is more data to be read or the remote side is still open
 		if !ok || !inputProtocol.Transport().Peek() {
-			break
+			break // TODO stop the session?
 		}
 	}
 
