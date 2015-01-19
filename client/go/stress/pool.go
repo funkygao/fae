@@ -16,6 +16,7 @@ func testServantPool(proxy *proxy.Proxy) {
 			return
 		}
 
+		client.Close()
 		client.Recycle()
 	}
 
@@ -31,6 +32,7 @@ func testServantPool(proxy *proxy.Proxy) {
 			return
 		}
 
+		client.Close()
 		client.Recycle()
 
 		peer = client.Addr()
