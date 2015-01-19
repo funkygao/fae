@@ -88,7 +88,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		if err := etclib.Dial(config.Engine.EtcdServers); err != nil {
 			panic(err)
 		} else {
-			log.Debug("etcd connected")
+			log.Debug("etcd connected: %+v", config.Engine.EtcdServers)
 		}
 	}
 
