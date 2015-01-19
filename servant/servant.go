@@ -13,6 +13,7 @@ import (
 	"github.com/funkygao/fae/servant/redis"
 	"github.com/funkygao/fae/servant/store"
 	"github.com/funkygao/golib/cache"
+	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/idgen"
 	"github.com/funkygao/golib/mutexmap"
 	"github.com/funkygao/golib/server"
@@ -259,10 +260,11 @@ func (this *FunServantImpl) showStats() {
 	// TODO show most recent stats, reset at some interval
 
 	for _ = range ticker.C {
-		log.Info("rpc: {sessions:%d, calls:%d, avg:%d}",
-			this.sessionN,
-			this.stats.calls.Total(),
-			this.stats.calls.Total()/int64(this.sessionN+1)) // +1 to avoid divide by zero
+		callsN := this.stats.calls.Total()
+		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f}",
+			gofmt.Comma(this.sessionN),
+			gofmt.Comma(callsN),
+			float64(callsN)/float64(this.sessionN+1)) // +1 to avoid divide by zero
 	}
 }
 

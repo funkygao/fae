@@ -99,6 +99,9 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 // record php request time and payload size in bytes
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	bytes int32) (ex error) {
+	const IDENT = "gm.latency"
+	this.stats.inc(IDENT)
+
 	this.game.UpdatePhpLatency(int64(ms))
 	this.game.UpdatePhpPayloadSize(int64(bytes))
 
