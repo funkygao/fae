@@ -191,6 +191,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		// e,g Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE entityId=?' at line 1
 		if ex != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
+			callsN++
 			return callsN, ex // TODO stop the session?
 		}
 
