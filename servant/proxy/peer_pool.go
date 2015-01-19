@@ -74,7 +74,7 @@ func (this *funServantPeerPool) connect(peerAddr string) (*rpc.FunServantClient,
 	}
 
 	if err = transport.Open(); err != nil {
-		log.Error("conn peer[%s]: %s", peerAddr, err)
+		log.Error("connect peer[%s]: %s", peerAddr, err)
 
 		return nil, err
 	}
