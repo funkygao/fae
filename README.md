@@ -87,6 +87,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### TODO
 
 *   stress test on MacOS problems
+    - use of closed network connection
     - Jan 19 12:43:51 mac-3 kernel[0]: process pingfae[84624] caught causing excessive wakeups. Observed wakeups rate (per sec): 2358; Maximum permitted wakeups rate (per sec): 150; Observation period: 300 seconds; Task lifetime number of wakeups: 45018
       - Mac sensors
       - sudo pmset -g
@@ -94,13 +95,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
       - sudo pmset -a sms 1 # enable Sudden Motion Sensor
     - Limiting closed port RST response from 1422 to 250 packets per second
     - Jan 19 12:43:33 mac-3.local FileStatsAgent[84625]: Metadata.framework [Error]: couldn't get the client port
-*   stats activeSessionN
 *   fae close session if ex found, why? bad for proxy peers persistent conn
     - although reasonable for short lived conn
 *   mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
     - CLIENT_NO_SCHEMA, don't allow database.table.column
-*   too many round trips between fae and mysql
+    - too many round trips between fae and mysql
 *   vBucket for cluster sharding, what about each kingdom is a shard?
 *   hot reload config
 *   more strict test on zookeeper failure

@@ -58,6 +58,10 @@ func (this *TFunServer) Serve() error {
 		return err
 	}
 
+	if config.Engine.Rpc.StatsOutputInterval > 0 {
+		go this.showStats(config.Engine.Rpc.StatsOutputInterval)
+	}
+
 	// register to etcd
 	// once registered, other peers will connect to me
 	// so, must be after Listen ready
@@ -89,8 +93,6 @@ func (this *TFunServer) Serve() error {
 }
 
 func (this *TFunServer) handleSession(client interface{}) {
-	defer atomic.AddInt64(&this.activeSessionN, -1)
-
 	transport, ok := client.(thrift.TTransport)
 	if !ok {
 		// should never happen
@@ -100,6 +102,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 
 	this.engine.stats.SessionPerSecond.Mark(1)
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
+	defer atomic.AddInt64(&this.activeSessionN, -1)
 
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
 		if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
@@ -238,4 +241,13 @@ func (this *TFunServer) InputProtocolFactory() thrift.TProtocolFactory {
 
 func (this *TFunServer) OutputProtocolFactory() thrift.TProtocolFactory {
 	return this.outputProtocolFactory
+}
+
+func (this *TFunServer) showStats(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for _ = range ticker.C {
+		log.Info("rpc: {active_sessions: %d}", atomic.LoadInt64(&this.activeSessionN))
+	}
 }
