@@ -7,11 +7,11 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	log "github.com/funkygao/log4go"
+	"time"
 )
 
 const (
 	REASON = "pingfae"
-	RID    = "1" // request id
 )
 
 var (
@@ -48,7 +48,7 @@ func main() {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = REASON
-	ctx.Rid = RID
+	ctx.Rid = fmt.Sprintf("req:%d", time.Now().UnixNano())
 	pong, err := client.Ping(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -72,23 +72,24 @@ func pingCluster(proxy *proxy.Proxy) {
 		return
 	}
 
+	t := time.Now().Unix() // part of rid
 	for i := 0; i < loops; i++ {
 		for _, peerAddr := range peers {
 			client, err := proxy.Servant(peerAddr)
 			if err != nil {
-				fmt.Printf("%s: %s\n", peerAddr, err)
+				fmt.Printf("[%6d] %21s: %s\n", i+1, peerAddr, err)
 				continue
 			}
 
 			ctx := rpc.NewContext()
 			ctx.Reason = REASON
-			ctx.Rid = RID
+			ctx.Rid = fmt.Sprintf("t:%d,req:%d", t, i+1)
 			pong, err := client.Ping(ctx)
 			if err != nil {
 				client.Close()
-				fmt.Printf("%21s: %s\n", peerAddr, err)
+				fmt.Printf("[%6d] %21s: %s\n", i+1, peerAddr, err)
 			} else {
-				fmt.Printf("%21s: %s\n", peerAddr, pong)
+				fmt.Printf("[%6d] %21s: %s\n", i+1, peerAddr, pong)
 			}
 
 			client.Recycle()
