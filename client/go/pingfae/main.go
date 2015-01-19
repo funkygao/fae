@@ -15,14 +15,16 @@ const (
 )
 
 var (
-	host string
-	port string
-	zk   string
+	host  string
+	port  string
+	zk    string
+	loops int
 )
 
 func init() {
 	flag.StringVar(&host, "host", "", "host name of faed")
 	flag.StringVar(&port, "port", "", "fae port")
+	flag.IntVar(&loops, "loops", 1, "ping how many times")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zookeeper server addr")
 	flag.Parse()
 
@@ -70,24 +72,27 @@ func pingCluster(proxy *proxy.Proxy) {
 		return
 	}
 
-	for _, peerAddr := range peers {
-		client, err := proxy.Servant(peerAddr)
-		if err != nil {
-			fmt.Printf("%s: %s\n", peerAddr, err)
-			continue
-		}
+	for i := 0; i < loops; i++ {
+		for _, peerAddr := range peers {
+			client, err := proxy.Servant(peerAddr)
+			if err != nil {
+				fmt.Printf("%s: %s\n", peerAddr, err)
+				continue
+			}
 
-		ctx := rpc.NewContext()
-		ctx.Reason = REASON
-		ctx.Rid = RID
-		pong, err := client.Ping(ctx)
-		if err != nil {
-			fmt.Printf("%21s: %s\n", peerAddr, err)
-		} else {
-			fmt.Printf("%21s: %s\n", peerAddr, pong)
-		}
+			ctx := rpc.NewContext()
+			ctx.Reason = REASON
+			ctx.Rid = RID
+			pong, err := client.Ping(ctx)
+			if err != nil {
+				client.Close()
+				fmt.Printf("%21s: %s\n", peerAddr, err)
+			} else {
+				fmt.Printf("%21s: %s\n", peerAddr, pong)
+			}
 
-		client.Close()
+			client.Recycle()
+		}
 	}
 
 }
