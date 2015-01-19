@@ -10,16 +10,16 @@ import (
 // curl localhost:8091/poolsStreaming/default?uuid=ee6009fb8f1ba20b3101a465455828ee
 
 func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
-	key string) (r bool, appErr error) {
+	key string) (r bool, ex error) {
 	const IDENT = "cb.del"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -27,19 +27,19 @@ func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	appErr = b.Delete(key)
-	if appErr != nil {
+	ex = b.Delete(key)
+	if ex != nil {
 		r = false
 
-		if e, ok := appErr.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
-			appErr = nil
+		if e, ok := ex.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
+			ex = nil
 		} else {
 			// unexpected err
-			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, appErr.Error())
+			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, ex.Error())
 		}
 	} else {
 		// found this item, and deleted successfully
@@ -53,16 +53,16 @@ func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
 }
 
 func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
-	key string) (r *rpc.TCouchbaseData, appErr error) {
+	key string) (r *rpc.TCouchbaseData, ex error) {
 	const IDENT = "cb.get"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -70,20 +70,20 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	r = rpc.NewTCouchbaseData()
 	var data []byte
-	data, appErr = b.GetRaw(key)
-	if appErr != nil {
+	data, ex = b.GetRaw(key)
+	if ex != nil {
 		r.Missed = true
 
-		if e, ok := appErr.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
-			appErr = nil
+		if e, ok := ex.(*gomemcached.MCResponse); ok && e.Status == gomemcached.KEY_ENOENT {
+			ex = nil
 		} else {
-			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, appErr.Error())
+			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, ex.Error())
 		}
 	} else {
 		r.Data = data
@@ -100,16 +100,16 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 // key can be up to 250 chars long, unique within a bucket
 // val can be up to 25MB in size
 func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
-	key string, val []byte, expire int32) (appErr error) {
+	key string, val []byte, expire int32) (ex error) {
 	const IDENT = "cb.set"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -117,13 +117,13 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	appErr = b.SetRaw(key, int(expire), val)
-	if appErr != nil {
-		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+	ex = b.SetRaw(key, int(expire), val)
+	if ex != nil {
+		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
 	}
 
 	profiler.do(IDENT, ctx,
@@ -134,16 +134,16 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 }
 
 func (this *FunServantImpl) CbAdd(ctx *rpc.Context, bucket string,
-	key string, val []byte, expire int32) (r bool, appErr error) {
+	key string, val []byte, expire int32) (r bool, ex error) {
 	const IDENT = "cb.add"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -151,13 +151,13 @@ func (this *FunServantImpl) CbAdd(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	r, appErr = b.AddRaw(key, int(expire), val)
-	if appErr != nil {
-		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+	r, ex = b.AddRaw(key, int(expire), val)
+	if ex != nil {
+		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
 	}
 
 	profiler.do(IDENT, ctx,
@@ -169,16 +169,16 @@ func (this *FunServantImpl) CbAdd(ctx *rpc.Context, bucket string,
 
 // append raw data to an existing item
 func (this *FunServantImpl) CbAppend(ctx *rpc.Context, bucket string,
-	key string, val []byte) (appErr error) {
+	key string, val []byte) (ex error) {
 	const IDENT = "cb.append"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -186,13 +186,13 @@ func (this *FunServantImpl) CbAppend(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	appErr = b.Append(key, val)
-	if appErr != nil {
-		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, appErr)
+	ex = b.Append(key, val)
+	if ex != nil {
+		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
 	}
 
 	profiler.do(IDENT, ctx,
@@ -204,16 +204,16 @@ func (this *FunServantImpl) CbAppend(ctx *rpc.Context, bucket string,
 
 // fetches multiple keys concurrently
 func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
-	keys []string) (r map[string][]byte, appErr error) {
+	keys []string) (r map[string][]byte, ex error) {
 	const IDENT = "cb.gets"
 	if this.cb == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -221,15 +221,15 @@ func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	var rv map[string]*gomemcached.MCResponse
-	rv, appErr = b.GetBulk(keys)
+	rv, ex = b.GetBulk(keys)
 	r = make(map[string][]byte)
-	if appErr != nil {
-		log.Error("Q=%s %s: %v %s", IDENT, ctx.String(), keys, appErr)
+	if ex != nil {
+		log.Error("Q=%s %s: %v %s", IDENT, ctx.String(), keys, ex)
 	} else {
 		for k, data := range rv {
 			r[k] = data.Body

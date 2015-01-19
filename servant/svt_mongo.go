@@ -12,11 +12,11 @@ import (
 
 func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	doc []byte) (r bool, appErr error) {
+	doc []byte) (r bool, ex error) {
 	const IDENT = "mg.insert"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -24,13 +24,13 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
@@ -39,12 +39,12 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	// client json_encode, server json_decode into internal bson.M struct
 	bsonDoc, err := mongo.UnmarshalIn(doc)
 	if err != nil {
-		appErr = err
+		ex = err
 		profiler.do(IDENT, ctx,
 			"{pool^%s table^%s doc^%v} {err^%v r^%v}",
 			pool, table,
 			bsonDoc,
-			appErr,
+			ex,
 			r)
 
 		return
@@ -66,7 +66,7 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 		"{pool^%s table^%s doc^%v} {err^%v r^%v}",
 		pool, table,
 		bsonDoc,
-		appErr,
+		ex,
 		r)
 
 	return
@@ -74,11 +74,11 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	docs [][]byte) (r bool, appErr error) {
+	docs [][]byte) (r bool, ex error) {
 	const IDENT = "mg.inserts"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -86,14 +86,14 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
@@ -104,7 +104,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	for i, doc := range docs {
 		bsonDoc, err := mongo.UnmarshalIn(doc)
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 
@@ -124,7 +124,7 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 		"{pool^%s table^%s docN^%d} {err^%v r^%v}",
 		pool, table,
 		len(docs),
-		appErr,
+		ex,
 		r)
 
 	return
@@ -132,11 +132,11 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	query []byte) (r bool, appErr error) {
+	query []byte) (r bool, ex error) {
 	const IDENT = "mg.del"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -144,21 +144,21 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	err = sess.DB().C(table).Remove(bsonQuery)
@@ -170,7 +170,7 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 		"{pool^%s table^%s query^%v} {err^%v r^%v}",
 		pool, table,
 		bsonQuery,
-		appErr,
+		ex,
 		r)
 
 	return
@@ -179,11 +179,11 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, fields []byte) (r []byte,
-	miss *rpc.TMongoNotFound, appErr error) {
+	miss *rpc.TMongoNotFound, ex error) {
 	const IDENT = "mg.findOne"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -191,28 +191,28 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	var bsonFields bson.M
 	if !mongo.FieldsIsNil(fields) {
 		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 	}
@@ -235,12 +235,12 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 				bsonQuery,
 				bsonFields,
 				miss,
-				appErr,
+				ex,
 				result)
 			return
 		}
 
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -252,7 +252,7 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		bsonQuery,
 		bsonFields,
 		miss,
-		appErr,
+		ex,
 		result)
 
 	return
@@ -261,11 +261,11 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, fields []byte, limit int32, skip int32,
-	orderBy []string) (r [][]byte, appErr error) {
+	orderBy []string) (r [][]byte, ex error) {
 	const IDENT = "mg.findAll"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -273,27 +273,27 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	var bsonFields bson.M
 	if !mongo.FieldsIsNil(fields) {
 		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 	}
@@ -320,7 +320,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 			r[i] = mongo.MarshalOut(v)
 		}
 	} else {
-		appErr = err
+		ex = err
 	}
 
 	profiler.do(IDENT, ctx,
@@ -328,7 +328,7 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		pool, table,
 		bsonQuery,
 		bsonFields,
-		appErr,
+		ex,
 		len(r))
 
 	return
@@ -336,11 +336,11 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	query []byte, change []byte) (r bool, appErr error) {
+	query []byte, change []byte) (r bool, ex error) {
 	const IDENT = "mg.update"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -348,26 +348,26 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -383,7 +383,7 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		pool, table,
 		bsonQuery,
 		bsonChange,
-		appErr,
+		ex,
 		r)
 
 	return
@@ -391,18 +391,18 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgUpdateId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	id int32, change []byte) (r bool, appErr error) {
-	appErr = ErrNotImplemented
+	id int32, change []byte) (r bool, ex error) {
+	ex = ErrNotImplemented
 	return
 }
 
 func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	query []byte, change []byte) (r bool, appErr error) {
+	query []byte, change []byte) (r bool, ex error) {
 	const IDENT = "mg.upsert"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -410,25 +410,25 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -442,7 +442,7 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 		pool, table,
 		bsonQuery,
 		bsonChange,
-		appErr,
+		ex,
 		r)
 
 	return
@@ -450,18 +450,18 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	id int32, change []byte) (r bool, appErr error) {
-	appErr = ErrNotImplemented
+	id int32, change []byte) (r bool, ex error) {
+	ex = ErrNotImplemented
 	return
 }
 
 func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	query []byte) (n int32, appErr error) {
+	query []byte) (n int32, ex error) {
 	const IDENT = "mg.count"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -469,33 +469,33 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	var r int
-	r, appErr = sess.DB().C(table).Find(bsonQuery).Count()
+	r, ex = sess.DB().C(table).Find(bsonQuery).Count()
 	n = int32(r)
 
 	profiler.do(IDENT, ctx,
 		"{pool^%s table^%s query^%v} {err^%v r^%d}",
 		pool, table,
 		bsonQuery,
-		appErr,
+		ex,
 		n)
 
 	return
@@ -504,11 +504,11 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	query []byte, change []byte, upsert bool,
-	remove bool, returnNew bool) (r []byte, appErr error) {
+	remove bool, returnNew bool) (r []byte, ex error) {
 	const IDENT = "mg.findAndModify"
 
 	if this.mg == nil {
-		appErr = ErrServantNotStarted
+		ex = ErrServantNotStarted
 		return
 	}
 
@@ -516,26 +516,26 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	// get mongodb session
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	defer sess.Recyle(&err)
 
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -550,7 +550,7 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 		pool, table,
 		bsonQuery,
 		bsonChange,
-		appErr,
+		ex,
 		changeInfo.Updated, changeInfo.Removed,
 		doc)
 	return
@@ -558,8 +558,8 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 
 func (this *FunServantImpl) MgFindId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
-	id []byte) (r []byte, appErr error) {
-	appErr = ErrNotImplemented
+	id []byte) (r []byte, ex error) {
+	ex = ErrNotImplemented
 	return
 }
 

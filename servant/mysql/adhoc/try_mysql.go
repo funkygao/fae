@@ -110,8 +110,8 @@ func runDb(seq int) {
 				for i, _ := range cols {
 					scanArgs[i] = &rawRowValues[i]
 				}
-				if appErr := rows.Scan(scanArgs...); appErr != nil {
-					log.Printf("%d[%d]: %s", i+1, seq, appErr)
+				if ex := rows.Scan(scanArgs...); ex != nil {
+					log.Printf("%d[%d]: %s", i+1, seq, ex)
 					return
 				}
 
