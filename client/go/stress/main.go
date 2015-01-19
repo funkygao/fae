@@ -5,7 +5,6 @@ package main
 import (
 	"flag"
 	"github.com/funkygao/etclib"
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/server"
@@ -16,12 +15,6 @@ import (
 )
 
 func init() {
-	ctx = rpc.NewContext()
-	ctx.Reason = "stress.go"
-	ctx.Host = "stress.test.local"
-	ctx.Ip = "127.0.0.1"
-	ctx.Rid = "bcf8f619"
-
 	parseFlag()
 
 	log.SetOutput(os.Stdout)
@@ -33,7 +26,7 @@ func parseFlag() {
 	flag.IntVar(&LoopsPerSession, "loop", 1, "loops for each session")
 	flag.IntVar(&Concurrency, "c", 3000, "concurrent num")
 	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
-	flag.IntVar(&Cmd, "x", CallMysql, "bitwise rpc calls")
+	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")

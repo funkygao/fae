@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-)
-
 const (
 	CallPing = 1 << iota
 	CallIdGen
@@ -23,7 +19,6 @@ const (
 
 var (
 	report stats
-	ctx    *rpc.Context
 
 	SampleRate      int
 	Concurrency     int
