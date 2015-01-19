@@ -8,22 +8,22 @@ import (
 
 // Ticket server
 func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
-	backwards *rpc.TIdTimeBackwards, appErr error) {
+	backwards *rpc.TIdTimeBackwards, ex error) {
 	const IDENT = "id.next"
 
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	r, appErr = this.idgen.Next()
-	if appErr != nil {
+	r, ex = this.idgen.Next()
+	if ex != nil {
 		log.Error("Q=%s %s: clock backwards", IDENT, ctx.String())
 
-		backwards = appErr.(*rpc.TIdTimeBackwards)
-		appErr = nil
+		backwards = ex.(*rpc.TIdTimeBackwards)
+		ex = nil
 	}
 
 	profiler.do(IDENT, ctx, "{r^%d}", r)
@@ -32,16 +32,16 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 }
 
 func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
-	tag int16) (r int64, appErr error) {
+	tag int16) (r int64, ex error) {
 	const IDENT = "id.nextag"
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	r, appErr = this.idgen.NextWithTag(tag)
+	r, ex = this.idgen.NextWithTag(tag)
 
 	profiler.do(IDENT, ctx, "{tag^%d} {r^%d}", tag, r)
 
@@ -49,7 +49,7 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) IdDecode(ctx *rpc.Context,
-	id int64) (r []int64, appErr error) {
+	id int64) (r []int64, ex error) {
 	const IDENT = "id.decode"
 	this.stats.inc(IDENT)
 	ts, tag, wid, seq := idgen.DecodeId(id)

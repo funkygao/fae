@@ -161,8 +161,8 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 			tcpClient.SetDeadline(time.Now().Add(config.Engine.Rpc.IoTimeout))
 		}
 
-		ok, err := processor.Process(inputProtocol, outputProtocol)
-		if err == nil {
+		ok, ex := processor.Process(inputProtocol, outputProtocol)
+		if ex == nil {
 			callsN++
 		}
 
@@ -171,7 +171,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		this.engine.stats.CallPerSecond.Mark(1)
 
 		// check transport error
-		if err, ok := err.(thrift.TTransportException); ok &&
+		if err, ok := ex.(thrift.TTransportException); ok &&
 			err.TypeId() == thrift.END_OF_FILE {
 			// remote client closed transport, this is normal end of session
 			this.engine.stats.CallPerSession.Update(callsN)
@@ -189,9 +189,9 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 
 		// it is servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE entityId=?' at line 1
-		if err != nil {
+		if ex != nil {
 			this.engine.stats.TotalFailedCalls.Inc(1)
-			return callsN, err
+			return callsN, ex
 		}
 
 		// Peek: there is more data to be read or the remote side is still open

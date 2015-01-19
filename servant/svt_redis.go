@@ -9,14 +9,14 @@ import (
 )
 
 func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
-	pool string, keysAndArgs []string) (r string, appErr error) {
+	pool string, keysAndArgs []string) (r string, ex error) {
 	const IDENT = "rd.call"
 
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -26,7 +26,7 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	for i, v := range keysAndArgs {
 		iargs[i] = v
 	}
-	if val, appErr = this.rd.Call(cmd, pool, iargs...); appErr == nil && val != nil {
+	if val, ex = this.rd.Call(cmd, pool, iargs...); ex == nil && val != nil {
 		switch val := val.(type) {
 		case []byte:
 			r = string(val)

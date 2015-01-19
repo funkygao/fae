@@ -7,16 +7,17 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64, appErr error) {
+func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
+	ex error) {
 	const IDENT = "gm.reg"
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
-	r, appErr = this.game.Register(typ)
+	r, ex = this.game.Register(typ)
 
 	profiler.do(IDENT, ctx, "{type^%s} {r^%+v}", typ, r)
 
@@ -24,13 +25,13 @@ func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64, a
 }
 
 // get a uniq name with length 3
-func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
+func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 	const IDENT = "gm.name3"
 
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -46,7 +47,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 	} else {
 		svt, err := this.proxy.ServantByKey(IDENT)
 		if err != nil {
-			appErr = err
+			ex = err
 			log.Error("%s: %s", IDENT, err)
 			return
 		}
@@ -63,9 +64,9 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, appErr error) {
 			// remote peer servant
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			r, appErr = svt.GmName3(ctx)
-			if appErr != nil {
-				log.Error("%s: %s", IDENT, appErr)
+			r, ex = svt.GmName3(ctx)
+			if ex != nil {
+				log.Error("%s: %s", IDENT, ex)
 				svt.Close()
 			}
 
@@ -97,7 +98,7 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 
 // record php request time and payload size in bytes
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
-	bytes int32) (appErr error) {
+	bytes int32) (ex error) {
 	this.game.UpdatePhpLatency(int64(ms))
 	this.game.UpdatePhpPayloadSize(int64(bytes))
 
@@ -109,13 +110,13 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 }
 
 func (this *FunServantImpl) GmLock(ctx *rpc.Context,
-	reason string, key string) (r bool, appErr error) {
+	reason string, key string) (r bool, ex error) {
 	const IDENT = "gm.lock"
 
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -125,7 +126,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 	} else {
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 
@@ -134,8 +135,8 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		} else {
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			r, appErr = svt.GmLock(ctx, reason, key)
-			if appErr != nil {
+			r, ex = svt.GmLock(ctx, reason, key)
+			if ex != nil {
 				svt.Close()
 			}
 
@@ -154,13 +155,13 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
-	reason string, key string) (appErr error) {
+	reason string, key string) (ex error) {
 	const IDENT = "gm.unlock"
 
 	this.stats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -170,7 +171,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 	} else {
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 
@@ -180,8 +181,8 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 			// remote peer servant
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			appErr = svt.GmUnlock(ctx, reason, key)
-			if appErr != nil {
+			ex = svt.GmUnlock(ctx, reason, key)
+			if ex != nil {
 				svt.Close()
 			}
 
@@ -195,7 +196,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) GmLike(ctx *rpc.Context,
-	name string, mode int8) (r []string, appErr error) {
+	name string, mode int8) (r []string, ex error) {
 	t := trie.NewTrie() // TODO
 	switch mode {
 	case 1:

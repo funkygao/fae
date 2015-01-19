@@ -8,6 +8,7 @@ import (
 )
 
 // A single rpc client connection with remote peer
+// When ex encountered, must Close/Recyle the servant conn from pool
 type FunServantPeer struct {
 	id uint64
 	pool.Resource

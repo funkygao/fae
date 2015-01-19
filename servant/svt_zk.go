@@ -6,12 +6,12 @@ import (
 )
 
 func (this *FunServantImpl) ZkCreate(ctx *rpc.Context, path string,
-	data string) (r bool, appErr error) {
+	data string) (r bool, ex error) {
 	const IDENT = "zk.create"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -28,12 +28,12 @@ func (this *FunServantImpl) ZkCreate(ctx *rpc.Context, path string,
 }
 
 func (this *FunServantImpl) ZkChildren(ctx *rpc.Context,
-	path string) (r []string, appErr error) {
+	path string) (r []string, ex error) {
 	const IDENT = "zk.children"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -46,12 +46,12 @@ func (this *FunServantImpl) ZkChildren(ctx *rpc.Context,
 }
 
 func (this *FunServantImpl) ZkDel(ctx *rpc.Context,
-	path string) (r bool, appErr error) {
+	path string) (r bool, ex error) {
 	const IDENT = "zk.del"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 

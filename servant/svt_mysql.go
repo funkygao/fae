@@ -16,12 +16,12 @@ import (
 
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	hintId int64, sql string, args []string, cacheKey string) (r *rpc.MysqlResult,
-	appErr error) {
+	ex error) {
 	const IDENT = "my.query"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -39,7 +39,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	if cacheKeyHash == "" {
-		r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+		r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 			sql, args, cacheKeyHash)
 		rows = len(r.Rows)
 		if r.RowsAffected > 0 {
@@ -47,7 +47,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		}
 	} else {
 		if ctx.IsSetSticky() && *ctx.Sticky {
-			r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+			r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 				sql, args, cacheKeyHash)
 			rows = len(r.Rows)
 			if r.RowsAffected > 0 {
@@ -56,12 +56,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		} else {
 			svt, err := this.proxy.ServantByKey(cacheKey)
 			if err != nil {
-				appErr = err
+				ex = err
 				return
 			}
 
 			if svt == nil {
-				r, appErr = this.doMyQuery(IDENT, ctx, pool, table, hintId,
+				r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 					sql, args, cacheKeyHash)
 				rows = len(r.Rows)
 				if r.RowsAffected > 0 {
@@ -71,8 +71,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				// dispatch to peer
 				peer = svt.Addr()
 				svt.HijackContext(ctx)
-				r, appErr = svt.MyQuery(ctx, pool, table, hintId, sql, args, cacheKey)
-				if appErr != nil {
+				r, ex = svt.MyQuery(ctx, pool, table, hintId, sql, args, cacheKey)
+				if ex != nil {
 					svt.Close()
 				} else {
 					rows = len(r.Rows)
@@ -86,10 +86,10 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		}
 	}
 
-	if appErr != nil {
+	if ex != nil {
 		profiler.do(IDENT, ctx,
 			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {err^%s}",
-			peer, cacheKey, pool, table, hintId, sql, args, appErr)
+			peer, cacheKey, pool, table, hintId, sql, args, ex)
 	} else {
 		profiler.do(IDENT, ctx,
 			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {rows^%d r^%+v}",
@@ -100,14 +100,14 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 }
 
 func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
-	cacheKey string) (appErr error) {
+	cacheKey string) (ex error) {
 	const IDENT = "my.evict"
 
 	this.stats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -117,7 +117,7 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 	} else {
 		svt, err := this.proxy.ServantByKey(cacheKey)
 		if err != nil {
-			appErr = err
+			ex = err
 			return
 		}
 
@@ -126,8 +126,8 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 		} else {
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			appErr = svt.MyEvict(ctx, cacheKey)
-			if appErr != nil {
+			ex = svt.MyEvict(ctx, cacheKey)
+			if ex != nil {
 				svt.Close()
 			}
 
@@ -143,12 +143,12 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 // If conflicts, jsonVal prevails
 func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	hintId int64, where string, key string, column string,
-	jsonVal string) (r *rpc.MysqlMergeResult, appErr error) {
+	jsonVal string) (r *rpc.MysqlMergeResult, ex error) {
 	const IDENT = "my.merge"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -160,12 +160,12 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	queryResult, err := this.doMyQuery(IDENT, ctx, pool, table, hintId,
 		querySql, nil, "")
 	if err != nil {
-		appErr = err
+		ex = err
 		log.Error("%s[%s]: %s", IDENT, querySql, err.Error())
 		return
 	}
 	if len(queryResult.Rows) != 1 {
-		appErr = ErrMyMergeInvalidRow
+		ex = ErrMyMergeInvalidRow
 		return
 	}
 
@@ -175,20 +175,20 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	// do the merge in mem
 	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 	j2, err := json.NewJson([]byte(jsonVal))
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
 	var m1, m2 map[string]interface{}
-	if m1, appErr = j1.Map(); appErr != nil {
+	if m1, ex = j1.Map(); ex != nil {
 		return
 	}
-	if m2, appErr = j2.Map(); appErr != nil {
+	if m2, ex = j2.Map(); ex != nil {
 		return
 	}
 
@@ -198,7 +198,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	// update db with merged value
 	newVal, err := _json.Marshal(merged)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -208,7 +208,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		nil, "")
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -225,7 +225,7 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 // TODO ServantByKey(cacheKey)
 func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 	pool string, table string, hintId int64, sql string,
-	args []string, cacheKey string) (r *rpc.MysqlResult, appErr error) {
+	args []string, cacheKey string) (r *rpc.MysqlResult, ex error) {
 	const (
 		SQL_SELECT = "SELECT"
 		SQL_UPDATE = "UPDATE"
@@ -239,10 +239,10 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 
 	r = rpc.NewMysqlResult()
 	if strings.HasPrefix(sql, SQL_SELECT) { // SELECT MUST be in upper case
-		appErr = this.doMySelect(r, ident, ctx, pool, table, hintId,
+		ex = this.doMySelect(r, ident, ctx, pool, table, hintId,
 			sql, args, iargs, cacheKey)
 	} else {
-		appErr = this.doMyExec(r, ident, ctx, pool, table, hintId,
+		ex = this.doMyExec(r, ident, ctx, pool, table, hintId,
 			sql, args, iargs, cacheKey)
 	}
 
@@ -252,7 +252,7 @@ func (this *FunServantImpl) doMyQuery(ident string, ctx *rpc.Context,
 func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 	ident string, ctx *rpc.Context,
 	pool string, table string, hintId int64, sql string,
-	args []string, iargs []interface{}, cacheKey string) (appErr error) {
+	args []string, iargs []interface{}, cacheKey string) (ex error) {
 	if cacheKey != "" {
 		if cacheValue, present := this.dbCacheStore.Get(cacheKey); present {
 			log.Debug("Q=%s cache[%s] hit", ident, cacheKey)
@@ -265,7 +265,7 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 	// cache miss, do real db query
 	rows, err := this.my.Query(pool, table, int(hintId), sql, iargs)
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -275,12 +275,12 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 	// pack the result
 	cols, err := rows.Columns()
 	if err != nil {
-		appErr = err
+		ex = err
 		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 			ident,
 			pool, table,
 			sql, args,
-			appErr)
+			ex)
 		return
 	} else {
 		r.Cols = cols
@@ -291,12 +291,12 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 			for i, _ := range cols {
 				scanArgs[i] = &rawRowValues[i]
 			}
-			if appErr = rows.Scan(scanArgs...); appErr != nil {
+			if ex = rows.Scan(scanArgs...); ex != nil {
 				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 					ident,
 					pool, table,
 					sql, args,
-					appErr)
+					ex)
 				return
 			}
 
@@ -313,12 +313,12 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 		}
 
 		// check for errors after we’re done iterating over the rows
-		if appErr = rows.Err(); appErr != nil {
+		if ex = rows.Err(); ex != nil {
 			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
-				appErr)
+				ex)
 			return
 		}
 

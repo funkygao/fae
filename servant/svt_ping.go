@@ -6,12 +6,12 @@ import (
 	"github.com/funkygao/golib/server"
 )
 
-func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
+func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 	const IDENT = "ping"
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
-		appErr = err
+		ex = err
 		return
 	}
 
@@ -19,6 +19,8 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, appErr error) {
 
 	r = fmt.Sprintf("pong, %s, myid:%d", server.BuildID, this.conf.IdgenWorkerId)
 
-	profiler.do(IDENT, ctx, "pong")
+	profiler.do(IDENT, ctx, "{pong, %s, myid:%d}",
+		server.BuildID, this.conf.IdgenWorkerId)
+
 	return
 }
