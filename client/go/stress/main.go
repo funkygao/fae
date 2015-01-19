@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"github.com/funkygao/etclib"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/server"
@@ -36,7 +37,10 @@ func parseFlag() {
 }
 
 func main() {
-	proxy := proxy.NewWithDefaultConfig()
+	cf := config.NewDefaultProxy()
+	cf.PoolCapacity = Concurrency
+	proxy := proxy.New(cf)
+
 	etclib.Dial([]string{zk})
 	go proxy.StartMonitorCluster()
 	proxy.AwaitClusterTopologyReady()
