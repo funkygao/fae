@@ -12,18 +12,21 @@ func (this *FunServantImpl) ZkCreate(ctx *rpc.Context, path string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	this.stats.inc(IDENT)
 
 	// TODO always persistent?
-	if err = etclib.Create(path, data, 0); err == nil {
+	if ex = etclib.Create(path, data, 0); ex == nil {
 		r = true
+	} else {
+		this.stats.incErr()
 	}
 
 	profiler.do(IDENT, ctx, "{path^%s data^%s} {r^%v err^%v}",
-		path, string(data), r, err)
+		path, string(data), r, ex)
 	return
 }
 
@@ -34,14 +37,18 @@ func (this *FunServantImpl) ZkChildren(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	this.stats.inc(IDENT)
-	r, err = etclib.Children(path)
+	r, ex = etclib.Children(path)
+	if ex != nil {
+		this.stats.incErr()
+	}
 
 	profiler.do(IDENT, ctx, "{path^%s} {r^%+v err^%v}",
-		path, r, err)
+		path, r, ex)
 	return
 }
 
@@ -52,15 +59,18 @@ func (this *FunServantImpl) ZkDel(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	this.stats.inc(IDENT)
-	if err = etclib.Delete(path); err == nil {
+	if ex = etclib.Delete(path); ex == nil {
 		r = true
+	} else {
+		this.stats.incErr()
 	}
 
 	profiler.do(IDENT, ctx, "{path^%s} {r^%v err^%v}",
-		path, r, err)
+		path, r, ex)
 	return
 }

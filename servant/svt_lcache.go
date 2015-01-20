@@ -26,14 +26,14 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	this.lc.Set(key, value)
 	r = true
 	profiler.do(IDENT, ctx,
-		"{key^%s val^%s} {r^%v}",
-		key, value, r)
+		"{key^%s val^%s} {r^%v}", key, value, r)
 
 	return
 }
@@ -47,6 +47,7 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -59,8 +60,7 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	}
 
 	profiler.do(IDENT, ctx,
-		"{key^%s} {miss^%v r^%s}",
-		key, miss, r)
+		"{key^%s} {miss^%v r^%s}", key, miss, r)
 
 	return
 }
@@ -73,11 +73,11 @@ func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	this.lc.Del(key)
-	profiler.do(IDENT, ctx,
-		"{key^%s}", key)
+	profiler.do(IDENT, ctx, "{key^%s}", key)
 	return
 }

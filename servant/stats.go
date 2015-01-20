@@ -8,6 +8,7 @@ import (
 type servantStats struct {
 	calls         metrics.PercentCounter
 	callsFromPeer int64
+	callsErr      int64
 }
 
 func (this *servantStats) registerMetrics() {
@@ -21,4 +22,8 @@ func (this *servantStats) inc(key string) {
 
 func (this *servantStats) incPeerCall() {
 	atomic.AddInt64(&this.callsFromPeer, 1)
+}
+
+func (this *servantStats) incErr() {
+	atomic.AddInt64(&this.callsErr, 1)
 }

@@ -15,6 +15,7 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -35,13 +36,18 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 	tag int16) (r int64, ex error) {
 	const IDENT = "id.nextag"
 	this.stats.inc(IDENT)
+
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	r, ex = this.idgen.NextWithTag(tag)
+	if ex != nil {
+		this.stats.incErr()
+	}
 
 	profiler.do(IDENT, ctx, "{tag^%d} {r^%d}", tag, r)
 

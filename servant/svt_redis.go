@@ -17,6 +17,7 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -51,6 +52,10 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 		default:
 			log.Error("redis.%s unknown result type: %T", cmd, val)
 		}
+	}
+
+	if ex != nil {
+		this.stats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,

@@ -261,10 +261,11 @@ func (this *FunServantImpl) showStats() {
 
 	for _ = range ticker.C {
 		callsN := this.stats.calls.Total()
-		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; pcalls: %s}",
+		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; errs:%s pcalls:%s}",
 			gofmt.Comma(this.sessionN),
 			gofmt.Comma(callsN),
 			float64(callsN)/float64(this.sessionN+1), // +1 to avoid divide by zero
+			gofmt.Comma(this.stats.callsErr),
 			gofmt.Comma(this.stats.callsFromPeer))
 	}
 }

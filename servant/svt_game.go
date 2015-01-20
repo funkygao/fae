@@ -15,10 +15,14 @@ func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
 	r, ex = this.game.Register(typ)
+	if ex != nil {
+		this.stats.incErr()
+	}
 
 	profiler.do(IDENT, ctx, "{type^%s} {r^%+v}", typ, r)
 
@@ -33,6 +37,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -51,7 +56,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 		svt, err := this.proxy.ServantByKey(IDENT)
 		if err != nil {
 			ex = err
-			log.Error("%s: %s", IDENT, err)
+			this.stats.incErr()
 			return
 		}
 
@@ -68,8 +73,12 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmName3(ctx)
-			if ex != nil && proxy.IsIoError(ex) {
-				svt.Close()
+			if ex != nil {
+				this.stats.incErr()
+
+				if proxy.IsIoError(ex) {
+					svt.Close()
+				}
 			}
 
 			svt.Recycle() // NEVER forget about this
@@ -122,6 +131,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -134,6 +144,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
 			ex = err
+			this.stats.incErr()
 			return
 		}
 
@@ -143,8 +154,12 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmLock(ctx, reason, key)
-			if ex != nil && proxy.IsIoError(ex) {
-				svt.Close()
+			if ex != nil {
+				this.stats.incErr()
+
+				if proxy.IsIoError(ex) {
+					svt.Close()
+				}
 			}
 
 			svt.Recycle()
@@ -169,6 +184,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
@@ -181,6 +197,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
 			ex = err
+			this.stats.incErr()
 			return
 		}
 
@@ -191,8 +208,12 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.GmUnlock(ctx, reason, key)
-			if ex != nil && proxy.IsIoError(ex) {
-				svt.Close()
+			if ex != nil {
+				this.stats.incErr()
+
+				if proxy.IsIoError(ex) {
+					svt.Close()
+				}
 			}
 
 			svt.Recycle()

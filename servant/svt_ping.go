@@ -12,6 +12,7 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
+		this.stats.incErr()
 		return
 	}
 
