@@ -5,7 +5,7 @@ import (
 )
 
 func BenchmarkServantPing(b *testing.B) {
-	proxy := New(10, 0)
+	proxy := NewWithDefaultConfig()
 	servant, _ := proxy.ServantByAddr(":9001")
 	defer servant.Transport.Close()
 
@@ -20,7 +20,7 @@ func BenchmarkServantPing(b *testing.B) {
 }
 
 func BenchmarkServantMcSet(b *testing.B) {
-	proxy := New(10, 0)
+	proxy := NewWithDefaultConfig()
 	servant, _ := proxy.ServantByAddr(":9001")
 	defer servant.Transport.Close()
 
