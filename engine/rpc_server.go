@@ -207,6 +207,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 				err = nil
 			}
 
+			callsN--
 			this.engine.stats.CallPerSession.Update(callsN)
 
 			// for transport err, server always stop the session
