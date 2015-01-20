@@ -32,14 +32,14 @@ func init() {
 
 func main() {
 	cf := config.NewDefaultProxy()
-	cf.PoolCapacity = 5
-	proxy := proxy.New(cf)
+	cf.PoolCapacity = 2
+	peer := proxy.New(cf)
 
 	for {
 		time.Sleep(time.Duration(interval) * time.Second)
 		fmt.Println()
 
-		client, err := proxy.ServantByAddr(host + ":" + port)
+		client, err := peer.ServantByAddr(host + ":" + port)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -50,7 +50,11 @@ func main() {
 		ctx.Rid = fmt.Sprintf("req:%d", time.Now().UnixNano())
 		pong, err := client.Ping(ctx)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("err:", err)
+
+			if proxy.IsIoError(err) {
+				client.Close()
+			}
 		} else {
 			fmt.Println(pong)
 		}

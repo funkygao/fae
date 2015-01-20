@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/gofmt"
 	"github.com/funkygao/golib/trie"
 	log "github.com/funkygao/log4go"
@@ -67,8 +68,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmName3(ctx)
-			if ex != nil {
-				log.Error("%s: %s", IDENT, ex)
+			if ex != nil && proxy.IsIoError(ex) {
 				svt.Close()
 			}
 
@@ -143,7 +143,7 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmLock(ctx, reason, key)
-			if ex != nil {
+			if ex != nil && proxy.IsIoError(ex) {
 				svt.Close()
 			}
 
@@ -191,7 +191,7 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.GmUnlock(ctx, reason, key)
-			if ex != nil {
+			if ex != nil && proxy.IsIoError(ex) {
 				svt.Close()
 			}
 

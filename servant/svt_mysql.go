@@ -8,6 +8,7 @@ import (
 	sql_ "database/sql"
 	_json "encoding/json"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
 	json "github.com/funkygao/go-simplejson"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/mergemap"
@@ -75,7 +76,9 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				svt.HijackContext(ctx)
 				r, ex = svt.MyQuery(ctx, pool, table, hintId, sql, args, cacheKey)
 				if ex != nil {
-					svt.Close()
+					if proxy.IsIoError(ex) {
+						svt.Close()
+					}
 				} else {
 					rows = len(r.Rows)
 					if r.RowsAffected > 0 {
@@ -130,7 +133,7 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.MyEvict(ctx, cacheKey)
-			if ex != nil {
+			if ex != nil && proxy.IsIoError(ex) {
 				svt.Close()
 			}
 
