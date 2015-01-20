@@ -122,16 +122,16 @@ func (this *TFunServer) handleSession(client interface{}) {
 	var (
 		t1    = time.Now()
 		calls int64
-		err   error
+		errs  int64
 	)
-	if calls, err = this.processRequests(transport); err != nil {
+	if calls, errs = this.processRequests(transport); errs > 0 {
 		this.engine.stats.TotalFailedSessions.Inc(1)
 	}
 
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
-	if err != nil {
-		log.Error("session[%s] %d calls in %s: %v", remoteAddr, calls, elapsed, err)
+	if errs > 0 {
+		log.Warn("session[%s] %d calls in %s, errs: %d", remoteAddr, calls, elapsed, errs)
 	} else {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
@@ -142,7 +142,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error) {
+func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
 	outputTransport := this.outputTransportFactory.GetTransport(client)
@@ -162,8 +162,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		t1           time.Time
 		elapsed      time.Duration
 		tcpClient    = client.(*thrift.TSocket).Conn().(*net.TCPConn)
-		callsN       int64
-		lastErr      error
+		remoteAddr   = tcpClient.RemoteAddr().String()
 	)
 
 	for {
@@ -173,7 +172,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		}
 
 		_, ex := processor.Process(inputProtocol, outputProtocol)
-		callsN++
+		callsN++ // call num increment first anyway
 
 		elapsed = time.Since(t1)
 		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
@@ -202,23 +201,29 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 				// e,g. broken pipe
 				// e,g. read tcp i/o timeout
 				this.engine.stats.TotalFailedCalls.Inc(1)
+				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
+				errsN++
 			} else {
 				// EOF is not err, its normal end of session
 				err = nil
 			}
 
-			callsN--
+			callsN-- // in case of transport err, the call didn't finish
 			this.engine.stats.CallPerSession.Update(callsN)
 
 			// for transport err, server always stop the session
-			return callsN, err
+			return
 		}
 
 		// TProtocolException should never happen
 		// so ex MUST be servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax
 		this.engine.stats.TotalFailedCalls.Inc(1)
-		lastErr = ex // remember the latest app err
+		errsN++
+
+		// the central place to log call err
+		// servant needn't dup err log
+		log.Error("call[%s]: %s", remoteAddr, ex.Error())
 
 		// Peek: there is more data to be read or the remote side is still open?
 		if !inputProtocol.Transport().Peek() {
@@ -227,7 +232,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)
-	return callsN, lastErr
+	return
 }
 
 func (this *TFunServer) Stop() error {
