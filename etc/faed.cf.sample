@@ -16,11 +16,11 @@
         framed: false
         buffer_size: 4096
         max_outstanding_sessions: 10000
+        warn_too_many_sessions_threshold: 3000
         session_timeout: "0s"
         session_slow_threshold: "8s"
         io_timeout: "4s"
         stats_output_interval: "10m"
-        warn_too_many_sessions_threshold: 1000
     }
 
     servants: {
