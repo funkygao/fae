@@ -74,7 +74,7 @@ func (this *Client) Call(cmd string, pool string,
 	err = conn.Err()
 	if err != nil {
 		conn.Close()
-		this.breaker.Fail()
+		this.breaker.Fail() // conn err is always system err
 		log.Error("redis.%s[%s] conn: %s", cmd, key, err)
 		return
 	}

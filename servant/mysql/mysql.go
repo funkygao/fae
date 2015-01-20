@@ -82,6 +82,7 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 			stmt, err = this.db.Prepare(query)
 			if err != nil {
 				if this.isSystemError(err) {
+					log.Warn("mysql prepare breaks: %s", err.Error())
 					this.breaker.Fail()
 				}
 
@@ -104,6 +105,7 @@ func (this *mysql) Query(query string, args ...interface{}) (rows *sql.Rows,
 	}
 	if err != nil {
 		if this.isSystemError(err) {
+			log.Warn("mysql query breaks: %s", err.Error())
 			this.breaker.Fail()
 		}
 	} else {
@@ -125,13 +127,20 @@ func (this *mysql) Exec(query string, args ...interface{}) (afftectedRows int64,
 	var result sql.Result
 	result, err = this.db.Exec(query, args...)
 	if err != nil {
-		this.breaker.Fail()
+		if this.isSystemError(err) {
+			log.Warn("mysql exec breaks: %s", err.Error())
+			this.breaker.Fail()
+		}
+
 		return 0, 0, err
 	}
 
 	afftectedRows, err = result.RowsAffected()
 	if err != nil {
-		this.breaker.Fail()
+		if this.isSystemError(err) {
+			log.Warn("mysql exec2 breaks: %s", err.Error())
+			this.breaker.Fail()
+		}
 	} else {
 		this.breaker.Succeed()
 	}
