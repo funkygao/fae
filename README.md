@@ -108,6 +108,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
     - default zk session timeout: 2 * tickTime ~ 20 * tickTime
+    - echo 'mntr' | nc localhost 2181
+    - echo 'stat' | nc localhost 2181
 *   race condition detector
 *   NewTBufferedTransportFactory buffer size, and php config buf size
 *   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
@@ -115,3 +117,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
 *   https://github.com/toddlipcon/gremlins
+
+### Contribs
+
+*   https://github.com/phunt/zktop
