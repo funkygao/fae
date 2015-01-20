@@ -104,21 +104,23 @@ func (this *TFunServer) handleSession(client interface{}) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
+	var remoteAddr string
 	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
+		remoteAddr = tcpClient.RemoteAddr().String()
+
 		if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
 			log.Warn("session[%s] open, too many sessions: %d",
-				tcpClient.RemoteAddr(), currentSessionN)
+				remoteAddr, currentSessionN)
 		} else {
-			log.Debug("session[%s] open", tcpClient.RemoteAddr())
+			log.Debug("session[%s] open", remoteAddr)
 		}
 	} else {
 		log.Error("non tcp conn found, should NEVER happen")
 		return
 	}
 
-	t1 := time.Now()
-	remoteAddr := transport.(*thrift.TSocket).Conn().RemoteAddr().String()
 	var (
+		t1    = time.Now()
 		calls int64
 		err   error
 	)
@@ -140,7 +142,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 }
 
-// FIXME if error occurs, fae will actively close this session: halt on first exception
 func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error) {
 	processor := this.processorFactory.GetProcessor(client)
 	inputTransport := this.inputTransportFactory.GetTransport(client)
@@ -197,13 +198,13 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (int64, error)
 		err, isTransportEx := ex.(thrift.TTransportException)
 		if isTransportEx {
 			if err.TypeId() != thrift.END_OF_FILE {
-				// END_OF_FILE: remote client closed transport, this is normal end of session
-
-				// non-EOF transport err
 				// e,g. connection reset by peer
 				// e,g. broken pipe
 				// e,g. read tcp i/o timeout
 				this.engine.stats.TotalFailedCalls.Inc(1)
+			} else {
+				// EOF is not err, its normal end of session
+				err = nil
 			}
 
 			this.engine.stats.CallPerSession.Update(callsN)
