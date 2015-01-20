@@ -10,7 +10,7 @@ import (
 func main() {
 	t1 := time.Now()
 
-	client, err := proxy.NewWithDefaultConfig().Servant(":9001")
+	client, err := proxy.NewWithDefaultConfig().ServantByAddr(":9001")
 	if err != nil {
 		panic(err)
 	}

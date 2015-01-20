@@ -21,7 +21,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	}()
 
 	t1 := time.Now()
-	client, err := proxy.Servant(host + ":9001")
+	client, err := proxy.ServantByAddr(host + ":9001")
 	if err != nil {
 		report.incConnErrs()
 		log.Printf("session{round^%d seq^%d} error: %v", round, seq, err)

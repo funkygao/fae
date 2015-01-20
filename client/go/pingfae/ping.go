@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// ping a single faed
-	client, err := proxy.Servant(host + ":" + port)
+	client, err := proxy.ServantByAddr(host + ":" + port)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -75,7 +75,7 @@ func pingCluster(proxy *proxy.Proxy) {
 	t := time.Now().Unix() // part of rid
 	for i := 0; i < loops; i++ {
 		for _, peerAddr := range peers {
-			client, err := proxy.Servant(peerAddr)
+			client, err := proxy.ServantByAddr(peerAddr)
 			if err != nil {
 				fmt.Printf("[%6d] %21s: %s\n", i+1, peerAddr, err)
 				continue

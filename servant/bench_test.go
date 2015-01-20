@@ -161,7 +161,7 @@ func BenchmarkPingOnLocalhost(b *testing.B) {
 	b.ReportAllocs()
 
 	cf := &config.ConfigProxy{PoolCapacity: 1}
-	client, err := proxy.New(cf).Servant("localhost:9001")
+	client, err := proxy.New(cf).ServantByAddr("localhost:9001")
 	if err != nil {
 		b.Fatal(err)
 	}

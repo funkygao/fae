@@ -36,7 +36,10 @@ func main() {
 	proxy := proxy.New(cf)
 
 	for {
-		client, err := proxy.Servant(host + ":" + port)
+		time.Sleep(time.Duration(interval) * time.Second)
+		fmt.Println()
+
+		client, err := proxy.ServantByAddr(host + ":" + port)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -51,11 +54,8 @@ func main() {
 		} else {
 			fmt.Println(pong)
 		}
-		fmt.Println()
 
 		client.Recycle()
-
-		time.Sleep(time.Duration(interval) * time.Second)
 	}
 
 }

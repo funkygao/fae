@@ -10,7 +10,7 @@ func testServantPool(proxy *proxy.Proxy) {
 	t1 := time.Now()
 	peer := host + ":9001"
 	for i := 0; i < Concurrency; i++ {
-		client, err := proxy.Servant(peer)
+		client, err := proxy.ServantByAddr(peer)
 		if err != nil {
 			log.Printf("seq^%d err^%v\n", i, err)
 			return
@@ -20,7 +20,7 @@ func testServantPool(proxy *proxy.Proxy) {
 		client.Recycle()
 	}
 
-	log.Printf("proxy.Servant[%s] open/close %d loops within %s\n",
+	log.Printf("proxy.ServantByAddr[%s] open/close %d loops within %s\n",
 		peer, Concurrency, time.Since(t1))
 
 	key := "test.go"

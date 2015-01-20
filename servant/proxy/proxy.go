@@ -140,7 +140,7 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 }
 
 // Get or create a fae peer servant based on peer address
-func (this *Proxy) Servant(peerAddr string) (*FunServantPeer, error) {
+func (this *Proxy) ServantByAddr(peerAddr string) (*FunServantPeer, error) {
 	this.addRemotePeerIfNecessary(peerAddr)
 
 	log.Debug("servant by addr[%s]: {txn:%d}", peerAddr,
