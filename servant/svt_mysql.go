@@ -47,6 +47,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 		}
 	} else {
 		if ctx.IsSetSticky() && *ctx.Sticky {
+			this.stats.incPeerCall()
+
 			r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 				sql, args, cacheKeyHash)
 			rows = len(r.Rows)
@@ -113,6 +115,7 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.stats.incPeerCall()
 		this.dbCacheStore.Del(cacheKey)
 	} else {
 		svt, err := this.proxy.ServantByKey(cacheKey)

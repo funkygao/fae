@@ -38,6 +38,8 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
+		this.stats.incPeerCall()
+
 		if !this.game.NameDbLoaded {
 			this.game.NameDbLoaded = true
 			go this.loadName3Bitmap(ctx)
@@ -125,6 +127,8 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.stats.incPeerCall()
+
 		r = this.game.Lock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
@@ -170,6 +174,8 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
+		this.stats.incPeerCall()
+
 		this.game.Unlock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key)
