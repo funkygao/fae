@@ -30,6 +30,7 @@ log/
 profiler/
 daemon/faed/faed
 client/go/stress/stress
+client/go/broken/broken
 faed.lock
 *.class
 etc/faed.cf
