@@ -86,6 +86,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   unified err logging so that external alarming system can get notified
 *   use of closed network connection
 *   race condition detector
 *   more strict test on zookeeper failure
