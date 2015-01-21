@@ -131,7 +131,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	elapsed := time.Since(t1)
 	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	if errs > 0 {
-		log.Warn("session[%s] %d calls in %s, errs: %d", remoteAddr, calls, elapsed, errs)
+		log.Warn("session[%s] %d calls in %s, errs:%d", remoteAddr, calls, elapsed, errs)
 	} else {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
