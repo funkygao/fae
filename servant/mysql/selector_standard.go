@@ -157,8 +157,7 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 	}
 
 	this.lookupCache.Set(key, my)
-	log.Trace("lookupCache[%s] set {pool^%s}",
-		key, bucket)
+	log.Debug("lookupCache[%s] set {pool^%s}", key, bucket)
 
 	return my, nil
 }
