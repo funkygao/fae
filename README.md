@@ -88,7 +88,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   unified err logging so that external alarming system can get notified
 *   use of closed network connection
-*   race condition detector
 *   more strict test on zookeeper failure
 *   mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html

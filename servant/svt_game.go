@@ -70,6 +70,8 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			r = this.game.NextName()
 		} else {
 			// remote peer servant
+			this.stats.incCallPeer()
+
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmName3(ctx)
@@ -151,6 +153,8 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		if svt == nil {
 			r = this.game.Lock(key)
 		} else {
+			this.stats.incCallPeer()
+
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmLock(ctx, reason, key)
@@ -204,7 +208,8 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		if svt == nil {
 			this.game.Unlock(key)
 		} else {
-			// remote peer servant
+			this.stats.incCallPeer()
+
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.GmUnlock(ctx, reason, key)
