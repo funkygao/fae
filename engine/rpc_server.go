@@ -223,7 +223,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 
 		// the central place to log call err
 		// servant needn't dup err log
-		log.Error("call[%s]: %s", remoteAddr, ex.Error())
+		log.Error("caller[%s]: %s", remoteAddr, ex.Error())
 
 		// Peek: there is more data to be read or the remote side is still open?
 		if !inputProtocol.Transport().Peek() {
