@@ -253,6 +253,15 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 	log.Info("servants recreated")
 }
 
+func (this *FunServantImpl) Runtime() map[string]interface{} {
+	r := make(map[string]interface{})
+	r["sessions"] = this.sessionN
+	r["reason"] = this.phpReasonPercent
+	r["dbcache"] = this.dbCacheHits
+	r["stats"] = *this.stats
+	return r
+}
+
 func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
