@@ -70,14 +70,13 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["status"] = "stopped"
 
 	case "stat":
+		rusage := syscall.Rusage{}
+		syscall.Getrusage(0, &rusage)
+		output["rusage"] = rusage
 		output["started"] = this.StartedAt
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
-		output["stats"] = this.stats.String()
-		rusage := syscall.Rusage{}
-		syscall.Getrusage(0, &rusage)
-		output["rusage"] = rusage
 		output["ver"] = server.VERSION
 		output["build_id"] = server.BuildID
 		output["servant"] = this.svt.Runtime()

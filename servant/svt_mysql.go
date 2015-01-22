@@ -74,6 +74,8 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				}
 			} else {
 				// dispatch to peer
+				this.stats.incCallPeer()
+
 				peer = svt.Addr()
 				svt.HijackContext(ctx)
 				r, ex = svt.MyQuery(ctx, pool, table, hintId, sql, args, cacheKey)
@@ -136,6 +138,8 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 		if svt == nil {
 			this.dbCacheStore.Del(cacheKey)
 		} else {
+			this.stats.incCallPeer()
+
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.MyEvict(ctx, cacheKey)

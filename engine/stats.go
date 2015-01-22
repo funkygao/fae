@@ -56,11 +56,6 @@ func (this *engineStats) registerMetrics() {
 	metrics.Register("call.per.session", this.CallPerSession)
 }
 
-// TODO
-func (this engineStats) String() string {
-	return ""
-}
-
 func (this *engineStats) Start(t time.Time, interval time.Duration, logfile string) {
 	this.startedAt = t
 

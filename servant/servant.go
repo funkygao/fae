@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"sync/atomic"
 	"time"
 )
 
@@ -255,10 +256,20 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 
 func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["sessions"] = this.sessionN
-	r["reason"] = this.phpReasonPercent
-	r["dbcache"] = this.dbCacheHits
-	r["stats"] = *this.stats
+	r["sessions"] = atomic.LoadInt64(&this.sessionN)
+	r["call.errs"] = this.stats.callsErr
+	r["call.peer.from"] = this.stats.callsFromPeer
+	r["call.peer.to"] = this.stats.callsToPeer
+	for _, key := range this.stats.calls.Keys() {
+		r["call["+key+"]"] = this.stats.calls.Percent(key)
+	}
+	for _, key := range this.phpReasonPercent.Keys() {
+		r["reason["+key+"]"] = this.phpReasonPercent.Percent(key)
+	}
+	for _, key := range this.dbCacheHits.Keys() {
+		r["dbcache["+key+"]"] = this.dbCacheHits.Percent(key)
+	}
+
 	return r
 }
 
