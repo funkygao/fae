@@ -106,6 +106,10 @@ func (this *FunServantImpl) Flush() {
 	log.Trace("servants flushed")
 }
 
+func (this *FunServantImpl) AddErr(n int64) {
+	this.stats.addErr(n)
+}
+
 func (this *FunServantImpl) createServants() {
 	log.Info("creating servants...")
 

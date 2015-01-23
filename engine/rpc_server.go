@@ -104,19 +104,12 @@ func (this *TFunServer) handleSession(client interface{}) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
-	var remoteAddr string
-	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		remoteAddr = tcpClient.RemoteAddr().String()
-
-		if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
-			log.Warn("session[%s] open, too many sessions: %d",
-				remoteAddr, currentSessionN)
-		} else {
-			log.Debug("session[%s] open", remoteAddr)
-		}
+	remoteAddr := transport.(*thrift.TSocket).Conn().(*net.TCPConn).RemoteAddr().String()
+	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
+		log.Warn("session[%s] open, too many sessions: %d",
+			remoteAddr, currentSessionN)
 	} else {
-		log.Error("non tcp conn found, should NEVER happen")
-		return
+		log.Debug("session[%s] open", remoteAddr)
 	}
 
 	var (
@@ -126,6 +119,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	)
 	if calls, errs = this.processRequests(transport); errs > 0 {
 		this.engine.stats.TotalFailedSessions.Inc(1)
+		this.engine.svt.AddErr(errs)
 	}
 
 	elapsed := time.Since(t1)

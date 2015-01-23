@@ -32,3 +32,7 @@ func (this *servantStats) incCallPeer() {
 func (this *servantStats) incErr() {
 	atomic.AddInt64(&this.callsErr, 1)
 }
+
+func (this *servantStats) addErr(n int64) {
+	atomic.AddInt64(&this.callsErr, n)
+}
