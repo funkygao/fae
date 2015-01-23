@@ -6,7 +6,6 @@ import (
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/redigo/redis"
 	"sync"
-	"time"
 )
 
 const (
@@ -35,7 +34,7 @@ func newRegister(cf *config.ConfigGame) *Register {
 	this.currentShards = make(map[string]int64)
 	this.redis = &redis.Pool{
 		MaxIdle:     5, // TODO
-		MaxActive:   10,
+		MaxActive:   100,
 		IdleTimeout: 0,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", this.cf.RedisServerAddr)
@@ -45,10 +44,7 @@ func newRegister(cf *config.ConfigGame) *Register {
 
 			return c, err
 		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
+		TestOnBorrow: nil,
 	}
 
 	this.loadSnapshot()
