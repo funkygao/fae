@@ -8,7 +8,10 @@ import (
 )
 
 func TestLockBasic(t *testing.T) {
-	cf := &config.ConfigLock{MaxItems: 10, Expires: 10 * time.Second}
+	cf := &config.ConfigGame{
+		LockMaxItems: 10,
+		LockExpires:  10 * time.Second,
+	}
 	l := newLock(cf)
 	k1 := "hello"
 	k2 := "world"
@@ -27,7 +30,10 @@ func TestLockBasic(t *testing.T) {
 }
 
 func TestLockExpires(t *testing.T) {
-	cf := &config.ConfigLock{MaxItems: 10, Expires: 1 * time.Second}
+	cf := &config.ConfigGame{
+		LockMaxItems: 10,
+		LockExpires:  1 * time.Second,
+	}
 	l := newLock(cf)
 	k := "hello"
 	l.Lock(k)
@@ -37,7 +43,10 @@ func TestLockExpires(t *testing.T) {
 }
 
 func BenchmarkLockBasic(b *testing.B) {
-	cf := &config.ConfigLock{MaxItems: 10, Expires: 10 * time.Second}
+	cf := &config.ConfigGame{
+		LockMaxItems: 10,
+		LockExpires:  10 * time.Second,
+	}
 	l := newLock(cf)
 	k := "haha"
 	b.ReportAllocs()
