@@ -22,11 +22,6 @@ type engineStats struct {
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.memStats = new(runtime.MemStats)
-	this.registerMetrics()
-	return
-}
-
-func (this *engineStats) registerMetrics() {
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("latency.call", this.CallLatencies)
@@ -35,6 +30,7 @@ func (this *engineStats) registerMetrics() {
 	this.CallPerSession = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("call.per.session", this.CallPerSession)
+	return
 }
 
 func (this *engineStats) Start(t time.Time, interval time.Duration, logfile string) {

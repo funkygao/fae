@@ -255,6 +255,11 @@ func (this *TFunServer) showStats(interval time.Duration) {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions: %d}", atomic.LoadInt64(&this.activeSessionN))
+		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
+			atomic.LoadInt64(&this.activeSessionN),
+			this.engine.stats.CallPerSecond.Rate1(),
+			this.engine.stats.CallPerSecond.Rate5(),
+			this.engine.stats.CallPerSecond.Rate15(),
+			this.engine.stats.CallPerSecond.RateMean())
 	}
 }
