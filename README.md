@@ -86,6 +86,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   session.profiler should not be pointer, reduce GC overhead
 *   unified err logging so that external alarming system can get notified
 *   use of closed network connection
 *   more strict test on zookeeper failure

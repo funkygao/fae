@@ -13,11 +13,11 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	r = fmt.Sprintf("ver:%s, build:%s, myid:%d, uptime:%s",
 		server.VERSION, server.BuildID,

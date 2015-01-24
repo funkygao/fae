@@ -11,17 +11,17 @@ import (
 func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
 	ex error) {
 	const IDENT = "gm.reg"
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	r, ex = this.game.Register(typ)
 	if ex != nil {
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx, "{type^%s} {r^%+v}", typ, r)
@@ -33,18 +33,18 @@ func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
 func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 	const IDENT = "gm.name3"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		// I' the final servant, got call from remote peers
-		this.stats.incPeerCall()
+		svtStats.incPeerCall()
 
 		if !this.game.NameDbLoaded {
 			this.game.NameDbLoaded = true
@@ -56,7 +56,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 		svt, err := this.proxy.ServantByKey(IDENT)
 		if err != nil {
 			ex = err
-			this.stats.incErr()
+			svtStats.incErr()
 			return
 		}
 
@@ -70,13 +70,13 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			r = this.game.NextName()
 		} else {
 			// remote peer servant
-			this.stats.incCallPeer()
+			svtStats.incCallPeer()
 
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmName3(ctx)
 			if ex != nil {
-				this.stats.incErr()
+				svtStats.incErr()
 
 				if proxy.IsIoError(ex) {
 					svt.Close()
@@ -113,7 +113,7 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	bytes int32) (ex error) {
 	const IDENT = "gm.latency"
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	this.game.UpdatePhpLatency(int64(ms))
 	this.game.UpdatePhpPayloadSize(int64(bytes))
@@ -129,37 +129,37 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 	reason string, key string) (r bool, ex error) {
 	const IDENT = "gm.lock"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
-		this.stats.incPeerCall()
+		svtStats.incPeerCall()
 
 		r = this.game.Lock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
 			ex = err
-			this.stats.incErr()
+			svtStats.incErr()
 			return
 		}
 
 		if svt == nil {
 			r = this.game.Lock(key)
 		} else {
-			this.stats.incCallPeer()
+			svtStats.incCallPeer()
 
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			r, ex = svt.GmLock(ctx, reason, key)
 			if ex != nil {
-				this.stats.incErr()
+				svtStats.incErr()
 
 				if proxy.IsIoError(ex) {
 					svt.Close()
@@ -184,37 +184,37 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 	reason string, key string) (ex error) {
 	const IDENT = "gm.unlock"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	var peer string
 	if ctx.IsSetSticky() && *ctx.Sticky {
-		this.stats.incPeerCall()
+		svtStats.incPeerCall()
 
 		this.game.Unlock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
 			ex = err
-			this.stats.incErr()
+			svtStats.incErr()
 			return
 		}
 
 		if svt == nil {
 			this.game.Unlock(key)
 		} else {
-			this.stats.incCallPeer()
+			svtStats.incCallPeer()
 
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
 			ex = svt.GmUnlock(ctx, reason, key)
 			if ex != nil {
-				this.stats.incErr()
+				svtStats.incErr()
 
 				if proxy.IsIoError(ex) {
 					svt.Close()

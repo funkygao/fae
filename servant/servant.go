@@ -39,9 +39,7 @@ type FunServantImpl struct {
 	dbCacheHits        metrics.PercentCounter
 
 	startedAt time.Time
-	sessionN  int64           // total sessions served since boot
 	sessions  *cache.LruCache // state kept for sessions FIXME kill it
-	stats     *servantStats   // stats
 
 	proxy *proxy.Proxy // remote fae agent
 
@@ -71,9 +69,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
 	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
 
-	// stats
-	this.stats = new(servantStats)
-	this.stats.registerMetrics()
 	this.phpReasonPercent = metrics.NewPercentCounter()
 	metrics.Register("php.reason", this.phpReasonPercent)
 	this.dbCacheHits = metrics.NewPercentCounter()
@@ -98,6 +93,7 @@ func (this *FunServantImpl) Start() {
 	go this.watchConfigReloaded()
 
 	this.startedAt = time.Now()
+	svtStats.registerMetrics()
 	this.warmUp()
 }
 
@@ -109,7 +105,7 @@ func (this *FunServantImpl) Flush() {
 }
 
 func (this *FunServantImpl) AddErr(n int64) {
-	this.stats.addErr(n)
+	svtStats.addErr(n)
 }
 
 func (this *FunServantImpl) createServants() {
@@ -262,14 +258,14 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 
 func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["sessions"] = atomic.LoadInt64(&this.sessionN)
-	r["call.errs"] = this.stats.callsErr
-	r["call.slow"] = this.stats.callsSlow
-	r["call.peer.from"] = this.stats.callsFromPeer
-	r["call.peer.to"] = this.stats.callsToPeer
+	r["sessions"] = atomic.LoadInt64(&svtStats.sessionN)
+	r["call.errs"] = svtStats.callsErr
+	r["call.slow"] = svtStats.callsSlow
+	r["call.peer.from"] = svtStats.callsFromPeer
+	r["call.peer.to"] = svtStats.callsToPeer
 
-	for _, key := range this.stats.calls.Keys() {
-		r["call["+key+"]"] = this.stats.calls.Percent(key)
+	for _, key := range svtStats.calls.Keys() {
+		r["call["+key+"]"] = svtStats.calls.Percent(key)
 	}
 	for _, key := range this.phpReasonPercent.Keys() {
 		r["reason["+key+"]"] = this.phpReasonPercent.Percent(key)
@@ -288,15 +284,15 @@ func (this *FunServantImpl) showStats() {
 	// TODO show most recent stats, reset at some interval
 
 	for _ = range ticker.C {
-		callsN := this.stats.calls.Total()
+		callsN := svtStats.calls.Total()
 		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
-			gofmt.Comma(this.sessionN),
+			gofmt.Comma(svtStats.sessionN),
 			gofmt.Comma(callsN),
-			float64(callsN)/float64(this.sessionN+1), // +1 to avoid divide by zero
-			gofmt.Comma(this.stats.callsSlow),
-			gofmt.Comma(this.stats.callsErr),
-			gofmt.Comma(this.stats.callsFromPeer),
-			gofmt.Comma(this.stats.callsToPeer))
+			float64(callsN)/float64(svtStats.sessionN+1), // +1 to avoid divide by zero
+			gofmt.Comma(svtStats.callsSlow),
+			gofmt.Comma(svtStats.callsErr),
+			gofmt.Comma(svtStats.callsFromPeer),
+			gofmt.Comma(svtStats.callsToPeer))
 	}
 }
 

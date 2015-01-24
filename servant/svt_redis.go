@@ -12,12 +12,12 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	pool string, keysAndArgs []string) (r string, ex error) {
 	const IDENT = "rd.call"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -55,7 +55,7 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	}
 
 	if ex != nil {
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
