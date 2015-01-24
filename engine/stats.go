@@ -14,13 +14,11 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	TotalFailedSessions metrics.Counter
-	TotalSlowSessions   metrics.Counter
-	TotalSlowCalls      metrics.Counter
-	CallLatencies       metrics.Histogram
-	SessionPerSecond    metrics.Meter
-	CallPerSecond       metrics.Meter
-	CallPerSession      metrics.Histogram
+	TotalSlowCalls   metrics.Counter
+	CallLatencies    metrics.Histogram
+	SessionPerSecond metrics.Meter
+	CallPerSecond    metrics.Meter
+	CallPerSession   metrics.Histogram
 }
 
 func newEngineStats() (this *engineStats) {
@@ -31,10 +29,6 @@ func newEngineStats() (this *engineStats) {
 }
 
 func (this *engineStats) registerMetrics() {
-	this.TotalFailedSessions = metrics.NewCounter()
-	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
-	this.TotalSlowSessions = metrics.NewCounter()
-	metrics.Register("total.sessions.slow", this.TotalSlowSessions)
 	this.TotalSlowCalls = metrics.NewCounter()
 	metrics.Register("total.calls.slow", this.TotalSlowCalls)
 	this.CallLatencies = metrics.NewHistogram(

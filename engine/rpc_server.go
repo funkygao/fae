@@ -118,7 +118,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 		errs  int64
 	)
 	if calls, errs = this.processRequests(transport); errs > 0 {
-		this.engine.stats.TotalFailedSessions.Inc(1)
 		this.engine.svt.AddErr(errs)
 	}
 
@@ -129,10 +128,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
 
-	if config.Engine.Rpc.SessionSlowThreshold.Seconds() > 0 &&
-		elapsed > config.Engine.Rpc.SessionSlowThreshold {
-		this.engine.stats.TotalSlowSessions.Inc(1)
-	}
 }
 
 func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
