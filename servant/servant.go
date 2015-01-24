@@ -38,9 +38,10 @@ type FunServantImpl struct {
 	dbCacheStore       store.Store
 	dbCacheHits        metrics.PercentCounter
 
-	sessionN int64           // total sessions served since boot
-	sessions *cache.LruCache // state kept for sessions FIXME kill it
-	stats    *servantStats   // stats
+	startedAt time.Time
+	sessionN  int64           // total sessions served since boot
+	sessions  *cache.LruCache // state kept for sessions FIXME kill it
+	stats     *servantStats   // stats
 
 	proxy *proxy.Proxy // remote fae agent
 
@@ -96,6 +97,7 @@ func (this *FunServantImpl) Start() {
 	go this.proxy.StartMonitorCluster()
 	go this.watchConfigReloaded()
 
+	this.startedAt = time.Now()
 	this.warmUp()
 }
 
