@@ -5,9 +5,14 @@ import (
 	"sync/atomic"
 )
 
+var (
+	svtStats servantStats
+)
+
 type servantStats struct {
 	calls metrics.PercentCounter
 
+	sessionN      int64 // total sessions served since boot
 	callsFromPeer int64
 	callsToPeer   int64
 	callsErr      int64

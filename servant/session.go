@@ -10,7 +10,6 @@ import (
 )
 
 type session struct {
-	svt      *FunServantImpl
 	ctx      *rpc.Context // will stay the same during a session
 	profiler *profiler
 }
@@ -19,8 +18,8 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 	const DIGIT_REPLACED_WITH = "?"
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
-		atomic.AddInt64(&this.sessionN, 1)
-		s = &session{ctx: ctx, svt: this}
+		atomic.AddInt64(&svtStats.sessionN, 1)
+		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 
 		normalizedReason := this.digitNormalizer.ReplaceAll(
@@ -41,7 +40,7 @@ func (this *session) startProfiler() (*profiler, error) {
 			return nil, ErrInvalidContext
 		}
 
-		this.profiler = &profiler{svt: this.svt}
+		this.profiler = &profiler{}
 		// TODO 某些web server需要100%采样
 		this.profiler.on = sampling.SampleRateSatisfied(config.Engine.Servants.ProfilerRate)
 		this.profiler.t0 = time.Now()

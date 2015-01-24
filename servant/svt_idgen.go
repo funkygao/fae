@@ -11,11 +11,11 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 	backwards *rpc.TIdTimeBackwards, ex error) {
 	const IDENT = "id.next"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -35,18 +35,18 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 	tag int16) (r int64, ex error) {
 	const IDENT = "id.nextag"
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	r, ex = this.idgen.NextWithTag(tag)
 	if ex != nil {
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx, "{tag^%d} {r^%d}", tag, r)
@@ -57,7 +57,7 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 func (this *FunServantImpl) IdDecode(ctx *rpc.Context,
 	id int64) (r []int64, ex error) {
 	const IDENT = "id.decode"
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 	ts, tag, wid, seq := idgen.DecodeId(id)
 	r = []int64{ts, tag, wid, seq}
 	return
