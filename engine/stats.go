@@ -14,10 +14,9 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	CallLatencies    metrics.Histogram
-	SessionPerSecond metrics.Meter
-	CallPerSecond    metrics.Meter
-	CallPerSession   metrics.Histogram
+	CallLatencies  metrics.Histogram
+	CallPerSecond  metrics.Meter
+	CallPerSession metrics.Histogram
 }
 
 func newEngineStats() (this *engineStats) {
@@ -31,10 +30,8 @@ func (this *engineStats) registerMetrics() {
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("latency.call", this.CallLatencies)
-	this.SessionPerSecond = metrics.NewMeter()
-	metrics.Register("rps.session", this.SessionPerSecond)
 	this.CallPerSecond = metrics.NewMeter()
-	metrics.Register("rps.call", this.CallPerSecond)
+	metrics.Register("qps.call", this.CallPerSecond)
 	this.CallPerSession = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("call.per.session", this.CallPerSession)

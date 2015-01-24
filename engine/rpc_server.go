@@ -100,7 +100,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 		return
 	}
 
-	this.engine.stats.SessionPerSecond.Mark(1)
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
