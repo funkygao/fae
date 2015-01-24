@@ -194,7 +194,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 				// e,g. connection reset by peer
 				// e,g. broken pipe
 				// e,g. read tcp i/o timeout
-				this.engine.stats.TotalFailedCalls.Inc(1)
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
 				errsN++
 			} else {
@@ -212,7 +211,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 		// TProtocolException should never happen
 		// so ex MUST be servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax
-		this.engine.stats.TotalFailedCalls.Inc(1)
 		errsN++
 
 		// the central place to log call err
