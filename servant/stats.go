@@ -6,10 +6,12 @@ import (
 )
 
 type servantStats struct {
-	calls         metrics.PercentCounter
+	calls metrics.PercentCounter
+
 	callsFromPeer int64
 	callsToPeer   int64
 	callsErr      int64
+	callsSlow     int64
 }
 
 func (this *servantStats) registerMetrics() {
@@ -27,6 +29,10 @@ func (this *servantStats) incPeerCall() {
 
 func (this *servantStats) incCallPeer() {
 	atomic.AddInt64(&this.callsToPeer, 1)
+}
+
+func (this *servantStats) incCallSlow() {
+	atomic.AddInt64(&this.callsSlow, 1)
 }
 
 func (this *servantStats) incErr() {

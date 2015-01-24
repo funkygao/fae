@@ -264,8 +264,10 @@ func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
 	r["sessions"] = atomic.LoadInt64(&this.sessionN)
 	r["call.errs"] = this.stats.callsErr
+	r["call.slow"] = this.stats.callsSlow
 	r["call.peer.from"] = this.stats.callsFromPeer
 	r["call.peer.to"] = this.stats.callsToPeer
+
 	for _, key := range this.stats.calls.Keys() {
 		r["call["+key+"]"] = this.stats.calls.Percent(key)
 	}
@@ -287,10 +289,11 @@ func (this *FunServantImpl) showStats() {
 
 	for _ = range ticker.C {
 		callsN := this.stats.calls.Total()
-		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; errs:%s peer.from:%s, peer.to:%s}",
+		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
 			gofmt.Comma(this.sessionN),
 			gofmt.Comma(callsN),
 			float64(callsN)/float64(this.sessionN+1), // +1 to avoid divide by zero
+			gofmt.Comma(this.stats.callsSlow),
 			gofmt.Comma(this.stats.callsErr),
 			gofmt.Comma(this.stats.callsFromPeer),
 			gofmt.Comma(this.stats.callsToPeer))

@@ -14,7 +14,6 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	TotalSlowCalls   metrics.Counter
 	CallLatencies    metrics.Histogram
 	SessionPerSecond metrics.Meter
 	CallPerSecond    metrics.Meter
@@ -29,8 +28,6 @@ func newEngineStats() (this *engineStats) {
 }
 
 func (this *engineStats) registerMetrics() {
-	this.TotalSlowCalls = metrics.NewCounter()
-	metrics.Register("total.calls.slow", this.TotalSlowCalls)
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("latency.call", this.CallLatencies)

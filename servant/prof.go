@@ -10,9 +10,10 @@ import (
 
 // profiler and auditter
 type profiler struct {
-	on bool
-	t0 time.Time // start of each session
-	t1 time.Time // start of each call
+	svt *FunServantImpl
+	on  bool
+	t0  time.Time // start of each session
+	t1  time.Time // start of each call
 }
 
 func (this *profiler) do(callName string, ctx *rpc.Context, format string,
@@ -25,6 +26,8 @@ func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 
 	body := fmt.Sprintf(format, args...)
 	if slow {
+		this.svt.stats.incCallSlow()
+
 		header := fmt.Sprintf("SLOW=%s/%s Q=%s ",
 			elapsed, time.Since(this.t0), callName)
 		log.Warn(header + this.truncatedStr(body))
