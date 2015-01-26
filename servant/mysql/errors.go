@@ -10,6 +10,7 @@ var (
 	ErrCircuitOpen         = errors.New("mysql circuit open")
 	ErrShardLookupNotFound = errors.New("shard lookup fails")
 	ErrInvalidHintId       = errors.New("hintId=0?")
+	ErrEntityLocked        = errors.New("entity being locked")
 	ErrLookupTableNotFound = errors.New("mysql lookup table not configured")
 )
 

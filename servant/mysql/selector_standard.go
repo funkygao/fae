@@ -97,7 +97,7 @@ func (this *StandardServerSelector) lookupCacheKey(pool string, hintId int) stri
 func (this *StandardServerSelector) pickShardedServer(pool string,
 	table string, hintId int) (*mysql, error) {
 	const (
-		sb1 = "SELECT shardId FROM "
+		sb1 = "SELECT shardId,shardLock FROM "
 		sb2 = " WHERE entityId=?"
 	)
 
@@ -139,10 +139,16 @@ func (this *StandardServerSelector) pickShardedServer(pool string,
 		return nil, ErrShardLookupNotFound
 	}
 
-	var shardId string
-	if err = rows.Scan(&shardId); err != nil {
+	var (
+		shardId     string
+		shardLocked int
+	)
+	if err = rows.Scan(&shardId, &shardLocked); err != nil {
 		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
 		return nil, err
+	}
+	if shardLocked > 0 {
+		return nil, ErrEntityLocked
 	}
 	if err = rows.Err(); err != nil {
 		log.Error("sql=%s id=%d: %s", sb.String(), hintId, err.Error())
