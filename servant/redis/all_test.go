@@ -32,7 +32,7 @@ func TestCRUD(t *testing.T) {
 
 	c := New(cf)
 	val, err = c.Get(pool, "hello")
-	assert.Equal(t, ErrorDataNotExists.Error(), err.Error())
+	assert.Equal(t, ErrDataNotExists.Error(), err.Error())
 
 	err = c.Set(pool, "hello", "world")
 	assert.Equal(t, nil, err)
@@ -43,7 +43,7 @@ func TestCRUD(t *testing.T) {
 	err = c.Del(pool, "hello")
 	assert.Equal(t, nil, err)
 	val, err = c.Get(pool, "hello")
-	assert.Equal(t, ErrorDataNotExists, err)
+	assert.Equal(t, ErrDataNotExists, err)
 
 	err = c.Del(pool, "hello") // del again
 	assert.Equal(t, nil, err)

@@ -69,7 +69,10 @@ func (this *Client) Call(cmd string, pool string,
 	}
 
 	key := keysAndArgs[0].(string)
-	addr := this.addr(pool, key)
+	addr, errPoolNotFound := this.addr(pool, key)
+	if errPoolNotFound != nil {
+		return nil, errPoolNotFound
+	}
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
 	if err != nil {
@@ -86,13 +89,13 @@ func (this *Client) Call(cmd string, pool string,
 	case "GET":
 		newVal, err = conn.Do(cmd, key)
 		if newVal == nil {
-			err = ErrorDataNotExists
+			err = ErrDataNotExists
 		}
 
 	default:
 		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
-	if err != nil && err != ErrorDataNotExists {
+	if err != nil && err != ErrDataNotExists {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
 	}
 
@@ -123,7 +126,11 @@ func (this *Client) Del(pool, key string) (err error) {
 	return
 }
 
-func (this *Client) addr(pool, key string) string {
-	// FIXME if pool not exists, will panic
-	return this.selectors[pool].PickServer(key)
+func (this *Client) addr(pool, key string) (string, error) {
+	selector, present := this.selectors[pool]
+	if !present {
+		return "", ErrPoolNotFound
+	}
+
+	return selector.PickServer(key), nil
 }

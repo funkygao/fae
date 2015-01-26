@@ -5,6 +5,7 @@ import (
 )
 
 var (
-	ErrorDataNotExists = errors.New("key not exists")
-	ErrCircuitOpen     = errors.New("redis: circuit open")
+	ErrDataNotExists = errors.New("key not exists")
+	ErrCircuitOpen   = errors.New("redis: circuit open")
+	ErrPoolNotFound  = errors.New("redis pool not found")
 )
