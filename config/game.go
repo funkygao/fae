@@ -10,12 +10,15 @@ type ConfigGame struct {
 	NamegenLength   int
 	LockMaxItems    int
 	LockExpires     time.Duration
-	RedisServerAddr string
+	RedisServerPool string
 	ShardSplit      ConfigGameShardSplit
 }
 
 func (this *ConfigGame) LoadConfig(cf *conf.Conf) {
-	this.RedisServerAddr = cf.String("redis_server_addr", "127.0.0.1:6379")
+	this.RedisServerPool = cf.String("redis_server_pool", "")
+	if this.RedisServerPool == "" {
+		panic("empty redis_server_pool in game section")
+	}
 	this.NamegenLength = cf.Int("namegen_length", 3)
 	this.LockMaxItems = cf.Int("lock_max_items", 1<<20)
 	this.LockExpires = cf.Duration("lock_expires", time.Second*10)

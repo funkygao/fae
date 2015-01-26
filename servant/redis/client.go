@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// TODO use my own pool, TestOnBorrow is expensive
 type Client struct {
 	breaker *breaker.Consecutive
 
@@ -95,11 +96,15 @@ func (this *Client) Call(cmd string, pool string,
 	default:
 		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
-	if err != nil && err != ErrDataNotExists {
+	if err != nil &&
+		err.Error() != ErrKeyNotExist.Error() &&
+		err != ErrDataNotExists {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
+		this.breaker.Fail()
+	} else {
+		this.breaker.Succeed()
 	}
 
-	this.breaker.Succeed()
 	this.locks[pool][addr].Unlock()
 	conn.Close() // return to conn pool
 	return

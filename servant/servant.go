@@ -118,9 +118,6 @@ func (this *FunServantImpl) createServants() {
 		panic(err)
 	}
 
-	log.Debug("creating servant: game")
-	this.game = game.New(this.conf.Game)
-
 	if this.conf.Lcache.Enabled() {
 		log.Debug("creating servant: lcache")
 		this.lc = cache.NewLruCache(this.conf.Lcache.MaxItems)
@@ -175,6 +172,9 @@ func (this *FunServantImpl) createServants() {
 		}
 	}
 
+	log.Debug("creating servant: game")
+	this.game = game.New(this.conf.Game, this.rd)
+
 	log.Info("servants created")
 }
 
@@ -189,11 +189,6 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 		if err != nil {
 			panic(err)
 		}
-	}
-
-	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
-		log.Debug("recreating servant: game")
-		this.game = game.New(cf.Game)
 	}
 
 	if cf.Lcache.Enabled() &&
@@ -249,6 +244,11 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 		if err != nil {
 			log.Error("couchbase: %s", err)
 		}
+	}
+
+	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
+		log.Debug("recreating servant: game")
+		this.game = game.New(cf.Game, this.rd)
 	}
 
 	this.conf = cf

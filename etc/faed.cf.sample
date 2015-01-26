@@ -189,7 +189,7 @@
             namegen_length: 3
             lock_max_items: 1048576
             lock_expires: "5s"
-            redis_server_addr: "127.0.0.1:6379"
+            redis_server_pool: "game"
         }
 
         redis: {
@@ -209,6 +209,16 @@
                         }
                     ]
                 }
+                {
+                    name: "game"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 20
+                            idle_timeout: "0s"
+                        }
+                    ]
                 {
                     name: "naming"
                     servers: [
