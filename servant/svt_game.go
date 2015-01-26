@@ -8,6 +8,8 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
+// TODO use hset to reduce mem usage
+// http://instagram-engineering.tumblr.com/post/12202313862/storing-hundreds-of-millions-of-simple-key-value
 func (this *FunServantImpl) GmReserve(ctx *rpc.Context,
 	tag string, oldName, newName string) (r bool, ex error) {
 	const IDENT = "gm.reserve"
