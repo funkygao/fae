@@ -204,8 +204,19 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 10
-                            idle_timeout: "360s"
+                            max_active: 20
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
+                {
+                    name: "naming"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 20
+                            idle_timeout: "0s"
                         }
                     ]
                 }

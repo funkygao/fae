@@ -8,6 +8,30 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
+func (this *FunServantImpl) GmReserve(ctx *rpc.Context,
+	tag string, name string) (r bool, ex error) {
+	const IDENT = "gm.reserve"
+	const REDIS_POOL = "naming"
+
+	svtStats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		ex = err
+		svtStats.incErr()
+		return
+	}
+
+	var counter string
+	counter, ex = this.callRedis("INCR", REDIS_POOL, []string{"acc:" + tag + ":" + name})
+	if counter == "1" {
+		r = true
+	}
+
+	profiler.do(IDENT, ctx, "{tag^%s name^%s} {r^%+v}", tag, name, r)
+
+	return
+}
+
 func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
 	ex error) {
 	const IDENT = "gm.reg"

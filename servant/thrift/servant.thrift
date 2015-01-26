@@ -490,4 +490,11 @@ service FunServant {
         2: string typ
     ),
 
+    // reserve a uniq name
+    bool gm_reserve(
+        1: Context ctx,
+        2: string tag,
+        3: string name
+    ),
+
 }

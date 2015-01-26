@@ -16,10 +16,9 @@ import (
 
 func setupServant() *FunServantImpl {
 	cf, _ := conf.Load("../etc/faed.cf")
-	section, _ := cf.Section("servants")
-	config.LoadServants(section)
+	config.LoadEngineConfig("../etc/faed.cf", cf)
 	server.LaunchHttpServ(":9999", "")
-	return NewFunServant(config.Servants)
+	return NewFunServant(config.Engine.Servants)
 }
 
 // 103 ns/op

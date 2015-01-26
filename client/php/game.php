@@ -28,6 +28,9 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1'));
 
+    var_dump($client->gm_reserve($ctx, 'u', 'funky'));
+    var_dump($client->gm_reserve($ctx, 'u', 'funky'));
+
     for ($i=0; $i<100; $i++) {
         $k = $client->gm_register($ctx, 'k');
         echo "reg with k: $k \n";

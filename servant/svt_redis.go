@@ -21,6 +21,19 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 		return
 	}
 
+	if r, ex = this.callRedis(cmd, pool, keysAndArgs); ex != nil {
+		svtStats.incErr()
+	}
+
+	profiler.do(IDENT, ctx,
+		"{cmd^%s pool^%s key^%s args^%+v} {r^%s}",
+		cmd, pool, keysAndArgs[0], keysAndArgs[1:], r)
+
+	return
+}
+
+func (this *FunServantImpl) callRedis(cmd string, pool string,
+	keysAndArgs []string) (r string, ex error) {
 	var val interface{}
 	// cannot use args (type []string) as type []interface {}
 	iargs := make([]interface{}, len(keysAndArgs))
@@ -53,14 +66,6 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 			log.Error("redis.%s unknown result type: %T", cmd, val)
 		}
 	}
-
-	if ex != nil {
-		svtStats.incErr()
-	}
-
-	profiler.do(IDENT, ctx,
-		"{cmd^%s pool^%s key^%s args^%+v} {r^%s}",
-		cmd, pool, keysAndArgs[0], keysAndArgs[1:], r)
 
 	return
 }
