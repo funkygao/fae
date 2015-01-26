@@ -9,9 +9,10 @@ import (
 )
 
 func (this *FunServantImpl) GmReserve(ctx *rpc.Context,
-	tag string, name string) (r bool, ex error) {
+	tag string, oldName, newName string) (r bool, ex error) {
 	const IDENT = "gm.reserve"
 	const REDIS_POOL = "naming"
+	var prefix = "acc:" + tag + ":"
 
 	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -22,12 +23,17 @@ func (this *FunServantImpl) GmReserve(ctx *rpc.Context,
 	}
 
 	var counter string
-	counter, ex = this.callRedis("INCR", REDIS_POOL, []string{"acc:" + tag + ":" + name})
+	counter, ex = this.callRedis("INCR", REDIS_POOL, []string{prefix + newName})
 	if counter == "1" {
 		r = true
+
+		if oldName != "" {
+			_, ex = this.callRedis("DEL", REDIS_POOL, []string{prefix + oldName})
+		}
 	}
 
-	profiler.do(IDENT, ctx, "{tag^%s name^%s} {r^%+v}", tag, name, r)
+	profiler.do(IDENT, ctx, "{tag^%s old^%s new^%s} {r^%+v}",
+		tag, oldName, newName, r)
 
 	return
 }
@@ -35,6 +41,7 @@ func (this *FunServantImpl) GmReserve(ctx *rpc.Context,
 func (this *FunServantImpl) GmRegister(ctx *rpc.Context, typ string) (r int64,
 	ex error) {
 	const IDENT = "gm.reg"
+
 	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {

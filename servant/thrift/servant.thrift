@@ -494,7 +494,8 @@ service FunServant {
     bool gm_reserve(
         1: Context ctx,
         2: string tag,
-        3: string name
+        3: string oldName,
+        4: string newName
     ),
 
 }
