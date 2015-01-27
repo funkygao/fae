@@ -27,6 +27,16 @@ func New(cf *config.ConfigMysql) *MysqlCluster {
 	return this
 }
 
+func (this *MysqlCluster) Conn(pool string, table string,
+	hintId int) (*sql.DB, error) {
+	my, err := this.selector.PickServer(pool, table, hintId)
+	if err != nil {
+		return nil, err
+	}
+
+	return my.db, nil
+}
+
 func (this *MysqlCluster) Query(pool string, table string, hintId int,
 	sql string, args []interface{}) (*sql.Rows, error) {
 	my, err := this.selector.PickServer(pool, table, hintId)
