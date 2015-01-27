@@ -90,15 +90,13 @@ func (this *Client) Call(cmd string, pool string,
 	case "GET":
 		newVal, err = conn.Do(cmd, key)
 		if newVal == nil {
-			err = ErrDataNotExists
+			err = ErrKeyNotExist
 		}
 
 	default:
 		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
-	if err != nil &&
-		err.Error() != ErrKeyNotExist.Error() &&
-		err != ErrDataNotExists {
+	if err != nil && err != ErrKeyNotExist {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
 		this.breaker.Fail()
 	} else {

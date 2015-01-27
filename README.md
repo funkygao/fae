@@ -86,7 +86,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
-*   oneway
 *   start fae, then restart remote peer, then call ServantByKey, see what happens
 *   session.profiler should not be pointer, reduce GC overhead
 *   bloom filter 

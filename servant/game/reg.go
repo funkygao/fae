@@ -46,7 +46,7 @@ func (this *Register) loadSnapshot() {
 		this.currentShards[typ], err = _redis.Int64(this.redis.Call("GET",
 			this.cf.RedisServerPool, key))
 		if err != nil {
-			if err == _redis.ErrNil || err.Error() == redis.ErrKeyNotExist.Error() {
+			if err == _redis.ErrNil || err == redis.ErrKeyNotExist {
 				this.currentShards[typ] = 1
 				_, err = this.redis.Call("SET", this.cf.RedisServerPool,
 					key, this.currentShards[typ])

@@ -467,7 +467,7 @@ service FunServant {
         1: Context ctx
     ),
 
-    oneway void gm_latency(
+    void gm_latency(
         1: Context ctx,
         2: i32 latency,
         3: i32 bytes
