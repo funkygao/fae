@@ -7,6 +7,7 @@ import (
 	"github.com/funkygao/golib/ip"
 	log "github.com/funkygao/log4go"
 	"sync"
+	"time"
 )
 
 // Proxy of remote servant so that we can dispatch request
@@ -58,17 +59,18 @@ func (this *Proxy) StartMonitorCluster() {
 		case <-peersChan:
 			peers, err := etclib.ServiceEndpoints(etclib.SERVICE_FAE)
 			if err == nil {
+				if !this.clusterTopologyReady {
+					this.clusterTopologyReady = true
+					close(this.clusterTopologyChan)
+				}
+
 				if len(peers) == 0 {
 					// TODO panic?
-					log.Error("Cluster fae etcd died: empty peers")
+					log.Warn("Empty cluster fae peers")
 				} else {
 					// no lock, because running within 1 goroutine
 					this.selector.SetPeersAddr(peers...)
 					this.refreshPeers(peers)
-					if !this.clusterTopologyReady {
-						this.clusterTopologyReady = true
-						close(this.clusterTopologyChan)
-					}
 
 					log.Info("Cluster latest fae nodes: %+v", peers)
 				}
@@ -186,4 +188,21 @@ func (this *Proxy) StatsMap() map[string]string {
 	}
 
 	return m
+}
+
+func (this *Proxy) Warmup() {
+	this.AwaitClusterTopologyReady()
+
+	t0 := time.Now()
+	for _, peerPool := range this.remotePeerPools {
+		for i := 0; i < this.cf.PoolCapacity; i++ {
+			conn, err := peerPool.Get()
+			if err != nil {
+				conn.Close()
+			}
+			conn.Recycle()
+		}
+	}
+
+	log.Debug("Proxy warmup within %s", time.Since(t0))
 }
