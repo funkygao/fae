@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pool []string, table []string,
-	hintId []int64, sql []string, args [][]string, cacheKey []string) (r int64,
+func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables []string,
+	hintIds []int64, sqls []string, argv [][]string, cacheKeys []string) (r int64,
 	ex error) {
 	const IDENT = "my.bexec"
 
@@ -29,16 +29,30 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pool []string, table []
 
 	svtStats.inc(IDENT)
 
+	var (
+		rowsAffected int64
+		result       *rpc.MysqlResult
+	)
+	for idx, pool := range pools {
+		result, ex = this.MyQuery(ctx, pool, tables[idx],
+			hintIds[idx], sqls[idx], argv[idx], cacheKeys[idx])
+		if ex != nil {
+			break
+		}
+
+		rowsAffected += result.RowsAffected
+	}
+
 	if ex != nil {
 		svtStats.incErr()
 
 		profiler.do(IDENT, ctx,
-			"{cache^%+v pool^%+v table^%+v id^%+v sql^%+v args^%+v} {err^%s}",
-			cacheKey, pool, table, hintId, sql, args, ex)
+			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v} {err^%s}",
+			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
 	} else {
 		profiler.do(IDENT, ctx,
-			"{cache^%+v pool^%+v table^%+v id^%+v sql^%+v args^%+v} {err^%s}",
-			cacheKey, pool, table, hintId, sql, args, r)
+			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v} {err^%s}",
+			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
 	}
 
 	return
