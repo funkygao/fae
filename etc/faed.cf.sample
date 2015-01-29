@@ -219,6 +219,7 @@
                             idle_timeout: "0s"
                         }
                     ]
+                }
                 {
                     name: "naming"
                     servers: [
