@@ -388,6 +388,16 @@ service FunServant {
     // mysql section
     //=================
 
+    i64 my_bulk_exec(
+        1: required Context ctx,
+        2: list<string> pool,
+        3: list<string> table,
+        4: list<i64> hintId,
+        5: list<string> sql,
+        6: list<list<string>> argv,
+        7: list<string> cacheKey
+    ),
+
     MysqlResult my_query(
         1: required Context ctx,
         2: string pool,

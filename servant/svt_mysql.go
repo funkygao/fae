@@ -15,6 +15,35 @@ import (
 	"strings"
 )
 
+func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pool []string, table []string,
+	hintId []int64, sql []string, args [][]string, cacheKey []string) (r int64,
+	ex error) {
+	const IDENT = "my.bexec"
+
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		ex = err
+		svtStats.incErr()
+		return
+	}
+
+	svtStats.inc(IDENT)
+
+	if ex != nil {
+		svtStats.incErr()
+
+		profiler.do(IDENT, ctx,
+			"{cache^%+v pool^%+v table^%+v id^%+v sql^%+v args^%+v} {err^%s}",
+			cacheKey, pool, table, hintId, sql, args, ex)
+	} else {
+		profiler.do(IDENT, ctx,
+			"{cache^%+v pool^%+v table^%+v id^%+v sql^%+v args^%+v} {err^%s}",
+			cacheKey, pool, table, hintId, sql, args, r)
+	}
+
+	return
+}
+
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	hintId int64, sql string, args []string, cacheKey string) (r *rpc.MysqlResult,
 	ex error) {
