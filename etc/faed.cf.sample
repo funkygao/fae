@@ -8,6 +8,7 @@
     pprof_listen_addr: "localhost:9901"
     cpu_num: "max"
     metrics_logfile: "metrics.log"
+    server_mode: true
 
     rpc: {
         listen_addr: ":9001"
