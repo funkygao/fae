@@ -81,14 +81,14 @@ try {
     $client->my_bulk_exec($ctx, 
         array('UserShard', 'AllianceShard'),
         array('UserInfo', 'Alliance'),
-        array(1, 1),
+        array(1, 3),
         array(
             'UPDATE UserInfo set power=? WHERE uid=?',
             'UPDATE Alliance set power=? WHERE alliance_id=?',
         ),
         array(
             array(158, 1),
-            array(1508, 1),
+            array(1508, 3),
         ),
         array(
             '', 

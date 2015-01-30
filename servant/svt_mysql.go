@@ -51,8 +51,8 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
 	} else {
 		profiler.do(IDENT, ctx,
-			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v} {err^%s}",
-			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
+			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v}",
+			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv)
 	}
 
 	return
