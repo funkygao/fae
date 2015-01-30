@@ -55,6 +55,10 @@ func (this *Engine) ServeForever() {
 }
 
 func (this *Engine) UnregisterEtcd() {
+	if !config.Engine.ServerMode {
+		return
+	}
+
 	if config.Engine.EtcdSelfAddr != "" {
 		if !etclib.IsConnected() {
 			if err := etclib.Dial(config.Engine.EtcdServers); err != nil {

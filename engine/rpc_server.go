@@ -65,7 +65,8 @@ func (this *TFunServer) Serve() error {
 	// register to etcd
 	// once registered, other peers will connect to me
 	// so, must be after Listen ready
-	if config.Engine.EtcdSelfAddr != "" {
+	if config.Engine.ServerMode &&
+		config.Engine.EtcdSelfAddr != "" {
 		etclib.BootService(config.Engine.EtcdSelfAddr, etclib.SERVICE_FAE)
 
 		log.Info("etcd self[%s] registered", config.Engine.EtcdSelfAddr)

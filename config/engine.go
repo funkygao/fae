@@ -67,7 +67,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 		}
 	}
 
-	log.Debug("engine conf: %+v", *this.Conf)
+	log.Debug("engine conf: %+v", *this)
 }
 
 func (this *ConfigEngine) runWatchdog() {
