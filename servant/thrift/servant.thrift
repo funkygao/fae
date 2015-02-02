@@ -408,6 +408,13 @@ service FunServant {
         7: string cacheKey
     ),
 
+    MysqlResult my_query_shards(
+        1: required Context ctx,
+        2: string table,
+        3: string sql,
+        4: list<string> argv
+    ),
+
     MysqlMergeResult my_merge(
         1: required Context ctx,
         2: string pool,

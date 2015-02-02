@@ -58,6 +58,13 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	return
 }
 
+func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, table string,
+	sql string, args []string) (r *rpc.MysqlResult, ex error) {
+	const IDENT = "my.shards"
+
+	return
+}
+
 func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	hintId int64, sql string, args []string, cacheKey string) (r *rpc.MysqlResult,
 	ex error) {
