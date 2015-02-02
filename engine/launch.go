@@ -55,7 +55,7 @@ func (this *Engine) ServeForever() {
 }
 
 func (this *Engine) UnregisterEtcd() {
-	if !config.Engine.ServerMode {
+	if config.Engine.IsProxyOnly() {
 		return
 	}
 

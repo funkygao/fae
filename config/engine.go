@@ -70,6 +70,10 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	log.Debug("engine conf: %+v", *this)
 }
 
+func (this *ConfigEngine) IsProxyOnly() bool {
+	return !this.ServerMode
+}
+
 func (this *ConfigEngine) runWatchdog() {
 	ticker := time.NewTicker(this.ReloadWatchdogInterval)
 	defer ticker.Stop()
