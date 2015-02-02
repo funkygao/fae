@@ -60,3 +60,11 @@ func (this *Game) UpdatePhpPayloadSize(bytes int64) {
 func (this *Game) Register(typ string) (int64, error) {
 	return this.register.Register(typ)
 }
+
+func (this *Game) PhpPayloadHistogram() metrics.Histogram {
+	return this.phpPayloadSize
+}
+
+func (this *Game) PhpLatencyHistogram() metrics.Histogram {
+	return this.phpLatency
+}

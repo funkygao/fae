@@ -74,14 +74,6 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.dbCacheHits = metrics.NewPercentCounter()
 	metrics.Register("db.cache.hits", this.dbCacheHits)
 
-	// proxy can dynamically auto discover peers
-	if this.conf.Proxy.Enabled() {
-		log.Debug("creating servant: proxy")
-		this.proxy = proxy.New(this.conf.Proxy)
-	} else {
-		panic("peers proxy required")
-	}
-
 	this.createServants()
 
 	return
@@ -110,6 +102,14 @@ func (this *FunServantImpl) AddErr(n int64) {
 
 func (this *FunServantImpl) createServants() {
 	log.Info("creating servants...")
+
+	// proxy can dynamically auto discover peers
+	if this.conf.Proxy.Enabled() {
+		log.Debug("creating servant: proxy")
+		this.proxy = proxy.New(this.conf.Proxy)
+	} else {
+		panic("peers proxy required")
+	}
 
 	log.Debug("creating servant: idgen")
 	var err error

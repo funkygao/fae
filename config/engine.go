@@ -24,6 +24,7 @@ type ConfigEngine struct {
 	MetricsLogfile  string
 
 	ReloadWatchdogInterval time.Duration
+	ServerMode             bool // if false then client only mode
 
 	Rpc      *ConfigRpc
 	Servants *ConfigServant
@@ -38,6 +39,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	this.PprofListenAddr = this.String("pprof_listen_addr", "")
 	this.MetricsLogfile = this.String("metrics_logfile", "metrics.log")
 	this.ReloadWatchdogInterval = this.Duration("reload_watchdog_interval", time.Second)
+	this.ServerMode = this.Bool("server_mode", true)
 
 	// rpc section
 	this.Rpc = new(ConfigRpc)
@@ -65,7 +67,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 		}
 	}
 
-	log.Debug("engine conf: %+v", *this.Conf)
+	log.Debug("engine conf: %+v", *this)
 }
 
 func (this *ConfigEngine) runWatchdog() {
