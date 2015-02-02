@@ -41,7 +41,8 @@ type FunServantImpl struct {
 	startedAt time.Time
 	sessions  *cache.LruCache // state kept for sessions FIXME kill it
 
-	proxy *proxy.Proxy // remote fae agent
+	proxyMode bool
+	proxy     *proxy.Proxy // remote fae agent
 
 	idgen *idgen.IdGenerator   // global id generator
 	game  *game.Game           // game engine
@@ -56,6 +57,7 @@ type FunServantImpl struct {
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
+	this.proxyMode = config.Engine.IsProxyOnly()
 
 	// http REST to export internal state
 	if server.Launched() {

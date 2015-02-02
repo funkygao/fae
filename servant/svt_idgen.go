@@ -6,10 +6,21 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-// Ticket server
+// Ticket service
 func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 	backwards *rpc.TIdTimeBackwards, ex error) {
 	const IDENT = "id.next"
+
+	if this.proxyMode {
+		svt, err := this.peerServantRand(ctx)
+		if err != nil {
+			ex = err
+			return
+		}
+
+		r, backwards, ex = svt.IdNext(ctx)
+		return
+	}
 
 	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -35,6 +46,18 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 	tag int16) (r int64, ex error) {
 	const IDENT = "id.nextag"
+
+	if this.proxyMode {
+		svt, err := this.peerServantRand(ctx)
+		if err != nil {
+			ex = err
+			return
+		}
+
+		r, ex = svt.IdNextWithTag(ctx, tag)
+		return
+	}
+
 	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
