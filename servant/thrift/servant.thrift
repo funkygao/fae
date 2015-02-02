@@ -410,9 +410,10 @@ service FunServant {
 
     MysqlResult my_query_shards(
         1: required Context ctx,
-        2: string table,
-        3: string sql,
-        4: list<string> argv
+        2: string pool,
+        3: string table,
+        4: string sql,
+        5: list<string> argv
     ),
 
     MysqlMergeResult my_merge(

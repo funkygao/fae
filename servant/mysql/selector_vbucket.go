@@ -91,7 +91,10 @@ func (this *VbucketServerSelector) Servers() []*mysql {
 	}
 
 	return r
+}
 
+func (this *VbucketServerSelector) PoolServers(pool string) []*mysql {
+	return nil // TODO
 }
 
 func (this *VbucketServerSelector) shardedPool(pool string) bool {

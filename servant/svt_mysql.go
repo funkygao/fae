@@ -58,9 +58,43 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	return
 }
 
-func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, table string,
+// Always select instead of update/delete
+func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table string,
 	sql string, args []string) (r *rpc.MysqlResult, ex error) {
-	const IDENT = "my.shards"
+	const IDENT = "my.qshards"
+
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		ex = err
+		svtStats.incErr()
+		return
+	}
+
+	svtStats.inc(IDENT)
+
+	iargs := make([]interface{}, len(args), len(args))
+	for i, arg := range args {
+		iargs[i] = arg
+	}
+	rows, err := this.my.QueryShards(pool, table, sql, iargs)
+	if err != nil {
+		ex = err
+		return
+	}
+
+	// TODO
+
+	if ex != nil {
+		svtStats.incErr()
+
+		profiler.do(IDENT, ctx,
+			"{pool^%s table^%s sql^%s args^%+v} {err^%s}",
+			pool, table, sql, args, ex)
+	} else {
+		profiler.do(IDENT, ctx,
+			"{pool^%s table^%s sql^%s args^%+v} {rows^%d r^%+v}",
+			pool, table, sql, args, rows, *r)
+	}
 
 	return
 }

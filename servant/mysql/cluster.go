@@ -37,6 +37,13 @@ func (this *MysqlCluster) Conn(pool string, table string,
 	return my.db, nil
 }
 
+func (this *MysqlCluster) QueryShards(pool string, table string, sqlStmt string,
+	args []interface{}) (*sql.Rows, error) {
+	r := &sql.Rows{}
+	// TODO
+	return r, nil
+}
+
 func (this *MysqlCluster) Query(pool string, table string, hintId int,
 	sql string, args []interface{}) (*sql.Rows, error) {
 	my, err := this.selector.PickServer(pool, table, hintId)
