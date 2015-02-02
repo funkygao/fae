@@ -150,6 +150,17 @@ func (this *Proxy) ServantByAddr(peerAddr string) (*FunServantPeer, error) {
 	return this.remotePeerPools[peerAddr].Get()
 }
 
+// Simulate a simple load balance
+func (this *Proxy) RandServant() (*FunServantPeer, error) {
+	peerAddr := this.selector.RandPeer()
+	if peerAddr == this.cf.SelfAddr {
+		return nil, nil
+	}
+
+	this.remotePeerPools[peerAddr].nextTxn()
+	return this.remotePeerPools[peerAddr].Get()
+}
+
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
 func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {

@@ -2,6 +2,8 @@ package proxy
 
 import (
 	"hash/adler32"
+	"math/rand"
+	"time"
 )
 
 type StandardPeerSelector struct {
@@ -9,6 +11,7 @@ type StandardPeerSelector struct {
 }
 
 func newStandardPeerSelector() *StandardPeerSelector {
+	rand.Seed(time.Now().UnixNano())
 	return &StandardPeerSelector{}
 }
 
@@ -22,4 +25,8 @@ func (this *StandardPeerSelector) PickPeer(key string) (peerAddr string) {
 	index := int(checksum) % len(this.peerAddrs)
 
 	return this.peerAddrs[index]
+}
+
+func (this *StandardPeerSelector) RandPeer() string {
+	return this.peerAddrs[rand.Perm(len(this.peerAddrs))[0]]
 }
