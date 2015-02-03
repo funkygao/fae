@@ -146,15 +146,59 @@ func (this *FunServantImpl) loadName3Bitmap(ctx *rpc.Context) {
 func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	bytes int32) (ex error) {
 	const IDENT = "gm.latency"
+
 	svtStats.inc(IDENT)
 
 	this.game.UpdatePhpLatency(int64(ms))
 	this.game.UpdatePhpPayloadSize(int64(bytes))
 
-	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
-		ms, gofmt.ByteSize(bytes),
-		this.extractUid(ctx), ctx.Rid, ctx.Reason)
+	uid := this.extractUid(ctx)
+	this.game.CheckIn(uid)
 
+	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
+		ms, gofmt.ByteSize(bytes), uid, ctx.Rid, ctx.Reason)
+
+	return
+}
+
+func (this FunServantImpl) GmPresence(ctx *rpc.Context,
+	uids []int64) (r []bool, ex error) {
+	const IDENT = "gm.presence"
+
+	svtStats.inc(IDENT)
+	profiler, err := this.getSession(ctx).startProfiler()
+	if err != nil {
+		ex = err
+		svtStats.incErr()
+		return
+	}
+
+	// first, get my instance online status
+	r = this.game.OnlineStatus(uids)
+
+	// then, get online status in the whole cluster(self excluded)
+	remoteSvts, err := this.proxy.RemoteServants(true)
+	if err != nil {
+		ex = err
+		return
+	}
+
+	for _, svt := range remoteSvts {
+		onlines, err := svt.GmPresence(ctx, uids)
+		if err != nil {
+			log.Error("%s: %s", IDENT, err)
+			continue // skip the remote err
+		}
+
+		for i, online := range onlines {
+			if online {
+				// in the cluster, if any peer vote for a user online, he's online
+				r[i] = true
+			}
+		}
+	}
+
+	profiler.do(IDENT, ctx, "{uids^%v} {r^%v}", uids, r)
 	return
 }
 

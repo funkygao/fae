@@ -12,6 +12,7 @@ type Game struct {
 
 	lock     *Lock
 	register *Register
+	presence *Presence
 
 	phpLatency     metrics.Histogram // in ms
 	phpPayloadSize metrics.Histogram // in bytes
@@ -22,6 +23,7 @@ func New(cf *config.ConfigGame, redis *redis.Client) *Game {
 	this.nameGen = newNameGen(cf.NamegenLength)
 	this.lock = newLock(cf)
 	this.register = newRegister(cf, redis)
+	this.presence = newPresence()
 
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
@@ -59,6 +61,14 @@ func (this *Game) UpdatePhpPayloadSize(bytes int64) {
 
 func (this *Game) Register(typ string) (int64, error) {
 	return this.register.Register(typ)
+}
+
+func (this *Game) CheckIn(uid int64) {
+	this.presence.Update(uid)
+}
+
+func (this *Game) OnlineStatus(uids []int64) []bool {
+	return this.presence.Onlines(uids)
 }
 
 func (this *Game) PhpPayloadHistogram() metrics.Histogram {
