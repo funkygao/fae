@@ -173,7 +173,31 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 		return
 	}
 
+	// first, get my instance online status
 	r = this.game.OnlineStatus(uids)
+
+	// then, get online status in the whole cluster(self excluded)
+	remoteSvts, err := this.proxy.RemoteServants()
+	if err != nil {
+		ex = err
+		return
+	}
+
+	for _, svt := range remoteSvts {
+		onlines, err := svt.GmPresence(ctx, uids)
+		if err != nil {
+			log.Error("%s: %s", IDENT, err)
+			continue // skip the remote err
+		}
+
+		for i, online := range onlines {
+			if online {
+				// in the cluster, if any peer vote for a user online, he's online
+				r[i] = true
+			}
+		}
+	}
+
 	profiler.do(IDENT, ctx, "{uids^%v} {r^%v}", uids, r)
 	return
 }

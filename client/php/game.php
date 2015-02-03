@@ -28,7 +28,7 @@ try {
 
     $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1', 'uid' => 11));
 
-    $client->gm_latency($ctx, 11, 11);
+    $client->gm_latency($ctx, 19, 21);
     var_dump($client->gm_presence($ctx, array(11, 14)));
 
     var_dump($client->gm_reserve($ctx, 'u', 'funky1', 'funky'));
