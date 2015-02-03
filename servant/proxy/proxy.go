@@ -208,10 +208,12 @@ func (this *Proxy) Warmup() {
 	for _, peerPool := range this.remotePeerPools {
 		for i := 0; i < this.cf.PoolCapacity; i++ {
 			conn, err := peerPool.Get()
-			if err != nil {
-				conn.Close()
+			if conn != nil {
+				if err != nil {
+					conn.Close()
+				}
+				conn.Recycle()
 			}
-			conn.Recycle()
 		}
 	}
 
