@@ -491,6 +491,11 @@ service FunServant {
         3: i32 bytes
     ),
 
+    list<bool> gm_presence(
+        1: Context ctx,
+        2: list<i64> uids
+    ),
+
     bool gm_lock(
         1: Context ctx,
         2: string reason,
