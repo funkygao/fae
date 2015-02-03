@@ -21,12 +21,12 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 	key string, value []byte) (r bool, ex error) {
 	const IDENT = "lc.set"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -42,12 +42,12 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	miss *rpc.TCacheMissed, ex error) {
 	const IDENT = "lc.get"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -68,12 +68,12 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (ex error) {
 	const IDENT = "lc.del"
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 

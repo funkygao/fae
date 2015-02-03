@@ -388,6 +388,16 @@ service FunServant {
     // mysql section
     //=================
 
+    i64 my_bulk_exec(
+        1: required Context ctx,
+        2: list<string> pool,
+        3: list<string> table,
+        4: list<i64> hintId,
+        5: list<string> sql,
+        6: list<list<string>> argv,
+        7: list<string> cacheKey
+    ),
+
     MysqlResult my_query(
         1: required Context ctx,
         2: string pool,
@@ -396,6 +406,14 @@ service FunServant {
         5: string sql,
         6: list<string> argv,
         7: string cacheKey
+    ),
+
+    MysqlResult my_query_shards(
+        1: required Context ctx,
+        2: string pool,
+        3: string table,
+        4: string sql,
+        5: list<string> argv
     ),
 
     MysqlMergeResult my_merge(
@@ -488,6 +506,14 @@ service FunServant {
     i64 gm_register(
         1: Context ctx,
         2: string typ
+    ),
+
+    // reserve a uniq name
+    bool gm_reserve(
+        1: Context ctx,
+        2: string tag,
+        3: string oldName,
+        4: string newName
     ),
 
 }

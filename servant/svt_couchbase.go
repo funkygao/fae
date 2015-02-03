@@ -14,23 +14,23 @@ func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.del"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -43,7 +43,7 @@ func (this *FunServantImpl) CbDel(ctx *rpc.Context, bucket string,
 		} else {
 			// unexpected err
 			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, ex.Error())
-			this.stats.incErr()
+			svtStats.incErr()
 		}
 	} else {
 		// found this item, and deleted successfully
@@ -61,23 +61,23 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.get"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -91,7 +91,7 @@ func (this *FunServantImpl) CbGet(ctx *rpc.Context, bucket string,
 			ex = nil
 		} else {
 			log.Error("Q=%s %s %s: %s", IDENT, ctx.String(), key, ex.Error())
-			this.stats.incErr()
+			svtStats.incErr()
 		}
 	} else {
 		r.Data = data
@@ -112,30 +112,30 @@ func (this *FunServantImpl) CbSet(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.set"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	ex = b.SetRaw(key, int(expire), val)
 	if ex != nil {
 		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -150,30 +150,30 @@ func (this *FunServantImpl) CbAdd(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.add"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	r, ex = b.AddRaw(key, int(expire), val)
 	if ex != nil {
 		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -189,30 +189,30 @@ func (this *FunServantImpl) CbAppend(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.append"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	ex = b.Append(key, val)
 	if ex != nil {
 		log.Error("Q=%s %s: %s %s", IDENT, ctx.String(), key, ex)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -228,23 +228,23 @@ func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
 	const IDENT = "cb.gets"
 	if this.cb == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	b, err := this.cb.GetBucket(bucket)
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -253,7 +253,7 @@ func (this *FunServantImpl) CbGets(ctx *rpc.Context, bucket string,
 	r = make(map[string][]byte)
 	if ex != nil {
 		log.Error("Q=%s %s: %v %s", IDENT, ctx.String(), keys, ex)
-		this.stats.incErr()
+		svtStats.incErr()
 	} else {
 		for k, data := range rv {
 			r[k] = data.Body

@@ -14,46 +14,23 @@ type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
 
-	TotalFailedCalls    metrics.Counter
-	TotalFailedSessions metrics.Counter
-	TotalSlowSessions   metrics.Counter
-	TotalSlowCalls      metrics.Counter
-	SessionLatencies    metrics.Histogram
-	CallLatencies       metrics.Histogram
-	SessionPerSecond    metrics.Meter
-	CallPerSecond       metrics.Meter
-	CallPerSession      metrics.Histogram
+	CallLatencies  metrics.Histogram
+	CallPerSecond  metrics.Meter
+	CallPerSession metrics.Histogram
 }
 
 func newEngineStats() (this *engineStats) {
 	this = new(engineStats)
 	this.memStats = new(runtime.MemStats)
-	this.registerMetrics()
-	return
-}
-
-func (this *engineStats) registerMetrics() {
-	this.TotalFailedSessions = metrics.NewCounter()
-	metrics.Register("total.sessions.fail", this.TotalFailedSessions)
-	this.TotalSlowSessions = metrics.NewCounter()
-	metrics.Register("total.sessions.slow", this.TotalSlowSessions)
-	this.TotalFailedCalls = metrics.NewCounter()
-	metrics.Register("total.calls.fail", this.TotalFailedCalls)
-	this.TotalSlowCalls = metrics.NewCounter()
-	metrics.Register("total.calls.slow", this.TotalSlowCalls)
-	this.SessionLatencies = metrics.NewHistogram(
-		metrics.NewExpDecaySample(1028, 0.015))
-	metrics.Register("latency.session", this.SessionLatencies)
 	this.CallLatencies = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("latency.call", this.CallLatencies)
-	this.SessionPerSecond = metrics.NewMeter()
-	metrics.Register("rps.session", this.SessionPerSecond)
 	this.CallPerSecond = metrics.NewMeter()
-	metrics.Register("rps.call", this.CallPerSecond)
+	metrics.Register("qps.call", this.CallPerSecond)
 	this.CallPerSession = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("call.per.session", this.CallPerSession)
+	return
 }
 
 func (this *engineStats) Start(t time.Time, interval time.Duration, logfile string) {

@@ -44,7 +44,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	ctx.Host = "stress.test.local"
 	ctx.Ip = "127.0.0.1"
 	for i := 0; i < LoopsPerSession; i++ {
-		ctx.Rid = fmt.Sprintf("i:%d,round:%d,seq:%d,", i, round, seq)
+		ctx.Rid = fmt.Sprintf("round:%d,seq:%d:i:%d,", round, seq, i+1)
 		if Cmd&CallPing != 0 {
 			var r string
 			r, err = client.Ping(ctx)

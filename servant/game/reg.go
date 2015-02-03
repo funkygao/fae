@@ -3,10 +3,9 @@ package game
 import (
 	"fmt"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant/redis"
 	log "github.com/funkygao/log4go"
-	"github.com/funkygao/redigo/redis"
-	"sync"
-	"time"
+	_redis "github.com/funkygao/redigo/redis"
 )
 
 const (
@@ -23,33 +22,16 @@ var (
 type Register struct {
 	cf *config.ConfigGame
 
-	redis *redis.Pool
-	mutex sync.Mutex
+	redis *redis.Client
 
 	currentShards map[string]int64 // key is reg type
 }
 
-func newRegister(cf *config.ConfigGame) *Register {
+func newRegister(cf *config.ConfigGame, redis *redis.Client) *Register {
 	this := new(Register)
 	this.cf = cf
 	this.currentShards = make(map[string]int64)
-	this.redis = &redis.Pool{
-		MaxIdle:     5, // TODO
-		MaxActive:   10,
-		IdleTimeout: 0,
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", this.cf.RedisServerAddr)
-			if err != nil {
-				return nil, err
-			}
-
-			return c, err
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
-	}
+	this.redis = redis
 
 	this.loadSnapshot()
 	return this
@@ -58,19 +40,22 @@ func newRegister(cf *config.ConfigGame) *Register {
 func (this *Register) loadSnapshot() {
 	const IDENT = "game.reg.loadSnapshot"
 
-	redisConn := this.redis.Get()
-	defer redisConn.Close()
-
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
 	var err error
 	for _, typ := range regTypes {
 		key := this.currentKey(typ)
-		this.currentShards[typ], err = redis.Int64(redisConn.Do("GET", key))
-		if err != nil && err == redis.ErrNil {
-			this.currentShards[typ] = 1
-			redisConn.Do("SET", key, this.currentShards[typ]) // TODO check err
+		this.currentShards[typ], err = _redis.Int64(this.redis.Call("GET",
+			this.cf.RedisServerPool, key))
+		if err != nil {
+			if err == _redis.ErrNil || err == redis.ErrKeyNotExist {
+				this.currentShards[typ] = 1
+				_, err = this.redis.Call("SET", this.cf.RedisServerPool,
+					key, this.currentShards[typ])
+				if err != nil {
+					log.Error("%s set[%s]: %s", IDENT, key, err.Error())
+				}
+			} else {
+				log.Error("%s: %s", IDENT, err.Error())
+			}
 		}
 	}
 
@@ -80,14 +65,8 @@ func (this *Register) loadSnapshot() {
 func (this *Register) Register(typ string) (int64, error) {
 	const IDENT = "register"
 
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
-	redisConn := this.redis.Get()
-	defer redisConn.Close()
-
 	currKey := fmt.Sprintf("reg.%s.%d", typ, this.currentShards[typ])
-	n, err := redis.Int(redisConn.Do("INCR", currKey))
+	n, err := _redis.Int(this.redis.Call("INCR", this.cf.RedisServerPool, currKey))
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, typ, err)
 		return 0, err
@@ -115,14 +94,14 @@ func (this *Register) Register(typ string) (int64, error) {
 		this.currentShards[typ]++
 
 		currKey := this.currentKey(typ)
-		_, err = redisConn.Do("INCR", currKey)
+		_, err = this.redis.Call("INCR", this.cf.RedisServerPool, currKey)
 		if err != nil {
 			log.Error("incr[%s]: %s", currKey, err)
 			return 0, err
 		}
 
 		key := fmt.Sprintf("reg.%s.%d", typ, this.currentShards[typ])
-		_, err = redisConn.Do("INCR", key)
+		_, err = this.redis.Call("INCR", this.cf.RedisServerPool, key)
 		if err != nil {
 			log.Error("incr[%s]: %s", key, err)
 			return 0, err

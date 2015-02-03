@@ -13,16 +13,16 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 
 	if this.mc == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -33,7 +33,7 @@ func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,
 		r = true
 	} else {
 		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, ex)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -54,16 +54,16 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 
 	if this.mc == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -80,7 +80,7 @@ func (this *FunServantImpl) McGet(ctx *rpc.Context, pool string,
 	} else {
 		ex = err
 		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, err)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -99,16 +99,16 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 
 	if this.mc == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -122,7 +122,7 @@ func (this *FunServantImpl) McAdd(ctx *rpc.Context, pool string, key string,
 			ex = nil
 		} else {
 			log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, ex)
-			this.stats.incErr()
+			svtStats.incErr()
 		}
 	}
 
@@ -143,16 +143,16 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 
 	if this.mc == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -164,7 +164,7 @@ func (this *FunServantImpl) McDelete(ctx *rpc.Context, pool string,
 			ex = nil
 		} else {
 			log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, ex)
-			this.stats.incErr()
+			svtStats.incErr()
 		}
 	}
 
@@ -183,16 +183,16 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 
 	if this.mc == nil {
 		ex = ErrServantNotStarted
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
@@ -201,7 +201,7 @@ func (this *FunServantImpl) McIncrement(ctx *rpc.Context, pool string,
 		r = int64(newVal)
 	} else if err != memcache.ErrCacheMiss {
 		log.Error("Q=%s %s {key^%s}: %v", IDENT, ctx.String(), key, err)
-		this.stats.incErr()
+		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,

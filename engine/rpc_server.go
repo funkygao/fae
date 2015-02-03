@@ -65,7 +65,8 @@ func (this *TFunServer) Serve() error {
 	// register to etcd
 	// once registered, other peers will connect to me
 	// so, must be after Listen ready
-	if config.Engine.EtcdSelfAddr != "" {
+	if config.Engine.ServerMode &&
+		config.Engine.EtcdSelfAddr != "" {
 		etclib.BootService(config.Engine.EtcdSelfAddr, etclib.SERVICE_FAE)
 
 		log.Info("etcd self[%s] registered", config.Engine.EtcdSelfAddr)
@@ -100,23 +101,15 @@ func (this *TFunServer) handleSession(client interface{}) {
 		return
 	}
 
-	this.engine.stats.SessionPerSecond.Mark(1)
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
-	var remoteAddr string
-	if tcpClient, ok := transport.(*thrift.TSocket).Conn().(*net.TCPConn); ok {
-		remoteAddr = tcpClient.RemoteAddr().String()
-
-		if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
-			log.Warn("session[%s] open, too many sessions: %d",
-				remoteAddr, currentSessionN)
-		} else {
-			log.Debug("session[%s] open", remoteAddr)
-		}
+	remoteAddr := transport.(*thrift.TSocket).Conn().(*net.TCPConn).RemoteAddr().String()
+	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
+		log.Warn("session[%s] open, too many sessions: %d",
+			remoteAddr, currentSessionN)
 	} else {
-		log.Error("non tcp conn found, should NEVER happen")
-		return
+		log.Debug("session[%s] open", remoteAddr)
 	}
 
 	var (
@@ -125,21 +118,16 @@ func (this *TFunServer) handleSession(client interface{}) {
 		errs  int64
 	)
 	if calls, errs = this.processRequests(transport); errs > 0 {
-		this.engine.stats.TotalFailedSessions.Inc(1)
+		this.engine.svt.AddErr(errs)
 	}
 
 	elapsed := time.Since(t1)
-	this.engine.stats.SessionLatencies.Update(elapsed.Nanoseconds() / 1e6)
 	if errs > 0 {
 		log.Warn("session[%s] %d calls in %s, errs:%d", remoteAddr, calls, elapsed, errs)
 	} else {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
 
-	if config.Engine.Rpc.SessionSlowThreshold.Seconds() > 0 &&
-		elapsed > config.Engine.Rpc.SessionSlowThreshold {
-		this.engine.stats.TotalSlowSessions.Inc(1)
-	}
 }
 
 func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
@@ -200,7 +188,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 				// e,g. connection reset by peer
 				// e,g. broken pipe
 				// e,g. read tcp i/o timeout
-				this.engine.stats.TotalFailedCalls.Inc(1)
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
 				errsN++
 			} else {
@@ -218,7 +205,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 		// TProtocolException should never happen
 		// so ex MUST be servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax
-		this.engine.stats.TotalFailedCalls.Inc(1)
 		errsN++
 
 		// the central place to log call err
@@ -270,6 +256,11 @@ func (this *TFunServer) showStats(interval time.Duration) {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions: %d}", atomic.LoadInt64(&this.activeSessionN))
+		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
+			atomic.LoadInt64(&this.activeSessionN),
+			this.engine.stats.CallPerSecond.Rate1(),
+			this.engine.stats.CallPerSecond.Rate5(),
+			this.engine.stats.CallPerSecond.Rate15(),
+			this.engine.stats.CallPerSecond.RateMean())
 	}
 }

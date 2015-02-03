@@ -38,11 +38,11 @@ type FunServantImpl struct {
 	dbCacheStore       store.Store
 	dbCacheHits        metrics.PercentCounter
 
-	sessionN int64           // total sessions served since boot
-	sessions *cache.LruCache // state kept for sessions FIXME kill it
-	stats    *servantStats   // stats
+	startedAt time.Time
+	sessions  *cache.LruCache // state kept for sessions FIXME kill it
 
-	proxy *proxy.Proxy // remote fae agent
+	proxyMode bool
+	proxy     *proxy.Proxy // remote fae agent
 
 	idgen *idgen.IdGenerator   // global id generator
 	game  *game.Game           // game engine
@@ -57,6 +57,7 @@ type FunServantImpl struct {
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this = &FunServantImpl{conf: cf}
 	this.digitNormalizer = regexp.MustCompile(`\d+`)
+	this.proxyMode = config.Engine.IsProxyOnly()
 
 	// http REST to export internal state
 	if server.Launched() {
@@ -70,21 +71,10 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
 	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
 
-	// stats
-	this.stats = new(servantStats)
-	this.stats.registerMetrics()
 	this.phpReasonPercent = metrics.NewPercentCounter()
 	metrics.Register("php.reason", this.phpReasonPercent)
 	this.dbCacheHits = metrics.NewPercentCounter()
 	metrics.Register("db.cache.hits", this.dbCacheHits)
-
-	// proxy can dynamically auto discover peers
-	if this.conf.Proxy.Enabled() {
-		log.Debug("creating servant: proxy")
-		this.proxy = proxy.New(this.conf.Proxy)
-	} else {
-		panic("peers proxy required")
-	}
 
 	this.createServants()
 
@@ -96,6 +86,8 @@ func (this *FunServantImpl) Start() {
 	go this.proxy.StartMonitorCluster()
 	go this.watchConfigReloaded()
 
+	this.startedAt = time.Now()
+	svtStats.registerMetrics()
 	this.warmUp()
 }
 
@@ -106,8 +98,20 @@ func (this *FunServantImpl) Flush() {
 	log.Trace("servants flushed")
 }
 
+func (this *FunServantImpl) AddErr(n int64) {
+	svtStats.addErr(n)
+}
+
 func (this *FunServantImpl) createServants() {
 	log.Info("creating servants...")
+
+	// proxy can dynamically auto discover peers
+	if this.conf.Proxy.Enabled() {
+		log.Debug("creating servant: proxy")
+		this.proxy = proxy.New(this.conf.Proxy)
+	} else {
+		panic("peers proxy required")
+	}
 
 	log.Debug("creating servant: idgen")
 	var err error
@@ -115,9 +119,6 @@ func (this *FunServantImpl) createServants() {
 	if err != nil {
 		panic(err)
 	}
-
-	log.Debug("creating servant: game")
-	this.game = game.New(this.conf.Game)
 
 	if this.conf.Lcache.Enabled() {
 		log.Debug("creating servant: lcache")
@@ -173,6 +174,9 @@ func (this *FunServantImpl) createServants() {
 		}
 	}
 
+	log.Debug("creating servant: game")
+	this.game = game.New(this.conf.Game, this.rd)
+
 	log.Info("servants created")
 }
 
@@ -187,11 +191,6 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 		if err != nil {
 			panic(err)
 		}
-	}
-
-	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
-		log.Debug("recreating servant: game")
-		this.game = game.New(cf.Game)
 	}
 
 	if cf.Lcache.Enabled() &&
@@ -249,6 +248,11 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 		}
 	}
 
+	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
+		log.Debug("recreating servant: game")
+		this.game = game.New(cf.Game, this.rd)
+	}
+
 	this.conf = cf
 
 	log.Info("servants recreated")
@@ -256,12 +260,14 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 
 func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["sessions"] = atomic.LoadInt64(&this.sessionN)
-	r["call.errs"] = this.stats.callsErr
-	r["call.peer.from"] = this.stats.callsFromPeer
-	r["call.peer.to"] = this.stats.callsToPeer
-	for _, key := range this.stats.calls.Keys() {
-		r["call["+key+"]"] = this.stats.calls.Percent(key)
+	r["sessions"] = atomic.LoadInt64(&svtStats.sessionN)
+	r["call.errs"] = svtStats.callsErr
+	r["call.slow"] = svtStats.callsSlow
+	r["call.peer.from"] = svtStats.callsFromPeer
+	r["call.peer.to"] = svtStats.callsToPeer
+
+	for _, key := range svtStats.calls.Keys() {
+		r["call["+key+"]"] = svtStats.calls.Percent(key)
 	}
 	for _, key := range this.phpReasonPercent.Keys() {
 		r["reason["+key+"]"] = this.phpReasonPercent.Percent(key)
@@ -280,14 +286,15 @@ func (this *FunServantImpl) showStats() {
 	// TODO show most recent stats, reset at some interval
 
 	for _ = range ticker.C {
-		callsN := this.stats.calls.Total()
-		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; errs:%s peer.from:%s, peer.to:%s}",
-			gofmt.Comma(this.sessionN),
+		callsN := svtStats.calls.Total()
+		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
+			gofmt.Comma(svtStats.sessionN),
 			gofmt.Comma(callsN),
-			float64(callsN)/float64(this.sessionN+1), // +1 to avoid divide by zero
-			gofmt.Comma(this.stats.callsErr),
-			gofmt.Comma(this.stats.callsFromPeer),
-			gofmt.Comma(this.stats.callsToPeer))
+			float64(callsN)/float64(svtStats.sessionN+1), // +1 to avoid divide by zero
+			gofmt.Comma(svtStats.callsSlow),
+			gofmt.Comma(svtStats.callsErr),
+			gofmt.Comma(svtStats.callsFromPeer),
+			gofmt.Comma(svtStats.callsToPeer))
 	}
 }
 

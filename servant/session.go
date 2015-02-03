@@ -10,15 +10,15 @@ import (
 )
 
 type session struct {
-	profiler *profiler
 	ctx      *rpc.Context // will stay the same during a session
+	profiler *profiler
 }
 
 func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 	const DIGIT_REPLACED_WITH = "?"
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
-		atomic.AddInt64(&this.sessionN, 1)
+		atomic.AddInt64(&svtStats.sessionN, 1)
 		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 

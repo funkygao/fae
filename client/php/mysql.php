@@ -75,6 +75,33 @@ try {
     echo $rows->rowsAffected, ':rowsAffected, ', $rows->lastInsertId, ':lastInsertId, rows:', PHP_EOL;
     print_r($rows);
 
+    // mysql bulk exec
+    echo "\nDEMO bulk exec\n";
+    echo "===============================\n";
+    $client->my_bulk_exec($ctx, 
+        array('UserShard', 'AllianceShard'),
+        array('UserInfo', 'Alliance'),
+        array(1, 3),
+        array(
+            'UPDATE UserInfo set power=? WHERE uid=?',
+            'UPDATE Alliance set power=? WHERE alliance_id=?',
+        ),
+        array(
+            array(158, 1),
+            array(1508, 3),
+        ),
+        array(
+            '', 
+            '',
+        )
+    );
+
+    // mysql query shards
+    echo "\nDEMO query shards\n";
+    echo "===============================\n";
+    $rows = $client->my_query_shards($ctx, 'UserShard', 'UserInfo', 'SELECT chat_channel FROM UserInfo WHERE uid>?', array(1));
+    print_r($rows);
+
     $transport->close();
 } catch (Exception $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";

@@ -25,6 +25,8 @@ func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 
 	body := fmt.Sprintf(format, args...)
 	if slow {
+		svtStats.incCallSlow()
+
 		header := fmt.Sprintf("SLOW=%s/%s Q=%s ",
 			elapsed, time.Since(this.t0), callName)
 		log.Warn(header + this.truncatedStr(body))

@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// TODO use my own pool, TestOnBorrow is expensive
 type Client struct {
 	breaker *breaker.Consecutive
 
@@ -69,7 +70,10 @@ func (this *Client) Call(cmd string, pool string,
 	}
 
 	key := keysAndArgs[0].(string)
-	addr := this.addr(pool, key)
+	addr, errPoolNotFound := this.addr(pool, key)
+	if errPoolNotFound != nil {
+		return nil, errPoolNotFound
+	}
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
 	if err != nil {
@@ -86,17 +90,19 @@ func (this *Client) Call(cmd string, pool string,
 	case "GET":
 		newVal, err = conn.Do(cmd, key)
 		if newVal == nil {
-			err = ErrorDataNotExists
+			err = ErrKeyNotExist
 		}
 
 	default:
 		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
-	if err != nil && err != ErrorDataNotExists {
+	if err != nil && err != ErrKeyNotExist {
 		log.Error("redis.%s[%s]: %s", cmd, key, err)
+		this.breaker.Fail()
+	} else {
+		this.breaker.Succeed()
 	}
 
-	this.breaker.Succeed()
 	this.locks[pool][addr].Unlock()
 	conn.Close() // return to conn pool
 	return
@@ -123,7 +129,11 @@ func (this *Client) Del(pool, key string) (err error) {
 	return
 }
 
-func (this *Client) addr(pool, key string) string {
-	// FIXME if pool not exists, will panic
-	return this.selectors[pool].PickServer(key)
+func (this *Client) addr(pool, key string) (string, error) {
+	selector, present := this.selectors[pool]
+	if !present {
+		return "", ErrPoolNotFound
+	}
+
+	return selector.PickServer(key), nil
 }

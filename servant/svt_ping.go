@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/server"
+	"time"
 )
 
 func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
@@ -12,16 +13,17 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		this.stats.incErr()
+		svtStats.incErr()
 		return
 	}
 
-	this.stats.inc(IDENT)
+	svtStats.inc(IDENT)
 
-	r = fmt.Sprintf("pong, %s, myid:%d", server.BuildID, this.conf.IdgenWorkerId)
+	r = fmt.Sprintf("ver:%s, build:%s, myid:%d, uptime:%s",
+		server.VERSION, server.BuildID,
+		this.conf.IdgenWorkerId, time.Since(this.startedAt))
 
-	profiler.do(IDENT, ctx, "{pong, %s, myid:%d}",
-		server.BuildID, this.conf.IdgenWorkerId)
+	profiler.do(IDENT, ctx, "{r^%s}", r)
 
 	return
 }

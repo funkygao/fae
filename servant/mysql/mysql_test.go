@@ -55,7 +55,7 @@ func Benc1hmarkSqlExec(b *testing.B) {
 	//my.db.SetMaxIdleConns(100)
 	//my.db.SetMaxOpenConns(1000)
 	for i := 0; i < b.N; i++ {
-		_, _, e := my.ExecSql("UPDATE UserInfo SET gold=? WHERE uid=?", 12, 1)
+		_, _, e := my.Exec("UPDATE UserInfo SET gold=? WHERE uid=?", 12, 1)
 		if e != nil {
 			b.Log(e)
 		}

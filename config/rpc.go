@@ -34,7 +34,7 @@ func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
 	this.Protocol = section.String("protocol", "binary")
 	this.MaxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
 	this.WarnTooManySessionsThreshold = int64(section.Int("warn_too_many_sessions_threshold",
-		1000))
+		3000))
 
 	log.Debug("rpc conf: %+v", *this)
 }

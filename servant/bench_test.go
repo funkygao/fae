@@ -2,6 +2,7 @@ package servant
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
@@ -16,10 +17,29 @@ import (
 
 func setupServant() *FunServantImpl {
 	cf, _ := conf.Load("../etc/faed.cf")
-	section, _ := cf.Section("servants")
-	config.LoadServants(section)
+	config.LoadEngineConfig("../etc/faed.cf", cf)
 	server.LaunchHttpServ(":9999", "")
-	return NewFunServant(config.Servants)
+	return NewFunServant(config.Engine.Servants)
+}
+
+// 683 ns/op
+func BenchmarkSprintfSql(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		fmt.Sprintf("SELECT %s FROM %s WHERE %s", "*", "UserInfo", "uid=?")
+	}
+
+}
+
+// 166 ns/op
+func BenchmarkRawConcatSql(b *testing.B) {
+	b.ReportAllocs()
+	table := "UserInfo"
+	column := "*"
+	where := "uid=?"
+	for i := 0; i < b.N; i++ {
+		_ = "SELECT " + column + " FROM " + table + " WHERE " + where
+	}
 }
 
 // 103 ns/op

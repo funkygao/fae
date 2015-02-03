@@ -8,6 +8,7 @@
     pprof_listen_addr: "localhost:9901"
     cpu_num: "max"
     metrics_logfile: "metrics.log"
+    server_mode: true
 
     rpc: {
         listen_addr: ":9001"
@@ -189,7 +190,7 @@
             namegen_length: 3
             lock_max_items: 1048576
             lock_expires: "5s"
-            redis_server_addr: "127.0.0.1:6379"
+            redis_server_pool: "game"
         }
 
         redis: {
@@ -204,8 +205,30 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 10
-                            idle_timeout: "360s"
+                            max_active: 20
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
+                {
+                    name: "game"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 20
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
+                {
+                    name: "naming"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 20
+                            idle_timeout: "0s"
                         }
                     ]
                 }

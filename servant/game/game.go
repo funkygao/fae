@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant/redis"
 	"github.com/funkygao/metrics"
 )
 
@@ -16,11 +17,11 @@ type Game struct {
 	phpPayloadSize metrics.Histogram // in bytes
 }
 
-func New(cf *config.ConfigGame) *Game {
+func New(cf *config.ConfigGame, redis *redis.Client) *Game {
 	this := new(Game)
 	this.nameGen = newNameGen(cf.NamegenLength)
 	this.lock = newLock(cf)
-	this.register = newRegister(cf)
+	this.register = newRegister(cf, redis)
 
 	this.phpLatency = metrics.NewHistogram(
 		metrics.NewExpDecaySample(1028, 0.015))
@@ -58,4 +59,12 @@ func (this *Game) UpdatePhpPayloadSize(bytes int64) {
 
 func (this *Game) Register(typ string) (int64, error) {
 	return this.register.Register(typ)
+}
+
+func (this *Game) PhpPayloadHistogram() metrics.Histogram {
+	return this.phpPayloadSize
+}
+
+func (this *Game) PhpLatencyHistogram() metrics.Histogram {
+	return this.phpLatency
 }
