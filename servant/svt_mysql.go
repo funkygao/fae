@@ -374,9 +374,6 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 		return
 	}
 
-	// recycle the underlying connection back to conn pool
-	defer rows.Close()
-
 	// pack the result
 	cols, err := rows.Columns()
 	if err != nil {
@@ -386,6 +383,8 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 			pool, table,
 			sql, args,
 			ex)
+
+		rows.Close()
 		return
 	}
 
@@ -403,6 +402,7 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 				pool, table,
 				sql, args,
 				ex)
+			rows.Close()
 			return
 		}
 
@@ -426,6 +426,7 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 			pool, table,
 			sql, args,
 			ex)
+		rows.Close()
 		return
 	}
 
@@ -436,6 +437,8 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 		this.dbCacheHits.Inc("miss", 1)
 		log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
 	}
+
+	rows.Close() // recycle the underlying connection back to conn pool
 
 	return
 }
