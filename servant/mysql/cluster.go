@@ -37,9 +37,12 @@ func (this *MysqlCluster) Conn(pool string, table string,
 	return my.db, nil
 }
 
-func (this *MysqlCluster) QueryShards(pool string, table string, sqlStmt string,
+func (this *MysqlCluster) QueryShards(pool string, table string, querySql string,
 	args []interface{}) (*sql.Rows, error) {
 	r := &sql.Rows{}
+	for _, my := range this.selector.PoolServers(pool) {
+		my.Query(querySql, args...)
+	}
 	// TODO
 	return r, nil
 }

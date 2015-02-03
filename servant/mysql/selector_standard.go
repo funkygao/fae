@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/golib/str"
 	log "github.com/funkygao/log4go"
 	"strconv"
+	"strings"
 )
 
 type StandardServerSelector struct {
@@ -71,7 +72,14 @@ func (this *StandardServerSelector) Servers() []*mysql {
 }
 
 func (this *StandardServerSelector) PoolServers(pool string) []*mysql {
-	return nil
+	r := make([]*mysql, 0)
+	for p, my := range this.clients {
+		// p=UserShard2 pool=UserShard
+		if strings.HasPrefix(p, pool) {
+			r = append(r, my)
+		}
+	}
+	return r
 }
 
 func (this *StandardServerSelector) shardedPool(pool string) bool {
