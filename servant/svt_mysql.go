@@ -390,12 +390,12 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 	} else {
 		r.Cols = cols
 		r.Rows = make([][]string, 0)
+		rawRowValues := make([]sql_.RawBytes, len(cols))
+		scanArgs := make([]interface{}, len(cols))
+		for i, _ := range cols {
+			scanArgs[i] = &rawRowValues[i]
+		}
 		for rows.Next() {
-			rawRowValues := make([]sql_.RawBytes, len(cols))
-			scanArgs := make([]interface{}, len(cols))
-			for i, _ := range cols {
-				scanArgs[i] = &rawRowValues[i]
-			}
 			if ex = rows.Scan(scanArgs...); ex != nil {
 				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 					ident,
