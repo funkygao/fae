@@ -76,25 +76,20 @@ func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table s
 	for i, arg := range args {
 		iargs[i] = arg
 	}
-	rows, err := this.my.QueryShards(pool, table, sql, iargs)
+	cols, rows, err := this.my.QueryShards(pool, table, sql, iargs)
 	if err != nil {
+		svtStats.incErr()
 		ex = err
 		return
 	}
 
-	// TODO
+	r = rpc.NewMysqlResult()
+	r.Cols = cols
+	r.Rows = rows
 
-	if ex != nil {
-		svtStats.incErr()
-
-		profiler.do(IDENT, ctx,
-			"{pool^%s table^%s sql^%s args^%+v} {err^%s}",
-			pool, table, sql, args, ex)
-	} else {
-		profiler.do(IDENT, ctx,
-			"{pool^%s table^%s sql^%s args^%+v} {rows^%d r^%+v}",
-			pool, table, sql, args, rows, *r)
-	}
+	profiler.do(IDENT, ctx,
+		"{pool^%s table^%s sql^%s args^%+v} {rows^%d r^%+v}",
+		pool, table, sql, args, len(rows), *r)
 
 	return
 }

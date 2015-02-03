@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"database/sql"
+	sql_ "database/sql"
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
 	"time"
@@ -28,7 +28,7 @@ func New(cf *config.ConfigMysql) *MysqlCluster {
 }
 
 func (this *MysqlCluster) Conn(pool string, table string,
-	hintId int) (*sql.DB, error) {
+	hintId int) (*sql_.DB, error) {
 	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return nil, err
@@ -37,18 +37,63 @@ func (this *MysqlCluster) Conn(pool string, table string,
 	return my.db, nil
 }
 
-func (this *MysqlCluster) QueryShards(pool string, table string, querySql string,
-	args []interface{}) (*sql.Rows, error) {
-	r := &sql.Rows{}
+func (this *MysqlCluster) QueryShards(pool string, table string, sql string,
+	args []interface{}) (cols []string, rows [][]string, ex error) {
+	rows = make([][]string, 0)
+	var (
+		rawRowValues []sql_.RawBytes
+		scanArgs     []interface{}
+		rowValues    []string
+	)
+	// TODO query in parallel
 	for _, my := range this.selector.PoolServers(pool) {
-		my.Query(querySql, args...)
+		rs, err := my.Query(sql, args...)
+		if err != nil {
+			ex = err
+			return
+		}
+
+		if len(cols) == 0 {
+			cols, ex = rs.Columns()
+			if ex != nil {
+				rs.Close()
+				return
+			}
+
+			rawRowValues = make([]sql_.RawBytes, len(cols))
+			scanArgs = make([]interface{}, len(cols))
+			for i, _ := range cols {
+				scanArgs[i] = &rawRowValues[i]
+			}
+		}
+
+		for rs.Next() {
+			if ex = rs.Scan(scanArgs...); ex != nil {
+				rs.Close()
+				return
+			}
+
+			rowValues = make([]string, len(cols))
+			// TODO O(N), room for optimization
+			for i, raw := range rawRowValues {
+				if raw == nil {
+					rowValues[i] = "NULL"
+				} else {
+					rowValues[i] = string(raw)
+				}
+			}
+
+			rows = append(rows, rowValues)
+		}
+
+		rs.Close()
 	}
-	// TODO
-	return r, nil
+
+	return
 }
 
 func (this *MysqlCluster) Query(pool string, table string, hintId int,
-	sql string, args []interface{}) (*sql.Rows, error) {
+	sql string, args []interface{}) (*sql_.Rows, error) {
 	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return nil, err

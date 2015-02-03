@@ -96,6 +96,12 @@ try {
         )
     );
 
+    // mysql query shards
+    echo "\nDEMO query shards\n";
+    echo "===============================\n";
+    $rows = $client->my_query_shards($ctx, 'UserShard', 'UserInfo', 'SELECT chat_channel FROM UserInfo WHERE uid>?', array(1));
+    print_r($rows);
+
     $transport->close();
 } catch (Exception $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";
