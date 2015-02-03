@@ -177,7 +177,7 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 	r = this.game.OnlineStatus(uids)
 
 	// then, get online status in the whole cluster(self excluded)
-	remoteSvts, err := this.proxy.RemoteServants()
+	remoteSvts, err := this.proxy.RemoteServants(true)
 	if err != nil {
 		ex = err
 		return

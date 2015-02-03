@@ -173,18 +173,23 @@ func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
 	return this.remotePeerPools[peerAddr].Get()
 }
 
-func (this *Proxy) RemoteServants() ([]*FunServantPeer, error) {
+func (this *Proxy) RemoteServants(haltOnErr bool) ([]*FunServantPeer, error) {
 	r := make([]*FunServantPeer, 0)
-	for _, pool := range this.remotePeerPools {
+	for addr, pool := range this.remotePeerPools {
 		pool.nextTxn()
 
 		svt, err := pool.Get()
 		if err != nil {
-			return nil, err
+			if haltOnErr {
+				return nil, err
+			} else {
+				log.Error("RemoteServants[%s]: %s", addr, err)
+			}
+		} else {
+			r = append(r, svt)
 		}
-
-		r = append(r, svt)
 	}
+
 	return r, nil
 }
 
