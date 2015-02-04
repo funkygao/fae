@@ -143,71 +143,84 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 }
 
 // Get or create a fae peer servant based on peer address
-func (this *Proxy) ServantByAddr(peerAddr string) (*FunServantPeer, error) {
+func (this *Proxy) ServantByAddr(peerAddr string) (svt *FunServantPeer, err error) {
 	this.addRemotePeerIfNecessary(peerAddr)
 
-	log.Debug("servant by addr[%s]: {txn:%d}", peerAddr,
-		this.remotePeerPools[peerAddr].nextTxn())
-	svt, err := this.remotePeerPools[peerAddr].Get()
-	if err != nil {
-		if svt != nil {
-			if IsIoError(err) {
-				svt.Close()
-			}
-			svt.Recycle()
-		}
+	this.remotePeerPools[peerAddr].nextTxn()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("ServantByAddr[%s].%d: %v", peerAddr, i, err)
 
-		return nil, err
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+		}
 	}
 
-	return svt, err
+	return
 }
 
 // Simulate a simple load balance
-func (this *Proxy) RandServant() (*FunServantPeer, error) {
+func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
 	peerAddr := this.selector.RandPeer()
 	if peerAddr == this.cf.SelfAddr {
 		return nil, nil
 	}
 
 	this.remotePeerPools[peerAddr].nextTxn()
-	svt, err := this.remotePeerPools[peerAddr].Get()
-	if err != nil {
-		if svt != nil {
-			if IsIoError(err) {
-				svt.Close()
-			}
-			svt.Recycle()
-		}
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("RandServant.%d: %v", i, err)
 
-		return nil, err
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+
+		}
 	}
 
-	return svt, err
+	return
 }
 
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
-func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
+func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
 	peerAddr := this.selector.PickPeer(key)
 	if peerAddr == this.cf.SelfAddr {
 		return nil, nil
 	}
 
 	this.remotePeerPools[peerAddr].nextTxn()
-	svt, err := this.remotePeerPools[peerAddr].Get()
-	if err != nil {
-		if svt != nil {
-			if IsIoError(err) {
-				svt.Close()
-			}
-			svt.Recycle()
-		}
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			// found a valid conn
+			break
+		} else {
+			log.Error("ServantByKey[%s].%d: %v", key, i, err)
 
-		return nil, err
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+		}
 	}
 
-	return svt, err
+	return
 }
 
 // Remote only, self not inclusive
