@@ -183,34 +183,39 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 	r = this.game.OnlineStatus(uids)
 
 	// then, get online status in the whole cluster(self excluded)
-	remoteSvts, err := this.proxy.RemoteServants(true)
-	if err != nil {
-		ex = err
-		for _, svt := range remoteSvts {
-			svt.Recycle()
-		}
-		return
-	}
-
-	for _, svt := range remoteSvts {
-		onlines, err := svt.GmPresence(ctx, uids)
+	if !ctx.IsSetSticky() {
+		remoteSvts, err := this.proxy.RemoteServants(true)
 		if err != nil {
-			log.Error("%s: %s", IDENT, err)
-			if proxy.IsIoError(err) {
-				svt.Close()
+			ex = err
+			svtStats.incErr()
+			for _, svt := range remoteSvts {
+				svt.Recycle()
 			}
+			return
+		}
+
+		for _, svt := range remoteSvts {
+			svt.HijackContext(ctx) // don't bounce the call back again
+
+			onlines, err := svt.GmPresence(ctx, uids)
+			if err != nil {
+				log.Error("%s: %s", IDENT, err)
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+				continue // skip the remote err
+			}
+
+			for i, online := range onlines {
+				if online {
+					// in the cluster, if any peer vote for a user online, he's online
+					r[i] = true
+				}
+			}
+
 			svt.Recycle()
-			continue // skip the remote err
 		}
-
-		for i, online := range onlines {
-			if online {
-				// in the cluster, if any peer vote for a user online, he's online
-				r[i] = true
-			}
-		}
-
-		svt.Recycle()
 	}
 
 	profiler.do(IDENT, ctx, "{uids^%v} {r^%v}", uids, r)
