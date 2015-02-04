@@ -38,7 +38,7 @@
             pool_capacity: 50
             io_timeout: "0s"
             idle_timeout: "0s"
-            diagnostic_interval: "10s"
+            diagnostic_interval: "5s"
             borrow_max_seconds: 10
             buffer_size: 4096
             tcp_nodelay: true
@@ -205,7 +205,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]
@@ -216,7 +216,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]
@@ -227,7 +227,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]

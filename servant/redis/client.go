@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
-	log "github.com/funkygao/log4go"
 	"github.com/funkygao/redigo/redis"
 	"sync"
 	"time"
@@ -79,7 +78,6 @@ func (this *Client) Call(cmd string, pool string,
 	if err != nil {
 		conn.Close()
 		this.breaker.Fail() // conn err is always system err
-		log.Error("redis.%s[%s] conn: %s", cmd, key, err)
 		return
 	}
 
@@ -97,7 +95,6 @@ func (this *Client) Call(cmd string, pool string,
 		newVal, err = conn.Do(cmd, keysAndArgs...)
 	}
 	if err != nil && err != ErrKeyNotExist {
-		log.Error("redis.%s[%s]: %s", cmd, key, err)
 		this.breaker.Fail()
 	} else {
 		this.breaker.Succeed()
