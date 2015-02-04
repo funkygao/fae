@@ -205,7 +205,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]
@@ -216,7 +216,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]
@@ -227,7 +227,7 @@
                         {
                             addr: "127.0.0.1:6379"
                             max_idle: 5
-                            max_active: 20
+                            max_active: 50
                             idle_timeout: "0s"
                         }
                     ]
