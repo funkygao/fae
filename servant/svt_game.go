@@ -186,6 +186,9 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 	remoteSvts, err := this.proxy.RemoteServants(true)
 	if err != nil {
 		ex = err
+		for _, svt := range remoteSvts {
+			svt.Recycle()
+		}
 		return
 	}
 
