@@ -35,11 +35,11 @@
         profiler_rate: 1
 
         proxy: {
-            pool_capacity: 50
+            pool_capacity: 300
             io_timeout: "0s"
             idle_timeout: "0s"
             diagnostic_interval: "5s"
-            borrow_max_seconds: 10
+            borrow_max_seconds: 4
             buffer_size: 4096
             tcp_nodelay: true
         }
