@@ -34,6 +34,7 @@ client/go/broken/broken
 faed.lock
 *.class
 etc/faed.cf
+etc/faed.cf.rc
 client/go/pingfae/pingfae
 metrics.log
 panic.dump

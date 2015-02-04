@@ -1,17 +1,17 @@
 {
     etcd_servers: [
-        "127.0.0.1:2181",
+        {etcd_servers}
     ]
 
     reload_watchdog_interval: "1s"
-    http_listen_addr: ":9101"
-    pprof_listen_addr: "localhost:9901"
+    http_listen_addr: {http_listen_addr}
+    pprof_listen_addr: {pprof_listen_addr}
     cpu_num: "max"
-    metrics_logfile: "metrics.log"
+    metrics_logfile: {metrics_logfile}
     server_mode: true
 
     rpc: {
-        listen_addr: ":9001"
+        listen_addr: {rpc_listen_addr}
         // protocol: binary | json | simplejson | compact
         protocol: "binary"
         framed: false
@@ -25,7 +25,7 @@
     }
 
     servants: {
-        idgen_worker_id: 1
+        idgen_worker_id: {idgen_worker_id}
 
         session_max_items: 20000
         stats_output_interval: "10m"
@@ -52,7 +52,7 @@
             cache_store: "mem"
             cache_key_hash: false
             cache_store_mem_max_items: 1073741824
-            cache_store_redis_pool: "db_cache"
+            //cache_store_redis_pool: "db_cache"
             json_merge_max_outstanding_items: 8388608
             shard_strategy: "standard"
 
