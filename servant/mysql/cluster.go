@@ -54,6 +54,7 @@ func (this *MysqlCluster) QueryShards(pool string, table string, sql string,
 		}
 
 		if len(cols) == 0 {
+			// initialize the vars only once
 			cols, ex = rs.Columns()
 			if ex != nil {
 				rs.Close()

@@ -374,9 +374,6 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 		return
 	}
 
-	// recycle the underlying connection back to conn pool
-	defer rows.Close()
-
 	// pack the result
 	cols, err := rows.Columns()
 	if err != nil {
@@ -386,55 +383,62 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 			pool, table,
 			sql, args,
 			ex)
+
+		rows.Close()
 		return
-	} else {
-		r.Cols = cols
-		r.Rows = make([][]string, 0)
-		rawRowValues := make([]sql_.RawBytes, len(cols))
-		scanArgs := make([]interface{}, len(cols))
-		for i, _ := range cols {
-			scanArgs[i] = &rawRowValues[i]
-		}
-		for rows.Next() {
-			if ex = rows.Scan(scanArgs...); ex != nil {
-				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-					ident,
-					pool, table,
-					sql, args,
-					ex)
-				return
-			}
+	}
 
-			rowValues := make([]string, len(cols))
-			for i, raw := range rawRowValues {
-				if raw == nil {
-					rowValues[i] = "NULL"
-				} else {
-					rowValues[i] = string(raw)
-				}
-			}
-
-			r.Rows = append(r.Rows, rowValues)
-		}
-
-		// check for errors after we’re done iterating over the rows
-		if ex = rows.Err(); ex != nil {
+	r.Cols = cols
+	r.Rows = make([][]string, 0)
+	rawRowValues := make([]sql_.RawBytes, len(cols))
+	scanArgs := make([]interface{}, len(cols))
+	for i, _ := range cols {
+		scanArgs[i] = &rawRowValues[i]
+	}
+	for rows.Next() {
+		if ex = rows.Scan(scanArgs...); ex != nil {
 			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
 				ident,
 				pool, table,
 				sql, args,
 				ex)
+			rows.Close()
 			return
 		}
 
-		// query success, set cache: even when empty data returned
-		if cacheKey != "" {
-			this.dbCacheStore.Set(cacheKey, r)
-
-			this.dbCacheHits.Inc("miss", 1)
-			log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
+		rowValues := make([]string, len(cols))
+		// TODO optimize to discard the loop O(n)
+		for i, raw := range rawRowValues {
+			if raw == nil {
+				rowValues[i] = "NULL"
+			} else {
+				rowValues[i] = string(raw)
+			}
 		}
+
+		r.Rows = append(r.Rows, rowValues)
 	}
+
+	// check for errors after we’re done iterating over the rows
+	if ex = rows.Err(); ex != nil {
+		log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+			ident,
+			pool, table,
+			sql, args,
+			ex)
+		rows.Close()
+		return
+	}
+
+	// query success, set cache: even when empty data returned
+	if cacheKey != "" {
+		this.dbCacheStore.Set(cacheKey, r)
+
+		this.dbCacheHits.Inc("miss", 1)
+		log.Debug("Q=%s cache[%s] miss", ident, cacheKey)
+	}
+
+	rows.Close() // recycle the underlying connection back to conn pool
 
 	return
 }
