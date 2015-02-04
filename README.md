@@ -86,6 +86,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   ServantByAddr/ServantByKey loop pool capacity till found a valid svt
 *   optimize mysql query, iterate each row to transform to string/null
 *   start fae, then restart remote peer, then call ServantByKey, see what happens
 *   session.profiler should not be pointer, reduce GC overhead
