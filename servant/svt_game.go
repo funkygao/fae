@@ -187,6 +187,7 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 		onlines, err := svt.GmPresence(ctx, uids)
 		if err != nil {
 			log.Error("%s: %s", IDENT, err)
+			svt.Close()
 			continue // skip the remote err
 		}
 
@@ -196,6 +197,8 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 				r[i] = true
 			}
 		}
+
+		svt.Close()
 	}
 
 	profiler.do(IDENT, ctx, "{uids^%v} {r^%v}", uids, r)
