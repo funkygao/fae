@@ -90,6 +90,12 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 		if err != nil {
 			ex = err
 			svtStats.incErr()
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
 			return
 		}
 
@@ -187,6 +193,10 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 		onlines, err := svt.GmPresence(ctx, uids)
 		if err != nil {
 			log.Error("%s: %s", IDENT, err)
+			if proxy.IsIoError(err) {
+				svt.Close()
+			}
+			svt.Recycle()
 			continue // skip the remote err
 		}
 
@@ -196,6 +206,8 @@ func (this FunServantImpl) GmPresence(ctx *rpc.Context,
 				r[i] = true
 			}
 		}
+
+		svt.Recycle()
 	}
 
 	profiler.do(IDENT, ctx, "{uids^%v} {r^%v}", uids, r)
@@ -224,6 +236,12 @@ func (this *FunServantImpl) GmLock(ctx *rpc.Context,
 		if err != nil {
 			ex = err
 			svtStats.incErr()
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
 			return
 		}
 
@@ -279,6 +297,12 @@ func (this *FunServantImpl) GmUnlock(ctx *rpc.Context,
 		if err != nil {
 			ex = err
 			svtStats.incErr()
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
 			return
 		}
 

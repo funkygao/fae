@@ -2,6 +2,7 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/idgen"
 	log "github.com/funkygao/log4go"
 )
@@ -15,10 +16,18 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 		svt, err := this.peerServantRand(ctx)
 		if err != nil {
 			ex = err
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+
+				svt.Recycle()
+			}
 			return
 		}
 
 		r, backwards, ex = svt.IdNext(ctx)
+		svt.Recycle()
 		return
 	}
 
@@ -51,10 +60,18 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 		svt, err := this.peerServantRand(ctx)
 		if err != nil {
 			ex = err
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+
+				svt.Recycle()
+			}
 			return
 		}
 
 		r, ex = svt.IdNextWithTag(ctx, tag)
+		svt.Recycle()
 		return
 	}
 
