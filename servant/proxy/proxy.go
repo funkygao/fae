@@ -20,7 +20,7 @@ type Proxy struct {
 	clusterTopologyReady bool
 	clusterTopologyChan  chan bool
 
-	remotePeerPools map[string]*funServantPeerPool // key is peerAddr
+	remotePeerPools map[string]*funServantPeerPool // key is peerAddr, self not inclusive
 	selector        PeerSelector
 }
 
@@ -39,6 +39,12 @@ func New(cf *config.ConfigProxy) *Proxy {
 
 func NewWithDefaultConfig() *Proxy {
 	return New(config.NewDefaultProxy())
+}
+
+func NewWithPoolCapacity(capacity int) *Proxy {
+	cf := config.NewDefaultProxy()
+	cf.PoolCapacity = capacity
+	return New(cf)
 }
 
 func (this *Proxy) Enabled() bool {
@@ -95,19 +101,11 @@ func (this *Proxy) AwaitClusterTopologyReady() {
 func (this *Proxy) refreshPeers(peers []string) {
 	// add all latest peers
 	for _, peerAddr := range peers {
-		if peerAddr == this.cf.SelfAddr {
-			continue
-		}
-
 		this.addRemotePeerIfNecessary(peerAddr)
 	}
 
 	// kill died peers
 	for peerAddr, _ := range this.remotePeerPools {
-		if peerAddr == this.cf.SelfAddr {
-			continue
-		}
-
 		alive := false
 		for _, p := range peers {
 			if p == peerAddr {
@@ -126,10 +124,13 @@ func (this *Proxy) refreshPeers(peers []string) {
 			this.mutex.Unlock()
 		}
 	}
-
 }
 
 func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
+	if peerAddr == this.cf.SelfAddr {
+		return
+	}
+
 	this.mutex.Lock()
 
 	if _, present := this.remotePeerPools[peerAddr]; !present {
@@ -142,37 +143,87 @@ func (this *Proxy) addRemotePeerIfNecessary(peerAddr string) {
 }
 
 // Get or create a fae peer servant based on peer address
-func (this *Proxy) ServantByAddr(peerAddr string) (*FunServantPeer, error) {
+func (this *Proxy) ServantByAddr(peerAddr string) (svt *FunServantPeer, err error) {
 	this.addRemotePeerIfNecessary(peerAddr)
 
-	log.Debug("servant by addr[%s]: {txn:%d}", peerAddr,
-		this.remotePeerPools[peerAddr].nextTxn())
-	return this.remotePeerPools[peerAddr].Get()
+	this.remotePeerPools[peerAddr].nextTxn()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("ServantByAddr[%s].%d: %v", peerAddr, i, err)
+
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+		}
+	}
+
+	return
 }
 
 // Simulate a simple load balance
-func (this *Proxy) RandServant() (*FunServantPeer, error) {
+func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
 	peerAddr := this.selector.RandPeer()
 	if peerAddr == this.cf.SelfAddr {
 		return nil, nil
 	}
 
 	this.remotePeerPools[peerAddr].nextTxn()
-	return this.remotePeerPools[peerAddr].Get()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("RandServant.%d: %v", i, err)
+
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+
+		}
+	}
+
+	return
 }
 
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
-func (this *Proxy) ServantByKey(key string) (*FunServantPeer, error) {
+func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
 	peerAddr := this.selector.PickPeer(key)
 	if peerAddr == this.cf.SelfAddr {
 		return nil, nil
 	}
 
 	this.remotePeerPools[peerAddr].nextTxn()
-	return this.remotePeerPools[peerAddr].Get()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			// found a valid conn
+			break
+		} else {
+			log.Error("ServantByKey[%s].%d: %v", key, i, err)
+
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+		}
+	}
+
+	return
 }
 
+// Remote only, self not inclusive
 func (this *Proxy) RemoteServants(haltOnErr bool) ([]*FunServantPeer, error) {
 	r := make([]*FunServantPeer, 0)
 	for addr, pool := range this.remotePeerPools {
@@ -180,6 +231,13 @@ func (this *Proxy) RemoteServants(haltOnErr bool) ([]*FunServantPeer, error) {
 
 		svt, err := pool.Get()
 		if err != nil {
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+
 			if haltOnErr {
 				return nil, err
 			} else {
@@ -195,7 +253,7 @@ func (this *Proxy) RemoteServants(haltOnErr bool) ([]*FunServantPeer, error) {
 
 // peer addresses in the cluster
 func (this *Proxy) ClusterPeers() []string {
-	addrs := make([]string, 0)
+	addrs := make([]string, 0, len(this.remotePeerPools))
 	for addr, _ := range this.remotePeerPools {
 		addrs = append(addrs, addr)
 	}
@@ -227,12 +285,12 @@ func (this *Proxy) Warmup() {
 	t0 := time.Now()
 	for _, peerPool := range this.remotePeerPools {
 		for i := 0; i < this.cf.PoolCapacity; i++ {
-			conn, err := peerPool.Get()
-			if conn != nil {
+			svt, err := peerPool.Get()
+			if svt != nil {
 				if err != nil {
-					conn.Close()
+					svt.Close()
 				}
-				conn.Recycle()
+				svt.Recycle()
 			}
 		}
 	}

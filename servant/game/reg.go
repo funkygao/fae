@@ -68,7 +68,7 @@ func (this *Register) Register(typ string) (int64, error) {
 	currKey := fmt.Sprintf("reg.%s.%d", typ, this.currentShards[typ])
 	n, err := _redis.Int(this.redis.Call("INCR", this.cf.RedisServerPool, currKey))
 	if err != nil {
-		log.Error("%s[%s]: %s", IDENT, typ, err)
+		log.Error("%s[%s]: %s", IDENT, currKey, err)
 		return 0, err
 	}
 
