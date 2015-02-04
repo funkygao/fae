@@ -141,6 +141,12 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			if err != nil {
 				ex = err
 				svtStats.incErr()
+				if svt != nil {
+					if proxy.IsIoError(err) {
+						svt.Close()
+					}
+					svt.Recycle()
+				}
 				return
 			}
 
@@ -211,6 +217,12 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 		if err != nil {
 			ex = err
 			svtStats.incErr()
+			if svt != nil {
+				if proxy.IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
 			return
 		}
 
