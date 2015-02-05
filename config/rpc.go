@@ -8,7 +8,6 @@ import (
 
 type ConfigRpc struct {
 	ListenAddr                   string
-	SessionSlowThreshold         time.Duration // per session
 	SessionTimeout               time.Duration
 	IoTimeout                    time.Duration
 	BufferSize                   int // network IO read/write buffer
@@ -25,7 +24,6 @@ func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
 		panic("Empty listen_addr")
 	}
 
-	this.SessionSlowThreshold = section.Duration("session_slow_threshold", 10*time.Second)
 	this.SessionTimeout = section.Duration("session_timeout", 30*time.Second)
 	this.IoTimeout = section.Duration("io_timeout", 2*time.Second)
 	this.StatsOutputInterval = section.Duration("stats_output_interval", 10*time.Second)

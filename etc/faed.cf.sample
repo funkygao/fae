@@ -19,7 +19,6 @@
         max_outstanding_sessions: 10000
         warn_too_many_sessions_threshold: 3000
         session_timeout: "0s"
-        session_slow_threshold: "8s"
         io_timeout: "4s"
         stats_output_interval: "10m"
     }
@@ -30,7 +29,7 @@
         session_max_items: 20000
         stats_output_interval: "10m"
         profiler_max_body_size: 600
-        call_slow_threshold: "200ms"
+        call_slow_threshold: "1s"
         // 100/10000 = 1%
         profiler_rate: 1
 
