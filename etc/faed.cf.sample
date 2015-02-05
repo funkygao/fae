@@ -56,8 +56,8 @@
             shard_strategy: "standard"
 
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
 
             lookup_cache_max_items: 1048576
@@ -149,8 +149,8 @@
             max_idle_conns_per_server: 20
             max_conns_per_server: 50
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             servers: [
                 {
@@ -194,8 +194,8 @@
 
         redis: {
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             pools: [
                 {
@@ -241,8 +241,8 @@
             timeout: "4s"
             replica_num: 2
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             servers: [
                 {
