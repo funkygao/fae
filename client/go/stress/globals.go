@@ -27,4 +27,5 @@ var (
 	host            string
 	verbose         int
 	zk              string
+	testPool        bool
 )

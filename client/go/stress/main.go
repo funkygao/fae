@@ -32,6 +32,7 @@ func parseFlag() {
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
+	flag.BoolVar(&testPool, "testpool", false, "test pool")
 	flag.Usage = showUsage
 	flag.Parse()
 }
@@ -46,8 +47,10 @@ func main() {
 	proxy.AwaitClusterTopologyReady()
 
 	// test pool
-	testServantPool(proxy)
-	pause("pool tested")
+	if testPool {
+		testServantPool(proxy)
+		pause("pool tested")
+	}
 
 	go report.run()
 
