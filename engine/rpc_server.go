@@ -182,11 +182,10 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 				|- TProtocolException (BAD_VERSION), it should never be thrown, we skip it
 				|- TTransportException
 		*/
-		err, isTransportEx := ex.(thrift.TTransportException)
-		if isTransportEx {
+		if err, isTransportEx := ex.(thrift.TTransportException); isTransportEx {
 			if err.TypeId() != thrift.END_OF_FILE {
-				// e,g. connection reset by peer
-				// e,g. broken pipe
+				// e,g. connection reset by peer: read a socket that was closed by peer
+				// e,g. broken pipe: write to socket that was closed by peer
 				// e,g. read tcp i/o timeout
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
 				errsN++
