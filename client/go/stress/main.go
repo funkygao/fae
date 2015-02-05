@@ -66,12 +66,13 @@ func main() {
 	}
 
 	elapsed := time.Since(t1)
-	log.Printf("Elapsed: %s, calls: {%s, %.1f/s}, sessions: {%s, %.1f/s}, errors: {conn:%d, call:%d}",
+	log.Printf("Elapsed: %s, calls: {%s, %.1f/s}, sessions: {%s, %.1f/s}, errors: {conn:%d, io:%d call:%d}",
 		elapsed,
 		gofmt.Comma(report.callOk),
 		float64(report.callOk)/elapsed.Seconds(),
 		gofmt.Comma(int64(report.sessionN)),
 		float64(report.sessionN)/elapsed.Seconds(),
 		report.connErrs,
+		report.ioErrs,
 		report.callErrs)
 }

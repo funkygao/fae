@@ -15,6 +15,7 @@ type stats struct {
 	callErrs    int64
 	callOk      int64
 	connErrs    int64
+	ioErrs      int64
 }
 
 func (this *stats) incCallErr() {
@@ -31,6 +32,10 @@ func (this *stats) incSessions() {
 
 func (this *stats) incConnErrs() {
 	atomic.AddInt64(&this.connErrs, 1)
+}
+
+func (this *stats) incIoErrs() {
+	atomic.AddInt64(&this.ioErrs, 1)
 }
 
 func (this *stats) updateConcurrency(delta int32) {
