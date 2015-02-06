@@ -12,6 +12,7 @@ import (
 
 // TODO use my own pool, TestOnBorrow is expensive
 type Client struct {
+	cf      *config.ConfigRedis
 	breaker *breaker.Consecutive
 
 	selectors map[string]ServerSelector         // key is pool name
@@ -21,6 +22,7 @@ type Client struct {
 
 func New(cf *config.ConfigRedis) *Client {
 	this := new(Client)
+	this.cf = cf
 	this.selectors = make(map[string]ServerSelector)
 	this.conns = make(map[string]map[string]*redis.Pool)
 	this.locks = make(map[string]map[string]*sync.Mutex)
@@ -139,6 +141,20 @@ func (this *Client) addr(pool, key string) (string, error) {
 
 func (this *Client) Warmup() {
 	t1 := time.Now()
+	for poolName, pool := range this.conns {
+		for addr, conn := range pool {
+			for i := 0; i < this.cf.Servers[poolName][addr].MaxActive; i++ {
+				log.Debug("redis connecting: %s.%s", poolName, addr)
+				c := conn.Get()
+				if c.Err() != nil {
+					log.Error("redis[%s][%s]: %v", poolName, addr, c.Err())
+					continue
+				}
+				c.Do("PING")
+				defer c.Close()
+			}
+		}
+	}
 	log.Debug("Redis warmup within %s: %+v",
 		time.Since(t1), this.selectors)
 }
