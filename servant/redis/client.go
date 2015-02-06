@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
+	log "github.com/funkygao/log4go"
 	"github.com/funkygao/redigo/redis"
 	"sync"
 	"time"
@@ -73,6 +74,7 @@ func (this *Client) Call(cmd string, pool string,
 	if errPoolNotFound != nil {
 		return nil, errPoolNotFound
 	}
+
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
 	if err != nil {
@@ -133,4 +135,10 @@ func (this *Client) addr(pool, key string) (string, error) {
 	}
 
 	return selector.PickServer(key), nil
+}
+
+func (this *Client) Warmup() {
+	t1 := time.Now()
+	log.Debug("Redis warmup within %s: %+v",
+		time.Since(t1), this.selectors)
 }

@@ -23,5 +23,9 @@ func (this *FunServantImpl) warmUp() {
 		this.proxy.Warmup()
 	}
 
+	if this.rd != nil {
+		this.rd.Warmup()
+	}
+
 	log.Debug("warmup done")
 }
