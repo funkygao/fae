@@ -44,7 +44,8 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	var enableLog = false
-	if sampling(SampleRate) || Concurrency == 1 {
+	if !logTurnOff &&
+		(sampling(SampleRate) || Concurrency == 1) {
 		enableLog = true
 	}
 
@@ -225,7 +226,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if true {
 				var rows *rpc.MysqlResult
 				rows, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
-					"SELECT * FROM UserInfo WHERE uid=?",
+					"SELECT * FROM UserInfo WHERE uid>?",
 					[]string{"1"}, "")
 				if err != nil {
 					checkIoError(err)

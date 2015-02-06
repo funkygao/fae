@@ -28,4 +28,5 @@ var (
 	verbose         int
 	zk              string
 	testPool        bool
+	logTurnOff      bool
 )

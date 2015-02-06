@@ -26,13 +26,14 @@ func init() {
 func parseFlag() {
 	flag.IntVar(&LoopsPerSession, "loop", 1, "loops for each session")
 	flag.IntVar(&Concurrency, "c", 3000, "concurrent num")
-	flag.IntVar(&SampleRate, "s", Concurrency, "sampling rate")
-	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.IntVar(&Rounds, "n", 10, "rounds")
+	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
 	flag.IntVar(&verbose, "v", 0, "verbose level")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.BoolVar(&testPool, "testpool", false, "test pool")
+	flag.BoolVar(&logTurnOff, "logoff", false, "only show progress instead of rpc result")
+	flag.IntVar(&SampleRate, "s", Concurrency*Rounds*LoopsPerSession+100, "log sampling rate")
 	flag.Usage = showUsage
 	flag.Parse()
 }
