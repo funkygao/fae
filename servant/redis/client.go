@@ -143,13 +143,14 @@ func (this *Client) Warmup() {
 	t1 := time.Now()
 	for poolName, pool := range this.conns {
 		for addr, conn := range pool {
+			log.Debug("redis pool[%s] connecting: %s", poolName, addr)
 			for i := 0; i < this.cf.Servers[poolName][addr].MaxActive; i++ {
-				log.Debug("redis connecting: %s.%s", poolName, addr)
 				c := conn.Get()
 				if c.Err() != nil {
 					log.Error("redis[%s][%s]: %v", poolName, addr, c.Err())
 					continue
 				}
+
 				c.Do("PING")
 				defer c.Close()
 			}
