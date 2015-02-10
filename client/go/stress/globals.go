@@ -8,6 +8,7 @@ const (
 	CallMongo
 	CallMysql
 	CallGame
+	CallRedis
 
 	CallPingIdgen   = CallPing | CallIdGen
 	CallIdgenLcache = CallIdGen | CallLCache

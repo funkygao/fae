@@ -201,6 +201,23 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 		}
 
+		if Cmd&CallRedis != 0 {
+			shardId, err := client.GmRegister(ctx, "u")
+			if err != nil {
+				checkIoError(err)
+				report.incCallErr()
+				log.Printf("session{round^%d seq^%d GmRegister}: %v", round, seq, err)
+				client.Close()
+				return
+			} else {
+				if enableLog {
+					log.Printf("session{round^%d seq^%d GmRegister}: %d",
+						round, seq, shardId)
+				}
+				report.incCallOk()
+			}
+		}
+
 		if Cmd&CallMysql != 0 {
 			// with cache
 			if true {
