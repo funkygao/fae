@@ -86,6 +86,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   change ctx.rid from string to int64, proxy servant rid generation mechanism
 *   name3 found dup names, bug
 *   optimize mysql query, iterate each row to transform to string/null
 *   start fae, then restart remote peer, then call ServantByKey, see what happens
