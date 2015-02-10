@@ -41,6 +41,7 @@ func parseFlag() {
 func main() {
 	cf := config.NewDefaultProxy()
 	cf.PoolCapacity = Concurrency
+	cf.IoTimeout = time.Hour
 	proxy := proxy.New(cf)
 
 	etclib.Dial([]string{zk})
