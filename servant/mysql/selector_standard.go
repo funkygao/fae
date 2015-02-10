@@ -7,6 +7,7 @@ import (
 	log "github.com/funkygao/log4go"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type StandardServerSelector struct {
@@ -35,10 +36,25 @@ func newStandardServerSelector(cf *config.ConfigMysql) (this *StandardServerSele
 			my.breaker.Fail()
 		}
 
-		my.db.SetMaxIdleConns(cf.MaxIdleConnsPerServer)
-		// TODO https://code.google.com/p/go/source/detail?r=8a7ac002f840
-		my.db.SetMaxOpenConns(cf.MaxConnsPerServer)
-		this.clients[server.Pool] = my
+		if !my.breaker.Open() {
+			my.db.SetMaxIdleConns(cf.MaxIdleConnsPerServer)
+			// TODO https://code.google.com/p/go/source/detail?r=8a7ac002f840
+			my.db.SetMaxOpenConns(cf.MaxConnsPerServer)
+			this.clients[server.Pool] = my
+
+			if cf.MaxIdleTime > 0 {
+				go func() {
+					for _ = range time.Tick(cf.MaxIdleTime) {
+						if err := my.Ping(); err != nil {
+							log.Error("mysql[%s]: %s", server.DSN(), err.Error())
+							my.breaker.Fail()
+						}
+
+					}
+				}()
+			}
+		}
+
 	}
 
 	return

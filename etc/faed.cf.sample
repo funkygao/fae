@@ -45,6 +45,7 @@
 
         mysql: {
             timeout: "10s"
+            max_idle_time: "4h"
             max_idle_conns_per_server: 5
             max_conns_per_server: 50
             cache_prepare_stmt_max_items: 1024
