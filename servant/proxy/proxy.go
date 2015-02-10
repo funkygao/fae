@@ -116,7 +116,7 @@ func (this *Proxy) refreshPeers(peers []string) {
 		}
 
 		if !alive {
-			log.Trace("peer[%s] gone away", peerAddr)
+			log.Warn("peer[%s] gone away", peerAddr)
 
 			this.mutex.Lock()
 			this.remotePeerPools[peerAddr].Close() // kill all conns in this pool
