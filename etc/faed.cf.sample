@@ -5,6 +5,7 @@
 
     reload_watchdog_interval: "1s"
     http_listen_addr: {http_listen_addr}
+    // localhost:xx/debug/pprof/
     pprof_listen_addr: {pprof_listen_addr}
     cpu_num: "max"
     metrics_logfile: {metrics_logfile}
