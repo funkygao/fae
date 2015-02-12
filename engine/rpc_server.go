@@ -104,7 +104,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
-	remoteAddr := transport.(*thrift.TSocket).Conn().(*net.TCPConn).RemoteAddr().String()
+	remoteAddr := transport.(*thrift.TSocket).Addr().String()
 	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
 		log.Warn("session[%s] open, too many sessions: %d",
 			remoteAddr, currentSessionN)
