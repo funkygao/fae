@@ -66,6 +66,7 @@ type ConfigMysql struct {
 	HeartbeatInterval            int // TODO
 	JsonMergeMaxOutstandingItems int
 	CachePrepareStmtMaxItems     int // 0 means disabled
+	AllowNullableColumns         bool
 
 	// cache related
 	CacheStore            string
@@ -89,6 +90,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
 	this.MaxIdleTime = cf.Duration("max_idle_time", 0)
 	this.Timeout = cf.Duration("timeout", 10*time.Second)
+	this.AllowNullableColumns = cf.Bool("allow_nullable_columns", true)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)
