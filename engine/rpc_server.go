@@ -104,7 +104,7 @@ func (this *TFunServer) handleSession(client interface{}) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	defer atomic.AddInt64(&this.activeSessionN, -1)
 
-	remoteAddr := transport.(*thrift.TSocket).Conn().(*net.TCPConn).RemoteAddr().String()
+	remoteAddr := transport.(*thrift.TSocket).Addr().String()
 	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
 		log.Warn("session[%s] open, too many sessions: %d",
 			remoteAddr, currentSessionN)
@@ -209,11 +209,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 		// the central place to log call err
 		// servant needn't dup err log
 		log.Error("caller[%s]: %s", remoteAddr, ex.Error())
-
-		// Peek: there is more data to be read or the remote side is still open?
-		if !inputProtocol.Transport().Peek() {
-			break
-		}
 	}
 
 	this.engine.stats.CallPerSession.Update(callsN)

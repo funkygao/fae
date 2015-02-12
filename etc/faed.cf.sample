@@ -56,6 +56,7 @@
             //cache_store_redis_pool: "db_cache"
             json_merge_max_outstanding_items: 8388608
             shard_strategy: "standard"
+            allow_nullable_columns: true
 
             breaker: {
                 failure_allowance: 10

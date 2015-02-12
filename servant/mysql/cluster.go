@@ -75,7 +75,7 @@ func (this *MysqlCluster) QueryShards(pool string, table string, sql string,
 			}
 
 			rowValues = make([]string, len(cols))
-			// TODO O(N), room for optimization
+			// TODO O(N), room for optimization, allow_nullable_columns
 			for i, raw := range rawRowValues {
 				if raw == nil {
 					rowValues[i] = "NULL"

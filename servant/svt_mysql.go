@@ -7,6 +7,7 @@ import (
 	"crypto/sha1"
 	sql_ "database/sql"
 	_json "encoding/json"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	json "github.com/funkygao/go-simplejson"
@@ -402,33 +403,55 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 
 	r.Cols = cols
 	r.Rows = make([][]string, 0)
-	rawRowValues := make([]sql_.RawBytes, len(cols))
-	scanArgs := make([]interface{}, len(cols))
-	for i, _ := range cols {
-		scanArgs[i] = &rawRowValues[i]
-	}
-	for rows.Next() {
-		if ex = rows.Scan(scanArgs...); ex != nil {
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-				ident,
-				pool, table,
-				sql, args,
-				ex)
-			rows.Close()
-			return
-		}
 
-		rowValues := make([]string, len(cols))
-		// TODO optimize to discard the loop O(n)
-		for i, raw := range rawRowValues {
-			if raw == nil {
-				rowValues[i] = "NULL"
-			} else {
-				rowValues[i] = string(raw)
+	if config.Engine.Servants.Mysql.AllowNullableColumns {
+		rawRowValues := make([]sql_.RawBytes, len(cols))
+		scanArgs := make([]interface{}, len(cols))
+		for i, _ := range cols {
+			scanArgs[i] = &rawRowValues[i]
+		}
+		for rows.Next() {
+			if ex = rows.Scan(scanArgs...); ex != nil {
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+					ident,
+					pool, table,
+					sql, args,
+					ex)
+				rows.Close()
+				return
 			}
-		}
 
-		r.Rows = append(r.Rows, rowValues)
+			rowValues := make([]string, len(cols))
+			// TODO optimize to discard the loop O(n)
+			for i, raw := range rawRowValues {
+				if raw == nil {
+					rowValues[i] = "NULL"
+				} else {
+					rowValues[i] = string(raw)
+				}
+			}
+
+			r.Rows = append(r.Rows, rowValues)
+		}
+	} else {
+		rawRowValues := make([]string, len(cols))
+		scanArgs := make([]interface{}, len(cols))
+		for i, _ := range cols {
+			scanArgs[i] = &rawRowValues[i]
+		}
+		for rows.Next() {
+			if ex = rows.Scan(scanArgs...); ex != nil {
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+					ident,
+					pool, table,
+					sql, args,
+					ex)
+				rows.Close()
+				return
+			}
+
+			r.Rows = append(r.Rows, rawRowValues)
+		}
 	}
 
 	// check for errors after we’re done iterating over the rows
