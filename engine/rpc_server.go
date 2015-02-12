@@ -53,8 +53,7 @@ func NewTFunServer(engine *Engine,
 func (this *TFunServer) Serve() error {
 	var stoppedError = errors.New("RPC server stopped")
 
-	err := this.serverTransport.Listen()
-	if err != nil {
+	if err := this.serverTransport.Listen(); err != nil {
 		return err
 	}
 
@@ -75,7 +74,6 @@ func (this *TFunServer) Serve() error {
 	for {
 		select {
 		case <-this.quit:
-			// FIXME new conn will timeout, instead of conn close
 			log.Info("RPC server quit...")
 			return stoppedError
 
@@ -218,6 +216,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 func (this *TFunServer) Stop() error {
 	close(this.quit)
 	this.serverTransport.Interrupt()
+	this.serverTransport.Close() // accept tcp [::]:9001: use of closed network connection
 	return nil
 }
 
