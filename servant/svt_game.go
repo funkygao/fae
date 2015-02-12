@@ -81,7 +81,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 
 		if !this.game.NameDbLoaded {
 			this.game.NameDbLoaded = true
-			go this.loadName3Bitmap(ctx)
+			this.loadName3Bitmap(ctx)
 		}
 
 		r = this.game.NextName()
@@ -103,7 +103,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			// handle it by myself, got call locally
 			if !this.game.NameDbLoaded {
 				this.game.NameDbLoaded = true
-				go this.loadName3Bitmap(ctx)
+				this.loadName3Bitmap(ctx)
 			}
 
 			r = this.game.NextName()
