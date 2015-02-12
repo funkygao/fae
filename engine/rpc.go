@@ -97,7 +97,9 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
 	this.svt.Start()
 
-	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
+	this.rpcServer = NewTFunServer(this,
+		config.Engine.Rpc.PreforkMode,
+		this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 

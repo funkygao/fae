@@ -14,6 +14,7 @@ type ConfigRpc struct {
 	Framed                       bool
 	Protocol                     string
 	StatsOutputInterval          time.Duration
+	PreforkMode                  bool
 	MaxOutstandingSessions       int
 	WarnTooManySessionsThreshold int64
 }
@@ -30,6 +31,7 @@ func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
 	this.Framed = section.Bool("framed", false)
 	this.BufferSize = section.Int("buffer_size", 4<<10)
 	this.Protocol = section.String("protocol", "binary")
+	this.PreforkMode = section.Bool("prefork_mode", false)
 	this.MaxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
 	this.WarnTooManySessionsThreshold = int64(section.Int("warn_too_many_sessions_threshold",
 		3000))

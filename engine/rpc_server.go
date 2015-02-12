@@ -28,6 +28,7 @@ type TFunServer struct {
 }
 
 func NewTFunServer(engine *Engine,
+	preforkMode bool,
 	processor thrift.TProcessor,
 	serverTransport thrift.TServerTransport,
 	transportFactory thrift.TTransportFactory,
@@ -43,6 +44,7 @@ func NewTFunServer(engine *Engine,
 		outputProtocolFactory:  protocolFactory,  // TBinaryProtocolFactory
 	}
 	this.pool = newRpcThreadPool(
+		preforkMode,
 		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	engine.rpcThreadPool = this.pool
