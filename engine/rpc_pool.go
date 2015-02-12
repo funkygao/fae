@@ -5,7 +5,7 @@ import (
 	log "github.com/funkygao/log4go"
 )
 
-type rpcClientHandler func(req interface{})
+type rpcClientHandler func(sock thrift.TTransport)
 
 var Null struct{}
 

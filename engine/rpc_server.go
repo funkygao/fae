@@ -93,18 +93,9 @@ func (this *TFunServer) Serve() error {
 	return stoppedError
 }
 
-func (this *TFunServer) handleSession(client interface{}) {
-	transport, ok := client.(thrift.TTransport)
-	if !ok {
-		// should never happen
-		log.Error("Invalid client: %#v", client)
-		return
-	}
-
+func (this *TFunServer) handleSession(client thrift.TTransport) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
-	defer atomic.AddInt64(&this.activeSessionN, -1)
-
-	remoteAddr := transport.(*thrift.TSocket).Addr().String()
+	remoteAddr := client.(*thrift.TSocket).Addr().String()
 	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
 		log.Warn("session[%s] open, too many sessions: %d",
 			remoteAddr, currentSessionN)
@@ -117,9 +108,11 @@ func (this *TFunServer) handleSession(client interface{}) {
 		calls int64
 		errs  int64
 	)
-	if calls, errs = this.processRequests(transport); errs > 0 {
+	if calls, errs = this.processRequests(client); errs > 0 {
 		this.engine.svt.AddErr(errs)
 	}
+
+	atomic.AddInt64(&this.activeSessionN, -1)
 
 	elapsed := time.Since(t1)
 	if errs > 0 {
@@ -127,7 +120,6 @@ func (this *TFunServer) handleSession(client interface{}) {
 	} else {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
-
 }
 
 func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
