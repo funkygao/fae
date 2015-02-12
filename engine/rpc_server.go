@@ -36,11 +36,11 @@ func NewTFunServer(engine *Engine,
 		quit:                   make(chan bool),
 		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
-		serverTransport:        serverTransport,
-		inputTransportFactory:  transportFactory,
-		outputTransportFactory: transportFactory,
-		inputProtocolFactory:   protocolFactory,
-		outputProtocolFactory:  protocolFactory,
+		serverTransport:        serverTransport,  // TServerSocket
+		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
+		outputTransportFactory: transportFactory, // TBufferedTransportFactory
+		inputProtocolFactory:   protocolFactory,  // TBinaryProtocolFactory
+		outputProtocolFactory:  protocolFactory,  // TBinaryProtocolFactory
 	}
 	this.pool = newRpcThreadPool(
 		config.Engine.Rpc.MaxOutstandingSessions,
@@ -51,7 +51,7 @@ func NewTFunServer(engine *Engine,
 }
 
 func (this *TFunServer) Serve() error {
-	const stoppedError = "RPC server stopped"
+	var stoppedError = errors.New("RPC server stopped")
 
 	err := this.serverTransport.Listen()
 	if err != nil {
@@ -77,7 +77,7 @@ func (this *TFunServer) Serve() error {
 		case <-this.quit:
 			// FIXME new conn will timeout, instead of conn close
 			log.Info("RPC server quit...")
-			return errors.New(stoppedError)
+			return stoppedError
 
 		default:
 		}
@@ -90,7 +90,7 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return errors.New(stoppedError)
+	return stoppedError
 }
 
 func (this *TFunServer) handleSession(client interface{}) {

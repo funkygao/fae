@@ -47,7 +47,7 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
-	if this.conf.Timeout.Seconds() > 0 {
+	if this.conf.Timeout > 0 {
 		this.dsn += "&timeout=" + this.conf.Timeout.String()
 	}
 }
