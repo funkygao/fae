@@ -16,6 +16,8 @@ var (
 		blockprof    bool
 		lockFile     string
 		crashLogFile string
+		alarmLogSock string
+		alarmTag     string
 		kill         bool
 	}
 )
@@ -23,12 +25,14 @@ var (
 func parseFlags() {
 	flag.BoolVar(&options.kill, "k", false, "kill faed")
 	flag.StringVar(&options.logLevel, "level", "debug", "log level")
-	flag.StringVar(&options.logFile, "log", "stdout", "log file")
+	flag.StringVar(&options.logFile, "log", "stdout", "log file, default stdout")
 	flag.StringVar(&options.crashLogFile, "crashlog", "panic.dump", "crash log")
 	flag.StringVar(&options.configFile, "conf", "etc/faed.cf", "config file")
 	flag.StringVar(&options.lockFile, "lockfile", "faed.lock", "lockfile path")
+	flag.StringVar(&options.alarmTag, "alarmtag", "dw", "alarm tag name")
+	flag.StringVar(&options.alarmLogSock, "alarmsock", "/tmp/als.sock", "alarm syslogng unix socket path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
-	flag.IntVar(&options.tick, "tick", 60*10, "watchdog ticker length in seconds")
+	flag.IntVar(&options.tick, "tick", 60*10, "system info watchdog ticker in seconds")
 	flag.BoolVar(&options.cpuprof, "cpuprof", false, "enable cpu profiling")
 	flag.BoolVar(&options.memprof, "memprof", false, "enable memory profiling")
 	flag.BoolVar(&options.blockprof, "blockprof", false, "enable block profiling")

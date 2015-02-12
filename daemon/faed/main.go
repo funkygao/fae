@@ -26,7 +26,9 @@ func init() {
 		server.ShowVersionAndExit()
 	}
 
-	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
+	server.SetupLogging(options.logFile, options.logLevel,
+		options.crashLogFile, options.alarmLogSock, options.alarmTag)
+
 	// thrift lib use "log", so we also need to customize its behavior
 	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 
