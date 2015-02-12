@@ -30,7 +30,11 @@ func newRpcThreadPool(prefork bool, maxOutstandingSessions int,
 		this.clientSocketChan = make(chan thrift.TTransport, maxOutstandingSessions)
 		for i := 0; i < maxOutstandingSessions; i++ {
 			// prefork
-			go this.handleClientSession()
+			go func() {
+				for {
+					this.handler(<-this.clientSocketChan)
+				}
+			}()
 		}
 	} else {
 		this.throttleChan = make(chan struct{}, maxOutstandingSessions)
@@ -55,10 +59,4 @@ func (this *rpcThreadPool) Dispatch(clientSocket thrift.TTransport) {
 		this.handler(clientSocket)
 		<-this.throttleChan
 	}()
-}
-
-func (this *rpcThreadPool) handleClientSession() {
-	for {
-		this.handler(<-this.clientSocketChan)
-	}
 }
