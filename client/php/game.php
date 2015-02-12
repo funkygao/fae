@@ -63,10 +63,15 @@ try {
     // game get unique name with len 3
     //for ($i = 0; $i < 2; $i ++) {
     //for ($i = 0; $i < 658; $i ++) {
+    $allianceTags = array();
     for ($i = 0; $i < 50000000; $i ++) {
         //$name = $client->ping($ctx);
         $name = $client->gm_name3($ctx);
         echo "$i $name\n";
+        if (isset($allianceTags[$name])) {
+            throw new Exception("Dup name3: $name");
+        }
+        $allianceTags[$name] = TRUE;
         //usleep(10000);
         //sleep(1);
     }
