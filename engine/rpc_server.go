@@ -93,6 +93,20 @@ func (this *TFunServer) Serve() error {
 	return stoppedError
 }
 
+func (this *TFunServer) showStats(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for _ = range ticker.C {
+		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
+			atomic.LoadInt64(&this.activeSessionN),
+			this.engine.stats.CallPerSecond.Rate1(),
+			this.engine.stats.CallPerSecond.Rate5(),
+			this.engine.stats.CallPerSecond.Rate15(),
+			this.engine.stats.CallPerSecond.RateMean())
+	}
+}
+
 func (this *TFunServer) handleSession(client thrift.TTransport) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
 	remoteAddr := client.(*thrift.TSocket).Addr().String()
@@ -104,12 +118,27 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 	}
 
 	var (
-		t1    = time.Now()
-		calls int64
-		errs  int64
+		t1              = time.Now()
+		calls           int64
+		errs            int64
+		processor       = this.processorFactory.GetProcessor(client)
+		inputTransport  = this.inputTransportFactory.GetTransport(client)
+		outputTransport = this.outputTransportFactory.GetTransport(client)
+		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
+		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
-	if calls, errs = this.processRequests(client); errs > 0 {
+	if calls, errs = this.processRequests(client, processor,
+		inputTransport, outputTransport,
+		inputProtocol, outputProtocol); errs > 0 {
 		this.engine.svt.AddErr(errs)
+	}
+
+	// server actively closes the socket TODO timewait
+	if inputTransport != nil {
+		inputTransport.Close()
+	}
+	if outputTransport != nil {
+		outputTransport.Close()
 	}
 
 	atomic.AddInt64(&this.activeSessionN, -1)
@@ -122,33 +151,24 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 	}
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
-	processor := this.processorFactory.GetProcessor(client)
-	inputTransport := this.inputTransportFactory.GetTransport(client)
-	outputTransport := this.outputTransportFactory.GetTransport(client)
-	inputProtocol := this.inputProtocolFactory.GetProtocol(inputTransport)
-	outputProtocol := this.outputProtocolFactory.GetProtocol(outputTransport)
-	defer func() {
-		if inputTransport != nil {
-			inputTransport.Close()
-		}
-		if outputTransport != nil {
-			outputTransport.Close()
-		}
-	}()
-
+func (this *TFunServer) processRequests(client thrift.TTransport,
+	processor thrift.TProcessor,
+	inputTransport thrift.TTransport,
+	outputTransport thrift.TTransport,
+	inputProtocol thrift.TProtocol,
+	outputProtocol thrift.TProtocol) (callsN int64,
+	errsN int64) {
 	var (
-		rpcIoTimeout = config.Engine.Rpc.IoTimeout
-		t1           time.Time
-		elapsed      time.Duration
-		tcpClient    = client.(*thrift.TSocket).Conn().(*net.TCPConn)
-		remoteAddr   = tcpClient.RemoteAddr().String()
+		t1         time.Time
+		elapsed    time.Duration
+		tcpClient  = client.(*thrift.TSocket).Conn().(*net.TCPConn)
+		remoteAddr = tcpClient.RemoteAddr().String()
 	)
 
 	for {
 		t1 = time.Now()
-		if rpcIoTimeout > 0 { // read + write
-			tcpClient.SetDeadline(t1.Add(rpcIoTimeout))
+		if config.Engine.Rpc.IoTimeout > 0 { // read + write
+			tcpClient.SetDeadline(t1.Add(config.Engine.Rpc.IoTimeout))
 		}
 
 		_, ex := processor.Process(inputProtocol, outputProtocol)
@@ -236,18 +256,4 @@ func (this *TFunServer) InputProtocolFactory() thrift.TProtocolFactory {
 
 func (this *TFunServer) OutputProtocolFactory() thrift.TProtocolFactory {
 	return this.outputProtocolFactory
-}
-
-func (this *TFunServer) showStats(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
-			atomic.LoadInt64(&this.activeSessionN),
-			this.engine.stats.CallPerSecond.Rate1(),
-			this.engine.stats.CallPerSecond.Rate5(),
-			this.engine.stats.CallPerSecond.Rate15(),
-			this.engine.stats.CallPerSecond.RateMean())
-	}
 }
