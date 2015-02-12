@@ -125,6 +125,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   periodically reload name3 from db
 *   try not to use string as rpc func param, its costly to convert between []byte
 *   change ctx.rid from string to int64, proxy servant rid generation mechanism
 *   name3 found dup names, bug
