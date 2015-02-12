@@ -125,6 +125,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   try not to use string as rpc func param, its costly to convert between []byte
 *   change ctx.rid from string to int64, proxy servant rid generation mechanism
 *   name3 found dup names, bug
 *   optimize mysql query, iterate each row to transform to string/null

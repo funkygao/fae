@@ -28,6 +28,7 @@ type TFunServer struct {
 }
 
 func NewTFunServer(engine *Engine,
+	preforkMode bool,
 	processor thrift.TProcessor,
 	serverTransport thrift.TServerTransport,
 	transportFactory thrift.TTransportFactory,
@@ -36,13 +37,14 @@ func NewTFunServer(engine *Engine,
 		quit:                   make(chan bool),
 		engine:                 engine,
 		processorFactory:       thrift.NewTProcessorFactory(processor),
-		serverTransport:        serverTransport,
-		inputTransportFactory:  transportFactory,
-		outputTransportFactory: transportFactory,
-		inputProtocolFactory:   protocolFactory,
-		outputProtocolFactory:  protocolFactory,
+		serverTransport:        serverTransport,  // TServerSocket
+		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
+		outputTransportFactory: transportFactory, // TBufferedTransportFactory
+		inputProtocolFactory:   protocolFactory,  // TBinaryProtocolFactory
+		outputProtocolFactory:  protocolFactory,  // TBinaryProtocolFactory
 	}
 	this.pool = newRpcThreadPool(
+		preforkMode,
 		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	engine.rpcThreadPool = this.pool
@@ -51,10 +53,9 @@ func NewTFunServer(engine *Engine,
 }
 
 func (this *TFunServer) Serve() error {
-	const stoppedError = "RPC server stopped"
+	var stoppedError = errors.New("RPC server stopped")
 
-	err := this.serverTransport.Listen()
-	if err != nil {
+	if err := this.serverTransport.Listen(); err != nil {
 		return err
 	}
 
@@ -75,9 +76,8 @@ func (this *TFunServer) Serve() error {
 	for {
 		select {
 		case <-this.quit:
-			// FIXME new conn will timeout, instead of conn close
 			log.Info("RPC server quit...")
-			return errors.New(stoppedError)
+			return stoppedError
 
 		default:
 		}
@@ -90,21 +90,26 @@ func (this *TFunServer) Serve() error {
 		}
 	}
 
-	return errors.New(stoppedError)
+	return stoppedError
 }
 
-func (this *TFunServer) handleSession(client interface{}) {
-	transport, ok := client.(thrift.TTransport)
-	if !ok {
-		// should never happen
-		log.Error("Invalid client: %#v", client)
-		return
+func (this *TFunServer) showStats(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for _ = range ticker.C {
+		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
+			atomic.LoadInt64(&this.activeSessionN),
+			this.engine.stats.CallPerSecond.Rate1(),
+			this.engine.stats.CallPerSecond.Rate5(),
+			this.engine.stats.CallPerSecond.Rate15(),
+			this.engine.stats.CallPerSecond.RateMean())
 	}
+}
 
+func (this *TFunServer) handleSession(client thrift.TTransport) {
 	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
-	defer atomic.AddInt64(&this.activeSessionN, -1)
-
-	remoteAddr := transport.(*thrift.TSocket).Addr().String()
+	remoteAddr := client.(*thrift.TSocket).Addr().String()
 	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
 		log.Warn("session[%s] open, too many sessions: %d",
 			remoteAddr, currentSessionN)
@@ -113,13 +118,30 @@ func (this *TFunServer) handleSession(client interface{}) {
 	}
 
 	var (
-		t1    = time.Now()
-		calls int64
-		errs  int64
+		t1              = time.Now()
+		calls           int64
+		errs            int64
+		processor       = this.processorFactory.GetProcessor(client)
+		inputTransport  = this.inputTransportFactory.GetTransport(client)
+		outputTransport = this.outputTransportFactory.GetTransport(client)
+		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
+		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
-	if calls, errs = this.processRequests(transport); errs > 0 {
+	if calls, errs = this.processRequests(client, processor,
+		inputTransport, outputTransport,
+		inputProtocol, outputProtocol); errs > 0 {
 		this.engine.svt.AddErr(errs)
 	}
+
+	// server actively closes the socket TODO timewait
+	if inputTransport != nil {
+		inputTransport.Close()
+	}
+	if outputTransport != nil {
+		outputTransport.Close()
+	}
+
+	atomic.AddInt64(&this.activeSessionN, -1)
 
 	elapsed := time.Since(t1)
 	if errs > 0 {
@@ -127,36 +149,26 @@ func (this *TFunServer) handleSession(client interface{}) {
 	} else {
 		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
 	}
-
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64, errsN int64) {
-	processor := this.processorFactory.GetProcessor(client)
-	inputTransport := this.inputTransportFactory.GetTransport(client)
-	outputTransport := this.outputTransportFactory.GetTransport(client)
-	inputProtocol := this.inputProtocolFactory.GetProtocol(inputTransport)
-	outputProtocol := this.outputProtocolFactory.GetProtocol(outputTransport)
-	defer func() {
-		if inputTransport != nil {
-			inputTransport.Close()
-		}
-		if outputTransport != nil {
-			outputTransport.Close()
-		}
-	}()
-
+func (this *TFunServer) processRequests(client thrift.TTransport,
+	processor thrift.TProcessor,
+	inputTransport thrift.TTransport,
+	outputTransport thrift.TTransport,
+	inputProtocol thrift.TProtocol,
+	outputProtocol thrift.TProtocol) (callsN int64,
+	errsN int64) {
 	var (
-		rpcIoTimeout = config.Engine.Rpc.IoTimeout
-		t1           time.Time
-		elapsed      time.Duration
-		tcpClient    = client.(*thrift.TSocket).Conn().(*net.TCPConn)
-		remoteAddr   = tcpClient.RemoteAddr().String()
+		t1         time.Time
+		elapsed    time.Duration
+		tcpClient  = client.(*thrift.TSocket).Conn().(*net.TCPConn)
+		remoteAddr = tcpClient.RemoteAddr().String()
 	)
 
 	for {
 		t1 = time.Now()
-		if rpcIoTimeout > 0 { // read + write
-			tcpClient.SetDeadline(t1.Add(rpcIoTimeout))
+		if config.Engine.Rpc.IoTimeout > 0 { // read + write
+			tcpClient.SetDeadline(t1.Add(config.Engine.Rpc.IoTimeout))
 		}
 
 		_, ex := processor.Process(inputProtocol, outputProtocol)
@@ -218,6 +230,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport) (callsN int64,
 func (this *TFunServer) Stop() error {
 	close(this.quit)
 	this.serverTransport.Interrupt()
+	this.serverTransport.Close() // accept tcp [::]:9001: use of closed network connection
 	return nil
 }
 
@@ -243,18 +256,4 @@ func (this *TFunServer) InputProtocolFactory() thrift.TProtocolFactory {
 
 func (this *TFunServer) OutputProtocolFactory() thrift.TProtocolFactory {
 	return this.outputProtocolFactory
-}
-
-func (this *TFunServer) showStats(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions:%d, qps:{1m:%.1f, 5m:%.1f 15m:%.1f avg:%.1f}}",
-			atomic.LoadInt64(&this.activeSessionN),
-			this.engine.stats.CallPerSecond.Rate1(),
-			this.engine.stats.CallPerSecond.Rate5(),
-			this.engine.stats.CallPerSecond.Rate15(),
-			this.engine.stats.CallPerSecond.RateMean())
-	}
 }

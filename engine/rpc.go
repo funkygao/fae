@@ -60,7 +60,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	switch {
 	case strings.Contains(config.Engine.Rpc.ListenAddr, "/"):
 		serverNetwork = "unix"
-		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout > 0 {
 			serverTransport, err = NewTUnixSocketTimeout(
 				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
@@ -70,7 +70,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	default:
 		serverNetwork = "tcp"
-		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout > 0 {
 			serverTransport, err = thrift.NewTServerSocketTimeout(
 				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
@@ -97,7 +97,9 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
 	this.svt.Start()
 
-	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
+	this.rpcServer = NewTFunServer(this,
+		config.Engine.Rpc.PreforkMode,
+		this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 
