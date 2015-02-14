@@ -125,6 +125,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   gm presence shows not only online, but also last sync time
 *   log rotate size, only keep history for N days
 *   periodically reload name3 from db
 *   try not to use string as rpc func param, its costly to convert between []byte
