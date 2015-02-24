@@ -11,3 +11,18 @@ https://golang.org/doc/faq#stack_or_heap
 
     go build -gcflags '-m'
     src/cmd/gc/esc.c
+
+### inlining
+
+### compiler flags
+
+    go build -gcflags 
+
+    -S  see the assembly produced by compiling this package
+    -l  disable inlining
+    -m  show escape analysis and inlining
+    -g  output the steps a the compiler is a taking at a very low level
+
+### GC
+
+    env GODEBUG=gctrace=1 godoc -http=:6060
