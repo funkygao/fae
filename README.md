@@ -125,6 +125,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   go vet
 *   gm presence shows not only online, but also last sync time
 *   log rotate size, only keep history for N days
 *   periodically reload name3 from db
