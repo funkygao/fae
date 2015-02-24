@@ -1,6 +1,13 @@
 golang for high performance
 ===========================
 
+### Pointers usage
+
+* In general, don’t share built-in type values with a pointer.
+  - string, int, etc
+
+* Slice of pointers are not cache friendly
+
 ### escape analysis
 
 https://golang.org/doc/faq#stack_or_heap
@@ -26,3 +33,7 @@ https://golang.org/doc/faq#stack_or_heap
 ### GC
 
     env GODEBUG=gctrace=1 godoc -http=:6060
+
+### Scheduler tracing
+
+    GODEBUG=schedtrace=1000 ./daemon/faed/faed
