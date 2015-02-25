@@ -105,9 +105,10 @@ func (this *TFunServer) Serve() error {
 			}
 
 			continue
-		} else {
-			this.pool.Dispatch(client)
 		}
+
+		this.pool.Dispatch(client)
+		delay = ACCEPT_MIN_SLEEP
 	}
 
 	return stoppedError
