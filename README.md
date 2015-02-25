@@ -125,37 +125,37 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
-*   database/sql QueryRow for AR::get
-*   go vet
-*   gm presence shows not only online, but also last sync time
-*   log rotate size, only keep history for N days
-*   periodically reload name3 from db
-*   try not to use string as rpc func param, its costly to convert between []byte
-*   change ctx.rid from string to int64, proxy servant rid generation mechanism
-*   name3 found dup names, bug
-*   optimize mysql query, iterate each row to transform to string/null
-*   start fae, then restart remote peer, then call ServantByKey, see what happens
-*   session.profiler should not be pointer, reduce GC overhead
-*   bloom filter 
-*   unified err logging so that external alarming system can get notified
-*   use of closed network connection
-*   more strict test on zookeeper failure
-*   mysql prepare stmt caching
+*   [ ] database/sql QueryRow for AR::get
+*   [ ] go vet
+*   [ ] gm presence shows not only online, but also last sync time
+*   [ ] log rotate size, only keep history for N days
+*   [ ] periodically reload name3 from db
+*   [ ] try not to use string as rpc func param, its costly to convert between []byte
+*   [ ] change ctx.rid from string to int64, proxy servant rid generation mechanism
+*   [ ] name3 found dup names, bug
+*   [X] optimize mysql query, iterate each row to transform to string/null
+*   [X] start fae, then restart remote peer, then call ServantByKey, see what happens
+*   [ ] session.profiler should not be pointer, reduce GC overhead
+*   [X] bloom filter 
+*   [X] unified err logging so that external alarming system can get notified
+*   [ ] use of closed network connection
+*   [ ] more strict test on zookeeper failure
+*   [X] mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
     - CLIENT_NO_SCHEMA, don't allow database.table.column
     - too many round trips between fae and mysql
-*   vBucket for cluster sharding, what about each kingdom is a shard?
-*   hot reload config
-*   fae graceful shutdown
+*   [ ] vBucket for cluster sharding, what about each kingdom is a shard?
+*   [ ] hot reload config
+*   [X] fae graceful shutdown
     - https://github.com/facebookgo/grace
-*   maybe profiler sample rate is totally controlled by client
-*   zk connection loss and session expiration
+*   [X] maybe profiler sample rate is totally controlled by client
+*   [X] zk connection loss and session expiration
     - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
     - default zk session timeout: 2 * tickTime ~ 20 * tickTime
     - echo 'mntr' | nc localhost 2181
     - echo 'stat' | nc localhost 2181
-*   NewTBufferedTransportFactory buffer size, and php config buf size
-*   golang uses /proc/sys/net/core/somaxconn as listener backlog
+*   [X] NewTBufferedTransportFactory buffer size, and php config buf size
+*   [X] golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
 
 ### Contribs
