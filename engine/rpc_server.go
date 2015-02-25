@@ -73,6 +73,14 @@ func (this *TFunServer) Serve() error {
 		log.Info("etcd self[%s] registered", config.Engine.EtcdSelfAddr)
 	}
 
+	const (
+		SLEEP_STEP       = 2
+		ACCEPT_MIN_SLEEP = time.Millisecond * 10
+		ACCEPT_MAX_SLEEP = ACCEPT_MIN_SLEEP * SLEEP_STEP * SLEEP_STEP *
+			SLEEP_STEP * SLEEP_STEP
+	)
+	var delay = ACCEPT_MIN_SLEEP
+
 	for {
 		select {
 		case <-this.quit:
@@ -84,7 +92,19 @@ func (this *TFunServer) Serve() error {
 
 		client, err := this.serverTransport.Accept()
 		if err != nil {
-			log.Error("Accept: %v", err)
+			if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				log.Warn("Accept temporary: %v, sleeping %dms", ne,
+					delay/time.Millisecond)
+				time.Sleep(delay)
+				delay *= SLEEP_STEP
+				if delay > ACCEPT_MAX_SLEEP {
+					delay = ACCEPT_MAX_SLEEP
+				}
+			} else {
+				log.Error("Accept: %v", err)
+			}
+
+			continue
 		} else {
 			this.pool.Dispatch(client)
 		}
