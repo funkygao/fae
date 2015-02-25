@@ -422,7 +422,6 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 			}
 
 			rowValues := make([]string, len(cols))
-			// TODO optimize to discard the loop O(n)
 			for i, raw := range rawRowValues {
 				if raw == nil {
 					rowValues[i] = "NULL"
