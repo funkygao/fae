@@ -45,7 +45,7 @@ if [[ $1 = "-linux" ]]; then
     exit
 elif [[ $1 = "-debug" ]]; then
     #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
-    go build -gcflags '-m' -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
+    go build -gcflags '-m=1' -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
 else
     go build -tags release -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
 fi
