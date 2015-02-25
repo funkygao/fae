@@ -43,9 +43,11 @@ if [[ $1 = "-linux" ]]; then
     #sudo CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID"
     exit
-else
+elif [[ $1 = "-debug" ]]; then
     #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
     go build -gcflags '-m' -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
+else
+    go build -tags release -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
 fi
 
 #---------
