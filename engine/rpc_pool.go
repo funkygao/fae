@@ -2,12 +2,11 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/funkygao/golib/null"
 	log "github.com/funkygao/log4go"
 )
 
 type rpcClientHandler func(sock thrift.TTransport)
-
-var Null struct{}
 
 // Like php-fpm pm pool
 // forking goroutine under benchmark is around 40k/s, if higher conn/s
@@ -16,7 +15,7 @@ type rpcThreadPool struct {
 	preforkMode bool
 	handler     rpcClientHandler
 
-	throttleChan     chan struct{}          // if not prefork mode
+	throttleChan     chan null.NullStruct   // if not prefork mode
 	clientSocketChan chan thrift.TTransport // if prefork mode
 }
 
@@ -37,7 +36,7 @@ func newRpcThreadPool(prefork bool, maxOutstandingSessions int,
 			}()
 		}
 	} else {
-		this.throttleChan = make(chan struct{}, maxOutstandingSessions)
+		this.throttleChan = make(chan null.NullStruct, maxOutstandingSessions)
 	}
 
 	return
@@ -54,7 +53,7 @@ func (this *rpcThreadPool) Dispatch(clientSocket thrift.TTransport) {
 		return
 	}
 
-	this.throttleChan <- Null // block if outstanding sessions overflows
+	this.throttleChan <- null.Null // block if outstanding sessions overflows
 	go func() {
 		this.handler(clientSocket)
 		<-this.throttleChan
