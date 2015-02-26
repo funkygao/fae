@@ -102,6 +102,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] Context has too many strings, discard some of them
 *   [ ] database/sql QueryRow for AR::get
 *   [ ] go vet
 *   [ ] gm presence shows not only online, but also last sync time
