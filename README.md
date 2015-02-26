@@ -90,13 +90,13 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
      0 1 2 3 4 5 6 7 8 9 a b c d e f  0 1 2 3 4 5 6 7 8 9 a b c d e f
     +----------------------------------------------------------------+
-    |          version = 0x80010000 | msgType                       |
+    |          version = 0x80010000 | msgType                        |
     +----------------------------------------------------------------+
-    |          method name string len                               |
+    |          method name string len                                |
     +----------------------------------------------------------------+
-    |          method name string itself ...                        |
+    |          method name string itself ...                         |
     +----------------------------------------------------------------+
-    |          seqId(int32)                                         |
+    |          seqId(int32)                                          |
     +----------------------------------------------------------------+
 
 
