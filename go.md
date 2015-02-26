@@ -32,9 +32,27 @@ https://golang.org/doc/faq#stack_or_heap
     -m  show escape analysis and inlining
     -g  output the steps a the compiler is a taking at a very low level
 
-### GC
+### GC trace
 
     env GODEBUG=gctrace=1 godoc -http=:6060
+
+### GC internal
+
+    sysmon
+      |
+      |------------ forcegcperiod = 2m; // If we go two minutes without a garbage collection, force one to run
+      |                                 // forcegchelper() -> sweepone() -> markroot() -> scanblock()
+      |                                 // gc_m, gc mark
+      |             scavengelimit = 5m; // Scavenger return the unused MSpan to OS
+      |                                 // MHeap_Scavenge()
+      |                                 // madvise(v, n, MADV_DONTNEED)
+      |
+    runtime_init
+      |
+    main_init
+      |
+    main_main
+
 
 ### Scheduler tracing
 
