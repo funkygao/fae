@@ -8,6 +8,8 @@ golang for high performance
 
 * Slice of pointers are not cache friendly
 
+*  If a value is passed to a value method, an on-stack copy can be used instead of allocating on the heap
+
 ### escape analysis
 
 https://golang.org/doc/faq#stack_or_heap
@@ -37,3 +39,12 @@ https://golang.org/doc/faq#stack_or_heap
 ### Scheduler tracing
 
     GODEBUG=schedtrace=1000 ./daemon/faed/faed
+
+### Tips
+
+#### Avoid slice dynamic grow while append
+
+    a := [100]string
+    b := a[:0]
+    b = append(b, "a")
+    b = append(b, "b")
