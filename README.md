@@ -84,44 +84,21 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - auto
     - manual
 
-### Thrift
+### Thrift Payload
 
-      0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f
-     +---------------------------------------------------------------+
-     |          version = 0x80010000 | msgType                       |
-     +---------------------------------------------------------------+
-     |          method name string len                               |
-     +---------------------------------------------------------------+
-     |          method name string itself ...                        |
-     +---------------------------------------------------------------+
-     |          seqId                                                |
-     +---------------------------------------------------------------+
+    msgType = CALL | REPLY | EXCEPTION | ONEWAY
 
-#### hacking
+     0 1 2 3 4 5 6 7 8 9 a b c d e f  0 1 2 3 4 5 6 7 8 9 a b c d e f
+    +----------------------------------------------------------------+
+    |          version = 0x80010000 | msgType                       |
+    +----------------------------------------------------------------+
+    |          method name string len                               |
+    +----------------------------------------------------------------+
+    |          method name string itself ...                        |
+    +----------------------------------------------------------------+
+    |          seqId(int32)                                         |
+    +----------------------------------------------------------------+
 
-    
-        --- a/lib/go/thrift/rich_transport.go
-        +++ b/lib/go/thrift/rich_transport.go
-        @@ -19,7 +19,10 @@
-        
-         package thrift
-        
-        -import "io"
-        +import (
-        +       "github.com/funkygao/golib/hack"
-        +       "io"
-        +)
-        
-         type RichTransport struct {
-                TTransport
-        @@ -39,7 +42,7 @@ func (r *RichTransport) WriteByte(c byte) error {
-         }
-        
-         func (r *RichTransport) WriteString(s string) (n int, err error) {
-        -       return r.Write([]byte(s))
-        +       return r.Write(hack.Byte(s))
-         }
-        
 
 ### TODO
 
