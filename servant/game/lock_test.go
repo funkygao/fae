@@ -41,17 +41,3 @@ func TestLockExpires(t *testing.T) {
 	time.Sleep(time.Second)
 	assert.Equal(t, true, l.Lock(k))
 }
-
-func BenchmarkLockBasic(b *testing.B) {
-	cf := &config.ConfigGame{
-		LockMaxItems: 10,
-		LockExpires:  10 * time.Second,
-	}
-	l := newLock(cf)
-	k := "haha"
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		l.Lock(k)
-		l.Unlock(k)
-	}
-}

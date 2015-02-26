@@ -3,7 +3,6 @@ package game
 import (
 	"github.com/funkygao/assert"
 	"math"
-	"math/rand"
 	"testing"
 )
 
@@ -34,20 +33,4 @@ func TestNotDuplicatedName(t *testing.T) {
 	}
 
 	t.Logf("total: %d, bits: %+v", total, nm.bits)
-}
-
-// 827 ns/op
-func BenchmarkNextName(b *testing.B) {
-	b.ReportAllocs()
-	nm := newNameGen(3)
-	for i := 0; i < b.N; i++ {
-		nm.Next()
-	}
-}
-
-func BenchmarkRandInt31(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		rand.Int31n(int32(NameCharMax - NameCharMin))
-	}
 }

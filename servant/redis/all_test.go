@@ -5,17 +5,8 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/msgpack"
-	"net"
 	"testing"
 )
-
-// 536 ns/op TODO
-func BenchmarkResolveTCPAddr(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		net.ResolveTCPAddr("tcp", "12.2.11.1:6378")
-	}
-}
 
 func TestCRUD(t *testing.T) {
 	s := server.NewServer("test")
