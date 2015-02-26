@@ -2,10 +2,10 @@ package engine
 
 import (
 	"errors"
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
 	"sync/atomic"
 	"time"

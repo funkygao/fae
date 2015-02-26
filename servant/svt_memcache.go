@@ -1,10 +1,10 @@
 package servant
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/memcache"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
 func (this *FunServantImpl) McSet(ctx *rpc.Context, pool string, key string,

@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/golib/null"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
 type rpcClientHandler func(sock thrift.TTransport)

@@ -1,11 +1,11 @@
 package proxy
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/pool"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
 	"sync/atomic"
 )
