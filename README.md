@@ -102,6 +102,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput
 *   [ ] Context has too many strings, discard some of them
 *   [ ] database/sql QueryRow for AR::get
 *   [ ] go vet
