@@ -1,6 +1,8 @@
 package servant
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/funkygao/fae/config"
@@ -10,16 +12,54 @@ import (
 	conf "github.com/funkygao/jsconf"
 	"github.com/funkygao/msgpack"
 	"github.com/funkygao/thrift/lib/go/thrift"
+	"io"
 	"labix.org/v2/mgo/bson"
 	"strings"
 	"testing"
 )
 
+func sizedString(sz int) string {
+	u := make([]byte, sz)
+	io.ReadFull(rand.Reader, u)
+	return hex.EncodeToString(u)
+}
+
 func setupServant() *FunServantImpl {
+	server.SetupLogging("canbedeleted.test.log", "info", "", "", "")
+
 	cf, _ := conf.Load("../etc/faed.cf")
 	config.LoadEngineConfig("../etc/faed.cf", cf)
 	server.LaunchHttpServ(":9999", "")
 	return NewFunServant(config.Engine.Servants)
+}
+
+func BenchmarkExtractUidFromContext(b *testing.B) {
+	servant := setupServant()
+	b.ReportAllocs()
+	ctx := rpc.NewContext()
+	ctx.Reason = "hello world"
+	ctx.Rid = "12"
+	for i := 0; i < b.N; i++ {
+		servant.extractUid(ctx)
+	}
+}
+
+func BenchmarkSizedString(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		sizedString(12)
+	}
+}
+
+func BenchmarkGetSession(b *testing.B) {
+	servant := setupServant()
+	b.ReportAllocs()
+	ctx := rpc.NewContext()
+	ctx.Reason = "hello world"
+	for i := 0; i < b.N; i++ {
+		//ctx.Rid = sizedString(12)
+		servant.getSession(ctx)
+	}
 }
 
 // 1327 ns/op
