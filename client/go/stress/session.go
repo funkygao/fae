@@ -243,7 +243,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			if true {
 				var rows *rpc.MysqlResult
 				rows, err = client.MyQuery(ctx, "UserShard", "UserInfo", 1,
-					"SELECT * FROM UserInfo WHERE uid>?",
+					"SELECT * FROM UserInfo WHERE uid=?",
 					[]string{"1"}, "")
 				if err != nil {
 					checkIoError(err)
