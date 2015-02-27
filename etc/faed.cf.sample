@@ -180,7 +180,7 @@
         }
 
         lcache: {
-            max_items: 104857600
+            max_items: 10485760
         }
 
         game: {
