@@ -22,14 +22,14 @@
         warn_too_many_sessions_threshold: 6000
         session_timeout: "0s"
         io_timeout: "4s"
-        stats_output_interval: "10m"
+        stats_output_interval: "1m"
     }
 
     servants: {
         idgen_worker_id: {idgen_worker_id}
 
         session_max_items: 20000
-        stats_output_interval: "10m"
+        stats_output_interval: "1m"
         profiler_max_body_size: 600
         call_slow_threshold: "1s"
         // 100/10000 = 1%

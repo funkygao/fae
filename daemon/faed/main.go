@@ -97,7 +97,7 @@ func main() {
 	s.LoadConfig(options.configFile)
 	s.Launch()
 
-	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
+	go server.RunSysStats(time.Now(), options.tick)
 
 	engineRunner = engine.NewEngine()
 	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {

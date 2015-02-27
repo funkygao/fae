@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 )
 
 var (
@@ -10,7 +11,7 @@ var (
 		showVersion  bool
 		logFile      string
 		logLevel     string
-		tick         int
+		tick         time.Duration
 		cpuprof      bool
 		memprof      bool
 		blockprof    bool
@@ -32,7 +33,7 @@ func parseFlags() {
 	flag.StringVar(&options.alarmTag, "alarmtag", "dw", "alarm tag name")
 	flag.StringVar(&options.alarmLogSock, "alarmsock", "/tmp/als.sock", "alarm syslogng unix socket path")
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
-	flag.IntVar(&options.tick, "tick", 60*10, "system info watchdog ticker in seconds")
+	flag.DurationVar(&options.tick, "tick", time.Minute, "system info watchdog ticker")
 	flag.BoolVar(&options.cpuprof, "cpuprof", false, "enable cpu profiling")
 	flag.BoolVar(&options.memprof, "memprof", false, "enable memory profiling")
 	flag.BoolVar(&options.blockprof, "blockprof", false, "enable block profiling")
