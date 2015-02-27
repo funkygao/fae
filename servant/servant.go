@@ -139,18 +139,18 @@ func (this *FunServantImpl) createServants() {
 	if this.conf.Mysql.Enabled() {
 		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
-	}
 
-	switch this.conf.Mysql.CacheStore {
-	case "mem":
-		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
+		switch this.conf.Mysql.CacheStore {
+		case "mem":
+			this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
 
-	case "redis":
-		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
-			this.conf.Redis)
+		case "redis":
+			this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
+				this.conf.Redis)
 
-	default:
-		panic("unknown cache store")
+		default:
+			panic("unknown cache store")
+		}
 	}
 
 	if this.conf.Mongodb.Enabled() {
@@ -174,8 +174,10 @@ func (this *FunServantImpl) createServants() {
 		}
 	}
 
-	log.Debug("creating servant: game")
-	this.game = game.New(this.conf.Game, this.rd)
+	if this.conf.Game.Enabled() {
+		log.Debug("creating servant: game")
+		this.game = game.New(this.conf.Game, this.rd)
+	}
 
 	log.Info("servants created")
 }
