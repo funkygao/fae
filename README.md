@@ -102,6 +102,9 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] bad performance related blocks
+    - getSession    2880 ns/op         817 B/op         11 allocs/op
+    - 
 *   [ ] Context has too many strings, discard some of them
 *   [ ] database/sql QueryRow for AR::get
 *   [ ] go vet
@@ -135,6 +138,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [X] NewTBufferedTransportFactory buffer size, and php config buf size
 *   [X] golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
+
 
 ### Contribs
 
