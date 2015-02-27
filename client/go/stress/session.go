@@ -56,8 +56,6 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "stress.go"
-	ctx.Host = "stress.test.local"
-	ctx.Ip = "127.0.0.1"
 	for i := 0; i < LoopsPerSession; i++ {
 		//time.Sleep(time.Millisecond * 5)
 		ctx.Rid = fmt.Sprintf("round:%d,seq:%d:i:%d,", round, seq, i+1)
