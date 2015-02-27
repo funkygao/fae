@@ -239,6 +239,7 @@ func (this *TFunServer) processRequests(client thrift.TTransport,
 		// e,g Error 1064: You have an error in your SQL syntax
 		errsN++
 
+		// it must be TApplicationException
 		// the central place to log call err
 		// servant needn't dup err log
 		log.Error("caller[%s]: %s", remoteAddr, ex.Error())
