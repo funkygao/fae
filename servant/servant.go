@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/game"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -100,6 +101,14 @@ func (this *FunServantImpl) Flush() {
 
 func (this *FunServantImpl) AddErr(n int64) {
 	svtStats.addErr(n)
+}
+
+func (this *FunServantImpl) extractUid(ctx *rpc.Context) (uid int64) {
+	if ctx.IsSetUid() {
+		uid = *ctx.Uid
+	}
+
+	return
 }
 
 func (this *FunServantImpl) createServants() {

@@ -5,12 +5,9 @@ import (
 )
 
 var (
-	ErrNotImplemented    = errors.New("Not implemented")
-	ErrInvalidContext    = errors.New("Invalid context")
-	ErrServantNotStarted = errors.New("Servant not started")
-	ErrMyMergeInvalidRow = errors.New("Row not exist")
-)
-
-var (
-	ErrProxyNotFound = errors.New("Proxy not found")
+	ErrNotImplemented    = errors.New("Svt: not implemented")
+	ErrInvalidContext    = errors.New("Svt: invalid context")
+	ErrServantNotStarted = errors.New("Svt: not started")
+	ErrMyMergeInvalidRow = errors.New("Svt: row not found")
+	ErrProxyNotFound     = errors.New("Svt: proxy not found")
 )
