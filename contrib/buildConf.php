@@ -1,4 +1,5 @@
 <?php
+// build a config file based on template:etc/faed.cf.sample
 
 if ($argc != 7) {
     die("Usage: $argv[0] [etcd_servers] [http_listen_addr] [pprof_listen_addr] [metrics_logfile] [rpc.listen_addr] [servants.idgen_worker_id]\n");

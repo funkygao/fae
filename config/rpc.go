@@ -7,16 +7,15 @@ import (
 )
 
 type ConfigRpc struct {
-	ListenAddr                   string
-	SessionTimeout               time.Duration
-	IoTimeout                    time.Duration
-	BufferSize                   int // network IO read/write buffer
-	Framed                       bool
-	Protocol                     string
-	StatsOutputInterval          time.Duration
-	PreforkMode                  bool
-	MaxOutstandingSessions       int
-	WarnTooManySessionsThreshold int64
+	ListenAddr             string
+	SessionTimeout         time.Duration
+	IoTimeout              time.Duration
+	BufferSize             int // network IO read/write buffer
+	Framed                 bool
+	Protocol               string
+	StatsOutputInterval    time.Duration
+	PreforkMode            bool
+	MaxOutstandingSessions int
 }
 
 func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
@@ -33,8 +32,6 @@ func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
 	this.Protocol = section.String("protocol", "binary")
 	this.PreforkMode = section.Bool("prefork_mode", false)
 	this.MaxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
-	this.WarnTooManySessionsThreshold = int64(section.Int("warn_too_many_sessions_threshold",
-		3000))
 
 	log.Debug("rpc conf: %+v", *this)
 }

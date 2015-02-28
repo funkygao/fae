@@ -55,14 +55,12 @@ func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
 	ctx.Rid = strconv.FormatInt(this.pool.nextTxn(), 10)
 	ctx.Reason = reason
 	ctx.Uid = uid
-	ctx.Host = this.pool.myIp
 
 	return ctx
 }
 
 // append my transaction id and my host ip to ctx
 func (this *FunServantPeer) HijackContext(ctx *rpc.Context) {
-	ctx.Host = ctx.Host + ":" + this.pool.myIp
 	ctx.Sticky = new(bool)
 	*ctx.Sticky = true // tells peer it's from fae
 }

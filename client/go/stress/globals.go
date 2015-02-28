@@ -30,4 +30,5 @@ var (
 	zk              string
 	testPool        bool
 	logTurnOff      bool
+	tcpNoDelay      bool
 )

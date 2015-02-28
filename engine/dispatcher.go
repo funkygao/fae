@@ -2,7 +2,6 @@ package engine
 
 import (
 	"github.com/funkygao/golib/null"
-	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
@@ -11,7 +10,7 @@ type rpcClientHandler func(sock thrift.TTransport)
 // Like php-fpm pm pool
 // forking goroutine under benchmark is around 40k/s, if higher conn/s
 // is required, need pre-fork goroutines
-type rpcThreadPool struct {
+type rpcDispatcher struct {
 	preforkMode bool
 	handler     rpcClientHandler
 
@@ -19,37 +18,33 @@ type rpcThreadPool struct {
 	clientSocketChan chan thrift.TTransport // if prefork mode
 }
 
-func newRpcThreadPool(prefork bool, maxOutstandingSessions int,
-	handler rpcClientHandler) (this *rpcThreadPool) {
-	this = new(rpcThreadPool)
+func newRpcDispatcher(prefork bool, maxOutstandingSessions int,
+	handler rpcClientHandler) (this *rpcDispatcher) {
+	this = new(rpcDispatcher)
 	this.handler = handler
 	this.preforkMode = prefork
 
-	if this.preforkMode {
-		this.clientSocketChan = make(chan thrift.TTransport, maxOutstandingSessions)
-		for i := 0; i < maxOutstandingSessions; i++ {
-			// prefork
-			go func() {
-				for {
-					this.handler(<-this.clientSocketChan)
-				}
-			}()
-		}
-	} else {
+	if !this.preforkMode {
 		this.throttleChan = make(chan null.NullStruct, maxOutstandingSessions)
+		return
+	}
+
+	this.clientSocketChan = make(chan thrift.TTransport, maxOutstandingSessions)
+	for i := 0; i < maxOutstandingSessions; i++ {
+		// prefork
+		go func() {
+			for {
+				this.handler(<-this.clientSocketChan)
+			}
+		}()
 	}
 
 	return
 }
 
-func (this *rpcThreadPool) Dispatch(clientSocket thrift.TTransport) {
+func (this *rpcDispatcher) Dispatch(clientSocket thrift.TTransport) {
 	if this.preforkMode {
-		select {
-		case this.clientSocketChan <- clientSocket:
-		default:
-			log.Warn("rpc thread pool full, discarded client: %+v", clientSocket)
-		}
-
+		this.clientSocketChan <- clientSocket // block if busy
 		return
 	}
 

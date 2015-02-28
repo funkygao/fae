@@ -32,6 +32,7 @@ func parseFlag() {
 	flag.IntVar(&verbose, "v", 0, "verbose level")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.BoolVar(&testPool, "testpool", false, "test pool")
+	flag.BoolVar(&tcpNoDelay, "tcpnodelay", true, "tcp no delay")
 	flag.BoolVar(&logTurnOff, "logoff", false, "only show progress instead of rpc result")
 	flag.IntVar(&SampleRate, "s", Concurrency*Rounds*LoopsPerSession+100, "log sampling rate")
 	flag.Usage = showUsage
@@ -42,6 +43,7 @@ func main() {
 	cf := config.NewDefaultProxy()
 	cf.PoolCapacity = Concurrency
 	cf.IoTimeout = time.Hour
+	cf.TcpNoDelay = tcpNoDelay
 	proxy := proxy.New(cf)
 
 	etclib.Dial([]string{zk})

@@ -1,0 +1,35 @@
+# Linux kernal config for fae
+#============================
+fs.file-max = 1020000
+
+
+# set the max OS send/recv buffer size for queues on all protocols
+# 16MB
+net.core.rmem_max = 16777216    
+net.core.wmem_max = 16777216 
+# 1MB
+net.core.rmem_default = 1048576 
+net.core.wmem_default = 1048576 
+# in mem page size: 4KB(getconf PAGESIZE)
+net.ipv4.tcp_rmem = 4096 87380 16777216 
+net.ipv4.tcp_wmem = 4096 65536 16777216
+
+# listen backlog
+net.ipv4.tcp_max_syn_backlog=8192
+net.core.somaxconn=16384 
+net.core.netdev_max_backlog=5000
+
+# auto ajust rwnd
+net.ipv4.tcp_moderate_rcvbuf = 1
+
+net.ipv4.tcp_syn_retries = 5
+net.ipv4.tcp_synack_retries = 5
+
+net.ipv4.tcp_fin_timeout = 5
+net.ipv4.tcp_max_tw_buckets = 10000
+
+# slow start
+net.ipv4.tcp_max_ssthresh = 0
+# ip route change default via 10.13.104.1 dev eth0 prot static initcwnd 10
+# ip route show
+
