@@ -29,7 +29,10 @@ import (
 )
 
 type FunServantImpl struct {
-	conf *config.ConfigServant
+	conf      *config.ConfigServant
+	startedAt time.Time
+	proxyMode bool
+	sessions  *cache.LruCache // state kept for sessions FIXME kill it
 
 	ctxReasonPercentage metrics.PercentCounter
 	digitNormalizer     *regexp.Regexp
@@ -39,12 +42,7 @@ type FunServantImpl struct {
 	dbCacheStore       store.Store
 	dbCacheHits        metrics.PercentCounter
 
-	startedAt time.Time
-	sessions  *cache.LruCache // state kept for sessions FIXME kill it
-
-	proxyMode bool
-	proxy     *proxy.Proxy // remote fae agent
-
+	proxy *proxy.Proxy         // remote fae agent
 	idgen *idgen.IdGenerator   // global id generator
 	game  *game.Game           // game engine
 	lc    *cache.LruCache      // local cache
@@ -85,12 +83,20 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 }
 
 func (this *FunServantImpl) Start() {
-	go this.showStats()
-	go this.proxy.StartMonitorCluster()
-	go this.watchConfigReloaded()
-
 	this.startedAt = time.Now()
 	svtStats.registerMetrics()
+
+	go this.showStats()
+	go this.proxy.StartMonitorCluster()
+	go func() {
+		for {
+			select {
+			case cf := <-config.Engine.ReloadedChan:
+				this.recreateServants(cf.Servants)
+			}
+		}
+	}()
+
 	this.warmUp()
 }
 
@@ -105,6 +111,7 @@ func (this *FunServantImpl) AddErr(n int64) {
 	svtStats.addErr(n)
 }
 
+// TODO extends rpc.Context and let it able to extract Uid itself
 func (this *FunServantImpl) extractUid(ctx *rpc.Context) (uid int64) {
 	if ctx.IsSetUid() {
 		uid = *ctx.Uid
@@ -160,7 +167,7 @@ func (this *FunServantImpl) createServants() {
 				this.conf.Redis)
 
 		default:
-			panic("unknown cache store")
+			panic("unknown mysql cache store")
 		}
 	}
 
@@ -296,8 +303,6 @@ func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
-	// TODO show most recent stats, reset at some interval
-
 	for _ = range ticker.C {
 		callsN := svtStats.calls.Total()
 		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
@@ -308,14 +313,5 @@ func (this *FunServantImpl) showStats() {
 			gofmt.Comma(svtStats.callsErr),
 			gofmt.Comma(svtStats.callsFromPeer),
 			gofmt.Comma(svtStats.callsToPeer))
-	}
-}
-
-func (this *FunServantImpl) watchConfigReloaded() {
-	for {
-		select {
-		case cf := <-config.Engine.ReloadedChan:
-			this.recreateServants(cf.Servants)
-		}
 	}
 }
