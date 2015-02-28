@@ -42,13 +42,21 @@ func NewTFunServer(engine *Engine,
 		inputProtocolFactory:   protocolFactory,  // TBinaryProtocolFactory
 		outputProtocolFactory:  protocolFactory,  // TBinaryProtocolFactory
 	}
-	this.dispatcher = newRpcDispatcher(
-		preforkMode,
+	this.dispatcher = newRpcDispatcher(preforkMode,
 		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	return this
 }
 
+// thrift.TServer.Stop
+func (this *TFunServer) Stop() error {
+	close(this.quit)
+	this.serverTransport.Interrupt()
+	this.serverTransport.Close() // accept tcp [::]:9001: use of closed network connection
+	return nil
+}
+
+// thrift.TServer.Serve
 func (this *TFunServer) Serve() error {
 	if err := this.serverTransport.Listen(); err != nil {
 		return err
@@ -75,7 +83,6 @@ func (this *TFunServer) Serve() error {
 			SLEEP_STEP * SLEEP_STEP
 	)
 	var delay = ACCEPT_MIN_SLEEP
-
 	for {
 		select {
 		case <-this.quit:
@@ -88,7 +95,7 @@ func (this *TFunServer) Serve() error {
 		client, err := this.serverTransport.Accept()
 		if err != nil {
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
-				log.Warn("Accept temporary: %v, sleeping %dms", ne,
+				log.Warn("Accept temporary: %s, sleeping %dms", ne.Error(),
 					delay/time.Millisecond)
 				time.Sleep(delay)
 				delay *= SLEEP_STEP
@@ -96,7 +103,7 @@ func (this *TFunServer) Serve() error {
 					delay = ACCEPT_MAX_SLEEP
 				}
 			} else {
-				log.Error("Accept: %v", err)
+				log.Error("Accept: %s", err.Error())
 			}
 
 			continue
@@ -124,32 +131,29 @@ func (this *TFunServer) showStats(interval time.Duration) {
 }
 
 func (this *TFunServer) handleSession(client thrift.TTransport) {
-	currentSessionN := atomic.AddInt64(&this.activeSessionN, 1)
-	remoteAddr := client.(*thrift.TSocket).Addr().String()
-	if currentSessionN > config.Engine.Rpc.WarnTooManySessionsThreshold {
-		log.Warn("session[%s] open, too many sessions: %d",
-			remoteAddr, currentSessionN)
-	} else {
-		log.Debug("session[%s] open", remoteAddr)
-	}
-
 	var (
+		calls           int64 // #calls within this session
+		errs            int64 // #errs within this session
 		t1              = time.Now()
-		calls           int64
-		errs            int64
+		currentSessionN = atomic.AddInt64(&this.activeSessionN, 1)
+		tcpClient       = client.(*thrift.TSocket).Conn().(*net.TCPConn)
+		remoteAddr      = tcpClient.RemoteAddr().String()
 		processor       = this.processorFactory.GetProcessor(client)
 		inputTransport  = this.inputTransportFactory.GetTransport(client)
 		outputTransport = this.outputTransportFactory.GetTransport(client)
 		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
 		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
-	if calls, errs = this.processRequests(client, processor,
-		inputTransport, outputTransport,
+	log.Debug("session[%s]#%d open", remoteAddr, currentSessionN)
+
+	if calls, errs = this.serveCalls(tcpClient,
+		remoteAddr,
+		processor,
 		inputProtocol, outputProtocol); errs > 0 {
 		this.engine.svt.AddErr(errs)
 	}
 
-	// server actively closes the socket TODO timewait
+	// server actively closes the socket
 	if inputTransport != nil {
 		inputTransport.Close()
 	}
@@ -157,28 +161,26 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 		outputTransport.Close()
 	}
 
-	atomic.AddInt64(&this.activeSessionN, -1)
-
+	currentSessionN = atomic.AddInt64(&this.activeSessionN, -1) + 1
 	elapsed := time.Since(t1)
+
 	if errs > 0 {
-		log.Warn("session[%s] %d calls in %s, errs:%d", remoteAddr, calls, elapsed, errs)
+		log.Warn("session[%s]#%d %d calls in %s, errs:%d", remoteAddr,
+			currentSessionN, calls, elapsed, errs)
 	} else {
-		log.Trace("session[%s] %d calls in %s", remoteAddr, calls, elapsed)
+		log.Trace("session[%s]#%d %d calls in %s", remoteAddr,
+			currentSessionN, calls, elapsed)
 	}
 }
 
-func (this *TFunServer) processRequests(client thrift.TTransport,
+func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
+	remoteAddr string,
 	processor thrift.TProcessor,
-	inputTransport thrift.TTransport,
-	outputTransport thrift.TTransport,
 	inputProtocol thrift.TProtocol,
-	outputProtocol thrift.TProtocol) (callsN int64,
-	errsN int64) {
+	outputProtocol thrift.TProtocol) (callsN int64, errsN int64) {
 	var (
-		t1         time.Time
-		elapsed    time.Duration
-		tcpClient  = client.(*thrift.TSocket).Conn().(*net.TCPConn)
-		remoteAddr = tcpClient.RemoteAddr().String()
+		t1      time.Time
+		elapsed time.Duration
 	)
 
 	for {
@@ -242,13 +244,6 @@ func (this *TFunServer) processRequests(client thrift.TTransport,
 
 	this.engine.stats.CallPerSession.Update(callsN)
 	return
-}
-
-func (this *TFunServer) Stop() error {
-	close(this.quit)
-	this.serverTransport.Interrupt()
-	this.serverTransport.Close() // accept tcp [::]:9001: use of closed network connection
-	return nil
 }
 
 func (this *TFunServer) ProcessorFactory() thrift.TProcessorFactory {

@@ -19,7 +19,6 @@
         buffer_size: 4096
         prefork_mode: true
         max_outstanding_sessions: 50000
-        warn_too_many_sessions_threshold: 6000
         session_timeout: "0s"
         io_timeout: "4s"
         stats_output_interval: "10m"
