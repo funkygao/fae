@@ -137,8 +137,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [X] golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
 
-### Contribs
+#### Reference
 
+*   aws ec2 packets-per-second (pps) maximum rate is 100k in+out
+    - http://www.rightscale.com/blog/cloud-management-best-practices/benchmarking-load-balancers-cloud
+*   RPS in linux
+    - http://huoding.com/2013/10/30/296
 *   https://github.com/phunt/zktop
 *   https://github.com/toddlipcon/gremlins
 *   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
