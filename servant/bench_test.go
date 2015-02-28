@@ -25,7 +25,7 @@ func sizedString(sz int) string {
 }
 
 func setupServant() *FunServantImpl {
-	server.SetupLogging("canbedeleted.test.log", "info", "", "", "")
+	server.SetupLogging(".canbedeleted.test.log", "info", "", "", "")
 
 	cf, _ := conf.Load("../etc/faed.cf")
 	config.LoadEngineConfig("../etc/faed.cf", cf)
