@@ -1,6 +1,7 @@
 # Linux kernal config for fae
 #============================
-fs.file-max = 34166
+fs.file-max = 1020000
+
 
 # set the max OS send/recv buffer size for queues on all protocols
 # 16MB
@@ -29,5 +30,6 @@ net.ipv4.tcp_max_tw_buckets = 10000
 
 # slow start
 net.ipv4.tcp_max_ssthresh = 0
-
+# ip route change default via 10.13.104.1 dev eth0 prot static initcwnd 10
+# ip route show
 
