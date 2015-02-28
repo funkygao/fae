@@ -21,6 +21,8 @@ net.core.netdev_max_backlog=30000
 
 # auto ajust rwnd
 net.ipv4.tcp_moderate_rcvbuf = 1
+# 1/(2**2)=25% recv buffer used as app read(), 75% used as rwnd
+net.ipv4.tcp_adv_win_scale = 2
 
 net.ipv4.tcp_syn_retries = 5
 net.ipv4.tcp_synack_retries = 5
