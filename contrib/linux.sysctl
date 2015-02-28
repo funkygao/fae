@@ -18,4 +18,16 @@ net.ipv4.tcp_max_syn_backlog=8192
 net.core.somaxconn=16384 
 net.core.netdev_max_backlog=5000
 
-# echo 5 > /proc/sys/net/ipv4/tcp_fin_timeout
+# auto ajust rwnd
+net.ipv4.tcp_moderate_rcvbuf = 1
+
+net.ipv4.tcp_syn_retries = 5
+net.ipv4.tcp_synack_retries = 5
+
+net.ipv4.tcp_fin_timeout = 5
+net.ipv4.tcp_max_tw_buckets = 10000
+
+# slow start
+net.ipv4.tcp_max_ssthresh = 0
+
+
