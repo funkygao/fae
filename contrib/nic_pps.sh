@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================
-# show NIC PackagesPerSecond on Linux
+# show NIC PacketsPerSecond on Linux
 #====================================
  
 INTERVAL="1"  # update interval in seconds
