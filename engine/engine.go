@@ -11,10 +11,9 @@ import (
 type Engine struct {
 	StartedAt time.Time
 
-	svt           *servant.FunServantImpl
-	rpcProcessor  thrift.TProcessor
-	rpcServer     thrift.TServer
-	rpcThreadPool *rpcThreadPool
+	svt          *servant.FunServantImpl
+	rpcProcessor thrift.TProcessor
+	rpcServer    thrift.TServer
 
 	stats    *engineStats
 	pid      int

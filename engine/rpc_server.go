@@ -15,6 +15,7 @@ import (
 type TFunServer struct {
 	quit           chan bool
 	activeSessionN int64
+	dispatcher     *rpcDispatcher
 
 	engine                 *Engine
 	processorFactory       thrift.TProcessorFactory
@@ -23,8 +24,6 @@ type TFunServer struct {
 	outputTransportFactory thrift.TTransportFactory
 	inputProtocolFactory   thrift.TProtocolFactory
 	outputProtocolFactory  thrift.TProtocolFactory
-
-	pool *rpcThreadPool
 }
 
 func NewTFunServer(engine *Engine,
@@ -43,13 +42,12 @@ func NewTFunServer(engine *Engine,
 		inputProtocolFactory:   protocolFactory,  // TBinaryProtocolFactory
 		outputProtocolFactory:  protocolFactory,  // TBinaryProtocolFactory
 	}
-	this.pool = newRpcThreadPool(
+	this.dispatcher = newRpcDispatcher(
 		preforkMode,
 		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
-	engine.rpcThreadPool = this.pool
-
 	return this
+
 }
 
 func (this *TFunServer) Serve() error {
@@ -107,7 +105,7 @@ func (this *TFunServer) Serve() error {
 			continue
 		}
 
-		this.pool.Dispatch(client)
+		this.dispatcher.Dispatch(client)
 		delay = ACCEPT_MIN_SLEEP
 	}
 
