@@ -59,6 +59,24 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	for i := 0; i < LoopsPerSession; i++ {
 		//time.Sleep(time.Millisecond * 5)
 		ctx.Rid = fmt.Sprintf("round:%d,seq:%d:i:%d,", round, seq, i+1)
+
+		if Cmd&CallEcho != 0 {
+			var r int32
+			r, err = client.Echo(1)
+			if err != nil {
+				checkIoError(err)
+				report.incCallErr()
+				log.Printf("session{round^%d seq^%d ping}: %v", round, seq, err)
+				client.Close()
+				return
+			} else {
+				report.incCallOk()
+				if enableLog {
+					log.Printf("session{round^%d seq^%d echo}: %v", round, seq, r)
+				}
+			}
+		}
+
 		if Cmd&CallPing != 0 {
 			var r string
 			r, err = client.Ping(ctx)

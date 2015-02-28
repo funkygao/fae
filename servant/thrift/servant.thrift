@@ -99,6 +99,13 @@ service FunServant {
         2: required string path
     ),
 
+    /**
+     * Just for QPS throughput testing.
+     */
+    i32 echo(
+        1: required i32 x
+    ),
+
 
     /**
      * Ping.
