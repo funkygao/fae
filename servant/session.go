@@ -24,7 +24,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 
 		normalizedReason := this.digitNormalizer.ReplaceAll(
 			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
-		this.phpReasonPercent.Inc(string(normalizedReason), 1)
+		this.ctxReasonPercentage.Inc(string(normalizedReason), 1)
 
 		log.Debug("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
 			ctx.Rid, ctx.Reason)

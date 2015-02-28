@@ -31,8 +31,8 @@ import (
 type FunServantImpl struct {
 	conf *config.ConfigServant
 
-	digitNormalizer  *regexp.Regexp
-	phpReasonPercent metrics.PercentCounter // user's behavior
+	ctxReasonPercentage metrics.PercentCounter
+	digitNormalizer     *regexp.Regexp
 
 	// stateful mem data related to services
 	mysqlMergeMutexMap *mutexmap.MutexMap
@@ -56,9 +56,11 @@ type FunServantImpl struct {
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
-	this = &FunServantImpl{conf: cf}
-	this.digitNormalizer = regexp.MustCompile(`\d+`)
-	this.proxyMode = config.Engine.IsProxyOnly()
+	this = &FunServantImpl{
+		conf:            cf,
+		digitNormalizer: regexp.MustCompile(`\d+`),
+		proxyMode:       config.Engine.IsProxyOnly(),
+	}
 
 	// http REST to export internal state
 	if server.Launched() {
@@ -72,8 +74,8 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
 	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
 
-	this.phpReasonPercent = metrics.NewPercentCounter()
-	metrics.Register("php.reason", this.phpReasonPercent)
+	this.ctxReasonPercentage = metrics.NewPercentCounter()
+	metrics.Register("call.reason", this.ctxReasonPercentage)
 	this.dbCacheHits = metrics.NewPercentCounter()
 	metrics.Register("db.cache.hits", this.dbCacheHits)
 
@@ -280,8 +282,8 @@ func (this *FunServantImpl) Runtime() map[string]interface{} {
 	for _, key := range svtStats.calls.Keys() {
 		r["call["+key+"]"] = svtStats.calls.Percent(key)
 	}
-	for _, key := range this.phpReasonPercent.Keys() {
-		r["reason["+key+"]"] = this.phpReasonPercent.Percent(key)
+	for _, key := range this.ctxReasonPercentage.Keys() {
+		r["reason["+key+"]"] = this.ctxReasonPercentage.Percent(key)
 	}
 	for _, key := range this.dbCacheHits.Keys() {
 		r["dbcache["+key+"]"] = this.dbCacheHits.Percent(key)
