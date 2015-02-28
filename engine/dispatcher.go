@@ -2,7 +2,6 @@ package engine
 
 import (
 	"github.com/funkygao/golib/null"
-	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
@@ -45,12 +44,7 @@ func newRpcDispatcher(prefork bool, maxOutstandingSessions int,
 
 func (this *rpcDispatcher) Dispatch(clientSocket thrift.TTransport) {
 	if this.preforkMode {
-		select {
-		case this.clientSocketChan <- clientSocket:
-		default:
-			log.Warn("rpc thread pool full, discarded client: %+v", clientSocket)
-		}
-
+		this.clientSocketChan <- clientSocket // block if busy
 		return
 	}
 
