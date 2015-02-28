@@ -100,6 +100,32 @@ func (this *FunServantImpl) Start() {
 	this.warmUp()
 }
 
+func (this *FunServantImpl) warmUp() {
+	log.Debug("warming up...")
+
+	if this.mg != nil {
+		go this.mg.Warmup()
+	}
+
+	if this.mc != nil {
+		go this.mc.Warmup()
+	}
+
+	if this.my != nil {
+		this.my.Warmup()
+	}
+
+	if this.proxy != nil {
+		this.proxy.Warmup()
+	}
+
+	if this.rd != nil {
+		this.rd.Warmup()
+	}
+
+	log.Debug("warmup done")
+}
+
 func (this *FunServantImpl) Flush() {
 	log.Debug("servants flushing...")
 	// TODO
