@@ -47,12 +47,9 @@ func NewTFunServer(engine *Engine,
 		config.Engine.Rpc.MaxOutstandingSessions,
 		this.handleSession)
 	return this
-
 }
 
 func (this *TFunServer) Serve() error {
-	var stoppedError = errors.New("RPC server stopped")
-
 	if err := this.serverTransport.Listen(); err != nil {
 		return err
 	}
@@ -83,7 +80,7 @@ func (this *TFunServer) Serve() error {
 		select {
 		case <-this.quit:
 			log.Info("RPC server quit...")
-			return stoppedError
+			return errors.New("RPC server quit")
 
 		default:
 		}
@@ -109,7 +106,7 @@ func (this *TFunServer) Serve() error {
 		delay = ACCEPT_MIN_SLEEP
 	}
 
-	return stoppedError
+	return nil
 }
 
 func (this *TFunServer) showStats(interval time.Duration) {

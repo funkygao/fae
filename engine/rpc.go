@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/null"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"strings"
@@ -18,7 +19,7 @@ import (
 // Processor (compiler genereated)
 // Protocol (JSON/compact/...), what is transmitted
 // Transport (TCP/HTTP/...), how is transmitted
-func (this *Engine) launchRpcServe() (done chan interface{}) {
+func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 	var (
 		protocolFactory  thrift.TProtocolFactory
 		serverTransport  thrift.TServerTransport
@@ -103,18 +104,13 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 
-	done = make(chan interface{})
+	done = make(chan null.NullStruct)
 	go func() {
-		for {
-			err = this.rpcServer.Serve()
-			if err != nil {
-				log.Error("rpcServer: %+v", err)
-				break
-			}
+		if err = this.rpcServer.Serve(); err != nil {
+			log.Error("RPC server: %+v", err)
 		}
 
-		done <- 1
-
+		done <- null.Null
 	}()
 
 	return done
