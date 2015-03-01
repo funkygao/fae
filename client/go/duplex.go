@@ -17,7 +17,7 @@ func main() {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "go.duplex"
-	ctx.Rid = "189"
+	ctx.Rid = 189
 	for i := 0; i < 10; i++ {
 		go func() {
 			t1 := time.Now()

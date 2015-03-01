@@ -48,7 +48,7 @@ func main() {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = REASON
-	ctx.Rid = fmt.Sprintf("req:%d", time.Now().UnixNano())
+	ctx.Rid = time.Now().UnixNano()
 	pong, err := client.Ping(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -72,7 +72,6 @@ func pingCluster(proxy *proxy.Proxy) {
 		return
 	}
 
-	t := time.Now().Unix() // part of rid
 	for i := 0; i < loops; i++ {
 		for _, peerAddr := range peers {
 			client, err := proxy.ServantByAddr(peerAddr)
@@ -83,7 +82,7 @@ func pingCluster(proxy *proxy.Proxy) {
 
 			ctx := rpc.NewContext()
 			ctx.Reason = REASON
-			ctx.Rid = fmt.Sprintf("t:%d,req:%d", t, i+1)
+			ctx.Rid = time.Now().UnixNano() + int64(i)
 			pong, err := client.Ping(ctx)
 			if err != nil {
 				client.Close()

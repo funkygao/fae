@@ -47,7 +47,7 @@ func main() {
 
 		ctx := rpc.NewContext()
 		ctx.Reason = "broken.test"
-		ctx.Rid = fmt.Sprintf("req:%d", time.Now().UnixNano())
+		ctx.Rid = time.Now().UnixNano()
 		pong, err := client.Ping(ctx)
 		if err != nil {
 			fmt.Println("err:", err)

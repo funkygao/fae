@@ -4,7 +4,7 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/pool"
 	log "github.com/funkygao/log4go"
-	"strconv"
+	"time"
 )
 
 // A single rpc client connection with remote peer
@@ -52,7 +52,7 @@ func (this *FunServantPeer) Recycle() {
 
 func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
 	ctx := rpc.NewContext()
-	ctx.Rid = strconv.FormatInt(this.pool.nextTxn(), 10)
+	ctx.Rid = this.pool.nextTxn() + time.Now().UnixNano() // roughly unique, maybe enough
 	ctx.Reason = reason
 	ctx.Uid = uid
 

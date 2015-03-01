@@ -47,19 +47,24 @@ struct MysqlMergeResult {
 struct Context {
 
     /**
-     * PHP Request id.
+     * Request id.
      *
-     * for thrift RPC, this is session id because this is within a single tcp conn
+     * for thrift RPC, this is session id because this is within a single tcp conn.
+     *
+     * RPC client is reponsible to generate this rid.
      */ 
-    1:required string rid
+    1:required i64 rid
 
     /**
+     * Reason of call RPC.
+     *
      * e,g. controler.action name or batch cmds
      */
     2:required string reason
 
     /**
-     * User id
+     * User id.
+     *
      */
     3:optional i64 uid
 

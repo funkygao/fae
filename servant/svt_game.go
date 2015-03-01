@@ -161,7 +161,7 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	uid := this.extractUid(ctx)
 	this.game.CheckIn(uid)
 
-	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
+	log.Trace("{%dms %s}: {uid^%d rid^%d reason^%s}",
 		ms, gofmt.ByteSize(bytes), uid, ctx.Rid, ctx.Reason)
 
 	return

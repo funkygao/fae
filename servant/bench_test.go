@@ -16,6 +16,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"strings"
 	"testing"
+	"time"
 )
 
 func sizedString(sz int) string {
@@ -33,18 +34,25 @@ func setupServant() *FunServantImpl {
 	return NewFunServant(config.Engine.Servants)
 }
 
+func BenchmarkTimeUnixNano(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		time.Now().UnixNano()
+	}
+}
+
 func BenchmarkExtractUidFromContext(b *testing.B) {
 	servant := setupServant()
 	b.ReportAllocs()
 	ctx := rpc.NewContext()
 	ctx.Reason = "hello world"
-	ctx.Rid = "12"
+	ctx.Rid = 12
 	for i := 0; i < b.N; i++ {
 		servant.extractUid(ctx)
 	}
 }
 
-func BenchmarkSizedString(b *testing.B) {
+func BenchmarkSizedString12(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		sizedString(12)
@@ -57,7 +65,7 @@ func BenchmarkGetSession(b *testing.B) {
 	ctx := rpc.NewContext()
 	ctx.Reason = "hello world"
 	for i := 0; i < b.N; i++ {
-		//ctx.Rid = sizedString(12)
+		ctx.Rid = time.Now().UnixNano()
 		servant.getSession(ctx)
 	}
 }
@@ -120,7 +128,7 @@ func BenchmarkMcSet(b *testing.B) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "benchmark"
-	ctx.Rid = "1"
+	ctx.Rid = 1
 	data := rpc.NewTMemcacheData()
 	data.Data = []byte("bar")
 	for i := 0; i < b.N; i++ {
@@ -248,7 +256,7 @@ func BenchmarkPingOnLocalhost(b *testing.B) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "benchmark"
-	ctx.Rid = "1"
+	ctx.Rid = 2
 
 	for i := 0; i < b.N; i++ {
 		client.Ping(ctx)

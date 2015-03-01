@@ -58,7 +58,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	ctx.Reason = "stress.go"
 	for i := 0; i < LoopsPerSession; i++ {
 		//time.Sleep(time.Millisecond * 5)
-		ctx.Rid = fmt.Sprintf("round:%d,seq:%d:i:%d,", round, seq, i+1)
+		ctx.Rid = time.Now().UnixNano()
 
 		if Cmd&CallEcho != 0 {
 			var r int32
