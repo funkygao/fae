@@ -49,6 +49,8 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 	output["uris"] = []string{"/engine/help", "/svt/help"}
 	output["ver"] = server.VERSION
 	output["build_id"] = server.BuildID
+	output["golang"] = fmt.Sprintf("Built with %s %s for %s %s", runtime.Compiler,
+		runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	return output, nil
 }
 
