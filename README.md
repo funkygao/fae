@@ -20,25 +20,25 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
                                     |                        
                                     | short lived tcp/unix socket                        
                                     |                        
-                                    |                            peers discover
+                                    |                  
                                     |                            +---------------+
                                     |                     +------|  faed daemon  |-------+
                             +---------------+             |      +---------------+       |
-                            |  faed daemon  |  tcp        |                              |
-                            +---------------+ ------------|      peers discover          |
-                            |  LRU cache    |  proxy      |      +---------------+       |
+                            |  faed daemon  |  tcp pool   |                              |
+                            +---------------+ ------------|                              | peers
+                            |  LRU cache    |  discovery  |      +---------------+       |
                             +---------------+             +------|  faed daemon  |-------|
                                     |                            +---------------+       |
                                     |                                                    |
-                                    |                    consitent hash with replicas    |
+                                    |                                         zookeeper  |
                                     |----------------------------------------------------+
                                     |
-                                    | tcp long connection pool(heartbeat) with recycling
+                                    | tcp conn pool
                                     |
             +-----------------------------------------------+
-            |                       |                       |     self contained
+            |                       |                       |          SET model
         +----------------+  +----------------+  +------------------------------+
-        | mongodb servers|  |memcache servers|  | lcache | kvdb | idgen | ...  |
+        | mongodb/mysql  |  | memcache/redis |  | lcache | kvdb | idgen | ...  |
         +----------------+  +----------------+  +------------------------------+
 
 ### Why SOA?
