@@ -41,17 +41,6 @@ func BenchmarkTimeUnixNano(b *testing.B) {
 	}
 }
 
-func BenchmarkExtractUidFromContext(b *testing.B) {
-	servant := setupServant()
-	b.ReportAllocs()
-	ctx := rpc.NewContext()
-	ctx.Reason = "hello world"
-	ctx.Rid = 12
-	for i := 0; i < b.N; i++ {
-		servant.extractUid(ctx)
-	}
-}
-
 func BenchmarkSizedString12(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
@@ -63,7 +52,7 @@ func BenchmarkGetSession(b *testing.B) {
 	servant := setupServant()
 	b.ReportAllocs()
 	ctx := rpc.NewContext()
-	ctx.Reason = "hello world"
+	ctx.Reason = "Map:enterKingdomBlock"
 	for i := 0; i < b.N; i++ {
 		ctx.Rid = time.Now().UnixNano()
 		servant.getSession(ctx)

@@ -50,7 +50,7 @@ func (this *FunServantPeer) Recycle() {
 	}
 }
 
-func (this *FunServantPeer) NewContext(reason string, uid *int64) *rpc.Context {
+func (this *FunServantPeer) NewContext(reason string, uid int64) *rpc.Context {
 	ctx := rpc.NewContext()
 	ctx.Rid = this.pool.nextTxn() + time.Now().UnixNano() // roughly unique, maybe enough
 	ctx.Reason = reason

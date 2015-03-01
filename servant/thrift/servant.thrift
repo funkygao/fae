@@ -66,7 +66,7 @@ struct Context {
      * User id.
      *
      */
-    3:optional i64 uid
+    3:required i64 uid
 
     /**
      * If recv this flag, it means sticky request is sent

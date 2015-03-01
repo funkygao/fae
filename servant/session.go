@@ -26,7 +26,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
 		this.ctxReasonPercentage.Inc(string(normalizedReason), 1)
 
-		log.Debug("new session {uid^%d rid^%d reason^%s}", this.extractUid(ctx),
+		log.Debug("new session {uid^%d rid^%d reason^%s}", ctx.Uid,
 			ctx.Rid, ctx.Reason)
 	}
 
