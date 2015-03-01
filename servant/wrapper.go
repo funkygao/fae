@@ -3,6 +3,7 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	//log "github.com/funkygao/log4go"
 )
 
 type FunServantImplWrapper struct {

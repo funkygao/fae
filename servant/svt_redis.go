@@ -17,13 +17,10 @@ func (this *FunServantImpl) RdCall(ctx *rpc.Context, cmd string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
-	if r, ex = this.callRedis(cmd, pool, keysAndArgs); ex != nil {
-		svtStats.incErr()
-	}
+	r, ex = this.callRedis(cmd, pool, keysAndArgs)
 
 	profiler.do(IDENT, ctx,
 		"{cmd^%s pool^%s key^%s args^%+v} {r^%s}",

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/gofmt"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
@@ -13,9 +14,12 @@ import (
 
 // thrift.TServer implementation
 type TFunServer struct {
-	quit           chan bool
 	activeSessionN int64
+	cumSessions    int64 // cumulated
+	cumCalls       int64
+	cumCallErrs    int64
 
+	quit       chan bool
 	dispatcher *rpcDispatcher
 	engine     *Engine // cause TFunServer will report stats to engine
 
@@ -119,8 +123,12 @@ func (this *TFunServer) Serve() error {
 
 func (this *TFunServer) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["active_sessions"] = atomic.LoadInt64(&this.activeSessionN)
+	r["sessions.active"] = atomic.LoadInt64(&this.activeSessionN)
+	r["sessions.all"] = atomic.LoadInt64(&this.cumSessions)
+	r["call.all"] = atomic.LoadInt64(&this.cumCalls)
+	r["call.err"] = atomic.LoadInt64(&this.cumCallErrs)
 	r["dispatcher"] = this.dispatcher.Runtime()
+
 	return r
 }
 
@@ -129,8 +137,11 @@ func (this *TFunServer) showStats(interval time.Duration) {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions:%d, qps:{1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f}}",
+		log.Info("rpc: {session.on:%d/%s, call.err:%s/%s, qps:{1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f}}",
 			atomic.LoadInt64(&this.activeSessionN),
+			gofmt.Comma(atomic.LoadInt64(&this.cumSessions)),
+			gofmt.Comma(atomic.LoadInt64(&this.cumCallErrs)),
+			gofmt.Comma(atomic.LoadInt64(&this.cumCalls)),
 			this.engine.stats.CallPerSecond.Rate1(),
 			this.engine.stats.CallPerSecond.Rate5(),
 			this.engine.stats.CallPerSecond.Rate15(),
@@ -152,14 +163,14 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
 		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
+	atomic.AddInt64(&this.cumSessions, 1)
 	log.Debug("session[%s]#%d open", remoteAddr, currentSessionN)
 
-	if calls, errs = this.serveCalls(tcpClient,
-		remoteAddr,
-		processor,
+	if calls, errs = this.serveCalls(tcpClient, remoteAddr, processor,
 		inputProtocol, outputProtocol); errs > 0 {
-		this.engine.svt.AddErr(errs)
+		atomic.AddInt64(&this.cumCallErrs, errs)
 	}
+	atomic.AddInt64(&this.cumCalls, calls)
 
 	// server actively closes the socket
 	if inputTransport != nil {

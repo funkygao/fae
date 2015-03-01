@@ -94,7 +94,7 @@ func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 	}
 
 	// when config loaded, create the servants
-	this.svt = servant.NewFunServant(config.Engine.Servants)
+	this.svt = servant.NewFunServantWrapper(config.Engine.Servants)
 	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
 	this.svt.Start()
 

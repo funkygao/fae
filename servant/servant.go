@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
-	"sync/atomic"
 	"time"
 )
 
@@ -130,10 +129,6 @@ func (this *FunServantImpl) Flush() {
 	// TODO
 	this.my.Close()
 	log.Trace("servants flushed")
-}
-
-func (this *FunServantImpl) AddErr(n int64) {
-	svtStats.addErr(n)
 }
 
 func (this *FunServantImpl) createServants() {
@@ -296,8 +291,6 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 
 func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["sessions"] = atomic.LoadInt64(&svtStats.sessionN)
-	r["call.errs"] = svtStats.callsErr
 	r["call.slow"] = svtStats.callsSlow
 	r["call.peer.from"] = svtStats.callsFromPeer
 	r["call.peer.to"] = svtStats.callsToPeer
@@ -320,13 +313,8 @@ func (this *FunServantImpl) showStats() {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		callsN := svtStats.calls.Total()
-		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
-			gofmt.Comma(svtStats.sessionN),
-			gofmt.Comma(callsN),
-			float64(callsN)/float64(svtStats.sessionN+1), // +1 to avoid divide by zero
+		log.Info("svt: {slow:%s peer.from:%s, peer.to:%s}",
 			gofmt.Comma(svtStats.callsSlow),
-			gofmt.Comma(svtStats.callsErr),
 			gofmt.Comma(svtStats.callsFromPeer),
 			gofmt.Comma(svtStats.callsToPeer))
 	}

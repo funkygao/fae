@@ -11,7 +11,7 @@ import (
 type Engine struct {
 	StartedAt time.Time
 
-	svt          *servant.FunServantImpl
+	svt          *servant.FunServantImplWrapper
 	rpcProcessor thrift.TProcessor
 	rpcServer    thrift.TServer
 
