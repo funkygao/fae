@@ -138,7 +138,7 @@ func (this *TFunServer) Runtime() map[string]interface{} {
 	r["sessions.active"] = atomic.LoadInt64(&this.activeSessionN)
 	r["sessions.all"] = atomic.LoadInt64(&this.cumSessions)
 	r["call.all"] = atomic.LoadInt64(&this.cumCalls)
-	r["call.err"] = atomic.LoadInt64(&this.cumCallErrs)
+	r["call.err.all"] = atomic.LoadInt64(&this.cumCallErrs)
 	r["call.err.msg"] = this.errors
 	r["dispatcher"] = this.dispatcher.Runtime()
 	r["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
