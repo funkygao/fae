@@ -144,6 +144,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [X] NewTBufferedTransportFactory buffer size, and php config buf size
 *   [X] golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
+*   [X] thrift compiler didn't implement oneway in golang
 
 #### Reference
 
