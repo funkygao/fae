@@ -54,3 +54,15 @@ func (this *rpcDispatcher) Dispatch(clientSocket thrift.TTransport) {
 		<-this.throttleChan
 	}()
 }
+
+func (this *rpcDispatcher) Runtime() map[string]interface{} {
+	r := make(map[string]interface{})
+	if this.preforkMode {
+		r["cap"] = cap(this.clientSocketChan)
+		r["pending"] = len(this.clientSocketChan)
+	} else {
+		r["cap"] = cap(this.throttleChan)
+		r["pending"] = len(this.throttleChan)
+	}
+	return r
+}

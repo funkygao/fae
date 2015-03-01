@@ -47,6 +47,8 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 	}
 
 	output["uris"] = []string{"/engine/help", "/svt/help"}
+	output["ver"] = server.VERSION
+	output["build_id"] = server.BuildID
 	return output, nil
 }
 
@@ -82,14 +84,13 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["hostname"] = this.hostname
 		output["ver"] = server.VERSION
 		output["build_id"] = server.BuildID
-		output["active_sessions"] = 1 // TODO
-
-	case "qps":
 		output["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
 			this.stats.CallPerSecond.Rate1(),
 			this.stats.CallPerSecond.Rate5(),
 			this.stats.CallPerSecond.Rate15(),
 			this.stats.CallPerSecond.RateMean())
+		rpcServer := this.rpcServer.(*TFunServer)
+		output["rpc"] = rpcServer.Runtime()
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()
@@ -108,7 +109,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 			"/engine/debug",
 			"/engine/stop",
 			"/engine/stat",
-			"/engine/qps",
 			"/engine/runtime",
 			"/engine/mem",
 			"/engine/conf",

@@ -15,9 +15,10 @@ import (
 type TFunServer struct {
 	quit           chan bool
 	activeSessionN int64
-	dispatcher     *rpcDispatcher
 
-	engine                 *Engine
+	dispatcher *rpcDispatcher
+	engine     *Engine // cause TFunServer will report stats to engine
+
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
 	inputTransportFactory  thrift.TTransportFactory
@@ -114,6 +115,13 @@ func (this *TFunServer) Serve() error {
 	}
 
 	return nil
+}
+
+func (this *TFunServer) Runtime() map[string]interface{} {
+	r := make(map[string]interface{})
+	r["active_sessions"] = atomic.LoadInt64(&this.activeSessionN)
+	r["dispatcher"] = this.dispatcher.Runtime()
+	return r
 }
 
 func (this *TFunServer) showStats(interval time.Duration) {
