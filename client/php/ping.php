@@ -26,11 +26,12 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => '123', 'reason' => 'call.init.567', 'uid' => 11));
+    $ctx = new Context(array('rid' => hexdec(uniqid()), 'reason' => 'call.init.567', 'uid' => 11));
 
-    echo $client->ping($ctx), "\n";
-
-    echo $client->noop(21), "\n";
+    for ($i=0; $i<2000; $i++) {
+        echo 'ping:', $client->ping($ctx), "\n";
+        echo 'noop:', $client->noop(21), "\n";
+    }
 
     $transport->close();
 } catch (Exception $ex) {

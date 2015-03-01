@@ -15,7 +15,7 @@ try {
     $client = new fun\rpc\FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new fun\rpc\Context(array('rid' => "123", 'reason' => 'call.init.121'));
+    $ctx = new fun\rpc\Context(array('rid' => hexdec(uniqid()), 'reason' => 'call.init.121'));
 
     // mysql select multiple rows
     for ($i = 0; $i < 10; $i++) {
