@@ -181,6 +181,7 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
 		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
+
 	atomic.AddInt64(&this.cumSessions, 1)
 	log.Debug("session[%s]#%d open", remoteAddr, currentSessionN)
 
