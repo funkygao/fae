@@ -26,7 +26,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.121', 'host' => 'server1', 'ip' => '12.3.2.1'));
+    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.121'));
 
     // mysql select multiple rows
     echo "\nDEMO SELECT\n";
