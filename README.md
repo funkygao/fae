@@ -104,6 +104,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
+*   [ ] engine record all err msg counter
 *   [ ] bad performance related blocks
     - getSession()
 *   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput

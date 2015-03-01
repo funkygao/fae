@@ -57,9 +57,10 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 	params map[string]interface{}) (interface{}, error) {
 	var (
-		vars   = mux.Vars(req)
-		cmd    = vars["cmd"]
-		output = make(map[string]interface{})
+		vars      = mux.Vars(req)
+		cmd       = vars["cmd"]
+		rpcServer = this.rpcServer.(*TFunServer)
+		output    = make(map[string]interface{})
 	)
 
 	switch cmd {
@@ -86,19 +87,13 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["hostname"] = this.hostname
 		output["ver"] = server.VERSION
 		output["build_id"] = server.BuildID
-		output["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
-			this.stats.CallPerSecond.Rate1(),
-			this.stats.CallPerSecond.Rate5(),
-			this.stats.CallPerSecond.Rate15(),
-			this.stats.CallPerSecond.RateMean())
-		rpcServer := this.rpcServer.(*TFunServer)
 		output["rpc"] = rpcServer.Runtime()
 
 	case "runtime":
-		output["runtime"] = this.stats.Runtime()
+		output["runtime"] = rpcServer.stats.Runtime()
 
 	case "mem":
-		output["mem"] = *this.stats.memStats
+		output["mem"] = *rpcServer.stats.memStats
 
 	case "conf":
 		output["engine"] = *config.Engine

@@ -38,11 +38,6 @@ func (this *Engine) ServeForever() {
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
-	// start the stats counter
-	go this.stats.Start(this.StartedAt,
-		config.Engine.Rpc.StatsOutputInterval,
-		config.Engine.MetricsLogfile)
-
 	this.launchHttpServ()
 	defer this.stopHttpServ()
 

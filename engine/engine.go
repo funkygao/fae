@@ -15,7 +15,6 @@ type Engine struct {
 	rpcProcessor thrift.TProcessor
 	rpcServer    thrift.TServer
 
-	stats    *engineStats
 	pid      int
 	hostname string
 
@@ -24,7 +23,6 @@ type Engine struct {
 
 func NewEngine() (this *Engine) {
 	this = new(Engine)
-	this.stats = newEngineStats()
 	this.stopChan = make(chan bool)
 
 	return

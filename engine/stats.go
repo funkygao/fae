@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// TODO rename
 type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
