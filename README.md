@@ -150,7 +150,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   aws ec2 packets-per-second (pps) maximum rate is 100k in+out
     - http://www.rightscale.com/blog/cloud-management-best-practices/benchmarking-load-balancers-cloud
-*   RPS in linux
+*   RPS/RFS in linux
     - http://huoding.com/2013/10/30/296
 *   https://github.com/phunt/zktop
 *   https://github.com/toddlipcon/gremlins
