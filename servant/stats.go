@@ -12,11 +12,10 @@ var (
 type servantStats struct {
 	calls metrics.PercentCounter
 
-	sessionN      int64 // total sessions served since boot
 	callsFromPeer int64
 	callsToPeer   int64
-	callsErr      int64
-	callsSlow     int64
+
+	callsSlow int64 // TODO mv to engine
 }
 
 func (this *servantStats) registerMetrics() {
@@ -38,12 +37,4 @@ func (this *servantStats) incCallPeer() {
 
 func (this *servantStats) incCallSlow() {
 	atomic.AddInt64(&this.callsSlow, 1)
-}
-
-func (this *servantStats) incErr() {
-	atomic.AddInt64(&this.callsErr, 1)
-}
-
-func (this *servantStats) addErr(n int64) {
-	atomic.AddInt64(&this.callsErr, n)
 }

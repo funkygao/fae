@@ -24,7 +24,6 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -45,8 +44,6 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	}
 
 	if ex != nil {
-		svtStats.incErr()
-
 		profiler.do(IDENT, ctx,
 			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v} {err^%s}",
 			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
@@ -67,7 +64,6 @@ func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table s
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -79,7 +75,6 @@ func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table s
 	}
 	cols, rows, err := this.my.QueryShards(pool, table, sql, iargs)
 	if err != nil {
-		svtStats.incErr()
 		ex = err
 		return
 	}
@@ -103,7 +98,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -141,7 +135,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			svt, err := this.proxy.ServantByKey(cacheKey)
 			if err != nil {
 				ex = err
-				svtStats.incErr()
 				if svt != nil {
 					if proxy.IsIoError(err) {
 						svt.Close()
@@ -182,8 +175,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	if ex != nil {
-		svtStats.incErr()
-
 		profiler.do(IDENT, ctx,
 			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {err^%s}",
 			peer, cacheKey, pool, table, hintId, sql, args, ex)
@@ -205,7 +196,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -217,7 +207,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(cacheKey)
 		if err != nil {
 			ex = err
-			svtStats.incErr()
 			if svt != nil {
 				if proxy.IsIoError(err) {
 					svt.Close()
@@ -236,8 +225,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			ex = svt.MyEvict(ctx, cacheKey)
 			if ex != nil {
-				svtStats.incErr()
-
 				if proxy.IsIoError(ex) {
 					svt.Close()
 				}
@@ -261,7 +248,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -274,12 +260,10 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		querySql, nil, "")
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	if len(queryResult.Rows) != 1 {
 		ex = ErrMyMergeInvalidRow
-		svtStats.incErr()
 		return
 	}
 
@@ -290,13 +274,11 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	j2, err := json.NewJson([]byte(jsonVal))
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -315,7 +297,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	newVal, err := _json.Marshal(merged)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -326,7 +307,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
 		ex = err
-		svtStats.incErr()
 		return
 	}
 

@@ -2,22 +2,32 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/golib/gofmt"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
+	"sync"
 	"sync/atomic"
 	"time"
 )
 
 // thrift.TServer implementation
 type TFunServer struct {
-	quit           chan bool
 	activeSessionN int64
+	cumSessions    int64 // cumulated
+	cumCalls       int64
+	cumCallErrs    int64
+	cumCallSlow    int64 // TODO
+	stats          *engineStats
 
+	mutex  sync.Mutex
+	errors map[string]int32
+
+	quit       chan bool
 	dispatcher *rpcDispatcher
-	engine     *Engine // cause TFunServer will report stats to engine
 
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
@@ -35,7 +45,8 @@ func NewTFunServer(engine *Engine,
 	protocolFactory thrift.TProtocolFactory) *TFunServer {
 	this := &TFunServer{
 		quit:                   make(chan bool),
-		engine:                 engine,
+		stats:                  newEngineStats(),
+		errors:                 make(map[string]int32, 1<<10),
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,  // TServerSocket
 		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
@@ -62,6 +73,11 @@ func (this *TFunServer) Serve() error {
 	if err := this.serverTransport.Listen(); err != nil {
 		return err
 	}
+
+	// start the stats counter
+	go this.stats.Start(time.Now(),
+		config.Engine.Rpc.StatsOutputInterval,
+		config.Engine.MetricsLogfile)
 
 	if config.Engine.Rpc.StatsOutputInterval > 0 {
 		go this.showStats(config.Engine.Rpc.StatsOutputInterval)
@@ -119,8 +135,18 @@ func (this *TFunServer) Serve() error {
 
 func (this *TFunServer) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["active_sessions"] = atomic.LoadInt64(&this.activeSessionN)
+	r["sessions.active"] = atomic.LoadInt64(&this.activeSessionN)
+	r["sessions.all"] = atomic.LoadInt64(&this.cumSessions)
+	r["call.all"] = atomic.LoadInt64(&this.cumCalls)
+	r["call.err"] = atomic.LoadInt64(&this.cumCallErrs)
+	r["call.err.msg"] = this.errors
 	r["dispatcher"] = this.dispatcher.Runtime()
+	r["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
+		this.stats.CallPerSecond.Rate1(),
+		this.stats.CallPerSecond.Rate5(),
+		this.stats.CallPerSecond.Rate15(),
+		this.stats.CallPerSecond.RateMean())
+
 	return r
 }
 
@@ -129,12 +155,15 @@ func (this *TFunServer) showStats(interval time.Duration) {
 	defer ticker.Stop()
 
 	for _ = range ticker.C {
-		log.Info("rpc: {active_sessions:%d, qps:{1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f}}",
+		log.Info("rpc: {session.on:%d/%s, call.err:%s/%s, qps:{1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f}}",
 			atomic.LoadInt64(&this.activeSessionN),
-			this.engine.stats.CallPerSecond.Rate1(),
-			this.engine.stats.CallPerSecond.Rate5(),
-			this.engine.stats.CallPerSecond.Rate15(),
-			this.engine.stats.CallPerSecond.RateMean())
+			gofmt.Comma(atomic.LoadInt64(&this.cumSessions)),
+			gofmt.Comma(atomic.LoadInt64(&this.cumCallErrs)),
+			gofmt.Comma(atomic.LoadInt64(&this.cumCalls)),
+			this.stats.CallPerSecond.Rate1(),
+			this.stats.CallPerSecond.Rate5(),
+			this.stats.CallPerSecond.Rate15(),
+			this.stats.CallPerSecond.RateMean())
 	}
 }
 
@@ -152,14 +181,14 @@ func (this *TFunServer) handleSession(client thrift.TTransport) {
 		inputProtocol   = this.inputProtocolFactory.GetProtocol(inputTransport)
 		outputProtocol  = this.outputProtocolFactory.GetProtocol(outputTransport)
 	)
+	atomic.AddInt64(&this.cumSessions, 1)
 	log.Debug("session[%s]#%d open", remoteAddr, currentSessionN)
 
-	if calls, errs = this.serveCalls(tcpClient,
-		remoteAddr,
-		processor,
+	if calls, errs = this.serveCalls(tcpClient, remoteAddr, processor,
 		inputProtocol, outputProtocol); errs > 0 {
-		this.engine.svt.AddErr(errs)
+		atomic.AddInt64(&this.cumCallErrs, errs)
 	}
+	atomic.AddInt64(&this.cumCalls, calls)
 
 	// server actively closes the socket
 	if inputTransport != nil {
@@ -201,8 +230,8 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 		callsN++ // call num increment first anyway
 
 		elapsed = time.Since(t1)
-		this.engine.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
-		this.engine.stats.CallPerSecond.Mark(1)
+		this.stats.CallLatencies.Update(elapsed.Nanoseconds() / 1e6)
+		this.stats.CallPerSecond.Mark(1)
 
 		if ex == nil {
 			// rpc func called/Processed without any error
@@ -227,13 +256,14 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 				// e,g. read tcp i/o timeout
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
 				errsN++
+				this.saveCallError(err)
 			} else {
 				// EOF is not err, its normal end of session
 				err = nil
 			}
 
 			callsN-- // in case of transport err, the call didn't finish
-			this.engine.stats.CallPerSession.Update(callsN)
+			this.stats.CallPerSession.Update(callsN)
 
 			// for transport err, server always stop the session
 			return
@@ -243,6 +273,7 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 		// so ex MUST be servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax
 		errsN++
+		this.saveCallError(ex)
 
 		// it must be TApplicationException
 		// the central place to log call err
@@ -250,8 +281,17 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 		log.Error("caller[%s]: %s", remoteAddr, ex.Error())
 	}
 
-	this.engine.stats.CallPerSession.Update(callsN)
+	this.stats.CallPerSession.Update(callsN)
 	return
+}
+
+func (this *TFunServer) saveCallError(err error) {
+	this.mutex.Lock()
+	if len(this.errors) > (20 << 10) { // avoid OOM
+		this.errors = make(map[string]int32, 1<<10)
+	}
+	this.errors[err.Error()]++
+	this.mutex.Unlock()
 }
 
 func (this *TFunServer) ProcessorFactory() thrift.TProcessorFactory {
