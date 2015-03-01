@@ -154,6 +154,3 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - http://huoding.com/2013/10/30/296
 *   https://github.com/phunt/zktop
 *   https://github.com/toddlipcon/gremlins
-*   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
-*   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
-*   slabtop
