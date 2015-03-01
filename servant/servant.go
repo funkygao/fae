@@ -62,7 +62,7 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 
 	// http REST to export internal state
 	if server.Launched() {
-		server.RegisterHttpApi("/s/{cmd}",
+		server.RegisterHttpApi("/svt/{cmd}",
 			func(w http.ResponseWriter, req *http.Request,
 				params map[string]interface{}) (interface{}, error) {
 				return this.handleHttpQuery(w, req, params)

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
@@ -21,11 +22,6 @@ func (this *Engine) launchHttpServ() {
 	}
 
 	server.LaunchHttpServ(config.Engine.HttpListenAddr, config.Engine.PprofListenAddr)
-	server.RegisterHttpApi("/admin/{cmd}",
-		func(w http.ResponseWriter, req *http.Request,
-			params map[string]interface{}) (interface{}, error) {
-			return this.handleHttpQuery(w, req, params)
-		}).Methods("GET")
 	server.RegisterHttpApi("/h", func(w http.ResponseWriter, req *http.Request,
 		params map[string]interface{}) (interface{}, error) {
 		return this.handleHttpHelpQuery(w, req, params)
@@ -34,6 +30,12 @@ func (this *Engine) launchHttpServ() {
 		params map[string]interface{}) (interface{}, error) {
 		return this.handleHttpHelpQuery(w, req, params)
 	}).Methods("GET")
+
+	server.RegisterHttpApi("/engine/{cmd}",
+		func(w http.ResponseWriter, req *http.Request,
+			params map[string]interface{}) (interface{}, error) {
+			return this.handleHttpQuery(w, req, params)
+		}).Methods("GET")
 }
 
 func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request,
@@ -41,9 +43,10 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 	output := make(map[string]interface{})
 	if config.Engine.PprofListenAddr != "" {
 		output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
+		output["vars"] = "http://" + config.Engine.PprofListenAddr + "/debug/vars"
 	}
 
-	output["uris"] = []string{"/admin/h", "/admin/help", "/admin/guide"}
+	output["uris"] = []string{"/engine/help", "/svt/help"}
 	return output, nil
 }
 
@@ -69,7 +72,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		this.rpcServer.Stop()
 		output["status"] = "stopped"
 
-	case "stat":
+	case "stat", "stats":
 		rusage := syscall.Rusage{}
 		syscall.Getrusage(0, &rusage)
 		output["rusage"] = rusage
@@ -79,7 +82,14 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["hostname"] = this.hostname
 		output["ver"] = server.VERSION
 		output["build_id"] = server.BuildID
-		output["servant"] = this.svt.Runtime()
+		output["active_sessions"] = 1 // TODO
+
+	case "qps":
+		output["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
+			this.stats.CallPerSecond.Rate1(),
+			this.stats.CallPerSecond.Rate5(),
+			this.stats.CallPerSecond.Rate15(),
+			this.stats.CallPerSecond.RateMean())
 
 	case "runtime":
 		output["runtime"] = this.stats.Runtime()
@@ -94,16 +104,14 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 
 	case "guide", "help", "h":
 		output["uris"] = []string{
-			"/admin/ping",
-			"/admin/debug",
-			"/admin/stop",
-			"/admin/stat",
-			"/admin/runtime",
-			"/admin/mem",
-			"/admin/conf",
-		}
-		if config.Engine.PprofListenAddr != "" {
-			output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
+			"/engine/ping",
+			"/engine/debug",
+			"/engine/stop",
+			"/engine/stat",
+			"/engine/qps",
+			"/engine/runtime",
+			"/engine/mem",
+			"/engine/conf",
 		}
 
 	default:
