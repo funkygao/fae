@@ -9,6 +9,7 @@ import (
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -21,6 +22,9 @@ type TFunServer struct {
 	cumCallErrs    int64
 	cumCallSlow    int64 // TODO
 	stats          *engineStats
+
+	mutex  sync.Mutex
+	errors map[string]int32
 
 	quit       chan bool
 	dispatcher *rpcDispatcher
@@ -42,6 +46,7 @@ func NewTFunServer(engine *Engine,
 	this := &TFunServer{
 		quit:                   make(chan bool),
 		stats:                  newEngineStats(),
+		errors:                 make(map[string]int32, 1<<10),
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,  // TServerSocket
 		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
@@ -134,6 +139,7 @@ func (this *TFunServer) Runtime() map[string]interface{} {
 	r["sessions.all"] = atomic.LoadInt64(&this.cumSessions)
 	r["call.all"] = atomic.LoadInt64(&this.cumCalls)
 	r["call.err"] = atomic.LoadInt64(&this.cumCallErrs)
+	r["call.err.msg"] = this.errors
 	r["dispatcher"] = this.dispatcher.Runtime()
 	r["qps"] = fmt.Sprintf("1m:%.0f, 5m:%.0f 15m:%.0f avg:%.0f",
 		this.stats.CallPerSecond.Rate1(),
@@ -250,6 +256,7 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 				// e,g. read tcp i/o timeout
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
 				errsN++
+				this.saveCallError(err)
 			} else {
 				// EOF is not err, its normal end of session
 				err = nil
@@ -266,6 +273,7 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 		// so ex MUST be servant generated TApplicationException
 		// e,g Error 1064: You have an error in your SQL syntax
 		errsN++
+		this.saveCallError(ex)
 
 		// it must be TApplicationException
 		// the central place to log call err
@@ -275,6 +283,15 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 
 	this.stats.CallPerSession.Update(callsN)
 	return
+}
+
+func (this *TFunServer) saveCallError(err error) {
+	this.mutex.Lock()
+	if len(this.errors) > (20 << 10) { // avoid OOM
+		this.errors = make(map[string]int32, 1<<10)
+	}
+	this.errors[err.Error()]++
+	this.mutex.Unlock()
 }
 
 func (this *TFunServer) ProcessorFactory() thrift.TProcessorFactory {
