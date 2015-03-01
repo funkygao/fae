@@ -20,9 +20,10 @@ type rpcDispatcher struct {
 
 func newRpcDispatcher(prefork bool, maxOutstandingSessions int,
 	handler rpcClientHandler) (this *rpcDispatcher) {
-	this = new(rpcDispatcher)
-	this.handler = handler
-	this.preforkMode = prefork
+	this = &rpcDispatcher{
+		handler:     handler,
+		preforkMode: prefork,
+	}
 
 	if !this.preforkMode {
 		this.throttleChan = make(chan null.NullStruct, maxOutstandingSessions)

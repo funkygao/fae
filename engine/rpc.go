@@ -42,7 +42,7 @@ func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 		protocolFactory = thrift.NewTCompactProtocolFactory()
 
 	default:
-		panic(fmt.Sprintf("Invalid protocol: %s", config.Engine.Rpc.Protocol))
+		panic(fmt.Sprintf("Unknown protocol: %s", config.Engine.Rpc.Protocol))
 	}
 
 	// client-side Thrift protocol/transport stack must match

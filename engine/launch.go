@@ -14,8 +14,6 @@ import (
 
 func (this *Engine) ServeForever() {
 	this.StartedAt = time.Now()
-	this.hostname, _ = os.Hostname()
-	this.pid = os.Getpid()
 
 	signal.RegisterSignalHandler(syscall.SIGUSR1, func(sig os.Signal) {
 		// graceful shutdown
