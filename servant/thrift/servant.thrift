@@ -47,21 +47,26 @@ struct MysqlMergeResult {
 struct Context {
 
     /**
-     * PHP Request id.
+     * Request id.
      *
-     * for thrift RPC, this is session id because this is within a single tcp conn
+     * for thrift RPC, this is session id because this is within a single tcp conn.
+     *
+     * RPC client is reponsible to generate this rid.
      */ 
-    1:required string rid
+    1:required i64 rid
 
     /**
+     * Reason of call RPC.
+     *
      * e,g. controler.action name or batch cmds
      */
     2:required string reason
 
     /**
-     * User id
+     * User id.
+     *
      */
-    3:optional i64 uid
+    3:required i64 uid
 
     /**
      * If recv this flag, it means sticky request is sent
@@ -102,7 +107,7 @@ service FunServant {
     /**
      * Just for QPS throughput testing.
      */
-    i32 echo(
+    i32 noop(
         1: required i32 x
     ),
 

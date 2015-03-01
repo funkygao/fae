@@ -23,13 +23,13 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 		server.VERSION, server.BuildID,
 		this.conf.IdgenWorkerId, time.Since(this.startedAt))
 
-	profiler.do(IDENT, ctx, "{r^%s}", r)
+	profiler.do(IDENT, ctx, "ctx^%s {r^%s}", ctx.String(), r)
 
 	return
 }
 
 // Just for QPS throughput testing.
-func (this *FunServantImpl) Echo(x int32) (r int32, ex error) {
+func (this *FunServantImpl) Noop(x int32) (r int32, ex error) {
 	r = x
 	return
 }

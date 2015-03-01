@@ -158,11 +158,10 @@ func (this *FunServantImpl) GmLatency(ctx *rpc.Context, ms int32,
 	this.game.UpdatePhpLatency(int64(ms))
 	this.game.UpdatePhpPayloadSize(int64(bytes))
 
-	uid := this.extractUid(ctx)
-	this.game.CheckIn(uid)
+	this.game.CheckIn(ctx.Uid)
 
-	log.Trace("{%dms %s}: {uid^%d rid^%s reason^%s}",
-		ms, gofmt.ByteSize(bytes), uid, ctx.Rid, ctx.Reason)
+	log.Trace("{%dms %s}: {uid^%d rid^%d reason^%s}",
+		ms, gofmt.ByteSize(bytes), ctx.Uid, ctx.Rid, ctx.Reason)
 
 	return
 }

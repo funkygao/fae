@@ -16,28 +16,24 @@ use fun\rpc\TMemcacheData;
 try {
     $sock = new TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(1);
-    $sock->setSendTimeout(4000);
-    $sock->setRecvTimeout(4000);
+    $sock->setSendTimeout(400000);
+    $sock->setRecvTimeout(400000);
     $sock->setNumRetries(1);
-    $transport = new TBufferedTransport($sock, 1024, 1024);
+    $transport = new TBufferedTransport($sock, 4096, 4096);
     $protocol = new TBinaryProtocol($transport);
 
     // get our client
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123nfa", 'reason' => 'test.couchbase'));
+    $ctx = new Context(array('rid' => '123', 'reason' => 'call.init.567', 'uid' => 11));
 
-    // couchbase get/set
-    $bucket = 'default';
-    for ($i=0; $i<10000; $i++) {
-        $ok = $client->cb_set($ctx, $bucket, 'key1', 'value1', 0);
+    echo $client->ping($ctx), "\n";
 
-        $value = $client->cb_get($ctx, $bucket, 'key1');
-        var_dump($value);
-    }
+    echo $client->noop(21), "\n";
 
     $transport->close();
-} catch (TException $tx) {
-    print 'Something went wrong: ' . $tx->getMessage() . "\n";
+} catch (Exception $ex) {
+    print 'Something went wrong: ' . $ex->getMessage() . "\n";
 }
+
