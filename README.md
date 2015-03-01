@@ -105,32 +105,32 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### TODO
 
 *   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
+*   [ ] name3 found dup names, bug
+*   [ ] make all db column not nullable
+*   [ ] gm presence shows not only online, but also last sync time
+*   [ ] session.profiler should not be pointer, reduce GC overhead
+*   [X] optimize mysql query, iterate each row to transform to string/null
 *   [X] engine record all err msg counter
 *   [ ] bad performance related blocks
     - getSession()
 *   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput
-*   [ ] Context has too many strings, discard some of them
+*   [X] Context has too many strings, discard some of them
 *   [ ] database/sql QueryRow for AR::get
 *   [ ] go vet
-*   [ ] gm presence shows not only online, but also last sync time
 *   [ ] log rotate size, only keep history for N days
 *   [ ] periodically reload name3 from db
 *   [ ] try not to use string as rpc func param, its costly to convert between []byte
-*   [ ] change ctx.rid from string to int64, proxy servant rid generation mechanism
-*   [ ] name3 found dup names, bug
-*   [X] optimize mysql query, iterate each row to transform to string/null
+*   [X] change ctx.rid from string to int64, proxy servant rid generation mechanism
 *   [X] start fae, then restart remote peer, then call ServantByKey, see what happens
-*   [ ] session.profiler should not be pointer, reduce GC overhead
 *   [X] bloom filter 
 *   [X] unified err logging so that external alarming system can get notified
-*   [ ] use of closed network connection
 *   [ ] more strict test on zookeeper failure
 *   [X] mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
     - CLIENT_NO_SCHEMA, don't allow database.table.column
     - too many round trips between fae and mysql
 *   [ ] vBucket for cluster sharding, what about each kingdom is a shard?
-*   [ ] hot reload config
+*   [X] hot reload config
 *   [X] fae graceful shutdown
     - https://github.com/facebookgo/grace
 *   [X] maybe profiler sample rate is totally controlled by client
