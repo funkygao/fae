@@ -20,7 +20,7 @@ func showUsage() {
 	fmt.Println()
 	fmt.Println("bitwise rpc calls")
 	fmt.Println(strings.Repeat("=", 20))
-	fmt.Printf("%16s %3d\n", "CallEcho", CallEcho)
+	fmt.Printf("%16s %3d\n", "CallNoop", CallNoop)
 	fmt.Printf("%16s %3d\n", "CallPing", CallPing)
 	fmt.Printf("%16s %3d\n", "CallIdGen", CallIdGen)
 	fmt.Printf("%16s %3d\n", "CallLCache", CallLCache)

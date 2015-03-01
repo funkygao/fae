@@ -60,9 +60,9 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		//time.Sleep(time.Millisecond * 5)
 		ctx.Rid = time.Now().UnixNano()
 
-		if Cmd&CallEcho != 0 {
+		if Cmd&CallNoop != 0 {
 			var r int32
-			r, err = client.Echo(1)
+			r, err = client.Noop(1)
 			if err != nil {
 				recordIoError(err)
 				report.incCallErr()

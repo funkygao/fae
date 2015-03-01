@@ -107,7 +107,7 @@ service FunServant {
     /**
      * Just for QPS throughput testing.
      */
-    i32 echo(
+    i32 noop(
         1: required i32 x
     ),
 

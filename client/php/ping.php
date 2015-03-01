@@ -26,12 +26,11 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'uid' => 11));
+    $ctx = new Context(array('rid' => '123', 'reason' => 'call.init.567', 'uid' => 11));
 
     echo $client->ping($ctx), "\n";
 
-    $client->gm_latency($ctx, 19, 21);
-    var_dump($client->gm_presence($ctx, array(11, 14)));
+    echo $client->noop(21), "\n";
 
     $transport->close();
 } catch (Exception $ex) {

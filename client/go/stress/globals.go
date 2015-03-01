@@ -1,7 +1,7 @@
 package main
 
 const (
-	CallEcho = 1 << iota
+	CallNoop = 1 << iota
 	CallPing
 	CallIdGen
 	CallLCache
