@@ -39,7 +39,7 @@
             io_timeout: "0s"
             idle_timeout: "0s"
             diagnostic_interval: "5s"
-            borrow_max_seconds: 4
+            borrow_timeout: "10s"
             buffer_size: 4096
             tcp_nodelay: true
         }

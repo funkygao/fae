@@ -11,9 +11,9 @@ import (
 type ConfigProxy struct {
 	PoolCapacity       int
 	IdleTimeout        time.Duration
-	DiagnosticInterval time.Duration
 	IoTimeout          time.Duration
-	BorrowMaxSeconds   int
+	BorrowTimeout      time.Duration
+	DiagnosticInterval time.Duration
 	SelfAddr           string
 	TcpNoDelay         bool
 	BufferSize         int
@@ -25,8 +25,8 @@ func NewDefaultProxy() *ConfigProxy {
 		IdleTimeout:        0,
 		SelfAddr:           ":0",
 		IoTimeout:          time.Second * 10,
-		BorrowMaxSeconds:   10,
-		DiagnosticInterval: time.Second * 10,
+		BorrowTimeout:      time.Second * 10,
+		DiagnosticInterval: time.Second * 5,
 		TcpNoDelay:         true,
 		BufferSize:         4 << 10,
 	}
@@ -39,8 +39,8 @@ func (this *ConfigProxy) LoadConfig(selfAddr string, cf *conf.Conf) {
 	this.PoolCapacity = cf.Int("pool_capacity", 10)
 	this.IdleTimeout = cf.Duration("idle_timeout", 0)
 	this.IoTimeout = cf.Duration("io_timeout", time.Second*10)
-	this.BorrowMaxSeconds = cf.Int("borrow_max_seconds", 10)
-	this.DiagnosticInterval = cf.Duration("diagnostic_interval", time.Second*10)
+	this.BorrowTimeout = cf.Duration("borrow_timeout", time.Second*10)
+	this.DiagnosticInterval = cf.Duration("diagnostic_interval", time.Second*5)
 	this.TcpNoDelay = cf.Bool("tcp_nodelay", true)
 	this.BufferSize = cf.Int("buffer_size", 4<<10)
 	this.SelfAddr = selfAddr

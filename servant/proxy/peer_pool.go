@@ -48,7 +48,7 @@ func (this *funServantPeerPool) Open() {
 
 	this.pool = pool.NewResourcePool("peer", factory,
 		this.cf.PoolCapacity, this.cf.PoolCapacity, this.cf.IdleTimeout,
-		this.cf.DiagnosticInterval, this.cf.BorrowMaxSeconds)
+		this.cf.DiagnosticInterval, this.cf.BorrowTimeout)
 }
 
 func (this *funServantPeerPool) Close() {
