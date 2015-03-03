@@ -20,6 +20,7 @@ type Proxy struct {
 	clusterTopologyReady bool
 	clusterTopologyChan  chan bool
 
+	testOnBorrow    func()                         // TODO
 	remotePeerPools map[string]*funServantPeerPool // key is peerAddr, self not inclusive
 	selector        PeerSelector
 }
@@ -166,34 +167,6 @@ func (this *Proxy) ServantByAddr(peerAddr string) (svt *FunServantPeer, err erro
 	return
 }
 
-// Simulate a simple load balance
-func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
-	peerAddr := this.selector.RandPeer()
-	if peerAddr == this.cf.SelfAddr {
-		return nil, nil
-	}
-
-	this.remotePeerPools[peerAddr].nextTxn()
-	for i := 0; i < this.cf.PoolCapacity; i++ {
-		svt, err = this.remotePeerPools[peerAddr].Get()
-		if err == nil {
-			break
-		} else {
-			log.Error("RandServant.%d: %v", i, err)
-
-			if svt != nil {
-				if IsIoError(err) {
-					svt.Close()
-				}
-				svt.Recycle()
-			}
-
-		}
-	}
-
-	return
-}
-
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
 func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
@@ -217,6 +190,34 @@ func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
 				}
 				svt.Recycle()
 			}
+		}
+	}
+
+	return
+}
+
+// Simulate a simple load balance
+func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
+	peerAddr := this.selector.RandPeer()
+	if peerAddr == this.cf.SelfAddr {
+		return nil, nil
+	}
+
+	this.remotePeerPools[peerAddr].nextTxn()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("RandServant.%d: %v", i, err)
+
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+
 		}
 	}
 

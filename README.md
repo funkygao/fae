@@ -105,6 +105,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### TODO
 
 *   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
+*   [ ] proxy pool, test on borrow
 *   [ ] rpc export call.all has bug
     - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] name3 found dup names, bug
