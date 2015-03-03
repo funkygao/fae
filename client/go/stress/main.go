@@ -20,7 +20,7 @@ func init() {
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
-	server.SetupLogging("var/test.log", "info", "var/panic.dump", "", "")
+	server.SetupLogging("stdout", "info", "panic.dump", "", "")
 }
 
 func parseFlag() {
