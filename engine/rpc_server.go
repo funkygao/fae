@@ -126,7 +126,7 @@ func (this *TFunServer) Serve() error {
 			continue
 		}
 
-		this.dispatcher.Dispatch(client)
+		this.dispatcher.Dispatch(client) // may block, then stop to accept new conn
 		delay = ACCEPT_MIN_SLEEP
 	}
 
@@ -252,7 +252,7 @@ func (this *TFunServer) serveCalls(tcpClient *net.TCPConn,
 		*/
 		if err, isTransportEx := ex.(thrift.TTransportException); isTransportEx {
 			if err.TypeId() != thrift.END_OF_FILE {
-				// e,g. connection reset by peer: read a socket that was closed by peer
+				// e,g. connection reset by peer: read a socket that was closed by peer, RST
 				// e,g. broken pipe: write to socket that was closed by peer
 				// e,g. read tcp i/o timeout
 				log.Error("transport[%s]: %s", remoteAddr, ex.Error())
