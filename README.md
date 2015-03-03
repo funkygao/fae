@@ -61,6 +61,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   Engine
 *   Servant
+*   Proxy
 *   Peer
 *   Session
 *   Call
