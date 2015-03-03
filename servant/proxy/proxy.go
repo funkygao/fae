@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/ip"
 	log "github.com/funkygao/log4go"
 	"sync"
@@ -46,6 +47,14 @@ func NewWithPoolCapacity(capacity int) *Proxy {
 	cf := config.NewDefaultProxy()
 	cf.PoolCapacity = capacity
 	return New(cf)
+}
+
+// auto fills Rid field.
+func NewContext(reason string) *rpc.Context {
+	ctx := rpc.NewContext()
+	ctx.Reason = reason
+	ctx.Rid = time.Now().UnixNano() // TODO strict enough?
+	return ctx
 }
 
 func (this *Proxy) Enabled() bool {
