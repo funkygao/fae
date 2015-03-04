@@ -85,6 +85,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
         - Servers still do not know about each other
 *   Highly usage of mem to improve latancy & throughput
 *   Circuit breaker protection
+*   Flow control
 *   Full realtime internal stats export via http
 *   Smart metrics with low overhead
 *   Graceful degrade for OPS
@@ -119,6 +120,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [ ] session.profiler should not be pointer, reduce GC overhead
 *   [X] optimize mysql query, iterate each row to transform to string/null
 *   [X] engine record all err msg counter
+*   [ ] when disk is full, fae will get stuck because of logging component
 *   [ ] bad performance related blocks
     - getSession()
 *   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput
