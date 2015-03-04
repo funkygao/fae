@@ -69,6 +69,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### Highlights
 
 *   Self manageable cluster
+*   How to scale
+    - just add a new faed instance
 *   Dynamic cluster reconfiguration
     - VBucket
         - Better than consistent hashing
@@ -78,12 +80,11 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
         - Allow scaling up and down at will
         - We can hand data sets from one server another atomically
         - Servers still do not know about each other
-*   Easy extending for more servants(RPC service)
 *   Highly usage of mem to improve latancy & throughput
 *   Circuit breaker protection
 *   Full realtime internal stats export via http
 *   Smart metrics with low overhead
-*   Easy graceful degrade for OPS
+*   Graceful degrade for OPS
     - auto
     - manual
 
