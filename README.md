@@ -43,34 +43,37 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Why SOA?
 
-*   More clear architecture
 *   Seperation of concerns
 *   Reuse common code as service and transparently reuse infrastructure
-*   Centralized best practice
-*   Centralized monitoring, auditting and profiling
+*   Centralized best practice, monitoring, auditting and profiling
 *   Independently deployable/testable
     - vital code should be more robust
     - can't have too much vital code
-*   Reduce tcp 3/4 way handshake overhead
 *   Horizontal scale made easy
     - frontend(php) and middleware scale independently
     - middleware is in charge of performance while frontend is in charge of biz logic
 *   Polyglot development
+*   Easier dev team management
 
 ### Terms
 
 *   Engine
+    - handles system level issues
 *   Servant
+    - handles RPC services logic
 *   Proxy
+    - local stub of remote fae
 *   Peer
+    - a remote fae instance
 *   Session
+    - a RPC client tcp conn with fae
 *   Call
+    - a RPC call
 
 ### Highlights
 
 *   Self manageable cluster
-*   How to scale
-    - just add a new faed instance
+*   Linear scale by adding more fae instance
 *   Dynamic cluster reconfiguration
     - VBucket
         - Better than consistent hashing
