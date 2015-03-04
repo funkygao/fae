@@ -117,6 +117,8 @@ func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 }
 
 func (this *Engine) StopRpcServe() {
+	log.Info("RPC server stopping...")
+
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
 

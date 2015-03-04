@@ -45,6 +45,7 @@ func init() {
 		// finish all outstanding RPC sessions
 		if err := server.SignalProcess(options.lockFile, syscall.SIGUSR1); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
+			os.Exit(1)
 		}
 
 		cleanup() // TODO wait till that faed process terminates, who will do the cleanup
