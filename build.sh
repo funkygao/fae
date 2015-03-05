@@ -41,13 +41,13 @@ if [[ $1 = "-linux" ]]; then
     #cp -f ../../servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
     #cd $GOROOT/src 
     #sudo CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID"
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID"
     exit
 elif [[ $1 = "-debug" ]]; then
-    #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildID $ID"
-    go build -gcflags '-m=1' -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
+    #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildId $ID"
+    go build -gcflags '-m=1' -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID -w"
 else
-    go build -tags release -ldflags "-X github.com/funkygao/golib/server.VERSION $VER -X github.com/funkygao/golib/server.BuildID $ID -w"
+    go build -tags release -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID -w"
 fi
 
 #---------

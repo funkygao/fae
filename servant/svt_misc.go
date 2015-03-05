@@ -19,7 +19,7 @@ func (this *FunServantImpl) Ping(ctx *rpc.Context) (r string, ex error) {
 	svtStats.inc(IDENT)
 
 	r = fmt.Sprintf("ver:%s, build:%s, myid:%d, uptime:%s",
-		server.VERSION, server.BuildID,
+		server.Version, server.BuildId,
 		this.conf.IdgenWorkerId, time.Since(this.startedAt))
 
 	profiler.do(IDENT, ctx, "ctx^%s {r^%s}", ctx.String(), r)

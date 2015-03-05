@@ -47,8 +47,8 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 	}
 
 	output["uris"] = []string{"/engine/help", "/svt/help"}
-	output["ver"] = server.VERSION
-	output["build_id"] = server.BuildID
+	output["ver"] = server.Version
+	output["build_id"] = server.BuildId
 	output["golang"] = fmt.Sprintf("Built with %s %s for %s %s", runtime.Compiler,
 		runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	return output, nil
@@ -85,8 +85,8 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
-		output["ver"] = server.VERSION
-		output["build_id"] = server.BuildID
+		output["ver"] = server.Version
+		output["build_id"] = server.BuildId
 		output["rpc"] = rpcServer.Runtime()
 
 	case "runtime":
