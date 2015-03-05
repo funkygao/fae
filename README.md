@@ -120,6 +120,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] name3 found dup names, bug
 *   [ ] make all db column not nullable
+*   [ ] better request tracing
+*   [ ] backpressure
 *   [ ] gm presence shows not only online, but also last sync time
 *   [ ] session.profiler should not be pointer, reduce GC overhead
 *   [X] optimize mysql query, iterate each row to transform to string/null
