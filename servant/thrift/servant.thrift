@@ -122,6 +122,26 @@ service FunServant {
     ),
 
     /**
+     * Lock a key across the fae cluster.
+     *
+     * @return bool - success?
+     */
+    bool lock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
+    ),
+
+    /**
+     * Unlock a key across the fae cluster.
+     */
+    void unlock(
+        1: Context ctx,
+        2: string reason,
+        3: string key
+    ),
+
+    /**
      * ID generator
      */
     i64 id_next(
@@ -486,18 +506,6 @@ service FunServant {
     list<bool> gm_presence(
         1: Context ctx,
         2: list<i64> uids
-    ),
-
-    bool gm_lock(
-        1: Context ctx,
-        2: string reason,
-        3: string key
-    ),
-
-    void gm_unlock(
-        1: Context ctx,
-        2: string reason,
-        3: string key
     ),
 
     i64 gm_register(
