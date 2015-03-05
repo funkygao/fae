@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/locking"
-	"github.com/funkygao/golib/profile"
+	"github.com/funkygao/golib/profiler"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
@@ -77,7 +77,7 @@ func main() {
 	}()
 
 	if options.cpuprof || options.memprof {
-		cf := &profile.Config{
+		cf := &profiler.Config{
 			Quiet:        true,
 			ProfilePath:  "prof",
 			CPUProfile:   options.cpuprof,
@@ -85,7 +85,7 @@ func main() {
 			BlockProfile: options.blockprof,
 		}
 
-		defer profile.Start(cf).Stop()
+		defer profiler.Start(cf).Stop()
 	}
 
 	log.Info("%s", `
