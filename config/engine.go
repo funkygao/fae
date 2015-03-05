@@ -74,6 +74,7 @@ func (this *ConfigEngine) IsProxyOnly() bool {
 	return !this.ServerMode
 }
 
+// TODO kill this
 func (this *ConfigEngine) runWatchdog() {
 	ticker := time.NewTicker(this.ReloadWatchdogInterval)
 	defer ticker.Stop()
