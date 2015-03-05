@@ -110,6 +110,9 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] use golib/signal SignalProcess instead of server.SignalProcess
+*   [ ] replace config.engine.runWatchdog with server.WatchConfig
+
 *   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
 *   [ ] proxy pool, test on borrow
 *   [ ] rpc export call.all has bug
