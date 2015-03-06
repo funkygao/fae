@@ -110,6 +110,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
+*   [ ] engine plugin
 *   [ ] use golib/signal SignalProcess instead of server.SignalProcess
 *   [ ] replace config.engine.runWatchdog with server.WatchConfig
 *   [ ] rename myslq pool to group
@@ -125,6 +126,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [ ] backpressure
 *   [ ] gm presence shows not only online, but also last sync time
 *   [ ] session.profiler should not be pointer, reduce GC overhead
+*   [ ] mysql periodically ping to avoid being closed 
 *   [X] optimize mysql query, iterate each row to transform to string/null
 *   [X] engine record all err msg counter
 *   [ ] when disk is full, fae will get stuck because of logging component
@@ -145,7 +147,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [X] mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
     - CLIENT_NO_SCHEMA, don't allow database.table.column
-    - too many round trips between fae and mysql
 *   [ ] vBucket for cluster sharding, what about each kingdom is a shard?
 *   [X] hot reload config
 *   [X] fae graceful shutdown

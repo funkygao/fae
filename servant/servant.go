@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/game"
+	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -49,6 +50,7 @@ type FunServantImpl struct {
 	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
 	rd    *redis.Client        // redis pool, auto sharding by pool name
 	cb    *couch.Client        // couchbase client
+	lk    *lock.Lock           // cluster wise mutex lock
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
@@ -59,13 +61,11 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 	}
 
 	// http REST to export internal state
-	if server.Launched() {
-		server.RegisterHttpApi("/svt/{cmd}",
-			func(w http.ResponseWriter, req *http.Request,
-				params map[string]interface{}) (interface{}, error) {
-				return this.handleHttpQuery(w, req, params)
-			}).Methods("GET")
-	}
+	server.RegisterHttpApi("/svt/{cmd}",
+		func(w http.ResponseWriter, req *http.Request,
+			params map[string]interface{}) (interface{}, error) {
+			return this.handleHttpQuery(w, req, params)
+		}).Methods("GET")
 
 	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
 	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
@@ -163,6 +163,11 @@ func (this *FunServantImpl) createServants() {
 	if this.conf.Redis.Enabled() {
 		log.Debug("creating servant: redis")
 		this.rd = redis.New(this.conf.Redis)
+	}
+
+	if this.conf.Lock.Enabled() {
+		log.Debug("creating servant: lock")
+		this.lk = lock.New(this.conf.Lock)
 	}
 
 	if this.conf.Mysql.Enabled() {

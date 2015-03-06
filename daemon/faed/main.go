@@ -43,7 +43,8 @@ func init() {
 			UnregisterEtcd()
 
 		// finish all outstanding RPC sessions
-		if err := signal.SignalProcess(options.lockFile, syscall.SIGUSR1); err != nil {
+		if err := signal.SignalProcessByPidFile(options.lockFile,
+			syscall.SIGUSR1); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
 			os.Exit(1)
 		}

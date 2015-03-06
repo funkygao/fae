@@ -21,7 +21,7 @@ func (this *FunServantImpl) Lock(ctx *rpc.Context,
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		svtStats.incPeerCall()
 
-		r = this.game.Lock(key)
+		r = this.lk.Lock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key) // FIXME add prefix?
 		if err != nil {
@@ -36,13 +36,13 @@ func (this *FunServantImpl) Lock(ctx *rpc.Context,
 		}
 
 		if svt == nil {
-			r = this.game.Lock(key)
+			r = this.lk.Lock(key)
 		} else {
 			svtStats.incCallPeer()
 
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			r, ex = svt.GmLock(ctx, reason, key)
+			r, ex = svt.Lock(ctx, reason, key)
 			if ex != nil {
 				if proxy.IsIoError(ex) {
 					svt.Close()
@@ -78,7 +78,7 @@ func (this *FunServantImpl) Unlock(ctx *rpc.Context,
 	if ctx.IsSetSticky() && *ctx.Sticky {
 		svtStats.incPeerCall()
 
-		this.game.Unlock(key)
+		this.lk.Unlock(key)
 	} else {
 		svt, err := this.proxy.ServantByKey(key)
 		if err != nil {
@@ -93,13 +93,13 @@ func (this *FunServantImpl) Unlock(ctx *rpc.Context,
 		}
 
 		if svt == nil {
-			this.game.Unlock(key)
+			this.lk.Unlock(key)
 		} else {
 			svtStats.incCallPeer()
 
 			peer = svt.Addr()
 			svt.HijackContext(ctx)
-			ex = svt.GmUnlock(ctx, reason, key)
+			ex = svt.Unlock(ctx, reason, key)
 			if ex != nil {
 				if proxy.IsIoError(ex) {
 					svt.Close()
