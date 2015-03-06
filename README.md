@@ -100,6 +100,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Graceful degrade for OPS
     - auto
     - manual
+*   One binary, homogeneous deployment
 
 ### Thrift Payload
 
@@ -180,3 +181,4 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   https://github.com/phunt/zktop
 *   https://github.com/toddlipcon/gremlins
 *   network band width is cost problem while latency is physical constraint
+*   https://docs.google.com/document/d/11k2EmhLGSbViBvi6_zFEiKzuXxYF49ZuuDJLe6O8gBU/edit#
