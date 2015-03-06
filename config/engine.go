@@ -4,7 +4,6 @@ import (
 	"github.com/funkygao/golib/ip"
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
-	"os"
 	"strings"
 	"time"
 )
@@ -12,9 +11,6 @@ import (
 // the root of config, which will load sections one by one
 type ConfigEngine struct {
 	*conf.Conf
-
-	configFile         string
-	configFileLastStat os.FileInfo
 
 	EtcdServers  []string
 	EtcdSelfAddr string
@@ -70,29 +66,18 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 	log.Debug("engine conf: %+v", *this)
 }
 
-func (this *ConfigEngine) IsProxyOnly() bool {
-	return !this.ServerMode
-}
-
-// TODO kill this
-func (this *ConfigEngine) runWatchdog() {
-	ticker := time.NewTicker(this.ReloadWatchdogInterval)
-	defer ticker.Stop()
-
-	for _ = range ticker.C {
-		stat, _ := os.Stat(this.configFile)
-		if stat.ModTime() != this.configFileLastStat.ModTime() {
-			this.configFileLastStat = stat
-
-			cf, err := conf.Load(this.configFile)
-			if err != nil {
-				panic(err)
-			}
-
-			log.Info("config[%s] reloaded", this.configFile)
+func (this *ConfigEngine) watchReload() {
+	ch := make(chan *conf.Conf, 5)
+	go this.Watch(this.ReloadWatchdogInterval, ch)
+	for {
+		select {
+		case cf := <-ch:
 			this.LoadConfig(cf)
 			this.ReloadedChan <- *this
 		}
 	}
+}
 
+func (this *ConfigEngine) IsProxyOnly() bool {
+	return !this.ServerMode
 }
