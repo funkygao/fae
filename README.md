@@ -10,6 +10,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 **Table of Contents**
 
+- [Usage](#usage)
 - [Architecture](#status)
 - [SOA](#soa)
 - [Terms](#terms)
