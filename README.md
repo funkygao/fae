@@ -17,6 +17,13 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [Thrift Payload](#thrift-payload)
 - [TODO](#todo)
 - [Reference](#reference)
+
+### Usage
+
+    cp etc/etc/faed.cf.sample contrib
+    ./contrib/build_cf.php # create the config file
+    ./build.sh
+    ./daemon/faed/faed -conf contrib/fadfaed.cf.rc
                                
 ### Architecture
 
