@@ -1,3 +1,4 @@
+#!/usr/bin/php -q
 <?php
 // build a config file based on template:etc/faed.cf.sample
 
