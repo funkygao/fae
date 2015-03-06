@@ -30,7 +30,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 
         +----------------+  +----------------+  +----------------+
-        | php-fpm worker |  | php-fpm worker |  | php-fpm worker |
+        |   php-fpm      |  |    php-fpm     |  |     php-fpm    |
         +----------------+  +----------------+  +----------------+
             |                       |                       |
             +-----------------------------------------------+
@@ -43,7 +43,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
                             +---------------+             |      +---------------+       |
                             |  faed daemon  |  tcp pool   |                              |
                             +---------------+ ------------|                              | peers
-                            |  LRU cache    |  discovery  |      +---------------+       |
+                            |  LRU cache    |             |      +---------------+       |
                             +---------------+             +------|  faed daemon  |-------|
                                     |                            +---------------+       |
                                     |                                                    |
