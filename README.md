@@ -24,7 +24,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     cp etc/etc/faed.cf.sample contrib
     ./contrib/build_cf.php # create the config file
     ./build.sh
-    ./daemon/faed/faed -conf contrib/fadfaed.cf.rc
+    ./daemon/faed/faed -conf contrib/faed.cf.rc
                                
 ### Architecture
 
