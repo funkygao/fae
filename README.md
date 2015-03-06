@@ -85,7 +85,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Session
     - a RPC client tcp conn with fae
 *   Call
-    - a RPC call
+    - a RPC call within a Session
 
 ### Highlights
 
