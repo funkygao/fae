@@ -8,6 +8,16 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
         (__)    (__)(__)  (____)
 
 [![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
+
+**Table of Contents**
+
+- [Architecture](#status)
+- [SOA](#soa)
+- [Terms](#terms)
+- [Highlights](#highlights)
+- [Thrift Payload](#thrift-payload)
+- [TODO](#todo)
+- [Reference](#reference)
                                
 ### Architecture
 
@@ -41,7 +51,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
         | mongodb/mysql  |  | memcache/redis |  | lcache | kvdb | idgen | ...  |
         +----------------+  +----------------+  +------------------------------+
 
-### Why SOA?
+### SOA
 
 *   Seperation of concerns
 *   Reuse common code as service and transparently reuse infrastructure
