@@ -55,8 +55,8 @@ try {
 
     for ($i = 0; $i < 500; $i++) {
         $lockKey = "foo";
-        var_dump($client->gm_lock($ctx, 'just a test', $lockKey));
-        $client->gm_unlock($ctx, 'just a test', $lockKey);
+        var_dump($client->lock($ctx, 'just a test', $lockKey));
+        $client->unlock($ctx, 'just a test', $lockKey);
     }
 
     $t1 = microtime(TRUE);
