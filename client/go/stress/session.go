@@ -184,7 +184,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 			report.incCallOk()
 			if enableLog {
-				log.Printf("session{round^%d seq^%d GmLock}: %s",
+				log.Printf("session{round^%d seq^%d Lock}: %s",
 					round, seq, lockKey)
 			}
 			err = client.Unlock(ctx, "stress.go", lockKey)
