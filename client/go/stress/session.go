@@ -174,11 +174,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 
 			lockKey := fmt.Sprintf("key:%d:%d", round, seq)
-			_, err = client.GmLock(ctx, "stress.go", lockKey)
+			_, err = client.Lock(ctx, "stress.go", lockKey)
 			if err != nil {
 				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d GmLock}: %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d Lock}: %v", round, seq, err)
 				client.Close()
 				return
 			}
@@ -187,17 +187,17 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 				log.Printf("session{round^%d seq^%d GmLock}: %s",
 					round, seq, lockKey)
 			}
-			err = client.GmUnlock(ctx, "stress.go", lockKey)
+			err = client.Unlock(ctx, "stress.go", lockKey)
 			if err != nil {
 				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d GmLock}: %v", round, seq, err)
+				log.Printf("session{round^%d seq^%d Unlock}: %v", round, seq, err)
 				client.Close()
 				return
 			}
 			report.incCallOk()
 			if enableLog {
-				log.Printf("session{round^%d seq^%d GmUnlock}: %s",
+				log.Printf("session{round^%d seq^%d Unlock}: %s",
 					round, seq, lockKey)
 			}
 
