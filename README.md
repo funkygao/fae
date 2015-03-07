@@ -44,7 +44,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
                             +---------------+             |      +---------------+       |
                             |  faed daemon  |  tcp pool   |                              |
                             +---------------+ ------------|                              | peers
-                            |  LRU cache    |             |      +---------------+       |
+                            |  LRU cache    |  proxy      |      +---------------+       |
                             +---------------+             +------|  faed daemon  |-------|
                                     |                            +---------------+       |
                                     |                                                    |
