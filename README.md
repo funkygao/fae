@@ -107,6 +107,10 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     |          seqId(int32)                                          |
     +----------------------------------------------------------------+
 
+### golang
+
+*   GODEBUG=schedtrace=1000
+*   GODEBUG=gctrace=1
 
 ### TODO
 
