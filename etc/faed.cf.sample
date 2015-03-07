@@ -18,6 +18,7 @@
         framed: false
         buffer_size: 4096
         prefork_mode: true
+        host_max_call_per_minute: 6000
         max_outstanding_sessions: 50000
         session_timeout: "0s"
         io_timeout: "4s"

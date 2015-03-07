@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/gofmt"
+	"github.com/funkygao/golib/ratelimiter"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"net"
@@ -26,8 +27,9 @@ type TFunServer struct {
 	mutex  sync.Mutex
 	errors map[string]int32
 
-	quit       chan bool
-	dispatcher *rpcDispatcher
+	quit        chan bool
+	dispatcher  *rpcDispatcher
+	leakyBucket *ratelimiter.LeakyBucket
 
 	processorFactory       thrift.TProcessorFactory
 	serverTransport        thrift.TServerTransport
@@ -44,9 +46,11 @@ func NewTFunServer(engine *Engine,
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory) *TFunServer {
 	this := &TFunServer{
-		quit:                   make(chan bool),
-		stats:                  newEngineStats(),
-		errors:                 make(map[string]int32, 1<<10),
+		quit:   make(chan bool),
+		stats:  newEngineStats(),
+		errors: make(map[string]int32, 1<<10),
+		leakyBucket: ratelimiter.NewLeakyBucket(
+			uint16(config.Engine.Rpc.HostMaxCallPerMinute), time.Minute),
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,  // TServerSocket
 		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
