@@ -92,15 +92,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   Self manageable cluster
 *   Linear scale by adding more fae instance
-*   Dynamic cluster reconfiguration
-    - VBucket
-        - Better than consistent hashing
-          - because they are easier to move between servers then individual keys
-        - Never service a request on the wrong server
-          - compared with consitent hash
-        - Allow scaling up and down at will
-        - We can hand data sets from one server another atomically
-        - Servers still do not know about each other
+*   Dynamic cluster reconfiguration with vbucket
 *   Highly usage of mem to improve latancy & throughput
 *   Circuit breaker protection
 *   Flow control
