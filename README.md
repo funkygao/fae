@@ -16,6 +16,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [Terms](#terms)
 - [Highlights](#highlights)
 - [Thrift Payload](#thrift-payload)
+- [golang](#golang)
 - [TODO](#todo)
 - [Reference](#reference)
 
