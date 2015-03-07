@@ -99,8 +99,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Full realtime internal stats export via http
 *   Smart metrics with low overhead
 *   Graceful degrade for OPS
-    - auto
-    - manual
 *   Plugins
 *   One binary, homogeneous deployment
 
