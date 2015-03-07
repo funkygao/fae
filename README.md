@@ -129,7 +129,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [ ] replace config.engine.runWatchdog with server.WatchConfig
 *   [ ] rename myslq pool to group
 *   [ ] rate limit with golib.ratelimiter
-
 *   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
 *   [ ] proxy pool, test on borrow
 *   [ ] rpc export call.all has bug
