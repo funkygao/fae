@@ -24,6 +24,9 @@
         stats_output_interval: "1m"
     }
 
+    plugins: [
+    ]
+
     servants: {
         idgen_worker_id: {idgen_worker_id}
 
