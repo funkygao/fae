@@ -109,6 +109,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Graceful degrade for OPS
     - auto
     - manual
+*   Plugins
 *   One binary, homogeneous deployment
 
 ### Thrift Payload
