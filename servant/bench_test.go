@@ -29,9 +29,36 @@ func setupServant() *FunServantImpl {
 	server.SetupLogging(".canbedeleted.test.log", "info", "", "", "")
 
 	cf, _ := conf.Load("../etc/faed.cf")
-	config.LoadEngineConfig("../etc/faed.cf", cf)
-	server.LaunchHttpServ(":9999", "")
+	config.LoadEngineConfig(cf)
+	server.LaunchHttpServer(":9999", "")
 	return NewFunServant(config.Engine.Servants)
+}
+
+// 880 ns/op
+func BenchmarkIsSelectQuery(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(strings.ToLower(sql), "select")
+	}
+}
+
+// 64.0 ns/op
+func BenchmarkOptimizedIsSelectQuery(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(strings.ToLower(sql[:len("select")]), "select")
+	}
+}
+
+// 9 ns/op
+func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(sql, "select")
+	}
 }
 
 func BenchmarkTimeUnixNano(b *testing.B) {
@@ -154,24 +181,6 @@ func BenchmarkBson(b *testing.B) {
 			"hobbies": []string{"a", "b"}}}
 	for i := 0; i < b.N; i++ {
 		bson.Marshal(m)
-	}
-}
-
-// 880 ns/op
-func BenchmarkIsSelectQuery(b *testing.B) {
-	b.ReportAllocs()
-	var sql = "select * from UserInfo where uid=? and power>?"
-	for i := 0; i < b.N; i++ {
-		strings.HasPrefix(strings.ToLower(sql), "select")
-	}
-}
-
-// 9 ns/op
-func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
-	b.ReportAllocs()
-	var sql = "select * from UserInfo where uid=? and power>?"
-	for i := 0; i < b.N; i++ {
-		strings.HasPrefix(sql, "select")
 	}
 }
 
