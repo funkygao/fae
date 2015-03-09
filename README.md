@@ -126,7 +126,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 ### TODO
 
 *   [ ] engine plugin
-*   [ ] use golib/signal SignalProcess instead of server.SignalProcess
+*   [X] use golib/signal SignalProcess instead of server.SignalProcess
+*   [ ] stress loop in c1, c2 to test throughput under different concurrencies
 *   [ ] replace config.engine.runWatchdog with server.WatchConfig
 *   [ ] rename myslq pool to group
 *   [ ] rate limit with golib.ratelimiter
