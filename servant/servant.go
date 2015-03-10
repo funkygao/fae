@@ -2,6 +2,8 @@
 
 package servant
 
+//go:generate make gen
+
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
