@@ -130,6 +130,8 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   gotools
     - benchcmp
     - callgraph
+*   make use of annotation to auot generate code skeleton
+    - https://github.com/funkygao/goannotation
 *   [ ] stress loop in c1, c2 to test throughput under different concurrencies
 *   [ ] replace config.engine.runWatchdog with server.WatchConfig
 *   [ ] rename myslq pool to group
