@@ -104,6 +104,8 @@ func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 
+	this.launchDashboard()
+
 	done = make(chan null.NullStruct)
 	go func() {
 		if err = this.rpcServer.Serve(); err != nil {

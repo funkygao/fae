@@ -15,9 +15,10 @@ type ConfigEngine struct {
 	EtcdServers  []string
 	EtcdSelfAddr string
 
-	HttpListenAddr  string
-	PprofListenAddr string
-	MetricsLogfile  string
+	HttpListenAddr      string
+	PprofListenAddr     string
+	DashboardListenAddr string
+	MetricsLogfile      string
 
 	ReloadWatchdogInterval time.Duration
 	ServerMode             bool // if false then client only mode
@@ -33,6 +34,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 
 	this.HttpListenAddr = this.String("http_listen_addr", "")
 	this.PprofListenAddr = this.String("pprof_listen_addr", "")
+	this.DashboardListenAddr = this.String("dashboard_listen_addr", "")
 	this.MetricsLogfile = this.String("metrics_logfile", "metrics.log")
 	this.ReloadWatchdogInterval = this.Duration("reload_watchdog_interval", time.Second)
 	this.ServerMode = this.Bool("server_mode", true)

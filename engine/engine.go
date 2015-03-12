@@ -14,6 +14,7 @@ import (
 
 type Engine struct {
 	StartedAt time.Time
+	graph     Graph
 
 	svt          *servant.FunServantImplWrapper
 	rpcProcessor thrift.TProcessor
