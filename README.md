@@ -101,6 +101,10 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   One binary, homogeneous deployment
 *   Dynamic cluster reconfiguration with vbucket
 
+### Dashboard
+
+[![dashboard](https://github.com/funkygao/fae/contrib/resources/dashboard.png)]
+
 ### Golang debug
 
 *   GODEBUG=schedtrace=1000
