@@ -16,7 +16,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
-- [Golang debug](#golang)
+- [Golang](#golang)
 - [TODO](#todo)
 - [Reference](#reference)
 
@@ -105,7 +105,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   One binary, homogeneous deployment
 *   Dynamic cluster reconfiguration with vbucket
 
-### Golang debug
+### Golang
 
 *   GODEBUG=schedtrace=1000
 *   GODEBUG=gctrace=1
