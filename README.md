@@ -11,11 +11,11 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 **Table of Contents**
 
 - [Usage](#usage)
+- [Dashboard](#dashboard)
 - [Architecture](#status)
 - [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
-- [dashboard](#dashboard)
 - [golang](#golang)
 - [TODO](#todo)
 - [Reference](#reference)
@@ -27,6 +27,10 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     ./build.sh
     ./daemon/faed/faed -conf contrib/faed.cf.rc
                                
+### Dashboard
+
+![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)
+
 ### Architecture
 
 
@@ -100,10 +104,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Plugins
 *   One binary, homogeneous deployment
 *   Dynamic cluster reconfiguration with vbucket
-
-### Dashboard
-
-![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)
 
 ### Golang debug
 
