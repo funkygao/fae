@@ -15,7 +15,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
-- [Thrift Payload](#thrift-payload)
+- [dashboard](#dashboard)
 - [golang](#golang)
 - [TODO](#todo)
 - [Reference](#reference)
@@ -103,7 +103,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Dashboard
 
-[![dashboard](https://github.com/funkygao/fae/contrib/resources/dashboard.png)]
+[![dashboard](https://github.com/funkygao/fae/tree/bar/contrib/resources/dashboard.png)]
 
 ### Golang debug
 
