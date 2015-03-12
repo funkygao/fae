@@ -2,6 +2,8 @@ package engine
 
 import (
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/engine/plugin"
+	_ "github.com/funkygao/fae/plugins"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/golib/null"
 	conf "github.com/funkygao/jsconf"
@@ -32,5 +34,9 @@ func NewEngine() *Engine {
 
 func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
 	config.LoadEngineConfig(cf)
+
+	if section, err := cf.Section("plugin"); err == nil {
+		plugin.LoadPlugins(section)
+	}
 	return this
 }

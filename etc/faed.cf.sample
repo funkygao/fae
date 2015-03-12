@@ -25,8 +25,13 @@
         stats_output_interval: "1m"
     }
 
-    plugins: [
-    ]
+    plugin: {
+        plugins: [
+            {
+                name: "RateLimiter"
+            }
+        ]
+    }
 
     servants: {
         idgen_worker_id: {idgen_worker_id}

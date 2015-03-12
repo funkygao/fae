@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/engine/plugin"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
@@ -35,6 +36,8 @@ func (this *Engine) ServeForever() {
 	}
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
+
+	go plugin.Start()
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()
