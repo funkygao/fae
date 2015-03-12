@@ -1,11 +1,11 @@
 ### TODO
 
+*   [ ] rpc cumCalls/cumSessions has bug
+    - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] thrift use slab allocator to read string
 *   thrift oneway feature in golang
 *   [ ] rate limit with golib.ratelimiter
     - plan to use plugin mechanism
-*   [ ] rpc export call.all has bug
-    - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] bad performance related blocks
     - getSession()
     - logger
