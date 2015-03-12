@@ -16,7 +16,7 @@ const (
 	var sessions = {{ .Sessions }};
 	var data = [
 			{ label: "slow", data: {{ .Slows }} },	
-    		{ label: "activesession", data: {{ .ActiveSessions }} },
+    		{ label: "conns", data: {{ .ActiveSessions }} },
     		{ label: "err", data: {{ .Errors }} },
     		{ label: "qps", data: {{ .Qps }} },
     		{ label: "latency", data: {{ .Latencies }} },
@@ -25,7 +25,7 @@ const (
 	var options = {
 		legend: {
 			position: "nw",
-			noColumns: 2,
+			noColumns: 5,
 			backgroundOpacity: 0.2
 		},
 		xaxis: {
