@@ -2,34 +2,14 @@ package servant
 
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
-	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/idgen"
-	log "github.com/funkygao/log4go"
+	"math/rand"
+	"time"
 )
 
 // Ticket service
-func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
-	backwards *rpc.TIdTimeBackwards, ex error) {
+func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64, ex error) {
 	const IDENT = "id.next"
-
-	if this.proxyMode {
-		svt, err := this.peerServantRand(ctx)
-		if err != nil {
-			ex = err
-			if svt != nil {
-				if proxy.IsIoError(err) {
-					svt.Close()
-				}
-
-				svt.Recycle()
-			}
-			return
-		}
-
-		r, backwards, ex = svt.IdNext(ctx)
-		svt.Recycle()
-		return
-	}
 
 	svtStats.inc(IDENT)
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -38,12 +18,16 @@ func (this *FunServantImpl) IdNext(ctx *rpc.Context) (r int64,
 		return
 	}
 
-	r, ex = this.idgen.Next()
-	if ex != nil {
-		log.Error("Q=%s %s: clock backwards", IDENT, ctx.String())
+	for i := 0; i < 3; i++ {
+		r, ex = this.idgen.Next()
+		if ex != nil {
+			// encounter ntp clock backwards problem, just retry
+			time.Sleep(time.Millisecond * time.Duration(1+rand.Int63n(50)))
+		} else {
+			// got it!
+			break
+		}
 
-		backwards = ex.(*rpc.TIdTimeBackwards)
-		ex = nil
 	}
 
 	profiler.do(IDENT, ctx, "{r^%d}", r)
@@ -55,25 +39,6 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 	tag int16) (r int64, ex error) {
 	const IDENT = "id.nextag"
 
-	if this.proxyMode {
-		svt, err := this.peerServantRand(ctx)
-		if err != nil {
-			ex = err
-			if svt != nil {
-				if proxy.IsIoError(err) {
-					svt.Close()
-				}
-
-				svt.Recycle()
-			}
-			return
-		}
-
-		r, ex = svt.IdNextWithTag(ctx, tag)
-		svt.Recycle()
-		return
-	}
-
 	svtStats.inc(IDENT)
 
 	profiler, err := this.getSession(ctx).startProfiler()
@@ -82,7 +47,16 @@ func (this *FunServantImpl) IdNextWithTag(ctx *rpc.Context,
 		return
 	}
 
-	r, ex = this.idgen.NextWithTag(tag)
+	for i := 0; i < 3; i++ {
+		r, ex = this.idgen.NextWithTag(tag)
+		if ex != nil {
+			// encounter ntp clock backwards problem, just retry
+			time.Sleep(time.Millisecond * time.Duration(1+rand.Int63n(50)))
+		} else {
+			// got it!
+			break
+		}
+	}
 
 	profiler.do(IDENT, ctx, "{tag^%d} {r^%d}", tag, r)
 

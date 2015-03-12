@@ -19,9 +19,6 @@ exception TMongoReadOnly {
     11: optional string message
 }
 
-exception TIdTimeBackwards {
-}
-
 struct TMemcacheData {
     1: required binary data
     2: required i32 flags
@@ -142,19 +139,29 @@ service FunServant {
     ),
 
     /**
-     * ID generator
+     * ID generator.
+     *
+     * If return 0, it means failure.
      */
     i64 id_next(
         1: required Context ctx
-    ) throws (
-        1: TIdTimeBackwards backwards
     ),
 
+    /**
+     * ID generator with tag.
+     *
+     * If return 0, it means failure.
+     */
     i64 id_next_with_tag(
         1: required Context ctx,
         2: i16 tag
     ),
 
+    /**
+     * Decoce an id that was generated with id_next_with_tag.
+     *
+     * returns (ts, tag, wid, seq).
+     */
     list<i64> id_decode(
         1: required Context ctx,
         2: i64 id
