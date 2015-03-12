@@ -112,9 +112,15 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### TODO
 
-*   [ ] engine plugin
-*   [X] use golib/signal SignalProcess instead of server.SignalProcess
 *   [ ] thrift use slab allocator to read string
+*   thrift oneway feature in golang
+*   [ ] rate limit with golib.ratelimiter
+    - plan to use plugin mechanism
+*   [ ] rpc export call.all has bug
+    - stress -x 1 -c 100 -n 100000 -logoff
+*   [ ] bad performance related blocks
+    - getSession()
+    - logger
 *   [ ] gotools
     - benchcmp
     - callgraph
@@ -123,37 +129,24 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [X] shard lru cache to lower mutex race
 *   [X] fae dashboard
 *   [ ] stress loop in c1, c2 to test throughput under different concurrencies
-*   [ ] replace config.engine.runWatchdog with server.WatchConfig
-*   [ ] rename myslq pool to group
-*   [ ] rate limit with golib.ratelimiter
-*   [ ] engine pass tcpClient.RemoteAddr to Context, Servant will know the client better
+*   [ ] more strict test on zookeeper failure
 *   [ ] proxy pool, test on borrow
-*   [ ] rpc export call.all has bug
-    - stress -x 1 -c 100 -n 100000 -logoff
-*   [ ] name3 found dup names, bug
-*   [ ] make all db column not nullable
+*   [X] make all db column not nullable
 *   [ ] better request tracing
-*   [ ] backpressure
-*   [ ] gm presence shows not only online, but also last sync time
 *   [ ] session.profiler should not be pointer, reduce GC overhead
 *   [ ] mysql periodically ping to avoid being closed 
 *   [X] optimize mysql query, iterate each row to transform to string/null
 *   [X] engine record all err msg counter
 *   [ ] when disk is full, fae will get stuck because of logging component
-*   [ ] bad performance related blocks
-    - getSession()
 *   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput
-*   [X] Context has too many strings, discard some of them
-*   [ ] database/sql QueryRow for AR::get
-*   [ ] go vet
 *   [ ] log rotate size, only keep history for N days
-*   [ ] periodically reload name3 from db
-*   [ ] try not to use string as rpc func param, its costly to convert between []byte
+*   [X] engine plugin
+*   [X] use golib/signal SignalProcess instead of server.SignalProcess
+*   [X] Context has too many strings, discard some of them
 *   [X] change ctx.rid from string to int64, proxy servant rid generation mechanism
 *   [X] start fae, then restart remote peer, then call ServantByKey, see what happens
 *   [X] bloom filter 
 *   [X] unified err logging so that external alarming system can get notified
-*   [ ] more strict test on zookeeper failure
 *   [X] mysql prepare stmt caching
     - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
     - CLIENT_NO_SCHEMA, don't allow database.table.column
