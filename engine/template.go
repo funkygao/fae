@@ -4,23 +4,21 @@ const (
 	DASHBOARD_TPL = `
 <html>
 <head>
-<title>gcvis - {{ .Title }}</title>
+<title>{{ .Title }}</title>
 <meta http-equiv="refresh" content="10">
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.time.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.selection.min.js">
-</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.selection.min.js"></script>
 
 <script type="text/javascript">
-
 	var data = [
-    		{ label: "gc.heapinuse", data: {{ .HeapUse }} },
-    		{ label: "scvg.inuse", data: {{ .ScvgInuse }} },
-    		{ label: "scvg.idle", data: {{ .ScvgIdle }} },
-    		{ label: "scvg.sys", data: {{ .ScvgSys }} },
-    		{ label: "scvg.released", data: {{ .ScvgReleased }} },
-    		{ label: "scvg.consumed", data: {{ .ScvgConsumed }} },
+    		{ label: "qps", data: {{ .Qps }} },
+    		{ label: "activesession", data: {{ .ActiveSessions }} },
+    		{ label: "latency", data: {{ .Latencies }} },    
+    		{ label: "errs", data: {{ .Errors }} },  		
+    		{ label: "calls", data: {{ .Calls }} },
+    		{ label: "sessions", data: {{ .Sessions }} },
 	];
 
 	var options = {
@@ -68,7 +66,6 @@ const (
 
 	// now connect the two
 	$("#placeholder").bind("plotselected", function (event, ranges) {
-
 		// do the zooming
 		$.each(plot.getXAxes(), function(_, axis) {
 			var opts = axis.options;
@@ -127,7 +124,6 @@ const (
 <body>
 <pre>{{ .Title }}</pre>
 <div id="content">
-
 	<div class="demo-container">
 		<div id="placeholder" class="demo-placeholder"></div>
 	</div>
@@ -135,20 +131,8 @@ const (
 	<div class="demo-container" style="height:150px;">
 		<div id="overview" class="demo-placeholder"></div>
 	</div>
-
-	<p>The smaller plot is linked to the main plot, so it acts as an overview. Try dragging a selection on either plot, and watch the behavior of the other.</p>
-
 </div>
 
-<pre><b>Legend</b>
-
-gc.heapinuse: heap in use after gc
-scvg.inuse: virtual memory considered in use by the scavenger
-scvg.idle: virtual memory considered unused by the scavenger
-scvg.sys: virtual memory requested from the operating system (should aproximate VSS)
-scvg.released: virtual memory returned to the operating system by the scavenger
-scvg.consumed: virtual memory in use (should roughly match process RSS)
-</pre>
 </body>
 </html>
 	`
