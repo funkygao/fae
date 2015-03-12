@@ -32,4 +32,6 @@ var (
 	testPool        bool
 	logTurnOff      bool
 	tcpNoDelay      bool
+	c1              int
+	c2              int
 )

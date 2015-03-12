@@ -27,6 +27,22 @@ try {
     $transport->open();
 
     $ctx = new Context(array('rid' => hexdec(uniqid()), 'reason' => 'call.init.567'));
+    
+    // game get unique name with len 3
+    //for ($i = 0; $i < 2; $i ++) {
+    //for ($i = 0; $i < 658; $i ++) {
+    $allianceTags = array();
+    for ($i = 0; $i < 50000000; $i ++) {
+        //$name = $client->ping($ctx);
+        $name = $client->gm_name3($ctx);
+        echo "$i $name\n";
+        if (isset($allianceTags[$name])) {
+            throw new Exception("Dup name3: $name");
+        }
+        $allianceTags[$name] = TRUE;
+        //usleep(10000);
+        //sleep(1);
+    }
 
     $client->gm_latency($ctx, 19, 21);
     var_dump($client->gm_presence($ctx, array(11, 14)));
@@ -60,21 +76,6 @@ try {
     }
 
     $t1 = microtime(TRUE);
-    // game get unique name with len 3
-    //for ($i = 0; $i < 2; $i ++) {
-    //for ($i = 0; $i < 658; $i ++) {
-    $allianceTags = array();
-    for ($i = 0; $i < 50000000; $i ++) {
-        //$name = $client->ping($ctx);
-        $name = $client->gm_name3($ctx);
-        echo "$i $name\n";
-        if (isset($allianceTags[$name])) {
-            throw new Exception("Dup name3: $name");
-        }
-        $allianceTags[$name] = TRUE;
-        //usleep(10000);
-        //sleep(1);
-    }
 
     $ok = $client->zk_create($ctx, "/maintain/global", "");
     var_dump($ok);

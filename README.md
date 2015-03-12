@@ -127,6 +127,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 *   [ ] engine plugin
 *   [X] use golib/signal SignalProcess instead of server.SignalProcess
+*   [ ] thrift use slab allocator to read string
 *   gotools
     - benchcmp
     - callgraph
