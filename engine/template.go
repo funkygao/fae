@@ -15,11 +15,11 @@ const (
 	var calls = {{ .Calls }};
 	var sessions = {{ .Sessions }};
 	var data = [
-    		{ label: "qps", data: {{ .Qps }} },
+			{ label: "slow", data: {{ .Slows }} },	
     		{ label: "activesession", data: {{ .ActiveSessions }} },
-    		{ label: "latency", data: {{ .Latencies }} },    
-    		{ label: "err", data: {{ .Errors }} },  		
-    		{ label: "slow", data: {{ .Slows }} },
+    		{ label: "err", data: {{ .Errors }} },
+    		{ label: "qps", data: {{ .Qps }} },
+    		{ label: "latency", data: {{ .Latencies }} },
 	];
 
 	var options = {
