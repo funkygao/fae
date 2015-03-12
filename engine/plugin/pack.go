@@ -11,7 +11,8 @@ type PipelinePack struct {
 	// Reference counter, internal GC
 	RefCount int32
 
-	Data interface{}
+	Ident string
+	Data  interface{}
 }
 
 func NewPipelinePack(recyleChan chan *PipelinePack) *PipelinePack {
@@ -39,4 +40,5 @@ func (this *PipelinePack) Recycle() {
 func (this *PipelinePack) Reset() {
 	atomic.StoreInt32(&this.RefCount, 1)
 	this.Data = nil
+	this.Ident = ""
 }

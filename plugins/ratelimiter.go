@@ -27,7 +27,7 @@ func (this *RateLimiter) Run(r plugin.PluginRunner) error {
 	for {
 		pack = <-inChan
 
-		r.Inject(pack)
+		pack.Recycle()
 	}
 	return nil
 }

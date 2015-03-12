@@ -39,7 +39,7 @@ func (this *runner) InChan() chan *PipelinePack {
 }
 
 func (this *runner) Inject(pack *PipelinePack) {
-	hub.hub <- pack
+	hub.input <- pack
 }
 
 func (this *runner) Run() {
