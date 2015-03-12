@@ -16,7 +16,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
-- [Golang](#golang)
+- [Golang debug](#golang)
 - [TODO](#todo)
 - [Reference](#reference)
 
