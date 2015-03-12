@@ -103,7 +103,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Dashboard
 
-[![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)]
+![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)
 
 ### Golang debug
 
