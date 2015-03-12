@@ -4,17 +4,19 @@ import (
 	"html/template"
 	"io"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 type graphPoints [2]int
 
 type Graph struct {
-	Title                                                   string
-	Qps, ActiveSessions, Latencies, Errors, Calls, Sessions []graphPoints
-	Tpl                                                     *template.Template
-	mu                                                      sync.Mutex
-	rpcServer                                               *TFunServer
+	Title                                         string
+	Qps, ActiveSessions, Latencies, Errors, Slows []graphPoints
+	Calls, Sessions                               int64
+	Tpl                                           *template.Template
+	mu                                            sync.Mutex
+	rpcServer                                     *TFunServer
 }
 
 func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
@@ -26,8 +28,7 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 		ActiveSessions: []graphPoints{},
 		Latencies:      []graphPoints{},
 		Errors:         []graphPoints{},
-		Calls:          []graphPoints{},
-		Sessions:       []graphPoints{},
+		Slows:          []graphPoints{},
 
 		rpcServer: rpcServer,
 	}
@@ -43,8 +44,7 @@ func (g *Graph) write(w io.Writer) {
 		g.Latencies = []graphPoints{}
 		g.ActiveSessions = []graphPoints{}
 		g.Errors = []graphPoints{}
-		g.Calls = []graphPoints{}
-		g.Sessions = []graphPoints{}
+		g.Slows = []graphPoints{}
 
 	}
 
@@ -55,12 +55,15 @@ func (g *Graph) write(w io.Writer) {
 		int(g.rpcServer.activeSessionN)})
 	g.Latencies = append(g.Latencies, graphPoints{ts,
 		int(g.rpcServer.stats.CallLatencies.Mean())})
+	errs := atomic.LoadInt64(&g.rpcServer.cumCallErrs)
 	g.Errors = append(g.Errors, graphPoints{ts,
-		int(g.rpcServer.cumCallErrs)})
-	g.Calls = append(g.Calls, graphPoints{ts,
-		int(g.rpcServer.cumCalls)})
-	g.Sessions = append(g.Sessions, graphPoints{ts,
-		int(g.rpcServer.cumSessions)})
+		int(errs)})
+	slows := atomic.LoadInt64(&g.rpcServer.cumCallSlow)
+	g.Slows = append(g.Slows, graphPoints{ts,
+		int(slows)})
+
+	g.Calls = atomic.LoadInt64(&g.rpcServer.cumCalls)
+	g.Sessions = atomic.LoadInt64(&g.rpcServer.cumSessions)
 
 	g.Tpl.Execute(w, g)
 }

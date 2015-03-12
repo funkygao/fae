@@ -12,13 +12,14 @@ const (
 <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.2/jquery.flot.selection.min.js"></script>
 
 <script type="text/javascript">
+	var calls = {{ .Calls }};
+	var sessions = {{ .Sessions }};
 	var data = [
     		{ label: "qps", data: {{ .Qps }} },
     		{ label: "activesession", data: {{ .ActiveSessions }} },
     		{ label: "latency", data: {{ .Latencies }} },    
-    		{ label: "errs", data: {{ .Errors }} },  		
-    		{ label: "calls", data: {{ .Calls }} },
-    		{ label: "sessions", data: {{ .Sessions }} },
+    		{ label: "err", data: {{ .Errors }} },  		
+    		{ label: "slow", data: {{ .Slows }} },
 	];
 
 	var options = {

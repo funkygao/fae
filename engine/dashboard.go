@@ -10,9 +10,9 @@ func (this *Engine) launchDashboard() {
 		return
 	}
 
-	this.graph = NewGraph("fae RPC dashboard", DASHBOARD_TPL, this.rpcServer.(*TFunServer))
+	this.graph = NewGraph("RPC Dashboard", DASHBOARD_TPL, this.rpcServer.(*TFunServer))
 
-	http.HandleFunc("/dashboard", this.dashboard)
+	http.HandleFunc("/", this.dashboard)
 	go http.ListenAndServe(config.Engine.DashboardListenAddr, nil)
 }
 
