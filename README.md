@@ -128,12 +128,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   [ ] engine plugin
 *   [X] use golib/signal SignalProcess instead of server.SignalProcess
 *   [ ] thrift use slab allocator to read string
-*   gotools
+*   [ ] gotools
     - benchcmp
     - callgraph
-*   make use of annotation to auot generate code skeleton
+*   [ ] make use of annotation to auot generate code skeleton
     - https://github.com/funkygao/goannotation
-*   shard lru cache to lower mutex race
+*   [X] shard lru cache to lower mutex race
 *   [ ] stress loop in c1, c2 to test throughput under different concurrencies
 *   [ ] replace config.engine.runWatchdog with server.WatchConfig
 *   [ ] rename myslq pool to group
