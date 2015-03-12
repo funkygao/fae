@@ -68,8 +68,9 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - vital code should be more robust
     - can't have too much vital code
 *   Horizontal scale made easy
-    - frontend(php) and middleware scale independently
+    - frontend(e,g. php/python/java) and middleware scale independently
     - middleware is in charge of performance while frontend is in charge of biz logic
+    - fae serves as service abstractive service provider
 *   Polyglot development
 *   Easier dev team management
 
@@ -90,35 +91,17 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Highlights
 
-*   Self manageable cluster
-*   Linear scale by adding more fae instance
-*   Dynamic cluster reconfiguration with vbucket
+*   Self manageable cluster with browser base dashboard
+*   Linear scales by adding more fae instances
 *   Highly usage of mem to improve latancy & throughput
-*   Circuit breaker protection
-*   Flow control
-*   Full realtime internal stats export via http
+*   Circuit breaker protection and flow control
 *   Smart metrics with low overhead
 *   Graceful degrade for OPS
 *   Plugins
 *   One binary, homogeneous deployment
+*   Dynamic cluster reconfiguration with vbucket
 
-### Thrift Payload
-
-    msgType = CALL | REPLY | EXCEPTION | ONEWAY
-
-                   1               2                3               4
-     0 1 2 3 4 5 6 7 8 9 a b c d e f  0 1 2 3 4 5 6 7 8 9 a b c d e f
-    +----------------------------------------------------------------+
-    |          version = 0x80010000 | msgType                        |
-    +----------------------------------------------------------------+
-    |          method name string len                                |
-    +----------------------------------------------------------------+
-    |          method name string itself ...                         |
-    +----------------------------------------------------------------+
-    |          seqId(int32)                                          |
-    +----------------------------------------------------------------+
-
-### golang
+### Golang debug
 
 *   GODEBUG=schedtrace=1000
 *   GODEBUG=gctrace=1
