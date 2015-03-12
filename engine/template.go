@@ -124,6 +124,12 @@ const (
 </head>
 <body>
 <pre>{{ .Title }}</pre>
+<div id="peers">
+  <p>Peers in cluster</p>
+  {{range $index, $peer := .Peers}}<a href="http://{{$peer}}">{{$peer}}</a>&nbsp;&nbsp;
+  {{end}}
+</div>
+
 <div id="content">
 	<div class="demo-container">
 		<div id="placeholder" class="demo-placeholder"></div>
