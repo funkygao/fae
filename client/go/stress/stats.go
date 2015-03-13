@@ -53,13 +53,13 @@ func (this *stats) run() {
 				gofmt.Comma(this.callOk-lastCalls),
 				gofmt.Comma(this.callErrs))
 		} else {
-			log.Printf("c:%d sessions:%d conns:%d calls:%s qps:%s errs:%s go:%d",
+			log.Printf("c:%d sessions:%s calls:%s qps:%s errs:%s conns:%d go:%d",
 				Concurrency,
-				atomic.LoadInt32(&this.sessionN),
-				atomic.LoadInt32(&this.concurrentN),
+				gofmt.Comma(int64(atomic.LoadInt32(&this.sessionN))),
 				gofmt.Comma(atomic.LoadInt64(&this.callOk)),
 				gofmt.Comma(this.callOk-lastCalls),
 				gofmt.Comma(this.callErrs),
+				atomic.LoadInt32(&this.concurrentN),
 				runtime.NumGoroutine())
 		}
 
