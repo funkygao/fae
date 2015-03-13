@@ -26,5 +26,6 @@ do
         T2=`cat /sys/class/net/$1/statistics/tx_packets`
         TXPPS=`expr $T2 - $T1`
         RXPPS=`expr $R2 - $R1`
-        echo "TX $1: $TXPPS pkts/s RX $1: $RXPPS pkts/s"
+        PPS=`expr $TXPPS + $RXPPS`
+        echo "TX $1: $TXPPS pkts/s RX $1: $RXPPS pkts/s PPS: $PPS"
 done
