@@ -16,6 +16,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 - [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
+- [Performance](#perf)
 - [Reference](#reference)
 
 ### Usage
@@ -102,6 +103,12 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 *   Plugins
 *   One binary, homogeneous deployment
 *   Dynamic cluster reconfiguration with vbucket
+
+### Performance
+
+*   currently qps around 50k
+*   will be tweaked to 100k
+*   limited by NIC PPS(packets per second)
 
 #### Reference
 
