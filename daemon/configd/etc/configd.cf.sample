@@ -1,0 +1,14 @@
+{
+    etcd_servers: [
+        "127.0.0.1:2181",
+    ]
+
+    fae_template_file: "etc/fae.conf.tpl"
+    fae_target_file: "/sgn/htdocs/dev-dev/dragon-server-code/data/config/fae.php"
+
+    actor_template_file: ""
+    actor_target_file: ""
+
+    maintain_template_file: "etc/maintain.conf.tpl"
+    maintain_target_file: "/sgn/htdocs/dev-dev/dragon-server-code/data/config/maintain.php"
+}
