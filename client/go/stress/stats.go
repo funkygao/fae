@@ -45,6 +45,8 @@ func (this *stats) run() {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
+	t1 := time.Now()
+
 	var lastCalls int64
 	for _ = range ticker.C {
 		if neatStat {
@@ -53,7 +55,8 @@ func (this *stats) run() {
 				gofmt.Comma(this.callOk-lastCalls),
 				gofmt.Comma(this.callErrs))
 		} else {
-			log.Printf("c:%d sessions:%s calls:%s qps:%s errs:%s conns:%d go:%d",
+			log.Printf("%s c:%d sessions:%s calls:%s qps:%s errs:%s conns:%d go:%d",
+				time.Since(t1),
 				Concurrency,
 				gofmt.Comma(int64(atomic.LoadInt32(&this.sessionN))),
 				gofmt.Comma(atomic.LoadInt64(&this.callOk)),
