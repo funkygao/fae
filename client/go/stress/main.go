@@ -25,8 +25,8 @@ func init() {
 
 func parseFlag() {
 	flag.IntVar(&LoopsPerSession, "loop", 1, "loops for each session")
-	flag.IntVar(&c1, "c", 1, "concurrency lower limit")
-	flag.IntVar(&c2, "c2", 1000, "concurrency uppler limit")
+	flag.IntVar(&c1, "c1", 10, "concurrency lower limit")
+	flag.IntVar(&c2, "c2", 5000, "concurrency uppler limit")
 	flag.IntVar(&Rounds, "n", 100, "rounds")
 	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
@@ -61,10 +61,10 @@ func main() {
 
 	wg := new(sync.WaitGroup)
 	t1 := time.Now()
-	for i := 0; i < Rounds; i++ {
-		for k := c1; k <= c2; k++ {
-			Concurrency = k
+	for k := c1; k <= c2; k += 10 {
+		Concurrency = k
 
+		for i := 0; i < Rounds; i++ {
 			for j := 0; j < k; j++ {
 				wg.Add(1)
 				go runSession(proxy, wg, i+1, j)
