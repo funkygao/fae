@@ -44,8 +44,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	var enableLog = false
-	if !logTurnOff &&
-		(sampling(SampleRate) || Concurrency == 1) {
+	if !logTurnOff && sampling(SampleRate) {
 		enableLog = true
 	}
 
@@ -126,7 +125,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 		if Cmd&CallIdGen != 0 {
 			var r int64
-			r, _, err = client.IdNext(ctx)
+			r, err = client.IdNext(ctx)
 			if err != nil {
 				recordIoError(err)
 				report.incCallErr()

@@ -4,7 +4,6 @@ import (
 	"github.com/funkygao/golib/gofmt"
 	"log"
 	"runtime"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -48,8 +47,8 @@ func (this *stats) run() {
 
 	var lastCalls int64
 	for _ = range ticker.C {
-		log.Printf("%s sessions:%d concurrency:%d calls:%s qps:%s errs:%s go:%d",
-			strings.Repeat("-", 10),
+		log.Printf("c:%d sessions:%d conns:%d calls:%s qps:%s errs:%s go:%d",
+			Concurrency,
 			atomic.LoadInt32(&this.sessionN),
 			atomic.LoadInt32(&this.concurrentN),
 			gofmt.Comma(atomic.LoadInt64(&this.callOk)),

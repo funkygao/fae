@@ -20,7 +20,7 @@ func init() {
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
-	server.SetupLogging("stdout", "info", "panic.dump", "", "")
+	server.SetupLogging("stdout", "info", "", "", "")
 }
 
 func parseFlag() {
@@ -38,8 +38,6 @@ func parseFlag() {
 	flag.IntVar(&SampleRate, "s", 100, "log sampling rate")
 	flag.Usage = showUsage
 	flag.Parse()
-
-	Concurrency = c2
 }
 
 func main() {
@@ -65,13 +63,16 @@ func main() {
 	t1 := time.Now()
 	for i := 0; i < Rounds; i++ {
 		for k := c1; k <= c2; k++ {
+			Concurrency = k
+
 			for j := 0; j < k; j++ {
 				wg.Add(1)
 				go runSession(proxy, wg, i+1, j)
 			}
+
+			wg.Wait()
 		}
 
-		wg.Wait()
 	}
 
 	elapsed := time.Since(t1)

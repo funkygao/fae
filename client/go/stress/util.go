@@ -8,7 +8,12 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func sampling(rate int) bool {
 	return rand.Intn(rate) == 1
