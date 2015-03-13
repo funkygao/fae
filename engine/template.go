@@ -19,16 +19,16 @@ const (
 			{ label: "slow", data: {{ .Slows }} },	
     		{ label: "conns", data: {{ .ActiveSessions }} },
     		{ label: "err", data: {{ .Errors }} },
-    		{ label: "qps", data: {{ .Qps }}, yaxis: 2 },
+    		{ label: "qps2", data: {{ .Qps }}, yaxis: 2 },
     		{ label: "latency", data: {{ .Latencies }} },
 	];
 
 	var mem = [
-			{ label: "NumGC", data: {{ .NumGC }}, yaxis: 2 },
+			{ label: "NumG2", data: {{ .NumGC }}, yaxis: 2 },
 			{ label: "HeapSys", data: {{ .HeapSys }} },
 			{ label: "HeapAlloc", data: {{ .HeapAlloc }} },
-			{ label: "HeapReleased", data: {{ .HeapReleased }} },	
-			{ label: "StackInUse", data: {{ .StackInUse }}, yaxis: 2 },		
+			{ label: "HeapReleased2", data: {{ .HeapReleased }}, yaxis: 2 },	
+			{ label: "StackInUse2", data: {{ .StackInUse }}, yaxis: 2 },
 	];	
 
 	var options = {
@@ -157,11 +157,10 @@ const (
 </style>
 </head>
 <body>
-<pre>{{ .Title }}</pre>
 <div id="peers">
-  <p>Peers in cluster</p>
+  <p>Cluster: 
   {{range $index, $peer := .Peers}}<a href="http://{{$peer}}">{{$peer}}</a>&nbsp;&nbsp;
-  {{end}}
+  {{end}}</p>
 </div>
 
 <div id="content">

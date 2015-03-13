@@ -32,6 +32,7 @@ var (
 	logTurnOff      bool
 	errOff          bool
 	tcpNoDelay      bool
+	neatStat        bool
 	c1              int
 	c2              int
 )

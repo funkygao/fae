@@ -47,14 +47,21 @@ func (this *stats) run() {
 
 	var lastCalls int64
 	for _ = range ticker.C {
-		log.Printf("c:%d sessions:%d conns:%d calls:%s qps:%s errs:%s go:%d",
-			Concurrency,
-			atomic.LoadInt32(&this.sessionN),
-			atomic.LoadInt32(&this.concurrentN),
-			gofmt.Comma(atomic.LoadInt64(&this.callOk)),
-			gofmt.Comma(this.callOk-lastCalls),
-			gofmt.Comma(this.callErrs),
-			runtime.NumGoroutine())
+		if neatStat {
+			log.Printf("c:%6d qps:%20s errs:%10s",
+				Concurrency,
+				gofmt.Comma(this.callOk-lastCalls),
+				gofmt.Comma(this.callErrs))
+		} else {
+			log.Printf("c:%d sessions:%d conns:%d calls:%s qps:%s errs:%s go:%d",
+				Concurrency,
+				atomic.LoadInt32(&this.sessionN),
+				atomic.LoadInt32(&this.concurrentN),
+				gofmt.Comma(atomic.LoadInt64(&this.callOk)),
+				gofmt.Comma(this.callOk-lastCalls),
+				gofmt.Comma(this.callErrs),
+				runtime.NumGoroutine())
+		}
 
 		lastCalls = this.callOk
 	}

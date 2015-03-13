@@ -35,6 +35,7 @@ func parseFlag() {
 	flag.BoolVar(&tcpNoDelay, "tcpnodelay", true, "tcp no delay")
 	flag.BoolVar(&logTurnOff, "logoff", false, "only show progress instead of rpc result")
 	flag.BoolVar(&errOff, "erroff", false, "turn off err log")
+	flag.BoolVar(&neatStat, "neatstat", true, "only show concurrency and qps in stats output")
 	flag.IntVar(&SampleRate, "s", 100, "log sampling rate")
 	flag.Usage = showUsage
 	flag.Parse()
