@@ -14,6 +14,7 @@ const (
 <script type="text/javascript">
 	var calls = {{ .Calls }};
 	var sessions = {{ .Sessions }};
+	var stackSys = {{ .StackSys}};
 	var data = [
 			{ label: "slow", data: {{ .Slows }} },	
     		{ label: "conns", data: {{ .ActiveSessions }} },
@@ -23,13 +24,12 @@ const (
 	];
 
 	var mem = [
-			{ label: "NumGC", data: {{ .NumGC }} },
+			{ label: "NumGC", data: {{ .NumGC }}, yaxis: 2 },
 			{ label: "HeapSys", data: {{ .HeapSys }} },
 			{ label: "HeapAlloc", data: {{ .HeapAlloc }} },
-			{ label: "HeapReleased", data: {{ .HeapReleased }} },
-			{ label: "StackInUse", data: {{ .StackInUse }} },
-			{ label: "StackSys", data: {{ .StackSys }} },
-	];
+			{ label: "HeapReleased", data: {{ .HeapReleased }} },	
+			{ label: "StackInUse", data: {{ .StackInUse }}, yaxis: 2 },		
+	];	
 
 	var options = {
 		legend: {
@@ -63,6 +63,12 @@ const (
 			timezone: "browser",
 			timeformat: "%H:%M:%S "
 		},		
+		yaxes: [
+			{},
+			{
+				position: "right",
+			}
+		],
 	};
 
 	$(document).ready(function() {
@@ -159,10 +165,10 @@ const (
 </div>
 
 <div id="content">
-	<div class="demo-container" style="height:250px;">
+	<div class="demo-container" style="height:200px;">
 		<div id="placeholder_mem" class="demo-placeholder"></div>
-	</div>
-	<div class="demo-container">
+	</div>	
+	<div class="demo-container" style="height:400px;">
 		<div id="placeholder" class="demo-placeholder"></div>
 	</div>
 
