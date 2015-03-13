@@ -30,11 +30,11 @@ func parseFlag() {
 	flag.IntVar(&Rounds, "n", 100, "rounds")
 	flag.IntVar(&Cmd, "x", CallDefault, "bitwise rpc calls")
 	flag.StringVar(&host, "host", "localhost", "rpc server host")
-	flag.IntVar(&verbose, "v", 0, "verbose level")
 	flag.StringVar(&zk, "zk", "localhost:2181", "zk server addr")
 	flag.BoolVar(&testPool, "testpool", false, "test pool")
 	flag.BoolVar(&tcpNoDelay, "tcpnodelay", true, "tcp no delay")
 	flag.BoolVar(&logTurnOff, "logoff", false, "only show progress instead of rpc result")
+	flag.BoolVar(&errOff, "erroff", false, "turn off err log")
 	flag.IntVar(&SampleRate, "s", 100, "log sampling rate")
 	flag.Usage = showUsage
 	flag.Parse()
@@ -42,18 +42,17 @@ func parseFlag() {
 
 func main() {
 	cf := config.NewDefaultProxy()
-	cf.PoolCapacity = c2
 	cf.IoTimeout = time.Hour
 	cf.TcpNoDelay = tcpNoDelay
-	proxy := proxy.New(cf)
+	prx := proxy.New(cf)
 
 	etclib.Dial([]string{zk})
-	go proxy.StartMonitorCluster()
-	proxy.AwaitClusterTopologyReady()
+	go prx.StartMonitorCluster()
+	prx.AwaitClusterTopologyReady()
 
 	// test pool
 	if testPool {
-		testServantPool(proxy)
+		testServantPool(prx)
 		pause("pool tested")
 	}
 
@@ -64,15 +63,17 @@ func main() {
 	for k := c1; k <= c2; k += 10 {
 		Concurrency = k
 
+		cf.PoolCapacity = Concurrency
+		prx = proxy.New(cf)
+
 		for i := 0; i < Rounds; i++ {
 			for j := 0; j < k; j++ {
 				wg.Add(1)
-				go runSession(proxy, wg, i+1, j)
+				go runSession(prx, wg, i+1, j)
 			}
 
 			wg.Wait()
 		}
-
 	}
 
 	elapsed := time.Since(t1)

@@ -27,10 +27,10 @@ var (
 	LoopsPerSession int // calls=sessions*LoopsPerSession
 	Cmd             int
 	host            string
-	verbose         int
 	zk              string
 	testPool        bool
 	logTurnOff      bool
+	errOff          bool
 	tcpNoDelay      bool
 	c1              int
 	c2              int

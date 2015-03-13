@@ -102,7 +102,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
 	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
 	this.JsonMergeMaxOutstandingItems = cf.Int("json_merge_max_outstanding_items", 8<<20)
-	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1048576)
+	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1<<20)
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)
