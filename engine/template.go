@@ -33,6 +33,12 @@ const (
 			timezone: "browser",
 			timeformat: "%H:%M:%S "
 		},
+		yaxes: [
+			{},
+			{
+				position: "right",
+			}
+		],
 		selection: {
 			mode: "x"
 		},
