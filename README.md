@@ -109,9 +109,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - http://www.rightscale.com/blog/cloud-management-best-practices/benchmarking-load-balancers-cloud
 *   RPS/RFS in linux
     - http://huoding.com/2013/10/30/296
-*   https://github.com/phunt/zktop
-*   https://github.com/toddlipcon/gremlins
-*   network band width is cost problem while latency is physical constraint
 *   https://docs.google.com/document/d/11k2EmhLGSbViBvi6_zFEiKzuXxYF49ZuuDJLe6O8gBU/edit#
 *   golang
     - GODEBUG=schedtrace=1000
