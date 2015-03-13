@@ -14,7 +14,6 @@ const (
 <script type="text/javascript">
 	var calls = {{ .Calls }};
 	var sessions = {{ .Sessions }};
-	var stackSys = {{ .StackSys}};
 	var data = [
 			{ label: "slow", data: {{ .Slows }} },	
     		{ label: "conns", data: {{ .ActiveSessions }} },

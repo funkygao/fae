@@ -14,11 +14,12 @@ import (
 
 type graphPoints [2]int
 
+// Dashboard data of engine.
 type Graph struct {
 	Title                                         string
 	Qps, ActiveSessions, Latencies, Errors, Slows []graphPoints
 	NumGC, HeapSys, HeapAlloc, HeapReleased       []graphPoints
-	StackInUse, StackSys                          []graphPoints
+	StackInUse                                    []graphPoints
 	Calls, Sessions                               int64
 	Peers                                         []string
 	Tpl                                           *template.Template
@@ -43,7 +44,6 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 		HeapAlloc:      []graphPoints{},
 		HeapReleased:   []graphPoints{},
 		StackInUse:     []graphPoints{},
-		StackSys:       []graphPoints{},
 		rpcServer:      rpcServer,
 	}
 }
@@ -61,7 +61,7 @@ func (g *Graph) write(w io.Writer) {
 		}
 	}
 
-	if len(g.Qps) > (1 << 20) {
+	if len(g.Qps) > (60 * 60 * 12 / 10) { // 12 hours
 		// dashboard should never use up fae's memory
 		g.Qps = []graphPoints{}
 		g.Latencies = []graphPoints{}
@@ -72,7 +72,6 @@ func (g *Graph) write(w io.Writer) {
 		g.HeapReleased = []graphPoints{}
 		g.HeapSys = []graphPoints{}
 		g.NumGC = []graphPoints{}
-		g.StackSys = []graphPoints{}
 		g.StackInUse = []graphPoints{}
 	}
 
@@ -105,8 +104,6 @@ func (g *Graph) write(w io.Writer) {
 		int(memStats.HeapAlloc) / (1 << 20)})
 	g.StackInUse = append(g.StackInUse, graphPoints{ts,
 		int(memStats.StackInuse) / (1 << 20)})
-	g.StackSys = append(g.StackSys, graphPoints{ts,
-		int(memStats.StackSys) / (1 << 20)})
 
 	g.Tpl.Execute(w, g)
 }
