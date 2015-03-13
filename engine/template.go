@@ -18,7 +18,7 @@ const (
 			{ label: "slow", data: {{ .Slows }} },	
     		{ label: "conns", data: {{ .ActiveSessions }} },
     		{ label: "err", data: {{ .Errors }} },
-    		{ label: "qps", data: {{ .Qps }} },
+    		{ label: "qps", data: {{ .Qps }}, yaxis: 2 },
     		{ label: "latency", data: {{ .Latencies }} },
 	];
 
