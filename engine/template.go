@@ -22,6 +22,15 @@ const (
     		{ label: "latency", data: {{ .Latencies }} },
 	];
 
+	var mem = [
+			{ label: "NumGC", data: {{ .NumGC }} },
+			{ label: "HeapSys", data: {{ .HeapSys }} },
+			{ label: "HeapAlloc", data: {{ .HeapAlloc }} },
+			{ label: "HeapReleased", data: {{ .HeapReleased }} },
+			{ label: "StackInUse", data: {{ .StackInUse }} },
+			{ label: "StackSys", data: {{ .StackSys }} },
+	];
+
 	var options = {
 		legend: {
 			position: "nw",
@@ -43,10 +52,23 @@ const (
 			mode: "x"
 		},
 	};
+	var options_mem = {
+		legend: {
+			position: "nw",
+			noColumns: 6,
+			backgroundOpacity: 0.2
+		},
+		xaxis: {
+			mode: "time",
+			timezone: "browser",
+			timeformat: "%H:%M:%S "
+		},		
+	};
 
 	$(document).ready(function() {
 
 	var plot = $.plot("#placeholder", data, options);
+	var plotmem = $.plot("#placeholder_mem", mem, options_mem);
 
 	var overview = $.plot("#overview", data, {
 		legend: { show: false},
@@ -137,6 +159,9 @@ const (
 </div>
 
 <div id="content">
+	<div class="demo-container" style="height:250px;">
+		<div id="placeholder_mem" class="demo-placeholder"></div>
+	</div>
 	<div class="demo-container">
 		<div id="placeholder" class="demo-placeholder"></div>
 	</div>

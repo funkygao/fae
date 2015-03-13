@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"net"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -16,6 +17,8 @@ type graphPoints [2]int
 type Graph struct {
 	Title                                         string
 	Qps, ActiveSessions, Latencies, Errors, Slows []graphPoints
+	NumGC, HeapSys, HeapAlloc, HeapReleased       []graphPoints
+	StackInUse, StackSys                          []graphPoints
 	Calls, Sessions                               int64
 	Peers                                         []string
 	Tpl                                           *template.Template
@@ -35,6 +38,12 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 		Latencies:      []graphPoints{},
 		Errors:         []graphPoints{},
 		Slows:          []graphPoints{},
+		NumGC:          []graphPoints{},
+		HeapSys:        []graphPoints{},
+		HeapAlloc:      []graphPoints{},
+		HeapReleased:   []graphPoints{},
+		StackInUse:     []graphPoints{},
+		StackSys:       []graphPoints{},
 		rpcServer:      rpcServer,
 	}
 }
@@ -59,7 +68,12 @@ func (g *Graph) write(w io.Writer) {
 		g.ActiveSessions = []graphPoints{}
 		g.Errors = []graphPoints{}
 		g.Slows = []graphPoints{}
-
+		g.HeapAlloc = []graphPoints{}
+		g.HeapReleased = []graphPoints{}
+		g.HeapSys = []graphPoints{}
+		g.NumGC = []graphPoints{}
+		g.StackSys = []graphPoints{}
+		g.StackInUse = []graphPoints{}
 	}
 
 	ts := int(time.Now().UnixNano() / 1e6)
@@ -78,6 +92,21 @@ func (g *Graph) write(w io.Writer) {
 
 	g.Calls = atomic.LoadInt64(&g.rpcServer.cumCalls)
 	g.Sessions = atomic.LoadInt64(&g.rpcServer.cumSessions)
+
+	memStats := new(runtime.MemStats)
+	runtime.ReadMemStats(memStats)
+	g.NumGC = append(g.NumGC, graphPoints{ts,
+		int(memStats.NumGC)})
+	g.HeapSys = append(g.HeapSys, graphPoints{ts,
+		int(memStats.HeapSys) / (1 << 20)})
+	g.HeapReleased = append(g.HeapReleased, graphPoints{ts,
+		int(memStats.HeapReleased) / (1 << 20)})
+	g.HeapAlloc = append(g.HeapAlloc, graphPoints{ts,
+		int(memStats.HeapAlloc) / (1 << 20)})
+	g.StackInUse = append(g.StackInUse, graphPoints{ts,
+		int(memStats.StackInuse) / (1 << 20)})
+	g.StackSys = append(g.StackSys, graphPoints{ts,
+		int(memStats.StackSys) / (1 << 20)})
 
 	g.Tpl.Execute(w, g)
 }
