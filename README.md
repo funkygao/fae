@@ -116,7 +116,6 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
     - http://www.rightscale.com/blog/cloud-management-best-practices/benchmarking-load-balancers-cloud
 *   RPS/RFS in linux
     - http://huoding.com/2013/10/30/296
-*   https://docs.google.com/document/d/11k2EmhLGSbViBvi6_zFEiKzuXxYF49ZuuDJLe6O8gBU/edit#
 *   golang
     - GODEBUG=schedtrace=1000
     - GODEBUG=gctrace=1
