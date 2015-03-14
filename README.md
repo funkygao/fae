@@ -106,7 +106,7 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
 
 ### Performance
 
-*   currently qps around 50k
+*   currently, a single fae node qps around 50k
 *   will be tweaked to 100k
 *   limited by NIC PPS(packets per second)
 
