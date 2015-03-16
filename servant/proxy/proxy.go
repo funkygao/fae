@@ -27,11 +27,12 @@ type Proxy struct {
 }
 
 func New(cf *config.ConfigProxy) *Proxy {
+	ips, _ := ip.LocalIpv4Addrs()
 	this := &Proxy{
 		cf:                   cf,
 		remotePeerPools:      make(map[string]*funServantPeerPool),
 		selector:             newStandardPeerSelector(),
-		myIp:                 ip.LocalIpv4Addrs()[0],
+		myIp:                 ips[0],
 		clusterTopologyReady: false,
 		clusterTopologyChan:  make(chan bool),
 	}

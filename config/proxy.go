@@ -47,7 +47,8 @@ func (this *ConfigProxy) LoadConfig(selfAddr string, cf *conf.Conf) {
 	parts := strings.SplitN(this.SelfAddr, ":", 2)
 	if parts[0] == "" {
 		// auto get local ip when self_addr like ":9001"
-		this.SelfAddr = ip.LocalIpv4Addrs()[0] + ":" + parts[1]
+		ips, _ := ip.LocalIpv4Addrs()
+		this.SelfAddr = ips[0] + ":" + parts[1]
 	}
 
 	log.Debug("proxy conf: %+v", *this)

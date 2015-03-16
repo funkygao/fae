@@ -61,7 +61,8 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 		this.EtcdSelfAddr = this.Rpc.ListenAddr
 		if strings.HasPrefix(this.EtcdSelfAddr, ":") {
 			// automatically get local ip addr
-			this.EtcdSelfAddr = ip.LocalIpv4Addrs()[0] + this.EtcdSelfAddr
+			ips, _ := ip.LocalIpv4Addrs()
+			this.EtcdSelfAddr = ips[0] + this.EtcdSelfAddr
 		}
 	}
 
