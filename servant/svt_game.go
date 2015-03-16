@@ -92,8 +92,7 @@ func (this *FunServantImpl) GmName3(ctx *rpc.Context) (r string, ex error) {
 			return
 		}
 
-		if svt == nil {
-			// handle it by myself, got call locally
+		if svt == proxy.Self {
 			if !this.game.NameDbLoaded {
 				this.game.NameDbLoaded = true
 				this.loadName3Bitmap(ctx)

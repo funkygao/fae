@@ -35,7 +35,7 @@ func (this *FunServantImpl) Lock(ctx *rpc.Context,
 			return
 		}
 
-		if svt == nil {
+		if svt == proxy.Self {
 			r = this.lk.Lock(key)
 		} else {
 			svtStats.incCallPeer()
@@ -92,7 +92,7 @@ func (this *FunServantImpl) Unlock(ctx *rpc.Context,
 			return
 		}
 
-		if svt == nil {
+		if svt == proxy.Self {
 			this.lk.Unlock(key)
 		} else {
 			svtStats.incCallPeer()

@@ -144,7 +144,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				return
 			}
 
-			if svt == nil {
+			if svt == proxy.Self {
 				r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 					sql, args, cacheKeyHash)
 				rows = len(r.Rows)
@@ -216,7 +216,7 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 			return
 		}
 
-		if svt == nil {
+		if svt == proxy.Self {
 			this.dbCacheStore.Del(cacheKey)
 		} else {
 			svtStats.incCallPeer()
