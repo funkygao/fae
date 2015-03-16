@@ -1,5 +1,6 @@
 ### TODO
 
+*   [ ] stress test with different payload size
 *   [ ] rpc cumCalls/cumSessions has bug
     - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] thrift use slab allocator to read string
