@@ -1,4 +1,4 @@
-fae - Fun App Engine
+fae - Fun App Engine [![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
 ====================
 Distributed middleware layer of multilingual RPC engine for enterprise SOA infrastructure.
 
@@ -7,113 +7,119 @@ Distributed middleware layer of multilingual RPC engine for enterprise SOA infra
          )__)    /(__)\    )__) 
         (__)    (__)(__)  (____)
 
-[![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
+
+**Table of Contents**
+
+- [Usage](#usage)
+- [Dashboard](#dashboard)
+- [Architecture](#status)
+- [SOA](#soa)
+- [Terms](#terms)
+- [Highlights](#highlights)
+- [Performance](#perf)
+- [Reference](#reference)
+
+### Usage
+
+    cp etc/etc/faed.cf.sample contrib
+    ./contrib/build_cf.php # create the config file
+    ./build.sh
+    ./daemon/faed/faed -conf contrib/faed.cf.rc
                                
+### Dashboard
+
+![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)
+
 ### Architecture
 
 
         +----------------+  +----------------+  +----------------+
-        | php-fpm worker |  | php-fpm worker |  | php-fpm worker |
+        |   php-fpm      |  |    php-fpm     |  |     php-fpm    |
         +----------------+  +----------------+  +----------------+
             |                       |                       |
             +-----------------------------------------------+
                                     |                        
                                     | short lived tcp/unix socket                        
                                     |                        
-                                    |                            peers discover
+                                    |                  
                                     |                            +---------------+
                                     |                     +------|  faed daemon  |-------+
                             +---------------+             |      +---------------+       |
-                            |  faed daemon  |  tcp        |                              |
-                            +---------------+ ------------|      peers discover          |
+                            |  faed daemon  |  tcp pool   |                              |
+                            +---------------+ ------------|                              | peers
                             |  LRU cache    |  proxy      |      +---------------+       |
                             +---------------+             +------|  faed daemon  |-------|
                                     |                            +---------------+       |
                                     |                                                    |
-                                    |                    consitent hash with replicas    |
+                                    |                                         zookeeper  |
                                     |----------------------------------------------------+
                                     |
-                                    | tcp long connection pool(heartbeat) with recycling
+                                    | tcp conn pool
                                     |
             +-----------------------------------------------+
-            |                       |                       |     self contained
+            |                       |                       |          SET model
         +----------------+  +----------------+  +------------------------------+
-        | mongodb servers|  |memcache servers|  | lcache | kvdb | idgen | ...  |
+        | mongodb/mysql  |  | memcache/redis |  | lcache | kvdb | idgen | ...  |
         +----------------+  +----------------+  +------------------------------+
 
-### Why SOA?
+### SOA
 
-*   More clear architecture
 *   Seperation of concerns
 *   Reuse common code as service and transparently reuse infrastructure
-*   Centralized best practice
-*   Centralized monitoring, auditting and profiling
+*   Centralized best practice, monitoring, auditting and profiling
 *   Independently deployable/testable
     - vital code should be more robust
     - can't have too much vital code
-*   Reduce tcp 3/4 way handshake overhead
 *   Horizontal scale made easy
-    - frontend(php) and middleware scale independently
+    - frontend(e,g. php/python/java) and middleware scale independently
     - middleware is in charge of performance while frontend is in charge of biz logic
+    - fae serves as service abstractive service provider
 *   Polyglot development
+*   Easier dev team management
 
 ### Terms
 
 *   Engine
+    - handles system level issues
 *   Servant
+    - handles RPC services logic
+*   Proxy
+    - local stub of remote fae
 *   Peer
+    - a remote fae instance
+*   Session
+    - a RPC client tcp conn with fae
+*   Call
+    - a RPC call within a Session
 
 ### Highlights
 
-*   Self manageable cluster
-*   Dynamic cluster reconfiguration
-    - VBucket
-        - Better than consistent hashing
-          - because they are easier to move between servers then individual keys
-        - Never service a request on the wrong server
-          - compared with consitent hash
-        - Allow scaling up and down at will
-        - We can hand data sets from one server another atomically
-        - Servers still do not know about each other
-*   Easy extending for more servants(RPC service)
+*   Self manageable cluster with browser base dashboard
+*   Linear scales by adding more fae instances
 *   Highly usage of mem to improve latancy & throughput
-*   Circuit breaker protection
-*   Full realtime internal stats export via http
+*   Circuit breaker protection and flow control
 *   Smart metrics with low overhead
-*   Easy graceful degrade for OPS
-    - auto
-    - manual
+*   Graceful degrade for OPS
+*   Plugins
+*   One binary, homogeneous deployment
+*   Dynamic cluster reconfiguration with vbucket
 
-### TODO
+### Performance
 
-*   optimize mysql query, iterate each row to transform to string/null
-*   start fae, then restart remote peer, then call ServantByKey, see what happens
-*   session.profiler should not be pointer, reduce GC overhead
-*   bloom filter 
-*   unified err logging so that external alarming system can get notified
-*   use of closed network connection
-*   more strict test on zookeeper failure
-*   mysql prepare stmt caching
-    - http://dev.mysql.com/doc/refman/5.1/en/query-cache-operation.html
-    - CLIENT_NO_SCHEMA, don't allow database.table.column
-    - too many round trips between fae and mysql
-*   vBucket for cluster sharding, what about each kingdom is a shard?
-*   hot reload config
-*   fae graceful shutdown
-    - https://github.com/facebookgo/grace
-*   maybe profiler sample rate is totally controlled by client
-*   zk connection loss and session expiration
-    - http://www.ngdata.com/so-you-want-to-be-a-zookeeper/
-    - default zk session timeout: 2 * tickTime ~ 20 * tickTime
-    - echo 'mntr' | nc localhost 2181
-    - echo 'stat' | nc localhost 2181
-*   NewTBufferedTransportFactory buffer size, and php config buf size
-*   golang uses /proc/sys/net/core/somaxconn as listener backlog
-    - increase it if you need over 128(default) simultaneous outstanding connections
+*   currently, a single fae node qps around 50k
+*   will be tweaked to 100k
+*   limited by NIC PPS(packets per second)
 
-### Contribs
+#### Reference
 
-*   https://github.com/phunt/zktop
-*   https://github.com/toddlipcon/gremlins
-*   http://www.slideshare.net/renatko/couchbase-performance-benchmarking
-*   https://issues.apache.org/jira/browse/THRIFT-826 TSocket: Could not write
+*   aws ec2 packets-per-second (pps) maximum rate is 100k in+out
+    - http://www.rightscale.com/blog/cloud-management-best-practices/benchmarking-load-balancers-cloud
+*   RPS/RFS in linux
+    - http://huoding.com/2013/10/30/296
+*   http://highscalability.com/blog/2013/5/13/the-secret-to-10-million-concurrent-connections-the-kernel-i.html
+*   https://svn.ntop.org/svn/ntop/trunk/PF_RING/
+*   tcpcopy
+*   golang
+    - GODEBUG=schedtrace=1000
+    - GODEBUG=gctrace=1
+

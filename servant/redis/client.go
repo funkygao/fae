@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/breaker"
+	log "github.com/funkygao/log4go"
 	"github.com/funkygao/redigo/redis"
 	"sync"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 // TODO use my own pool, TestOnBorrow is expensive
 type Client struct {
+	cf      *config.ConfigRedis
 	breaker *breaker.Consecutive
 
 	selectors map[string]ServerSelector         // key is pool name
@@ -20,6 +22,7 @@ type Client struct {
 
 func New(cf *config.ConfigRedis) *Client {
 	this := new(Client)
+	this.cf = cf
 	this.selectors = make(map[string]ServerSelector)
 	this.conns = make(map[string]map[string]*redis.Pool)
 	this.locks = make(map[string]map[string]*sync.Mutex)
@@ -73,6 +76,7 @@ func (this *Client) Call(cmd string, pool string,
 	if errPoolNotFound != nil {
 		return nil, errPoolNotFound
 	}
+
 	conn := this.conns[pool][addr].Get()
 	err = conn.Err()
 	if err != nil {
@@ -133,4 +137,25 @@ func (this *Client) addr(pool, key string) (string, error) {
 	}
 
 	return selector.PickServer(key), nil
+}
+
+func (this *Client) Warmup() {
+	t1 := time.Now()
+	for poolName, pool := range this.conns {
+		for addr, conn := range pool {
+			log.Debug("redis pool[%s] connecting: %s", poolName, addr)
+			for i := 0; i < this.cf.Servers[poolName][addr].MaxActive; i++ {
+				c := conn.Get()
+				if c.Err() != nil {
+					log.Error("redis[%s][%s]: %v", poolName, addr, c.Err())
+					continue
+				}
+
+				c.Do("PING")
+				defer c.Close()
+			}
+		}
+	}
+	log.Debug("Redis warmup within %s: %+v",
+		time.Since(t1), this.selectors)
 }

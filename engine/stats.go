@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// TODO rename
 type engineStats struct {
 	startedAt time.Time
 	memStats  *runtime.MemStats
@@ -20,15 +21,17 @@ type engineStats struct {
 }
 
 func newEngineStats() (this *engineStats) {
-	this = new(engineStats)
-	this.memStats = new(runtime.MemStats)
-	this.CallLatencies = metrics.NewHistogram(
-		metrics.NewExpDecaySample(1028, 0.015))
+	this = &engineStats{
+		memStats: new(runtime.MemStats),
+		CallLatencies: metrics.NewHistogram(
+			metrics.NewExpDecaySample(1028, 0.015)),
+		CallPerSecond: metrics.NewMeter(),
+		CallPerSession: metrics.NewHistogram(
+			metrics.NewExpDecaySample(1028, 0.015)),
+	}
+
 	metrics.Register("latency.call", this.CallLatencies)
-	this.CallPerSecond = metrics.NewMeter()
 	metrics.Register("qps.call", this.CallPerSecond)
-	this.CallPerSession = metrics.NewHistogram(
-		metrics.NewExpDecaySample(1028, 0.015))
 	metrics.Register("call.per.session", this.CallPerSession)
 	return
 }

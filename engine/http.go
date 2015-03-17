@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/golib/server"
 	log "github.com/funkygao/log4go"
@@ -12,7 +13,7 @@ import (
 )
 
 func (this *Engine) stopHttpServ() {
-	server.StopHttpServ()
+	server.StopHttpServer()
 }
 
 func (this *Engine) launchHttpServ() {
@@ -20,12 +21,7 @@ func (this *Engine) launchHttpServ() {
 		return
 	}
 
-	server.LaunchHttpServ(config.Engine.HttpListenAddr, config.Engine.PprofListenAddr)
-	server.RegisterHttpApi("/admin/{cmd}",
-		func(w http.ResponseWriter, req *http.Request,
-			params map[string]interface{}) (interface{}, error) {
-			return this.handleHttpQuery(w, req, params)
-		}).Methods("GET")
+	server.LaunchHttpServer(config.Engine.HttpListenAddr, config.Engine.PprofListenAddr)
 	server.RegisterHttpApi("/h", func(w http.ResponseWriter, req *http.Request,
 		params map[string]interface{}) (interface{}, error) {
 		return this.handleHttpHelpQuery(w, req, params)
@@ -34,6 +30,12 @@ func (this *Engine) launchHttpServ() {
 		params map[string]interface{}) (interface{}, error) {
 		return this.handleHttpHelpQuery(w, req, params)
 	}).Methods("GET")
+
+	server.RegisterHttpApi("/engine/{cmd}",
+		func(w http.ResponseWriter, req *http.Request,
+			params map[string]interface{}) (interface{}, error) {
+			return this.handleHttpQuery(w, req, params)
+		}).Methods("GET")
 }
 
 func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request,
@@ -41,18 +43,24 @@ func (this *Engine) handleHttpHelpQuery(w http.ResponseWriter, req *http.Request
 	output := make(map[string]interface{})
 	if config.Engine.PprofListenAddr != "" {
 		output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
+		output["vars"] = "http://" + config.Engine.PprofListenAddr + "/debug/vars"
 	}
 
-	output["uris"] = []string{"/admin/h", "/admin/help", "/admin/guide"}
+	output["uris"] = []string{"/engine/help", "/svt/help"}
+	output["ver"] = server.Version
+	output["build_id"] = server.BuildId
+	output["golang"] = fmt.Sprintf("Built with %s %s for %s %s", runtime.Compiler,
+		runtime.Version(), runtime.GOOS, runtime.GOARCH)
 	return output, nil
 }
 
 func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 	params map[string]interface{}) (interface{}, error) {
 	var (
-		vars   = mux.Vars(req)
-		cmd    = vars["cmd"]
-		output = make(map[string]interface{})
+		vars      = mux.Vars(req)
+		cmd       = vars["cmd"]
+		rpcServer = this.rpcServer.(*TFunServer)
+		output    = make(map[string]interface{})
 	)
 
 	switch cmd {
@@ -69,7 +77,7 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		this.rpcServer.Stop()
 		output["status"] = "stopped"
 
-	case "stat":
+	case "stat", "stats":
 		rusage := syscall.Rusage{}
 		syscall.Getrusage(0, &rusage)
 		output["rusage"] = rusage
@@ -77,15 +85,15 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 		output["elapsed"] = time.Since(this.StartedAt).String()
 		output["pid"] = this.pid
 		output["hostname"] = this.hostname
-		output["ver"] = server.VERSION
-		output["build_id"] = server.BuildID
-		output["servant"] = this.svt.Runtime()
+		output["ver"] = server.Version
+		output["build_id"] = server.BuildId
+		output["rpc"] = rpcServer.Runtime()
 
 	case "runtime":
-		output["runtime"] = this.stats.Runtime()
+		output["runtime"] = rpcServer.stats.Runtime()
 
 	case "mem":
-		output["mem"] = *this.stats.memStats
+		output["mem"] = *rpcServer.stats.memStats
 
 	case "conf":
 		output["engine"] = *config.Engine
@@ -94,16 +102,13 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 
 	case "guide", "help", "h":
 		output["uris"] = []string{
-			"/admin/ping",
-			"/admin/debug",
-			"/admin/stop",
-			"/admin/stat",
-			"/admin/runtime",
-			"/admin/mem",
-			"/admin/conf",
-		}
-		if config.Engine.PprofListenAddr != "" {
-			output["pprof"] = "http://" + config.Engine.PprofListenAddr + "/debug/pprof/"
+			"/engine/ping",
+			"/engine/debug",
+			"/engine/stop",
+			"/engine/stat",
+			"/engine/runtime",
+			"/engine/mem",
+			"/engine/conf",
 		}
 
 	default:

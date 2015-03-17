@@ -1,11 +1,11 @@
 package servant
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/golib/trace"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -17,7 +17,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -26,14 +25,12 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -49,7 +46,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 			bsonDoc,
 			ex,
 			r)
-		svtStats.incErr()
 
 		return
 	}
@@ -62,7 +58,6 @@ func (this *FunServantImpl) MgInsert(ctx *rpc.Context,
 	if err != nil {
 		// will not rais app error
 		log.Error("mg.insert: %v", err)
-		svtStats.incErr()
 	} else {
 		r = true
 	}
@@ -84,7 +79,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -93,7 +87,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -101,7 +94,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -113,7 +105,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 		bsonDoc, err := mongo.UnmarshalIn(doc)
 		if err != nil {
 			ex = err
-			svtStats.incErr()
 			return
 		}
 
@@ -125,7 +116,6 @@ func (this *FunServantImpl) MgInserts(ctx *rpc.Context,
 	if err != nil {
 		// will not rais app error
 		log.Error("%s: %v", IDENT, err)
-		svtStats.incErr()
 	} else {
 		r = true
 	}
@@ -147,7 +137,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -156,7 +145,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -164,7 +152,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -172,7 +159,6 @@ func (this *FunServantImpl) MgDelete(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	err = sess.DB().C(table).Remove(bsonQuery)
@@ -198,7 +184,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -207,7 +192,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -215,7 +199,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -223,7 +206,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	var bsonFields bson.M
@@ -231,7 +213,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
 			ex = err
-			svtStats.incErr()
 			return
 		}
 	}
@@ -260,7 +241,6 @@ func (this *FunServantImpl) MgFindOne(ctx *rpc.Context,
 		}
 
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -286,7 +266,6 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -295,14 +274,12 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -310,7 +287,6 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	var bsonFields bson.M
@@ -318,7 +294,6 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		bsonFields, err = mongo.UnmarshalIn(fields)
 		if err != nil {
 			ex = err
-			svtStats.incErr()
 			return
 		}
 	}
@@ -346,7 +321,6 @@ func (this *FunServantImpl) MgFindAll(ctx *rpc.Context,
 		}
 	} else {
 		ex = err
-		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -367,7 +341,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -376,7 +349,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -384,7 +356,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -392,13 +363,11 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -407,7 +376,6 @@ func (this *FunServantImpl) MgUpdate(ctx *rpc.Context,
 		r = true
 	} else {
 		log.Error("%s: %v", IDENT, err)
-		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -425,7 +393,6 @@ func (this *FunServantImpl) MgUpdateId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	id int32, change []byte) (r bool, ex error) {
 	ex = ErrNotImplemented
-	svtStats.incErr()
 	return
 }
 
@@ -436,7 +403,6 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -445,14 +411,12 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -460,13 +424,11 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -474,7 +436,6 @@ func (this *FunServantImpl) MgUpsert(ctx *rpc.Context,
 	if err == nil {
 		r = true
 	} else {
-		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -492,7 +453,6 @@ func (this *FunServantImpl) MgUpsertId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	id int32, change []byte) (r bool, ex error) {
 	ex = ErrNotImplemented
-	svtStats.incErr()
 	return
 }
 
@@ -503,7 +463,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -512,7 +471,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -520,7 +478,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -528,7 +485,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -536,7 +492,6 @@ func (this *FunServantImpl) MgCount(ctx *rpc.Context,
 	r, ex = sess.DB().C(table).Find(bsonQuery).Count()
 	n = int32(r)
 	if ex != nil {
-		svtStats.incErr()
 	}
 
 	profiler.do(IDENT, ctx,
@@ -557,7 +512,6 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 
 	if this.mg == nil {
 		ex = ErrServantNotStarted
-		svtStats.incErr()
 		return
 	}
 
@@ -566,7 +520,6 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -574,7 +527,6 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	sess, err := this.mongoSession(pool, shardId)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	defer sess.Recyle(&err)
@@ -582,13 +534,11 @@ func (this *FunServantImpl) MgFindAndModify(ctx *rpc.Context,
 	bsonQuery, err := mongo.UnmarshalIn(query)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	bsonChange, err := mongo.UnmarshalIn(change)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -613,7 +563,6 @@ func (this *FunServantImpl) MgFindId(ctx *rpc.Context,
 	pool string, table string, shardId int32,
 	id []byte) (r []byte, ex error) {
 	ex = ErrNotImplemented
-	svtStats.incErr()
 	return
 }
 

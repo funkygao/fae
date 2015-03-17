@@ -47,7 +47,7 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 	if this.Charset != "" {
 		this.dsn += "charset=" + this.Charset
 	}
-	if this.conf.Timeout.Seconds() > 0 {
+	if this.conf.Timeout > 0 {
 		this.dsn += "&timeout=" + this.conf.Timeout.String()
 	}
 }
@@ -60,11 +60,13 @@ type ConfigMysql struct {
 	ShardStrategy                string
 	Timeout                      time.Duration
 	GlobalPools                  map[string]bool // non-sharded pools
+	MaxIdleTime                  time.Duration
 	MaxIdleConnsPerServer        int
 	MaxConnsPerServer            int
 	HeartbeatInterval            int // TODO
 	JsonMergeMaxOutstandingItems int
 	CachePrepareStmtMaxItems     int // 0 means disabled
+	AllowNullableColumns         bool
 
 	// cache related
 	CacheStore            string
@@ -86,7 +88,9 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 		this.GlobalPools[p] = true
 	}
 	this.ShardStrategy = cf.String("shard_strategy", "standard")
+	this.MaxIdleTime = cf.Duration("max_idle_time", 0)
 	this.Timeout = cf.Duration("timeout", 10*time.Second)
+	this.AllowNullableColumns = cf.Bool("allow_nullable_columns", true)
 	this.MaxIdleConnsPerServer = cf.Int("max_idle_conns_per_server", 2)
 	this.MaxConnsPerServer = cf.Int("max_conns_per_server",
 		this.MaxIdleConnsPerServer*5)
@@ -98,7 +102,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
 	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
 	this.JsonMergeMaxOutstandingItems = cf.Int("json_merge_max_outstanding_items", 8<<20)
-	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1048576)
+	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1<<20)
 	section, err := cf.Section("breaker")
 	if err == nil {
 		this.Breaker.loadConfig(section)

@@ -12,6 +12,7 @@ type ConfigGame struct {
 	LockExpires     time.Duration
 	RedisServerPool string
 	ShardSplit      ConfigGameShardSplit
+	enabled         bool
 }
 
 func (this *ConfigGame) LoadConfig(cf *conf.Conf) {
@@ -27,8 +28,13 @@ func (this *ConfigGame) LoadConfig(cf *conf.Conf) {
 		panic("empty shard_split_strategy")
 	}
 	this.ShardSplit.loadConfig(section)
+	this.enabled = true
 
 	log.Debug("game conf: %+v", *this)
+}
+
+func (this *ConfigGame) Enabled() bool {
+	return this.enabled
 }
 
 type ConfigGameShardSplit struct {

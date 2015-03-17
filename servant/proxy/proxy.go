@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/ip"
 	log "github.com/funkygao/log4go"
 	"sync"
@@ -20,16 +21,18 @@ type Proxy struct {
 	clusterTopologyReady bool
 	clusterTopologyChan  chan bool
 
+	testOnBorrow    func()                         // TODO
 	remotePeerPools map[string]*funServantPeerPool // key is peerAddr, self not inclusive
 	selector        PeerSelector
 }
 
 func New(cf *config.ConfigProxy) *Proxy {
+	ips, _ := ip.LocalIpv4Addrs()
 	this := &Proxy{
 		cf:                   cf,
 		remotePeerPools:      make(map[string]*funServantPeerPool),
 		selector:             newStandardPeerSelector(),
-		myIp:                 ip.LocalIpv4Addrs()[0],
+		myIp:                 ips[0],
 		clusterTopologyReady: false,
 		clusterTopologyChan:  make(chan bool),
 	}
@@ -45,6 +48,14 @@ func NewWithPoolCapacity(capacity int) *Proxy {
 	cf := config.NewDefaultProxy()
 	cf.PoolCapacity = capacity
 	return New(cf)
+}
+
+// auto fills Rid field.
+func NewContext(reason string) *rpc.Context {
+	ctx := rpc.NewContext()
+	ctx.Reason = reason
+	ctx.Rid = time.Now().UnixNano() // TODO strict enough?
+	return ctx
 }
 
 func (this *Proxy) Enabled() bool {
@@ -116,7 +127,7 @@ func (this *Proxy) refreshPeers(peers []string) {
 		}
 
 		if !alive {
-			log.Trace("peer[%s] gone away", peerAddr)
+			log.Warn("peer[%s] gone away", peerAddr)
 
 			this.mutex.Lock()
 			this.remotePeerPools[peerAddr].Close() // kill all conns in this pool
@@ -166,34 +177,6 @@ func (this *Proxy) ServantByAddr(peerAddr string) (svt *FunServantPeer, err erro
 	return
 }
 
-// Simulate a simple load balance
-func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
-	peerAddr := this.selector.RandPeer()
-	if peerAddr == this.cf.SelfAddr {
-		return nil, nil
-	}
-
-	this.remotePeerPools[peerAddr].nextTxn()
-	for i := 0; i < this.cf.PoolCapacity; i++ {
-		svt, err = this.remotePeerPools[peerAddr].Get()
-		if err == nil {
-			break
-		} else {
-			log.Error("RandServant.%d: %v", i, err)
-
-			if svt != nil {
-				if IsIoError(err) {
-					svt.Close()
-				}
-				svt.Recycle()
-			}
-
-		}
-	}
-
-	return
-}
-
 // sticky request to remote peer servant by key
 // return nil if I'm the servant for this key
 func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
@@ -217,6 +200,34 @@ func (this *Proxy) ServantByKey(key string) (svt *FunServantPeer, err error) {
 				}
 				svt.Recycle()
 			}
+		}
+	}
+
+	return
+}
+
+// Simulate a simple load balance
+func (this *Proxy) RandServant() (svt *FunServantPeer, err error) {
+	peerAddr := this.selector.RandPeer()
+	if peerAddr == this.cf.SelfAddr {
+		return nil, nil
+	}
+
+	this.remotePeerPools[peerAddr].nextTxn()
+	for i := 0; i < this.cf.PoolCapacity; i++ {
+		svt, err = this.remotePeerPools[peerAddr].Get()
+		if err == nil {
+			break
+		} else {
+			log.Error("RandServant.%d: %v", i, err)
+
+			if svt != nil {
+				if IsIoError(err) {
+					svt.Close()
+				}
+				svt.Recycle()
+			}
+
 		}
 	}
 

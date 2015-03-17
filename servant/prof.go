@@ -17,6 +17,10 @@ type profiler struct {
 
 func (this *profiler) do(callName string, ctx *rpc.Context, format string,
 	args ...interface{}) {
+	if this == nil {
+		return
+	}
+
 	elapsed := time.Since(this.t1)
 	slow := elapsed > config.Engine.Servants.CallSlowThreshold
 	if !(slow || this.on) {

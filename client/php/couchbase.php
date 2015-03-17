@@ -26,7 +26,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123nfa", 'reason' => 'test.couchbase', 'host' => 'phptest', 'ip' => '12.3.2.1'));
+    $ctx = new Context(array('rid' => hexdec(uniqid()), 'reason' => 'test.couchbase'));
 
     // couchbase get/set
     $bucket = 'default';

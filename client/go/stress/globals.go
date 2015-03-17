@@ -1,13 +1,15 @@
 package main
 
 const (
-	CallPing = 1 << iota
+	CallNoop = 1 << iota
+	CallPing
 	CallIdGen
 	CallLCache
 	CallMemcache
 	CallMongo
 	CallMysql
 	CallGame
+	CallRedis
 
 	CallPingIdgen   = CallPing | CallIdGen
 	CallIdgenLcache = CallIdGen | CallLCache
@@ -25,6 +27,12 @@ var (
 	LoopsPerSession int // calls=sessions*LoopsPerSession
 	Cmd             int
 	host            string
-	verbose         int
 	zk              string
+	testPool        bool
+	logTurnOff      bool
+	errOff          bool
+	tcpNoDelay      bool
+	neatStat        bool
+	c1              int
+	c2              int
 )

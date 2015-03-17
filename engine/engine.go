@@ -1,37 +1,43 @@
 package engine
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/engine/plugin"
+	_ "github.com/funkygao/fae/plugins"
 	"github.com/funkygao/fae/servant"
+	"github.com/funkygao/golib/null"
 	conf "github.com/funkygao/jsconf"
+	"github.com/funkygao/thrift/lib/go/thrift"
+	"os"
 	"time"
 )
 
 type Engine struct {
 	StartedAt time.Time
+	graph     Graph
 
-	svt           *servant.FunServantImpl
-	rpcProcessor  thrift.TProcessor
-	rpcServer     thrift.TServer
-	rpcThreadPool *rpcThreadPool
+	svt          *servant.FunServantImplWrapper
+	rpcProcessor thrift.TProcessor
+	rpcServer    thrift.TServer
 
-	stats    *engineStats
 	pid      int
 	hostname string
 
-	stopChan chan bool
+	stopChan chan null.NullStruct
 }
 
-func NewEngine() (this *Engine) {
-	this = new(Engine)
-	this.stats = newEngineStats()
-	this.stopChan = make(chan bool)
-
-	return
+func NewEngine() *Engine {
+	this := &Engine{stopChan: make(chan null.NullStruct),
+		pid: os.Getpid()}
+	this.hostname, _ = os.Hostname()
+	return this
 }
 
-func (this *Engine) LoadConfig(configFile string, cf *conf.Conf) *Engine {
-	config.LoadEngineConfig(configFile, cf)
+func (this *Engine) LoadConfig(cf *conf.Conf) *Engine {
+	config.LoadEngineConfig(cf)
+
+	if section, err := cf.Section("plugin"); err == nil {
+		plugin.LoadPlugins(section)
+	}
 	return this
 }

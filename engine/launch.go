@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
+	"github.com/funkygao/fae/engine/plugin"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
 	"os"
@@ -14,8 +15,6 @@ import (
 
 func (this *Engine) ServeForever() {
 	this.StartedAt = time.Now()
-	this.hostname, _ = os.Hostname()
-	this.pid = os.Getpid()
 
 	signal.RegisterSignalHandler(syscall.SIGUSR1, func(sig os.Signal) {
 		// graceful shutdown
@@ -38,10 +37,7 @@ func (this *Engine) ServeForever() {
 	runtime.GOMAXPROCS(maxProcs)
 	log.Info("Launching Engine with %d/%d CPUs...", maxProcs, totalCpus)
 
-	// start the stats counter
-	go this.stats.Start(this.StartedAt,
-		config.Engine.Rpc.StatsOutputInterval,
-		config.Engine.MetricsLogfile)
+	go plugin.Start()
 
 	this.launchHttpServ()
 	defer this.stopHttpServ()

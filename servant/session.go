@@ -5,7 +5,6 @@ import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/sampling"
 	log "github.com/funkygao/log4go"
-	"sync/atomic"
 	"time"
 )
 
@@ -18,15 +17,14 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 	const DIGIT_REPLACED_WITH = "?"
 	s, present := this.sessions.Get(ctx.Rid)
 	if !present {
-		atomic.AddInt64(&svtStats.sessionN, 1)
 		s = &session{ctx: ctx}
 		this.sessions.Set(ctx.Rid, s)
 
 		normalizedReason := this.digitNormalizer.ReplaceAll(
 			[]byte(ctx.Reason), []byte(DIGIT_REPLACED_WITH))
-		this.phpReasonPercent.Inc(string(normalizedReason), 1)
+		this.ctxReasonPercentage.Inc(string(normalizedReason), 1)
 
-		log.Debug("new session {uid^%d rid^%s reason^%s}", this.extractUid(ctx),
+		log.Debug("new session {uid^%d rid^%d reason^%s}", ctx.Uid,
 			ctx.Rid, ctx.Reason)
 	}
 
@@ -35,7 +33,7 @@ func (this *FunServantImpl) getSession(ctx *rpc.Context) *session {
 
 func (this *session) startProfiler() (*profiler, error) {
 	if this.profiler == nil {
-		if this.ctx.Rid == "" || this.ctx.Reason == "" {
+		if this.ctx.Rid == 0 || this.ctx.Reason == "" {
 			log.Error("Invalid context: %s", this.ctx.String())
 			return nil, ErrInvalidContext
 		}

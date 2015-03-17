@@ -18,7 +18,7 @@ func main() {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "gotest"
-	ctx.Rid = "189"
+	ctx.Rid = 189
 	for i := 0; i < 10; i++ {
 		r, err := client.Ping(ctx)
 		if err != nil {

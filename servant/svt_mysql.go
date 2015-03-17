@@ -7,6 +7,7 @@ import (
 	"crypto/sha1"
 	sql_ "database/sql"
 	_json "encoding/json"
+	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	json "github.com/funkygao/go-simplejson"
@@ -23,7 +24,6 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -44,8 +44,6 @@ func (this *FunServantImpl) MyBulkExec(ctx *rpc.Context, pools []string, tables 
 	}
 
 	if ex != nil {
-		svtStats.incErr()
-
 		profiler.do(IDENT, ctx,
 			"rows^%d {caches^%+v pools^%+v tables^%+v ids^%+v sqls^%+v argv^%+v} {err^%s}",
 			rowsAffected, cacheKeys, pools, tables, hintIds, sqls, argv, ex)
@@ -66,7 +64,6 @@ func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table s
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -78,7 +75,6 @@ func (this *FunServantImpl) MyQueryShards(ctx *rpc.Context, pool string, table s
 	}
 	cols, rows, err := this.my.QueryShards(pool, table, sql, iargs)
 	if err != nil {
-		svtStats.incErr()
 		ex = err
 		return
 	}
@@ -102,7 +98,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -140,7 +135,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 			svt, err := this.proxy.ServantByKey(cacheKey)
 			if err != nil {
 				ex = err
-				svtStats.incErr()
 				if svt != nil {
 					if proxy.IsIoError(err) {
 						svt.Close()
@@ -150,7 +144,7 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 				return
 			}
 
-			if svt == nil {
+			if svt == proxy.Self {
 				r, ex = this.doMyQuery(IDENT, ctx, pool, table, hintId,
 					sql, args, cacheKeyHash)
 				rows = len(r.Rows)
@@ -181,8 +175,6 @@ func (this *FunServantImpl) MyQuery(ctx *rpc.Context, pool string, table string,
 	}
 
 	if ex != nil {
-		svtStats.incErr()
-
 		profiler.do(IDENT, ctx,
 			"P=%s {cache^%s pool^%s table^%s id^%d sql^%s args^%+v} {err^%s}",
 			peer, cacheKey, pool, table, hintId, sql, args, ex)
@@ -204,7 +196,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -216,7 +207,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 		svt, err := this.proxy.ServantByKey(cacheKey)
 		if err != nil {
 			ex = err
-			svtStats.incErr()
 			if svt != nil {
 				if proxy.IsIoError(err) {
 					svt.Close()
@@ -226,7 +216,7 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 			return
 		}
 
-		if svt == nil {
+		if svt == proxy.Self {
 			this.dbCacheStore.Del(cacheKey)
 		} else {
 			svtStats.incCallPeer()
@@ -235,8 +225,6 @@ func (this *FunServantImpl) MyEvict(ctx *rpc.Context,
 			svt.HijackContext(ctx)
 			ex = svt.MyEvict(ctx, cacheKey)
 			if ex != nil {
-				svtStats.incErr()
-
 				if proxy.IsIoError(ex) {
 					svt.Close()
 				}
@@ -260,7 +248,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -273,12 +260,10 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 		querySql, nil, "")
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	if len(queryResult.Rows) != 1 {
 		ex = ErrMyMergeInvalidRow
-		svtStats.incErr()
 		return
 	}
 
@@ -289,13 +274,11 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	j1, err := json.NewJson([]byte(queryResult.Rows[0][0]))
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 	j2, err := json.NewJson([]byte(jsonVal))
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -314,7 +297,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	newVal, err := _json.Marshal(merged)
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -325,7 +307,6 @@ func (this *FunServantImpl) MyMerge(ctx *rpc.Context, pool string, table string,
 	if err != nil {
 		log.Error("%s[%s]: %s", IDENT, updateSql, err.Error())
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -402,33 +383,54 @@ func (this *FunServantImpl) doMySelect(r *rpc.MysqlResult,
 
 	r.Cols = cols
 	r.Rows = make([][]string, 0)
-	rawRowValues := make([]sql_.RawBytes, len(cols))
-	scanArgs := make([]interface{}, len(cols))
-	for i, _ := range cols {
-		scanArgs[i] = &rawRowValues[i]
-	}
-	for rows.Next() {
-		if ex = rows.Scan(scanArgs...); ex != nil {
-			log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
-				ident,
-				pool, table,
-				sql, args,
-				ex)
-			rows.Close()
-			return
-		}
 
-		rowValues := make([]string, len(cols))
-		// TODO optimize to discard the loop O(n)
-		for i, raw := range rawRowValues {
-			if raw == nil {
-				rowValues[i] = "NULL"
-			} else {
-				rowValues[i] = string(raw)
+	if config.Engine.Servants.Mysql.AllowNullableColumns {
+		rawRowValues := make([]sql_.RawBytes, len(cols))
+		scanArgs := make([]interface{}, len(cols))
+		for i, _ := range cols {
+			scanArgs[i] = &rawRowValues[i]
+		}
+		for rows.Next() {
+			if ex = rows.Scan(scanArgs...); ex != nil {
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+					ident,
+					pool, table,
+					sql, args,
+					ex)
+				rows.Close()
+				return
 			}
-		}
 
-		r.Rows = append(r.Rows, rowValues)
+			rowValues := make([]string, len(cols))
+			for i, raw := range rawRowValues {
+				if raw == nil {
+					rowValues[i] = "NULL"
+				} else {
+					rowValues[i] = string(raw)
+				}
+			}
+
+			r.Rows = append(r.Rows, rowValues)
+		}
+	} else {
+		rawRowValues := make([]string, len(cols))
+		scanArgs := make([]interface{}, len(cols))
+		for i, _ := range cols {
+			scanArgs[i] = &rawRowValues[i]
+		}
+		for rows.Next() {
+			if ex = rows.Scan(scanArgs...); ex != nil {
+				log.Error("Q=%s %s[%s]: sql=%s args=(%v): %s",
+					ident,
+					pool, table,
+					sql, args,
+					ex)
+				rows.Close()
+				return
+			}
+
+			r.Rows = append(r.Rows, rawRowValues)
+		}
 	}
 
 	// check for errors after we’re done iterating over the rows

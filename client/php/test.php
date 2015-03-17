@@ -26,7 +26,7 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('reason' => "phptest", 'rid' => '125'));
+    $ctx = new Context(array('reason' => "phptest", 'rid' => hexdec(uniqid())));
 
     // ping
     $return = $client->ping($ctx);

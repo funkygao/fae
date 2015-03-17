@@ -4,10 +4,10 @@ local cache key:string, value:[]byte.
 package servant
 
 import (
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/golib/cache"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
 func (this *FunServantImpl) onLcLruEvicted(key cache.Key, value interface{}) {
@@ -26,7 +26,6 @@ func (this *FunServantImpl) LcSet(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -47,7 +46,6 @@ func (this *FunServantImpl) LcGet(ctx *rpc.Context, key string) (r []byte,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -73,7 +71,6 @@ func (this *FunServantImpl) LcDel(ctx *rpc.Context, key string) (ex error) {
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 

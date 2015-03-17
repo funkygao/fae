@@ -5,6 +5,7 @@
 
     reload_watchdog_interval: "1s"
     http_listen_addr: {http_listen_addr}
+    dashboard_listen_addr: ":8000"
     pprof_listen_addr: {pprof_listen_addr}
     cpu_num: "max"
     metrics_logfile: {metrics_logfile}
@@ -16,38 +17,47 @@
         protocol: "binary"
         framed: false
         buffer_size: 4096
-        max_outstanding_sessions: 10000
-        warn_too_many_sessions_threshold: 3000
+        prefork_mode: true
+        host_max_call_per_minute: 6000
+        max_outstanding_sessions: 50000
         session_timeout: "0s"
-        session_slow_threshold: "8s"
         io_timeout: "4s"
-        stats_output_interval: "10m"
+        stats_output_interval: "1m"
+    }
+
+    plugin: {
+        plugins: [
+            {
+                name: "RateLimiter"
+            }
+        ]
     }
 
     servants: {
         idgen_worker_id: {idgen_worker_id}
 
         session_max_items: 20000
-        stats_output_interval: "10m"
+        stats_output_interval: "1m"
         profiler_max_body_size: 600
-        call_slow_threshold: "200ms"
+        call_slow_threshold: "1s"
         // 100/10000 = 1%
         profiler_rate: 1
 
         proxy: {
-            pool_capacity: 50
+            pool_capacity: 300
             io_timeout: "0s"
             idle_timeout: "0s"
             diagnostic_interval: "5s"
-            borrow_max_seconds: 10
+            borrow_timeout: "10s"
             buffer_size: 4096
             tcp_nodelay: true
         }
 
         mysql: {
             timeout: "10s"
+            max_idle_time: "4h"
             max_idle_conns_per_server: 5
-            max_conns_per_server: 20
+            max_conns_per_server: 50
             cache_prepare_stmt_max_items: 1024
             cache_store: "mem"
             cache_key_hash: false
@@ -55,10 +65,11 @@
             //cache_store_redis_pool: "db_cache"
             json_merge_max_outstanding_items: 8388608
             shard_strategy: "standard"
+            allow_nullable_columns: true
 
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
 
             lookup_cache_max_items: 1048576
@@ -150,8 +161,8 @@
             max_idle_conns_per_server: 20
             max_conns_per_server: 50
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             servers: [
                 {
@@ -177,7 +188,12 @@
         }
 
         lcache: {
-            max_items: 104857600
+            max_items: 10485760
+        }
+
+        lock: {
+            max_items: 10485760
+            expires: "10s"
         }
 
         game: {
@@ -195,8 +211,8 @@
 
         redis: {
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             pools: [
                 {
@@ -242,8 +258,8 @@
             timeout: "4s"
             replica_num: 2
             breaker: {
-                failure_allowance: 5
-                retry_interval: "10s"
+                failure_allowance: 10
+                retry_interval: "5s"
             }
             servers: [
                 {

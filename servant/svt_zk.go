@@ -12,7 +12,6 @@ func (this *FunServantImpl) ZkCreate(ctx *rpc.Context, path string,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
@@ -21,9 +20,7 @@ func (this *FunServantImpl) ZkCreate(ctx *rpc.Context, path string,
 	// TODO always persistent?
 	if ex = etclib.Create(path, data, 0); ex == nil {
 		r = true
-	} else {
-		svtStats.incErr()
-	}
+	} 
 
 	profiler.do(IDENT, ctx, "{path^%s data^%s} {r^%v err^%v}",
 		path, string(data), r, ex)
@@ -37,15 +34,11 @@ func (this *FunServantImpl) ZkChildren(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
 	svtStats.inc(IDENT)
 	r, ex = etclib.Children(path)
-	if ex != nil {
-		svtStats.incErr()
-	}
 
 	profiler.do(IDENT, ctx, "{path^%s} {r^%+v err^%v}",
 		path, r, ex)
@@ -59,16 +52,13 @@ func (this *FunServantImpl) ZkDel(ctx *rpc.Context,
 	profiler, err := this.getSession(ctx).startProfiler()
 	if err != nil {
 		ex = err
-		svtStats.incErr()
 		return
 	}
 
 	svtStats.inc(IDENT)
 	if ex = etclib.Delete(path); ex == nil {
 		r = true
-	} else {
-		svtStats.incErr()
-	}
+	} 
 
 	profiler.do(IDENT, ctx, "{path^%s} {r^%v err^%v}",
 		path, r, ex)

@@ -2,10 +2,13 @@
 
 package servant
 
+//go:generate make gen
+
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
 	"github.com/funkygao/fae/servant/game"
+	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
 	"github.com/funkygao/fae/servant/mysql"
@@ -23,27 +26,24 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
-	"sync/atomic"
 	"time"
 )
 
 type FunServantImpl struct {
-	conf *config.ConfigServant
+	conf      *config.ConfigServant
+	startedAt time.Time
+	proxyMode bool
+	sessions  *cache.LruCache // state kept for sessions FIXME kill it
 
-	digitNormalizer  *regexp.Regexp
-	phpReasonPercent metrics.PercentCounter // user's behavior
+	ctxReasonPercentage metrics.PercentCounter
+	digitNormalizer     *regexp.Regexp
 
 	// stateful mem data related to services
 	mysqlMergeMutexMap *mutexmap.MutexMap
 	dbCacheStore       store.Store
 	dbCacheHits        metrics.PercentCounter
 
-	startedAt time.Time
-	sessions  *cache.LruCache // state kept for sessions FIXME kill it
-
-	proxyMode bool
-	proxy     *proxy.Proxy // remote fae agent
-
+	proxy *proxy.Proxy         // remote fae agent
 	idgen *idgen.IdGenerator   // global id generator
 	game  *game.Game           // game engine
 	lc    *cache.LruCache      // local cache
@@ -52,27 +52,28 @@ type FunServantImpl struct {
 	my    *mysql.MysqlCluster  // mysql pool, auto sharding by shardId
 	rd    *redis.Client        // redis pool, auto sharding by pool name
 	cb    *couch.Client        // couchbase client
+	lk    *lock.Lock           // cluster wise mutex lock
 }
 
 func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
-	this = &FunServantImpl{conf: cf}
-	this.digitNormalizer = regexp.MustCompile(`\d+`)
-	this.proxyMode = config.Engine.IsProxyOnly()
+	this = &FunServantImpl{
+		conf:            cf,
+		digitNormalizer: regexp.MustCompile(`\d+`),
+		proxyMode:       config.Engine.IsProxyOnly(),
+	}
 
 	// http REST to export internal state
-	if server.Launched() {
-		server.RegisterHttpApi("/s/{cmd}",
-			func(w http.ResponseWriter, req *http.Request,
-				params map[string]interface{}) (interface{}, error) {
-				return this.handleHttpQuery(w, req, params)
-			}).Methods("GET")
-	}
+	server.RegisterHttpApi("/svt/{cmd}",
+		func(w http.ResponseWriter, req *http.Request,
+			params map[string]interface{}) (interface{}, error) {
+			return this.handleHttpQuery(w, req, params)
+		}).Methods("GET")
 
 	this.sessions = cache.NewLruCache(cf.SessionMaxItems)
 	this.mysqlMergeMutexMap = mutexmap.New(cf.Mysql.JsonMergeMaxOutstandingItems)
 
-	this.phpReasonPercent = metrics.NewPercentCounter()
-	metrics.Register("php.reason", this.phpReasonPercent)
+	this.ctxReasonPercentage = metrics.NewPercentCounter()
+	metrics.Register("call.reason", this.ctxReasonPercentage)
 	this.dbCacheHits = metrics.NewPercentCounter()
 	metrics.Register("db.cache.hits", this.dbCacheHits)
 
@@ -82,13 +83,47 @@ func NewFunServant(cf *config.ConfigServant) (this *FunServantImpl) {
 }
 
 func (this *FunServantImpl) Start() {
-	go this.showStats()
-	go this.proxy.StartMonitorCluster()
-	go this.watchConfigReloaded()
-
 	this.startedAt = time.Now()
 	svtStats.registerMetrics()
+
+	go this.showStats()
+	go this.proxy.StartMonitorCluster()
+	go func() {
+		for {
+			select {
+			case cf := <-config.Engine.ReloadedChan:
+				this.recreateServants(cf.Servants)
+			}
+		}
+	}()
+
 	this.warmUp()
+}
+
+func (this *FunServantImpl) warmUp() {
+	log.Debug("warming up...")
+
+	if this.mg != nil {
+		go this.mg.Warmup()
+	}
+
+	if this.mc != nil {
+		go this.mc.Warmup()
+	}
+
+	if this.my != nil {
+		this.my.Warmup()
+	}
+
+	if this.proxy != nil {
+		this.proxy.Warmup()
+	}
+
+	if this.rd != nil {
+		this.rd.Warmup()
+	}
+
+	log.Debug("warmup done")
 }
 
 func (this *FunServantImpl) Flush() {
@@ -96,10 +131,6 @@ func (this *FunServantImpl) Flush() {
 	// TODO
 	this.my.Close()
 	log.Trace("servants flushed")
-}
-
-func (this *FunServantImpl) AddErr(n int64) {
-	svtStats.addErr(n)
 }
 
 func (this *FunServantImpl) createServants() {
@@ -136,21 +167,26 @@ func (this *FunServantImpl) createServants() {
 		this.rd = redis.New(this.conf.Redis)
 	}
 
+	if this.conf.Lock.Enabled() {
+		log.Debug("creating servant: lock")
+		this.lk = lock.New(this.conf.Lock)
+	}
+
 	if this.conf.Mysql.Enabled() {
 		log.Debug("creating servant: mysql")
 		this.my = mysql.New(this.conf.Mysql)
-	}
 
-	switch this.conf.Mysql.CacheStore {
-	case "mem":
-		this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
+		switch this.conf.Mysql.CacheStore {
+		case "mem":
+			this.dbCacheStore = store.NewMemStore(this.conf.Mysql.CacheStoreMemMaxItems)
 
-	case "redis":
-		this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
-			this.conf.Redis)
+		case "redis":
+			this.dbCacheStore = store.NewRedisStore(this.conf.Mysql.CacheStoreRedisPool,
+				this.conf.Redis)
 
-	default:
-		panic("unknown cache store")
+		default:
+			panic("unknown mysql cache store")
+		}
 	}
 
 	if this.conf.Mongodb.Enabled() {
@@ -174,8 +210,10 @@ func (this *FunServantImpl) createServants() {
 		}
 	}
 
-	log.Debug("creating servant: game")
-	this.game = game.New(this.conf.Game, this.rd)
+	if this.conf.Game.Enabled() {
+		log.Debug("creating servant: game")
+		this.game = game.New(this.conf.Game, this.rd)
+	}
 
 	log.Info("servants created")
 }
@@ -260,8 +298,6 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 
 func (this *FunServantImpl) Runtime() map[string]interface{} {
 	r := make(map[string]interface{})
-	r["sessions"] = atomic.LoadInt64(&svtStats.sessionN)
-	r["call.errs"] = svtStats.callsErr
 	r["call.slow"] = svtStats.callsSlow
 	r["call.peer.from"] = svtStats.callsFromPeer
 	r["call.peer.to"] = svtStats.callsToPeer
@@ -269,8 +305,8 @@ func (this *FunServantImpl) Runtime() map[string]interface{} {
 	for _, key := range svtStats.calls.Keys() {
 		r["call["+key+"]"] = svtStats.calls.Percent(key)
 	}
-	for _, key := range this.phpReasonPercent.Keys() {
-		r["reason["+key+"]"] = this.phpReasonPercent.Percent(key)
+	for _, key := range this.ctxReasonPercentage.Keys() {
+		r["reason["+key+"]"] = this.ctxReasonPercentage.Percent(key)
 	}
 	for _, key := range this.dbCacheHits.Keys() {
 		r["dbcache["+key+"]"] = this.dbCacheHits.Percent(key)
@@ -283,26 +319,10 @@ func (this *FunServantImpl) showStats() {
 	ticker := time.NewTicker(config.Engine.Servants.StatsOutputInterval)
 	defer ticker.Stop()
 
-	// TODO show most recent stats, reset at some interval
-
 	for _ = range ticker.C {
-		callsN := svtStats.calls.Total()
-		log.Info("rpc: {sessions:%s, calls:%s, avg:%.1f; slow:%s errs:%s peer.from:%s, peer.to:%s}",
-			gofmt.Comma(svtStats.sessionN),
-			gofmt.Comma(callsN),
-			float64(callsN)/float64(svtStats.sessionN+1), // +1 to avoid divide by zero
+		log.Info("svt: {slow:%s peer.from:%s, peer.to:%s}",
 			gofmt.Comma(svtStats.callsSlow),
-			gofmt.Comma(svtStats.callsErr),
 			gofmt.Comma(svtStats.callsFromPeer),
 			gofmt.Comma(svtStats.callsToPeer))
-	}
-}
-
-func (this *FunServantImpl) watchConfigReloaded() {
-	for {
-		select {
-		case cf := <-config.Engine.ReloadedChan:
-			this.recreateServants(cf.Servants)
-		}
 	}
 }

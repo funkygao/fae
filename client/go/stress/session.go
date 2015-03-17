@@ -7,9 +7,23 @@ import (
 	"labix.org/v2/mgo/bson"
 	"log"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 )
+
+func recordIoError(err error) {
+	const (
+		RESET_BY_PEER = "connection reset by peer"
+		BROKEN_PIPE   = "broken pipe"
+		IO_TIMEOUT    = "i/o timeout"
+	)
+	if strings.HasSuffix(err.Error(), RESET_BY_PEER) ||
+		strings.HasSuffix(err.Error(), IO_TIMEOUT) ||
+		strings.HasSuffix(err.Error(), BROKEN_PIPE) {
+		report.incIoErrs()
+	}
+}
 
 func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	report.updateConcurrency(1)
@@ -30,7 +44,7 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 	defer client.Recycle() // when err occurs, do we still need recycle?
 
 	var enableLog = false
-	if sampling(SampleRate) || Concurrency == 1 {
+	if !logTurnOff && sampling(SampleRate) {
 		enableLog = true
 	}
 
@@ -41,16 +55,38 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "stress.go"
-	ctx.Host = "stress.test.local"
-	ctx.Ip = "127.0.0.1"
 	for i := 0; i < LoopsPerSession; i++ {
-		ctx.Rid = fmt.Sprintf("round:%d,seq:%d:i:%d,", round, seq, i+1)
+		//time.Sleep(time.Millisecond * 5)
+		ctx.Rid = time.Now().UnixNano()
+
+		if Cmd&CallNoop != 0 {
+			var r int32
+			r, err = client.Noop(1)
+			if err != nil {
+				recordIoError(err)
+				report.incCallErr()
+				if !errOff {
+					log.Printf("session{round^%d seq^%d noop}: %v", round, seq, err)
+				}
+				client.Close()
+				return
+			} else {
+				report.incCallOk()
+				if enableLog {
+					log.Printf("session{round^%d seq^%d noop}: %v", round, seq, r)
+				}
+			}
+		}
+
 		if Cmd&CallPing != 0 {
 			var r string
 			r, err = client.Ping(ctx)
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d ping}: %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d ping}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -66,8 +102,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			value := []byte("value of " + key)
 			_, err = client.LcSet(ctx, key, value)
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d lc_set} %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d lc.set}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -76,8 +115,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 			value, _, err = client.LcGet(ctx, key)
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d lc_get} %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d lc.get}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -91,10 +133,13 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 
 		if Cmd&CallIdGen != 0 {
 			var r int64
-			r, _, err = client.IdNext(ctx)
+			r, err = client.IdNext(ctx)
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d idgen}: %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d idgen}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -107,17 +152,30 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 		}
 
 		if Cmd&CallGame != 0 {
-			client.GmLatency(ctx, 12, 4545)
-			report.incCallOk()
-			if enableLog {
-				log.Printf("session{round^%d seq^%d GmLatency}",
-					round, seq)
+			err := client.GmLatency(ctx, 12, 4545)
+			if err != nil {
+				recordIoError(err)
+				report.incCallErr()
+				if !errOff {
+					log.Printf("session{round^%d seq^%d GmLatency}: %v", round, seq, err)
+				}
+				client.Close()
+				return
+			} else {
+				report.incCallOk()
+				if enableLog {
+					log.Printf("session{round^%d seq^%d GmLatency}",
+						round, seq)
+				}
 			}
 
 			r, err := client.GmName3(ctx)
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d GmName3}: %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d GmName3}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -129,23 +187,63 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 			}
 
 			lockKey := fmt.Sprintf("key:%d:%d", round, seq)
-			client.GmLock(ctx, "stress.go", lockKey)
+			_, err = client.Lock(ctx, "stress.go", lockKey)
+			if err != nil {
+				recordIoError(err)
+				report.incCallErr()
+				if !errOff {
+					log.Printf("session{round^%d seq^%d Lock}: %v", round, seq, err)
+				}
+				client.Close()
+				return
+			}
 			report.incCallOk()
 			if enableLog {
-				log.Printf("session{round^%d seq^%d GmLock}: %s",
+				log.Printf("session{round^%d seq^%d Lock}: %s",
 					round, seq, lockKey)
 			}
-			client.GmUnlock(ctx, "stress.go", lockKey)
+			err = client.Unlock(ctx, "stress.go", lockKey)
+			if err != nil {
+				recordIoError(err)
+				report.incCallErr()
+				if !errOff {
+					log.Printf("session{round^%d seq^%d Unlock}: %v", round, seq, err)
+				}
+				client.Close()
+				return
+			}
 			report.incCallOk()
 			if enableLog {
-				log.Printf("session{round^%d seq^%d GmUnlock}: %s",
+				log.Printf("session{round^%d seq^%d Unlock}: %s",
 					round, seq, lockKey)
 			}
 
 			shardId, err := client.GmRegister(ctx, "u")
 			if err != nil {
+				recordIoError(err)
 				report.incCallErr()
-				log.Printf("session{round^%d seq^%d GmRegister}: %v", round, seq, err)
+				if !errOff {
+					log.Printf("session{round^%d seq^%d GmRegister}: %v", round, seq, err)
+				}
+				client.Close()
+				return
+			} else {
+				if enableLog {
+					log.Printf("session{round^%d seq^%d GmRegister}: %d",
+						round, seq, shardId)
+				}
+				report.incCallOk()
+			}
+		}
+
+		if Cmd&CallRedis != 0 {
+			shardId, err := client.GmRegister(ctx, "u")
+			if err != nil {
+				recordIoError(err)
+				report.incCallErr()
+				if !errOff {
+					log.Printf("session{round^%d seq^%d GmRegister}: %v", round, seq, err)
+				}
 				client.Close()
 				return
 			} else {
@@ -164,8 +262,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 					"SELECT * FROM UserInfo WHERE uid=?",
 					[]string{"1"}, "user:1")
 				if err != nil {
+					recordIoError(err)
 					report.incCallErr()
-					log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+					if !errOff {
+						log.Printf("session{round^%d seq^%d mysql.cache}: %v", round, seq, err)
+					}
 					client.Close()
 					return
 				} else {
@@ -184,8 +285,11 @@ func runSession(proxy *proxy.Proxy, wg *sync.WaitGroup, round int, seq int) {
 					"SELECT * FROM UserInfo WHERE uid=?",
 					[]string{"1"}, "")
 				if err != nil {
+					recordIoError(err)
 					report.incCallErr()
-					log.Printf("session{round^%d seq^%d mysql}: %v", round, seq, err)
+					if !errOff {
+						log.Printf("session{round^%d seq^%d mysql.nocache}: %v", round, seq, err)
+					}
 					client.Close()
 					return
 				} else {

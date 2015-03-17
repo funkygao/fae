@@ -26,7 +26,23 @@ try {
     $client = new FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => "123", 'reason' => 'call.init.567', 'host' => 'server1', 'ip' => '12.3.2.1', 'uid' => 11));
+    $ctx = new Context(array('rid' => hexdec(uniqid()), 'reason' => 'call.init.567'));
+    
+    // game get unique name with len 3
+    //for ($i = 0; $i < 2; $i ++) {
+    //for ($i = 0; $i < 658; $i ++) {
+    $allianceTags = array();
+    for ($i = 0; $i < 50000000; $i ++) {
+        //$name = $client->ping($ctx);
+        $name = $client->gm_name3($ctx);
+        echo "$i $name\n";
+        if (isset($allianceTags[$name])) {
+            throw new Exception("Dup name3: $name");
+        }
+        $allianceTags[$name] = TRUE;
+        //usleep(10000);
+        //sleep(1);
+    }
 
     $client->gm_latency($ctx, 19, 21);
     var_dump($client->gm_presence($ctx, array(11, 14)));
@@ -55,21 +71,11 @@ try {
 
     for ($i = 0; $i < 500; $i++) {
         $lockKey = "foo";
-        var_dump($client->gm_lock($ctx, 'just a test', $lockKey));
-        $client->gm_unlock($ctx, 'just a test', $lockKey);
+        var_dump($client->lock($ctx, 'just a test', $lockKey));
+        $client->unlock($ctx, 'just a test', $lockKey);
     }
 
     $t1 = microtime(TRUE);
-    // game get unique name with len 3
-    //for ($i = 0; $i < 2; $i ++) {
-    //for ($i = 0; $i < 658; $i ++) {
-    for ($i = 0; $i < 50000000; $i ++) {
-        //$name = $client->ping($ctx);
-        $name = $client->gm_name3($ctx);
-        echo "$i $name\n";
-        //usleep(10000);
-        //sleep(1);
-    }
 
     $ok = $client->zk_create($ctx, "/maintain/global", "");
     var_dump($ok);

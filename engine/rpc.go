@@ -2,12 +2,13 @@ package engine
 
 import (
 	"fmt"
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/etclib"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
+	"github.com/funkygao/golib/null"
 	log "github.com/funkygao/log4go"
+	"github.com/funkygao/thrift/lib/go/thrift"
 	"strings"
 	"sync/atomic"
 )
@@ -18,7 +19,7 @@ import (
 // Processor (compiler genereated)
 // Protocol (JSON/compact/...), what is transmitted
 // Transport (TCP/HTTP/...), how is transmitted
-func (this *Engine) launchRpcServe() (done chan interface{}) {
+func (this *Engine) launchRpcServe() (done chan null.NullStruct) {
 	var (
 		protocolFactory  thrift.TProtocolFactory
 		serverTransport  thrift.TServerTransport
@@ -41,7 +42,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 		protocolFactory = thrift.NewTCompactProtocolFactory()
 
 	default:
-		panic(fmt.Sprintf("Invalid protocol: %s", config.Engine.Rpc.Protocol))
+		panic(fmt.Sprintf("Unknown protocol: %s", config.Engine.Rpc.Protocol))
 	}
 
 	// client-side Thrift protocol/transport stack must match
@@ -60,7 +61,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	switch {
 	case strings.Contains(config.Engine.Rpc.ListenAddr, "/"):
 		serverNetwork = "unix"
-		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout > 0 {
 			serverTransport, err = NewTUnixSocketTimeout(
 				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
@@ -70,7 +71,7 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 
 	default:
 		serverNetwork = "tcp"
-		if config.Engine.Rpc.SessionTimeout.Seconds() > 0 {
+		if config.Engine.Rpc.SessionTimeout > 0 {
 			serverTransport, err = thrift.NewTServerSocketTimeout(
 				config.Engine.Rpc.ListenAddr, config.Engine.Rpc.SessionTimeout)
 		} else {
@@ -93,32 +94,33 @@ func (this *Engine) launchRpcServe() (done chan interface{}) {
 	}
 
 	// when config loaded, create the servants
-	this.svt = servant.NewFunServant(config.Engine.Servants)
+	this.svt = servant.NewFunServantWrapper(config.Engine.Servants)
 	this.rpcProcessor = rpc.NewFunServantProcessor(this.svt)
 	this.svt.Start()
 
-	this.rpcServer = NewTFunServer(this, this.rpcProcessor,
+	this.rpcServer = NewTFunServer(this,
+		config.Engine.Rpc.PreforkMode,
+		this.rpcProcessor,
 		serverTransport, transportFactory, protocolFactory)
 	log.Info("RPC server ready at %s:%s", serverNetwork, config.Engine.Rpc.ListenAddr)
 
-	done = make(chan interface{})
+	this.launchDashboard()
+
+	done = make(chan null.NullStruct)
 	go func() {
-		for {
-			err = this.rpcServer.Serve()
-			if err != nil {
-				log.Error("rpcServer: %+v", err)
-				break
-			}
+		if err = this.rpcServer.Serve(); err != nil {
+			log.Error("RPC server: %+v", err)
 		}
 
-		done <- 1
-
+		done <- null.Null
 	}()
 
 	return done
 }
 
 func (this *Engine) StopRpcServe() {
+	log.Info("RPC server stopping...")
+
 	rpcServer := this.rpcServer.(*TFunServer)
 	rpcServer.Stop()
 

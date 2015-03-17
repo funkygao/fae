@@ -1,25 +1,108 @@
 package servant
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
 	"github.com/funkygao/golib/server"
 	conf "github.com/funkygao/jsconf"
 	"github.com/funkygao/msgpack"
+	"github.com/funkygao/thrift/lib/go/thrift"
+	"io"
 	"labix.org/v2/mgo/bson"
 	"strings"
 	"testing"
+	"time"
 )
 
+func sizedString(sz int) string {
+	u := make([]byte, sz)
+	io.ReadFull(rand.Reader, u)
+	return hex.EncodeToString(u)
+}
+
 func setupServant() *FunServantImpl {
+	server.SetupLogging(".canbedeleted.test.log", "info", "", "", "")
+
 	cf, _ := conf.Load("../etc/faed.cf")
-	config.LoadEngineConfig("../etc/faed.cf", cf)
-	server.LaunchHttpServ(":9999", "")
+	config.LoadEngineConfig(cf)
+	server.LaunchHttpServer(":9999", "")
 	return NewFunServant(config.Engine.Servants)
+}
+
+// 880 ns/op
+func BenchmarkIsSelectQuery(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(strings.ToLower(sql), "select")
+	}
+}
+
+// 64.0 ns/op
+func BenchmarkOptimizedIsSelectQuery(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(strings.ToLower(sql[:len("select")]), "select")
+	}
+}
+
+// 9 ns/op
+func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
+	b.ReportAllocs()
+	var sql = "select * from UserInfo where uid=? and power>?"
+	for i := 0; i < b.N; i++ {
+		strings.HasPrefix(sql, "select")
+	}
+}
+
+func BenchmarkTimeUnixNano(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		time.Now().UnixNano()
+	}
+}
+
+func BenchmarkSizedString12(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		sizedString(12)
+	}
+}
+
+func BenchmarkGetSession(b *testing.B) {
+	servant := setupServant()
+	b.ReportAllocs()
+	ctx := rpc.NewContext()
+	ctx.Reason = "Map:enterKingdomBlock"
+	for i := 0; i < b.N; i++ {
+		ctx.Rid = time.Now().UnixNano()
+		servant.getSession(ctx)
+	}
+}
+
+// 1327 ns/op
+func BenchmarkByteSliceConvertString(b *testing.B) {
+	b.ReportAllocs()
+	s := strings.Repeat("h", 1000)
+	for i := 0; i < b.N; i++ {
+		_ = []byte(s) // will lead to mem copy and alloc
+	}
+}
+
+// 1338 ns/op
+func BenchmarkStringConvertByteSlice(b *testing.B) {
+	const N = 1000
+	b.ReportAllocs()
+	ba := make([]byte, N) // lower N will show better performance
+	for i := 0; i < b.N; i++ {
+		_ = string(ba) // its costly
+	}
 }
 
 // 683 ns/op
@@ -61,7 +144,7 @@ func BenchmarkMcSet(b *testing.B) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "benchmark"
-	ctx.Rid = "1"
+	ctx.Rid = 1
 	data := rpc.NewTMemcacheData()
 	data.Data = []byte("bar")
 	for i := 0; i < b.N; i++ {
@@ -98,24 +181,6 @@ func BenchmarkBson(b *testing.B) {
 			"hobbies": []string{"a", "b"}}}
 	for i := 0; i < b.N; i++ {
 		bson.Marshal(m)
-	}
-}
-
-// 880 ns/op
-func BenchmarkIsSelectQuery(b *testing.B) {
-	b.ReportAllocs()
-	var sql = "select * from UserInfo where uid=? and power>?"
-	for i := 0; i < b.N; i++ {
-		strings.HasPrefix(strings.ToLower(sql), "select")
-	}
-}
-
-// 9 ns/op
-func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
-	b.ReportAllocs()
-	var sql = "select * from UserInfo where uid=? and power>?"
-	for i := 0; i < b.N; i++ {
-		strings.HasPrefix(sql, "select")
 	}
 }
 
@@ -189,7 +254,7 @@ func BenchmarkPingOnLocalhost(b *testing.B) {
 
 	ctx := rpc.NewContext()
 	ctx.Reason = "benchmark"
-	ctx.Rid = "1"
+	ctx.Rid = 2
 
 	for i := 0; i < b.N; i++ {
 		client.Ping(ctx)

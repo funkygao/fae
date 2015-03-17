@@ -14,7 +14,7 @@ func (this *FunServantImpl) peerServantByKey(ctx *rpc.Context, key string) (
 
 	}
 
-	if svt == nil {
+	if svt == proxy.Self {
 		// should never happen
 		return nil, ErrProxyNotFound
 	}
@@ -31,7 +31,7 @@ func (this *FunServantImpl) peerServantRand(ctx *rpc.Context) (
 
 	}
 
-	if svt == nil {
+	if svt == proxy.Self {
 		// should never happen
 		return nil, ErrProxyNotFound
 	}

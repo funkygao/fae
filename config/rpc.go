@@ -7,16 +7,16 @@ import (
 )
 
 type ConfigRpc struct {
-	ListenAddr                   string
-	SessionSlowThreshold         time.Duration // per session
-	SessionTimeout               time.Duration
-	IoTimeout                    time.Duration
-	BufferSize                   int // network IO read/write buffer
-	Framed                       bool
-	Protocol                     string
-	StatsOutputInterval          time.Duration
-	MaxOutstandingSessions       int
-	WarnTooManySessionsThreshold int64
+	ListenAddr             string
+	SessionTimeout         time.Duration
+	IoTimeout              time.Duration
+	BufferSize             int // network IO read/write buffer
+	Framed                 bool
+	Protocol               string
+	StatsOutputInterval    time.Duration
+	PreforkMode            bool
+	MaxOutstandingSessions int
+	HostMaxCallPerMinute   int
 }
 
 func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
@@ -25,16 +25,15 @@ func (this *ConfigRpc) LoadConfig(section *conf.Conf) {
 		panic("Empty listen_addr")
 	}
 
-	this.SessionSlowThreshold = section.Duration("session_slow_threshold", 10*time.Second)
 	this.SessionTimeout = section.Duration("session_timeout", 30*time.Second)
 	this.IoTimeout = section.Duration("io_timeout", 2*time.Second)
 	this.StatsOutputInterval = section.Duration("stats_output_interval", 10*time.Second)
 	this.Framed = section.Bool("framed", false)
 	this.BufferSize = section.Int("buffer_size", 4<<10)
 	this.Protocol = section.String("protocol", "binary")
+	this.PreforkMode = section.Bool("prefork_mode", false)
 	this.MaxOutstandingSessions = section.Int("max_outstanding_sessions", 20000)
-	this.WarnTooManySessionsThreshold = int64(section.Int("warn_too_many_sessions_threshold",
-		3000))
+	this.HostMaxCallPerMinute = section.Int("host_max_call_per_minute", 100*60)
 
 	log.Debug("rpc conf: %+v", *this)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/funkygao/fae/servant/redis"
 	log "github.com/funkygao/log4go"
 	_redis "github.com/funkygao/redigo/redis"
+	"sync"
 )
 
 const (
@@ -25,6 +26,7 @@ type Register struct {
 	redis *redis.Client
 
 	currentShards map[string]int64 // key is reg type
+	mutex         sync.Mutex
 }
 
 func newRegister(cf *config.ConfigGame, redis *redis.Client) *Register {
@@ -62,12 +64,15 @@ func (this *Register) loadSnapshot() {
 	log.Debug("%s done, %+v", IDENT, this.currentShards)
 }
 
-func (this *Register) Register(typ string) (int64, error) {
+func (this *Register) Register(typ string) (shardId int64, ex error) {
 	const IDENT = "register"
+
+	this.mutex.Lock()
 
 	currKey := fmt.Sprintf("reg.%s.%d", typ, this.currentShards[typ])
 	n, err := _redis.Int(this.redis.Call("INCR", this.cf.RedisServerPool, currKey))
 	if err != nil {
+		this.mutex.Unlock()
 		log.Error("%s[%s]: %s", IDENT, currKey, err)
 		return 0, err
 	}
@@ -87,6 +92,7 @@ func (this *Register) Register(typ string) (int64, error) {
 		splitThreshold = this.cf.ShardSplit.Chat
 
 	default:
+		this.mutex.Unlock()
 		return 0, ErrInvalidRegType
 	}
 
@@ -97,17 +103,20 @@ func (this *Register) Register(typ string) (int64, error) {
 		_, err = this.redis.Call("INCR", this.cf.RedisServerPool, currKey)
 		if err != nil {
 			log.Error("incr[%s]: %s", currKey, err)
+			this.mutex.Unlock()
 			return 0, err
 		}
 
 		key := fmt.Sprintf("reg.%s.%d", typ, this.currentShards[typ])
 		_, err = this.redis.Call("INCR", this.cf.RedisServerPool, key)
 		if err != nil {
+			this.mutex.Unlock()
 			log.Error("incr[%s]: %s", key, err)
 			return 0, err
 		}
 	}
 
+	this.mutex.Unlock()
 	return this.currentShards[typ], nil
 }
 

@@ -1,3 +1,0 @@
-# Linux kernal config for fae
-#============================
-sysctl -w "fs.file-max=34166"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/funkygao/fae/engine"
 	"github.com/funkygao/golib/locking"
-	"github.com/funkygao/golib/profile"
+	"github.com/funkygao/golib/profiler"
 	"github.com/funkygao/golib/server"
 	"github.com/funkygao/golib/signal"
 	log "github.com/funkygao/log4go"
@@ -26,7 +26,9 @@ func init() {
 		server.ShowVersionAndExit()
 	}
 
-	server.SetupLogging(options.logFile, options.logLevel, options.crashLogFile)
+	server.SetupLogging(options.logFile, options.logLevel,
+		options.crashLogFile, options.alarmLogSock, options.alarmTag)
+
 	// thrift lib use "log", so we also need to customize its behavior
 	_log.SetFlags(_log.Ldate | _log.Ltime | _log.Lshortfile)
 
@@ -37,12 +39,14 @@ func init() {
 
 		// stop new requests
 		engine.NewEngine().
-			LoadConfig(options.configFile, s.Conf).
+			LoadConfig(s.Conf).
 			UnregisterEtcd()
 
 		// finish all outstanding RPC sessions
-		if err := server.SignalProcess(options.lockFile, syscall.SIGUSR1); err != nil {
+		if err := signal.SignalProcessByPidFile(options.lockFile,
+			syscall.SIGUSR1); err != nil {
 			fmt.Fprintf(os.Stderr, "stop failed: %s\n", err)
+			os.Exit(1)
 		}
 
 		cleanup() // TODO wait till that faed process terminates, who will do the cleanup
@@ -74,7 +78,7 @@ func main() {
 	}()
 
 	if options.cpuprof || options.memprof {
-		cf := &profile.Config{
+		cf := &profiler.Config{
 			Quiet:        true,
 			ProfilePath:  "prof",
 			CPUProfile:   options.cpuprof,
@@ -82,7 +86,7 @@ func main() {
 			BlockProfile: options.blockprof,
 		}
 
-		defer profile.Start(cf).Stop()
+		defer profiler.Start(cf).Stop()
 	}
 
 	log.Info("%s", `
@@ -95,7 +99,7 @@ func main() {
 	s.LoadConfig(options.configFile)
 	s.Launch()
 
-	go server.RunSysStats(time.Now(), time.Duration(options.tick)*time.Second)
+	go server.RunSysStats(time.Now(), options.tick)
 
 	engineRunner = engine.NewEngine()
 	signal.RegisterSignalHandler(syscall.SIGINT, func(sig os.Signal) {
@@ -103,6 +107,6 @@ func main() {
 		engineRunner.StopRpcServe()
 	})
 
-	engineRunner.LoadConfig(options.configFile, s.Conf).
+	engineRunner.LoadConfig(s.Conf).
 		ServeForever()
 }

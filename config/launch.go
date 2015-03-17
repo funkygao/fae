@@ -2,19 +2,12 @@ package config
 
 import (
 	conf "github.com/funkygao/jsconf"
-	"os"
 )
 
-func LoadEngineConfig(configFile string, cf *conf.Conf) {
+func LoadEngineConfig(cf *conf.Conf) {
 	Engine = new(ConfigEngine)
-	Engine.configFile = configFile
-	Engine.ReloadedChan = make(chan ConfigEngine)
-	var err error
-	Engine.configFileLastStat, err = os.Stat(configFile)
-	if err != nil {
-		panic(err)
-	}
+	Engine.ReloadedChan = make(chan ConfigEngine, 5)
 	Engine.LoadConfig(cf)
 
-	go Engine.runWatchdog()
+	go Engine.watchReload()
 }
