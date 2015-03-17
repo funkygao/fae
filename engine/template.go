@@ -23,7 +23,7 @@ const (
 	];
 
 	var mem = [
-			{ label: "NumG2", data: {{ .NumGC }}, yaxis: 2 },
+			{ label: "NumGC2", data: {{ .NumGC }}, yaxis: 2 },
 			{ label: "HeapSys", data: {{ .HeapSys }} },
 			{ label: "HeapAlloc", data: {{ .HeapAlloc }} },
 			{ label: "HeapReleased2", data: {{ .HeapReleased }}, yaxis: 2 },	
