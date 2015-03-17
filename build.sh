@@ -26,9 +26,11 @@ if [[ $1 = "-install" ]]; then
 fi
 
 BUILD_FLAGS=''
+if [[ $1 = "-race" ]]; then
+    BUILD_FLAGS="$BUILD_FLAGS -race"
+fi
 if [[ $1 = "-gc" ]]; then
-    BUILD_FLAGS="$BUILD_FLAGS go build -gcflags -m "
-    echo $BUILD_FLAGS
+    BUILD_FLAGS="$BUILD_FLAGS -gcflags '-m=1'"
 fi
 
 if [[ $1 = "-cpu" ]]; then
@@ -49,9 +51,6 @@ if [[ $1 = "-linux" ]]; then
     #sudo CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build $BUILD_FLAGS -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID"
     exit
-elif [[ $1 = "-debug" ]]; then
-    #go build -race -v -ldflags "-X github.com/funkygao/fae/engine.BuildId $ID"
-    go build $BUILD_FLAGS -gcflags '-m=1' -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID -w"
 else
     go build $BUILD_FLAGS -tags release -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $ID -w"
 fi
