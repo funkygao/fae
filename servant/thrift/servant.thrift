@@ -112,7 +112,7 @@ service FunServant {
     /**
      * Ping.
      *
-     * @return string - always 'pong'
+     * @return string - returns current fae version
      */
     string ping(
         1: required Context ctx
@@ -141,6 +141,8 @@ service FunServant {
     /**
      * ID generator.
      *
+     * Internally calls id_next_with_tag with tag=0
+     *
      * If return 0, it means failure.
      */
     i64 id_next(
@@ -158,7 +160,7 @@ service FunServant {
     ),
 
     /**
-     * Decoce an id that was generated with id_next_with_tag.
+     * Decode an id that was generated with id_next_with_tag.
      *
      * returns (ts, tag, wid, seq).
      */
@@ -167,9 +169,9 @@ service FunServant {
         2: i64 id
     ),
 
-    //=================
-    // lcache section
-    //=================
+    //====================
+    // local cache section
+    //====================
 
     bool lc_set(
         1: required Context ctx, 
@@ -427,6 +429,10 @@ service FunServant {
         7: string cacheKey
     ),
 
+    /**
+     * Query across all shards of a table.
+     *
+     */
     MysqlResult my_query_shards(
         1: required Context ctx,
         2: string pool,
@@ -435,6 +441,10 @@ service FunServant {
         5: list<string> argv
     ),
 
+    /**
+     * Atomically merge a blob column that is encoded in json.
+     * Specifically used for concurrent update.
+     */
     MysqlMergeResult my_merge(
         1: required Context ctx,
         2: string pool,
@@ -446,6 +456,9 @@ service FunServant {
         8: string jsonValue
     ),
 
+    /** 
+     * Manually evict a mysql cache by cacheKey.
+     */
     void my_evict(
         1: required Context ctx,
         2: string cacheKey
@@ -494,38 +507,6 @@ service FunServant {
         1: Context ctx,
         2: string bucket,
         3: list<string> keys
-    ),
-
-    //=================
-    // game section
-    //=================
-
-    string gm_name3(
-        1: Context ctx
-    ),
-
-    void gm_latency(
-        1: Context ctx,
-        2: i32 latency,
-        3: i32 bytes
-    ),
-
-    list<bool> gm_presence(
-        1: Context ctx,
-        2: list<i64> uids
-    ),
-
-    i64 gm_register(
-        1: Context ctx,
-        2: string typ
-    ),
-
-    // reserve a uniq name
-    bool gm_reserve(
-        1: Context ctx,
-        2: string tag,
-        3: string oldName,
-        4: string newName
     ),
 
 }

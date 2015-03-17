@@ -7,7 +7,6 @@ package servant
 import (
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/couch"
-	"github.com/funkygao/fae/servant/game"
 	"github.com/funkygao/fae/servant/lock"
 	"github.com/funkygao/fae/servant/memcache"
 	"github.com/funkygao/fae/servant/mongo"
@@ -45,7 +44,6 @@ type FunServantImpl struct {
 
 	proxy *proxy.Proxy         // remote fae agent
 	idgen *idgen.IdGenerator   // global id generator
-	game  *game.Game           // game engine
 	lc    *cache.LruCache      // local cache
 	mc    *memcache.ClientPool // memcache pool, auto sharding by key
 	mg    *mongo.Client        // mongodb pool, auto sharding by shardId
@@ -210,11 +208,6 @@ func (this *FunServantImpl) createServants() {
 		}
 	}
 
-	if this.conf.Game.Enabled() {
-		log.Debug("creating servant: game")
-		this.game = game.New(this.conf.Game, this.rd)
-	}
-
 	log.Info("servants created")
 }
 
@@ -284,11 +277,6 @@ func (this *FunServantImpl) recreateServants(cf *config.ConfigServant) {
 		if err != nil {
 			log.Error("couchbase: %s", err)
 		}
-	}
-
-	if !reflect.DeepEqual(*this.conf.Game, *cf.Game) {
-		log.Debug("recreating servant: game")
-		this.game = game.New(cf.Game, this.rd)
 	}
 
 	this.conf = cf

@@ -200,19 +200,6 @@
             expires: "10s"
         }
 
-        game: {
-            shard_split_strategy: {
-                kingdom: 18000
-                user: 200000
-                alliance: 2000
-                chat: 2000000
-            }
-            namegen_length: 3
-            lock_max_items: 1048576
-            lock_expires: "5s"
-            redis_server_pool: "game"
-        }
-
         redis: {
             breaker: {
                 failure_allowance: 10
