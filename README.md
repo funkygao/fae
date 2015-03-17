@@ -1,6 +1,6 @@
 fae - Fun App Engine [![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
 ====================
-Distributed middleware layer of multilingual RPC engine for enterprise SOA infrastructure.
+Distributed middleware layer of multilingual RPC framework for enterprise SOA infrastructure.
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
