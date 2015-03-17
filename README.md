@@ -2,7 +2,7 @@ fae - Fun App Engine [![Build Status](https://travis-ci.org/funkygao/fae.png?bra
 ====================
 Distributed RPC framework for enterprise SOA infrastructure.
 
-RPC server is written in golang while client supports php/python/java/etc.
+Cluster based RPC server is written in golang while client supports php/python/java/etc.
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
