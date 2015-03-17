@@ -25,6 +25,8 @@ Cluster based RPC server is written in golang while client supports php/python/j
 #### dependency
 
     install thrift 
+    go get github.com/funkygao/fae
+    cd $GOPATH/src/github.com/funkygao/fae
 
 #### compile
 
