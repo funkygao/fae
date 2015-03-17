@@ -1,9 +1,10 @@
 ### TODO
 
 *   [ ] stress test with different payload size
-*   [ ] rpc cumCalls/cumSessions has bug
+*   [ ] rpc cumCalls/cumSessions maybe have bug
     - stress -x 1 -c 100 -n 100000 -logoff
 *   [ ] thrift use slab allocator to read string
+*   [ ] proxy pool, test on borrow or loop Get till get a valid conn
 *   thrift oneway feature in golang
 *   [ ] rate limit with golib.ratelimiter
     - plan to use plugin mechanism
@@ -17,16 +18,14 @@
     - https://github.com/funkygao/goannotation
 *   [X] shard lru cache to lower mutex race
 *   [X] fae dashboard
-*   [ ] stress loop in c1, c2 to test throughput under different concurrencies
+*   [X] stress loop in c1, c2 to test throughput under different concurrencies
 *   [ ] more strict test on zookeeper failure
-*   [ ] proxy pool, test on borrow
 *   [X] make all db column not nullable
-*   [ ] better request tracing
-*   [ ] session.profiler should not be pointer, reduce GC overhead
-*   [ ] mysql periodically ping to avoid being closed 
+*   [X] better request tracing
+*   [ ] mysql periodically ping to avoid being closed when idle over 2h
 *   [X] optimize mysql query, iterate each row to transform to string/null
 *   [X] engine record all err msg counter
-*   [ ] when disk is full, fae will get stuck because of logging component
+*   [ ] when disk is full, fae will get stuck because of logging module
 *   [ ] use jumbo frame to increase MTU 1500 -> 9000 to increase tcp throughput
 *   [ ] log rotate size, only keep history for N days
 *   [X] engine plugin
@@ -49,7 +48,5 @@
     - default zk session timeout: 2 * tickTime ~ 20 * tickTime
     - echo 'mntr' | nc localhost 2181
     - echo 'stat' | nc localhost 2181
-*   [X] NewTBufferedTransportFactory buffer size, and php config buf size
 *   [X] golang uses /proc/sys/net/core/somaxconn as listener backlog
     - increase it if you need over 128(default) simultaneous outstanding connections
-*   [X] thrift compiler didn't implement oneway in golang
