@@ -13,7 +13,6 @@ Distributed RPC framework for enterprise SOA infrastructure.
 - [Usage](#usage)
 - [Dashboard](#dashboard)
 - [Architecture](#status)
-- [SOA](#soa)
 - [Terms](#terms)
 - [Highlights](#highlights)
 - [Performance](#perf)
