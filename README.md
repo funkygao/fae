@@ -28,7 +28,7 @@ Distributed middleware layer of multilingual RPC framework for enterprise SOA in
                                
 ### Dashboard
 
-![dashboard](https://raw.githubusercontent.com/funkygao/fae/bar/contrib/resources/dashboard.png)
+![dashboard](https://github.com/funkygao/fae/blob/master/contrib/resources/dashboard.png)
 
 ### Architecture
 
