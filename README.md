@@ -1,6 +1,6 @@
 fae - Fun App Engine [![Build Status](https://travis-ci.org/funkygao/fae.png?branch=master)](https://travis-ci.org/funkygao/fae)
 ====================
-Distributed middleware layer of multilingual RPC framework for enterprise SOA infrastructure.
+Distributed RPC framework for enterprise SOA infrastructure.
 
          ____      __      ____ 
         ( ___)    /__\    ( ___)
@@ -21,9 +21,21 @@ Distributed middleware layer of multilingual RPC framework for enterprise SOA in
 
 ### Usage
 
+#### dependency
+
+    install thrift 
+
+#### compile
+
+    ./build.sh
+
+#### run
+
+    # create a config file
     cp etc/etc/faed.cf.sample contrib
     ./contrib/build_cf.php # create the config file
-    ./build.sh
+
+    # startup fae
     ./daemon/faed/faed -conf contrib/faed.cf.rc
                                
 ### Dashboard
@@ -62,21 +74,6 @@ Distributed middleware layer of multilingual RPC framework for enterprise SOA in
         | mongodb/mysql  |  | memcache/redis |  | lcache | kvdb | idgen | ...  |
         +----------------+  +----------------+  +------------------------------+
 
-### SOA
-
-*   Seperation of concerns
-*   Reuse common code as service and transparently reuse infrastructure
-*   Centralized best practice, monitoring, auditting and profiling
-*   Independently deployable/testable
-    - vital code should be more robust
-    - can't have too much vital code
-*   Horizontal scale made easy
-    - frontend(e,g. php/python/java) and middleware scale independently
-    - middleware is in charge of performance while frontend is in charge of biz logic
-    - fae serves as service abstractive service provider
-*   Polyglot development
-*   Easier dev team management
-
 ### Terms
 
 *   Engine
@@ -84,11 +81,11 @@ Distributed middleware layer of multilingual RPC framework for enterprise SOA in
 *   Servant
     - handles RPC services logic
 *   Proxy
-    - local stub of remote fae
+    - local stub of remote fae peer
 *   Peer
     - a remote fae instance
 *   Session
-    - a RPC client tcp conn with fae
+    - a RPC client tcp connection with fae
 *   Call
     - a RPC call within a Session
 

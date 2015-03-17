@@ -1,4 +1,8 @@
 {
+    // NEVER use this file directly
+    // It is a template only config file
+    // Refer to contrib/build_cf.php for how to build a custom config file
+
     etcd_servers: [
         {etcd_servers}
     ]
