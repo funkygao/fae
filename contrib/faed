@@ -2,10 +2,6 @@
 #
 # Startup / shutdown script for the fae server
 #
-# Copyright (c) 2011, FunPlus, Inc.
-# All rights reserved
-#
-#
 ### BEGIN INIT INFO
 # Provides:          faed
 # Required-Start:    $network $local_fs
