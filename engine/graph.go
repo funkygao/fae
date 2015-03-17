@@ -5,8 +5,10 @@ import (
 	"github.com/funkygao/fae/config"
 	"html/template"
 	"io"
+	"math"
 	"net"
 	"runtime"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -14,12 +16,28 @@ import (
 
 type graphPoints [2]int
 
+type Uint64Slice []uint64
+
+func (s Uint64Slice) Len() int {
+	return len(s)
+}
+
+func (s Uint64Slice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s Uint64Slice) Less(i, j int) bool {
+	return s[i] < s[j]
+}
+
 // Dashboard data of engine.
 type Graph struct {
 	Title                                         string
 	Qps, ActiveSessions, Latencies, Errors, Slows []graphPoints
 	NumGC, HeapSys, HeapAlloc, HeapReleased       []graphPoints
 	StackInUse                                    []graphPoints
+	HeapObjects                                   []graphPoints
+	GcPause100, GcPause99, GcPause95              []graphPoints
 	Calls, Sessions                               int64
 	Peers                                         []string
 	Tpl                                           *template.Template
@@ -44,6 +62,10 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 		HeapAlloc:      []graphPoints{},
 		HeapReleased:   []graphPoints{},
 		StackInUse:     []graphPoints{},
+		HeapObjects:    []graphPoints{},
+		GcPause100:     []graphPoints{},
+		GcPause99:      []graphPoints{},
+		GcPause95:      []graphPoints{},
 		rpcServer:      rpcServer,
 	}
 }
@@ -73,6 +95,10 @@ func (g *Graph) write(w io.Writer) {
 		g.HeapSys = []graphPoints{}
 		g.NumGC = []graphPoints{}
 		g.StackInUse = []graphPoints{}
+		g.HeapObjects = []graphPoints{}
+		g.GcPause100 = []graphPoints{}
+		g.GcPause99 = []graphPoints{}
+		g.GcPause95 = []graphPoints{}
 	}
 
 	ts := int(time.Now().UnixNano() / 1e6)
@@ -104,6 +130,34 @@ func (g *Graph) write(w io.Writer) {
 		int(memStats.HeapAlloc) / (1 << 20)})
 	g.StackInUse = append(g.StackInUse, graphPoints{ts,
 		int(memStats.StackInuse) / (1 << 20)})
+	g.HeapObjects = append(g.HeapObjects, graphPoints{ts,
+		int(memStats.HeapObjects)})
+
+	// sort the GC pause array
+	length := len(memStats.PauseNs)
+	if int(memStats.NumGC) < length {
+		length = int(memStats.NumGC)
+	}
+	gcPauses := make(Uint64Slice, length)
+	copy(gcPauses, memStats.PauseNs[:length])
+	sort.Sort(gcPauses)
+	g.GcPause100 = append(g.GcPause100, graphPoints{ts,
+		int(percentile(100.0, gcPauses, len(gcPauses)) / 1000)})
+	g.GcPause99 = append(g.GcPause99, graphPoints{ts,
+		int(percentile(99.0, gcPauses, len(gcPauses)) / 1000)})
+	g.GcPause95 = append(g.GcPause95, graphPoints{ts,
+		int(percentile(95.0, gcPauses, len(gcPauses)) / 1000)})
 
 	g.Tpl.Execute(w, g)
+}
+
+func percentile(perc float64, arr []uint64, length int) uint64 {
+	if length == 0 {
+		return 0
+	}
+	indexOfPerc := int(math.Floor(((perc / 100.0) * float64(length)) + 0.5))
+	if indexOfPerc >= length {
+		indexOfPerc = length - 1
+	}
+	return arr[indexOfPerc]
 }

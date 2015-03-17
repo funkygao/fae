@@ -28,7 +28,15 @@ const (
 			{ label: "HeapAlloc", data: {{ .HeapAlloc }} },
 			{ label: "HeapReleased2", data: {{ .HeapReleased }}, yaxis: 2 },	
 			{ label: "StackInUse2", data: {{ .StackInUse }}, yaxis: 2 },
-	];	
+	];
+	var heapObjects = [
+			{ label: "HeapObjects", data: {{ .HeapObjects }} },
+	];
+	var gcPause = [
+			{ label: "GcPause100/us", data: {{ .GcPause100 }} },
+			{ label: "GcPause99/us", data: {{ .GcPause99 }} },
+			{ label: "GcPause95/us", data: {{ .GcPause95 }} },
+	];
 
 	var options = {
 		legend: {
@@ -51,6 +59,7 @@ const (
 			mode: "x"
 		},
 	};
+
 	var options_mem = {
 		legend: {
 			position: "nw",
@@ -67,59 +76,46 @@ const (
 			{
 				position: "right",
 			}
+		],		
+	};
+
+	var options_gc = {
+		legend: {
+			position: "nw",
+			noColumns: 6,
+			backgroundOpacity: 0.2
+		},
+		xaxis: {
+			mode: "time",
+			timezone: "browser",
+			timeformat: "%H:%M:%S "
+		},		
+		yaxes: [
+			{},
+			{
+				position: "right",
+			}
 		],
+		points: { show: true },
+		lines: { show: true, fill: true },
+		yaxis: {tickFormatter: function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+        }},
 	};
 
 	$(document).ready(function() {
-
-	var plot = $.plot("#placeholder", data, options);
-	var plotmem = $.plot("#placeholder_mem", mem, options_mem);
-
-	var overview = $.plot("#overview", data, {
-		legend: { show: false},
-		series: {
-			lines: {
-				show: true,
-				lineWidth: 1
-			},
-			shadowSize: 0
-		},
-		xaxis: {
-			ticks: [],
-			mode: "time"
-		},
-		yaxis: {
-			ticks: [],
-			min: 0,
-			autoscaleMargin: 0.1
-		},
-		selection: {
-			mode: "x"
-		}
+		var plot = $.plot("#placeholder", data, options);
+		var plotmem = $.plot("#placeholder_mem", mem, options_mem);
+		var heapobj = $.plot("#placeholder_heapobj", heapObjects, options_mem);
+		var gcpause = $.plot("#placeholder_gcpause", gcPause, options_mem);
 	});
 
-	// now connect the two
-	$("#placeholder").bind("plotselected", function (event, ranges) {
-		// do the zooming
-		$.each(plot.getXAxes(), function(_, axis) {
-			var opts = axis.options;
-			opts.min = ranges.xaxis.from;
-			opts.max = ranges.xaxis.to;
-		});
-		plot.setupGrid();
-		plot.draw();
-		plot.clearSelection();
-
-		// don't fire event on the overview to prevent eternal loop
-
-		overview.setSelection(ranges, true);
-	});
-
-	$("#overview").bind("plotselected", function (event, ranges) {
-		plot.setSelection(ranges);
-	});
-
-	});
+	$(document).ready(function() {
+		var plot = $.plot("#placeholder", data, options);
+		var plotmem = $.plot("#placeholder_mem", mem, options_mem);
+		var heapobj = $.plot("#placeholder_heapobj", heapObjects, options_gc);
+		var gcpause = $.plot("#placeholder_gcpause", gcPause, options_gc);
+	});	
 </script>
 <style>
 #content {
@@ -163,16 +159,22 @@ const (
 </div>
 
 <div id="content">
-	<div class="demo-container" style="height:200px;">
+	<p>Memory Presure</p>
+	<div class="demo-container" style="height:200px;">		
 		<div id="placeholder_mem" class="demo-placeholder"></div>
-	</div>	
-	<div class="demo-container" style="height:400px;">
+	</div>
+	<p>GC Pause Percentiles</p>
+	<div class="demo-container" style="height:200px;">		
+		<div id="placeholder_gcpause" class="demo-placeholder"></div>
+	</div>
+	<p>Heap Objects In Use</p>
+	<div class="demo-container" style="height:200px;">		
+		<div id="placeholder_heapobj" class="demo-placeholder"></div>
+	</div>
+	<p>RPC call</p>
+	<div class="demo-container" style="height:400px;">		
 		<div id="placeholder" class="demo-placeholder"></div>
-	</div>
-
-	<div class="demo-container" style="height:150px;">
-		<div id="overview" class="demo-placeholder"></div>
-	</div>
+	</div>	
 </div>
 
 </body>

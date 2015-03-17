@@ -1,6 +1,6 @@
 ### TODO
 
-*   [ ] learn from nsq for GC presure dashboard
+*   [X] learn from nsq for GC presure dashboard
     - http://blog.haohtml.com/archives/15475#more-15475
 *   [ ] stress test with different payload size
 *   [ ] rpc cumCalls/cumSessions maybe have bug
