@@ -80,8 +80,8 @@ Cluster based RPC server is written in golang while client supports php/python/j
     - handles RPC services logic
 *   Proxy
     - local stub of remote fae peer
-*   Peer/Node
-    - a remote fae instance
+*   Peer/Node/Endpoint
+    - an fae instance
 *   Session
     - a RPC client tcp connection with fae
 *   Call
@@ -117,6 +117,10 @@ If the FAE node does not own the data, it acts as a coordinator and sends the RP
 In the current implementation, a coordinator returns an RPC response back to client only after it gets response from remote FAE node: synchronously.
 
 For strong consistency, read and write calls follow the same data flow for any RPC call.
+
+Every FAE node in a cluster has the same role and responsibility. 
+Hence, there is no SPOF in a cluster.  
+With this advantage, one can simply add more nodes to an FAE cluster to meet traffic demands or loads.
 
 
         client          fae node1           fae node2
