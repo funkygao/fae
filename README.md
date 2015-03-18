@@ -117,4 +117,5 @@ Cluster based RPC server is written in golang while client supports php/python/j
 *   golang
     - GODEBUG=schedtrace=1000
     - GODEBUG=gctrace=1
+    - https://code.google.com/p/go/issues/detail?id=6047
 
