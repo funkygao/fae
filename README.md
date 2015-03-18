@@ -4,12 +4,6 @@ Distributed RPC framework for enterprise SOA infrastructure.
 
 Cluster based RPC server is written in golang while client supports php/python/java/etc.
 
-         ____      __      ____ 
-        ( ___)    /__\    ( ___)
-         )__)    /(__)\    )__) 
-        (__)    (__)(__)  (____)
-
-
 **Table of Contents**
 
 - [Usage](#usage)
