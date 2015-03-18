@@ -37,7 +37,7 @@ type Graph struct {
 	NumGC, HeapSys, HeapAlloc, HeapReleased       []graphPoints
 	StackInUse                                    []graphPoints
 	HeapObjects                                   []graphPoints
-	GcPause100, GcPause99, GcPause95              []graphPoints
+	GcPause100, GcPause99, GcPause95, GcPause75   []graphPoints
 	Calls, Sessions                               int64
 	Peers                                         []string
 	Tpl                                           *template.Template
@@ -66,6 +66,7 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 		GcPause100:     []graphPoints{},
 		GcPause99:      []graphPoints{},
 		GcPause95:      []graphPoints{},
+		GcPause75:      []graphPoints{},
 		rpcServer:      rpcServer,
 	}
 }
@@ -99,6 +100,7 @@ func (g *Graph) write(w io.Writer) {
 		g.GcPause100 = []graphPoints{}
 		g.GcPause99 = []graphPoints{}
 		g.GcPause95 = []graphPoints{}
+		g.GcPause75 = []graphPoints{}
 	}
 
 	ts := int(time.Now().UnixNano() / 1e6)
@@ -134,24 +136,35 @@ func (g *Graph) write(w io.Writer) {
 		int(memStats.HeapObjects)})
 
 	// sort the GC pause array
-	length := len(memStats.PauseNs)
-	if int(memStats.NumGC) < length {
-		length = int(memStats.NumGC)
+	gcPausesMs := make(Uint64Slice, 0, len(memStats.PauseNs))
+	for _, pauseNs := range memStats.PauseNs {
+		if pauseNs == 0 {
+			continue
+		}
+
+		pauseMs := pauseNs / uint64(time.Millisecond)
+		if pauseMs == 0 {
+			continue
+		}
+
+		gcPausesMs = append(gcPausesMs, pauseMs)
 	}
-	gcPauses := make(Uint64Slice, length)
-	copy(gcPauses, memStats.PauseNs[:length])
-	sort.Sort(gcPauses)
+	sort.Sort(gcPausesMs)
+
 	g.GcPause100 = append(g.GcPause100, graphPoints{ts,
-		int(percentile(100.0, gcPauses, len(gcPauses)) / 1000)})
+		int(percentile(100.0, gcPausesMs))})
 	g.GcPause99 = append(g.GcPause99, graphPoints{ts,
-		int(percentile(99.0, gcPauses, len(gcPauses)) / 1000)})
+		int(percentile(99.0, gcPausesMs))})
 	g.GcPause95 = append(g.GcPause95, graphPoints{ts,
-		int(percentile(95.0, gcPauses, len(gcPauses)) / 1000)})
+		int(percentile(95.0, gcPausesMs))})
+	g.GcPause75 = append(g.GcPause75, graphPoints{ts,
+		int(percentile(75.0, gcPausesMs))})
 
 	g.Tpl.Execute(w, g)
 }
 
-func percentile(perc float64, arr []uint64, length int) uint64 {
+func percentile(perc float64, sortedArr []uint64) uint64 {
+	length := len(sortedArr)
 	if length == 0 {
 		return 0
 	}
@@ -159,5 +172,5 @@ func percentile(perc float64, arr []uint64, length int) uint64 {
 	if indexOfPerc >= length {
 		indexOfPerc = length - 1
 	}
-	return arr[indexOfPerc]
+	return sortedArr[indexOfPerc]
 }

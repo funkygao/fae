@@ -33,9 +33,10 @@ const (
 			{ label: "HeapObjects", data: {{ .HeapObjects }} },
 	];
 	var gcPause = [
-			{ label: "GcPause100/us", data: {{ .GcPause100 }} },
-			{ label: "GcPause99/us", data: {{ .GcPause99 }} },
-			{ label: "GcPause95/us", data: {{ .GcPause95 }} },
+			{ label: "GcPause100%", data: {{ .GcPause100 }} },
+			{ label: "GcPause99%", data: {{ .GcPause99 }} },
+			{ label: "GcPause95%", data: {{ .GcPause95 }} },
+			{ label: "GcPause75%", data: {{ .GcPause75 }} },
 	];
 
 	var options = {
@@ -159,11 +160,11 @@ const (
 </div>
 
 <div id="content">
-	<p>Memory Presure</p>
+	<p>Memory Presure(2 means use 2nd yaxis)</p>
 	<div class="demo-container" style="height:200px;">		
 		<div id="placeholder_mem" class="demo-placeholder"></div>
 	</div>
-	<p>GC Pause Percentiles</p>
+	<p>GC Pause Percentiles(ms)</p>
 	<div class="demo-container" style="height:200px;">		
 		<div id="placeholder_gcpause" class="demo-placeholder"></div>
 	</div>
