@@ -2,6 +2,7 @@ package engine
 
 import (
 	"github.com/funkygao/golib/null"
+	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 )
 
@@ -35,8 +36,11 @@ func newRpcDispatcher(prefork bool, maxOutstandingSessions int,
 		// prefork
 		go func() {
 			for {
+				// reuse goroutines to reduce GC
 				this.handler(<-this.clientSocketChan)
 			}
+
+			log.Warn("dispatcher[%d] terminated", i)
 		}()
 	}
 
