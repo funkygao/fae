@@ -92,9 +92,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 	case "runtime":
 		output["runtime"] = rpcServer.stats.Runtime()
 
-	case "mem":
-		output["mem"] = *rpcServer.stats.memStats
-
 	case "conf":
 		output["engine"] = *config.Engine
 		output["rpc"] = *config.Engine.Rpc
@@ -107,7 +104,6 @@ func (this *Engine) handleHttpQuery(w http.ResponseWriter, req *http.Request,
 			"/engine/stop",
 			"/engine/stat",
 			"/engine/runtime",
-			"/engine/mem",
 			"/engine/conf",
 		}
 

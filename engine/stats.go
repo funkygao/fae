@@ -63,6 +63,8 @@ func (this *engineStats) Runtime() map[string]interface{} {
 	s["memory.gc.num"] = this.memStats.NumGC
 	s["memory.gc.num_per_second"] = float64(this.memStats.NumGC) / time.
 		Since(this.startedAt).Seconds()
+	s["memory.gc.num_freq"] = fmt.Sprintf("%.1fsec/gc", time.
+		Since(this.startedAt).Seconds()/float64(this.memStats.NumGC))
 	s["memory.gc.total_pause"] = fmt.Sprintf("%dms",
 		this.memStats.PauseTotalNs/uint64(time.Millisecond))
 	s["memory.heap.alloc"] = gofmt.ByteSize(this.memStats.HeapAlloc).String()
@@ -86,6 +88,7 @@ func (this *engineStats) Runtime() map[string]interface{} {
 		gcPausesMs = append(gcPausesMs, pauseStr)
 	}
 	s["memory.gc.pauses"] = gcPausesMs
+	s["mem"] = *this.memStats
 
 	return s
 }
