@@ -153,7 +153,7 @@ const (
 </head>
 <body>
 <div id="peers">
-  <p>Cluster: 
+  <p>Cluster nodes: 
   {{range $index, $peer := .Peers}}<a href="http://{{$peer}}">{{$peer}}</a>&nbsp;&nbsp;
   {{end}}</p>
 </div>
