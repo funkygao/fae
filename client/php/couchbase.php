@@ -2,31 +2,21 @@
 
 require_once 'bootstrap.php';
 
-use Thrift\Transport\TSocketPool;
-use Thrift\Transport\TBufferedTransport;
-use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Exception\TTransportException;
-use Thrift\Exception\TProtocolException;
-use fun\rpc\FunServantClient;
-use fun\rpc\Context;
-use fun\rpc\TCacheMissed;
-use fun\rpc\TMongoMissed;
-use fun\rpc\TMemcacheData;
-
 try {
-    $sock = new TSocketPool(array('localhost'), array(9001));
+    $sock = new Thrift\Transport\TSocketPool(array('localhost'), array(9001));
     $sock->setDebug(1);
     $sock->setSendTimeout(4000);
     $sock->setRecvTimeout(4000);
     $sock->setNumRetries(1);
-    $transport = new TBufferedTransport($sock, 1024, 1024);
-    $protocol = new TBinaryProtocol($transport);
+    $transport = new Thrift\Transport\TBufferedTransport($sock, 1024, 1024);
+    $protocol = new Thrift\Protocol\TBinaryProtocol($transport);
 
     // get our client
-    $client = new FunServantClient($protocol);
+    $client = new fun\rpc\FunServantClient($protocol);
     $transport->open();
 
-    $ctx = new Context(array('rid' => hexdec(uniqid()), 'reason' => 'test.couchbase'));
+    $ctx = new fun\rpc\Context(array('rid' => hexdec(uniqid()), 
+        'reason' => 'test.couchbase'));
 
     // couchbase get/set
     $bucket = 'default';
@@ -38,6 +28,6 @@ try {
     }
 
     $transport->close();
-} catch (TException $tx) {
+} catch (Exception $tx) {
     print 'Something went wrong: ' . $tx->getMessage() . "\n";
 }

@@ -8,12 +8,11 @@ const (
 	CallMemcache
 	CallMongo
 	CallMysql
-	CallGame
 	CallRedis
 
 	CallPingIdgen   = CallPing | CallIdGen
 	CallIdgenLcache = CallIdGen | CallLCache
-	CallDefault     = CallPing | CallIdGen | CallLCache | CallMysql | CallGame
+	CallDefault     = CallPing | CallIdGen | CallLCache | CallMysql
 
 	MC_POOL = "default"
 )
