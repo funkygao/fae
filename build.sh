@@ -9,8 +9,8 @@ fi
 VER=0.3.2stable
 ID=$(git rev-parse HEAD | cut -c1-7)
 
-if [[ $1 = "-dw" ]]; then
-    cp -f servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
+if [[ $1 = "-php" ]]; then
+    cp -f servant/gen-php/fun/rpc/* /Users/gaopeng/myphp/fae
     exit
 fi
 
