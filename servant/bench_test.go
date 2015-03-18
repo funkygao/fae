@@ -1,29 +1,17 @@
 package servant
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/funkygao/fae/config"
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/proxy"
+	rand_ "github.com/funkygao/golib/rand"
 	"github.com/funkygao/golib/server"
 	conf "github.com/funkygao/jsconf"
-	"github.com/funkygao/msgpack"
-	"github.com/funkygao/thrift/lib/go/thrift"
-	"io"
-	"labix.org/v2/mgo/bson"
 	"strings"
 	"testing"
 	"time"
 )
-
-func sizedString(sz int) string {
-	u := make([]byte, sz)
-	io.ReadFull(rand.Reader, u)
-	return hex.EncodeToString(u)
-}
 
 func setupServant() *FunServantImpl {
 	server.SetupLogging(".canbedeleted.test.log", "info", "", "", "")
@@ -61,17 +49,10 @@ func BenchmarkIsSelectQueryWithoutLowcase(b *testing.B) {
 	}
 }
 
-func BenchmarkTimeUnixNano(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		time.Now().UnixNano()
-	}
-}
-
 func BenchmarkSizedString12(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		sizedString(12)
+		rand_.SizedString(12)
 	}
 }
 
@@ -83,25 +64,6 @@ func BenchmarkGetSession(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ctx.Rid = time.Now().UnixNano()
 		servant.getSession(ctx)
-	}
-}
-
-// 1327 ns/op
-func BenchmarkByteSliceConvertString(b *testing.B) {
-	b.ReportAllocs()
-	s := strings.Repeat("h", 1000)
-	for i := 0; i < b.N; i++ {
-		_ = []byte(s) // will lead to mem copy and alloc
-	}
-}
-
-// 1338 ns/op
-func BenchmarkStringConvertByteSlice(b *testing.B) {
-	const N = 1000
-	b.ReportAllocs()
-	ba := make([]byte, N) // lower N will show better performance
-	for i := 0; i < b.N; i++ {
-		_ = string(ba) // its costly
 	}
 }
 
@@ -125,19 +87,6 @@ func BenchmarkRawConcatSql(b *testing.B) {
 	}
 }
 
-// 103 ns/op
-func BenchmarkDefer(b *testing.B) {
-	b.ReportAllocs()
-	f := func() {
-		defer func() {
-
-		}()
-	}
-	for i := 0; i < b.N; i++ {
-		f()
-	}
-}
-
 func BenchmarkMcSet(b *testing.B) {
 	servant := setupServant()
 	b.ReportAllocs()
@@ -150,96 +99,6 @@ func BenchmarkMcSet(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		servant.McSet(ctx, "default", "foo", data, 0)
 	}
-}
-
-func BenchmarkGoMap(b *testing.B) {
-	b.ReportAllocs()
-	var x map[int]bool = make(map[int]bool)
-	for i := 0; i < b.N; i++ {
-		x[i] = true
-	}
-}
-
-func BenchmarkJson(b *testing.B) {
-	m := bson.M{
-		"userId": 343434,
-		"gendar": "F",
-		"info": bson.M{
-			"city":    "beijing",
-			"hobbies": []string{"a", "b"}}}
-	for i := 0; i < b.N; i++ {
-		json.Marshal(m)
-	}
-}
-
-func BenchmarkBson(b *testing.B) {
-	m := bson.M{
-		"userId": 343434,
-		"gendar": "F",
-		"info": bson.M{
-			"city":    "beijing",
-			"hobbies": []string{"a", "b"}}}
-	for i := 0; i < b.N; i++ {
-		bson.Marshal(m)
-	}
-}
-
-func BenchmarkMsgPackSerialize(b *testing.B) {
-	b.ReportAllocs()
-
-	mysqlResult := rpc.NewMysqlResult()
-	mysqlResult.Cols = make([]string, 0)
-	mysqlResult.Rows = make([][]string, 0)
-	colsN, rowsN := 5, 10
-	for i := 0; i < colsN; i++ {
-		mysqlResult.Cols = append(mysqlResult.Cols, "username")
-	}
-	for i := 0; i < rowsN; i++ {
-		row := make([]string, 0)
-		for j := 0; j < colsN; j++ {
-			row = append(row, "beijing, los angels")
-		}
-
-		mysqlResult.Rows = append(mysqlResult.Rows, row)
-	}
-
-	for i := 0; i < b.N; i++ {
-		msgpack.Marshal(mysqlResult)
-	}
-
-	b.SetBytes(int64(len(mysqlResult.String())))
-}
-
-func BenchmarkThriftSerialize(b *testing.B) {
-	b.ReportAllocs()
-
-	transport := thrift.NewTMemoryBuffer()
-	protocol := thrift.NewTBinaryProtocolFactoryDefault()
-	//iprot := protocol.GetProtocol(transport)
-	oprot := protocol.GetProtocol(transport)
-	mysqlResult := rpc.NewMysqlResult()
-	mysqlResult.Cols = make([]string, 0)
-	mysqlResult.Rows = make([][]string, 0)
-	colsN, rowsN := 5, 10
-	for i := 0; i < colsN; i++ {
-		mysqlResult.Cols = append(mysqlResult.Cols, "username")
-	}
-	for i := 0; i < rowsN; i++ {
-		row := make([]string, 0)
-		for j := 0; j < colsN; j++ {
-			row = append(row, "beijing, los angels")
-		}
-
-		mysqlResult.Rows = append(mysqlResult.Rows, row)
-	}
-	b.Logf("%s", mysqlResult.String())
-
-	for i := 0; i < b.N; i++ {
-		mysqlResult.Write(oprot)
-	}
-
-	transport.Close()
-	b.SetBytes(int64(len(mysqlResult.String())))
 }
 
 func BenchmarkPingOnLocalhost(b *testing.B) {

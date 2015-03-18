@@ -7,31 +7,6 @@ import (
 	"time"
 )
 
-func BenchmarkSelectChanDefault(b *testing.B) {
-	quit := make(chan struct{})
-	for i := 0; i < b.N; i++ {
-		select {
-		case <-quit:
-		default:
-		}
-	}
-}
-
-func BenchmarkTimeNow(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		_ = time.Now()
-	}
-}
-
-func BenchmarkTimeSince(b *testing.B) {
-	b.ReportAllocs()
-	t1 := time.Now()
-	for i := 0; i < b.N; i++ {
-		time.Since(t1)
-	}
-}
-
 func BenchmarkDispatcher(b *testing.B) {
 	b.ReportAllocs()
 	handler := func(client thrift.TTransport) {}
