@@ -1,19 +1,25 @@
 {
+    // NEVER use this file directly
+    // It is a template only config file
+    // Refer to contrib/build_cf.php for how to build a custom config file
+
     etcd_servers: [
-        "127.0.0.1:2181"
+        {etcd_servers}
     ]
 
     reload_watchdog_interval: "1s"
-    http_listen_addr: ":9101"
+    http_listen_addr: {http_listen_addr}
     dashboard_listen_addr: ":8000"
-    pprof_listen_addr: ":9102"
+    pprof_listen_addr: {pprof_listen_addr}
     cpu_num: "max"
-    metrics_logfile: "metrics.log"
+    metrics_logfile: {metrics_logfile}
     server_mode: true
 
     rpc: {
-        listen_addr: ":9001"
+        listen_addr: {rpc_listen_addr}
+        // protocol: binary | json | simplejson | compact
         protocol: "binary"
+        framed: false
         buffer_size: 4096
         prefork_mode: true
         host_max_call_per_minute: 6000
@@ -32,15 +38,14 @@
     }
 
     servants: {
+        idgen_worker_id: {idgen_worker_id}
+
         session_max_items: 20000
         stats_output_interval: "1m"
-        call_slow_threshold: "1s"
-
-        // 100/10000 = 1%
-        profiler_rate: 100
         profiler_max_body_size: 600
-
-        idgen_worker_id: 1
+        call_slow_threshold: "1s"
+        // 100/10000 = 1%
+        profiler_rate: 1
 
         proxy: {
             pool_capacity: 300
@@ -76,6 +81,7 @@
             lookup_tables: {
                 "UserShard": "UserLookup"
                 "AllianceShard": "AllianceLookup"
+                "ChatShard": "ChatLookup"
                 "WorldShard": "WorldLookup"
             }
 
@@ -137,6 +143,14 @@
                     password: "halfquestfarm4321"
                     db: "AllianceShard1"
                 }
+                {
+                    pool: "ChatShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "hellofarm"
+                    password: "halfquestfarm4321"
+                    db: "ChatShard1"
+                }
             ]
         }
 
@@ -191,7 +205,6 @@
                 failure_allowance: 10
                 retry_interval: "5s"
             }
-
             pools: [
                 {
                     name: "default"
@@ -215,10 +228,21 @@
                         }
                     ]
                 }
+                {
+                    name: "naming"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 50
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
             ]
         }
 
-        memcache: {
+        memcache_offline: {
             hash_strategy: "standard"
             max_conns_per_server: 200
             max_idle_conns_per_server: 20

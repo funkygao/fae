@@ -25,16 +25,12 @@ Cluster based RPC server is written in golang while client supports php/python/j
 
 #### compile
 
-    ./build.sh
+    ./build.sh # will generate binary: daemon/faed/faed
 
 #### run
 
-    # create a config file
-    cp etc/etc/faed.cf.sample contrib
-    ./contrib/build_cf.php # create the config file
-
     # startup fae
-    ./daemon/faed/faed -conf contrib/faed.cf.rc
+    ./daemon/faed/faed -conf etc/faed.cf.sample
                                
 ### Dashboard
 
