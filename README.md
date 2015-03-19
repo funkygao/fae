@@ -98,7 +98,7 @@ Cluster based RPC server is written in golang while client supports php/python/j
 
 ### Performance
 
-*   currently, a single fae node qps around 50k(no batch request)
+*   currently, a single fae node on aws ec2 t2.medium qps around 50k(no batch request)
     - limited by NIC PPS(packets per second)
     - has to write linux kernal module to overcome this
 *   will be tweaked to 100k
