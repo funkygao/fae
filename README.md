@@ -98,8 +98,8 @@ Cluster based RPC server is written in golang while client supports php/python/j
 
 ### Performance
 
-*   currently, a single fae node on aws ec2 t2.medium qps around 50k(no batch request)
-    - limited by NIC PPS(packets per second)
+*   currently, a single fae node on AWS t2.medium qps around 50k(no batch request)
+    - on AWS t2.medium, PPS(packets per second) about 100K on TX and marginally higher on RX
     - has to write linux kernal module to overcome this
 *   will be tweaked to 100k
 
@@ -143,6 +143,8 @@ With this advantage, one can simply add more nodes to an FAE cluster to meet tra
     - http://huoding.com/2013/10/30/296
 *   http://highscalability.com/blog/2013/5/13/the-secret-to-10-million-concurrent-connections-the-kernel-i.html
 *   https://svn.ntop.org/svn/ntop/trunk/PF_RING/
+*   http://info.iet.unipi.it/~luigi/papers/20130903-rizzo-ancs.pdf
+*   http://shader.kaist.edu/mtcp/
 *   tcpcopy
 *   golang
     - GODEBUG=schedtrace=1000
