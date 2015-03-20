@@ -1,5 +1,6 @@
 ### TODO
 
+*   [ ] mysql driver use recycleable pool to reduce GC presure
 *   [ ] introduce gossip to propagate data/state between fae nodes globally
 *   [X] learn from nsq for GC presure dashboard
     - http://blog.haohtml.com/archives/15475#more-15475
