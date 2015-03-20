@@ -14,9 +14,6 @@
 *   [ ] bad performance related blocks
     - getSession()
     - logger
-*   [ ] gotools
-    - benchcmp
-    - callgraph
 *   [ ] make use of annotation to auot generate code skeleton
     - https://github.com/funkygao/goannotation
 *   [X] shard lru cache to lower mutex race
