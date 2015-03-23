@@ -110,13 +110,6 @@ const (
 		var heapobj = $.plot("#placeholder_heapobj", heapObjects, options_mem);
 		var gcpause = $.plot("#placeholder_gcpause", gcPause, options_mem);
 	});
-
-	$(document).ready(function() {
-		var plot = $.plot("#placeholder", data, options);
-		var plotmem = $.plot("#placeholder_mem", mem, options_mem);
-		var heapobj = $.plot("#placeholder_heapobj", heapObjects, options_gc);
-		var gcpause = $.plot("#placeholder_gcpause", gcPause, options_gc);
-	});	
 </script>
 <style>
 #content {
