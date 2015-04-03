@@ -19,6 +19,7 @@ _cgo_export.*
 _testmain.go
 .DS_Store
 *.exe
+*.6
 
 prof/
 servant/gen-php/
