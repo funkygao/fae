@@ -39,7 +39,14 @@ if [[ $1 = "-cpu" ]]; then
 fi
 if [[ $1 = "-mem" ]]; then
     #go tool pprof ./daemon/faed/faed prof/mem.pprof
+    echo "================="
+    echo "allocated objects"
+    echo "================="
     go tool pprof -alloc_objects -text http://localhost:9102/debug/pprof/heap
+    echo "================="
+    echo "inuse objects"
+    echo "================="
+    go tool pprof -inuse_objects -text http://localhost:9102/debug/pprof/heap
     #go tool pprof -alloc_space -text http://localhost:9102/debug/pprof/heap
     exit
 fi
