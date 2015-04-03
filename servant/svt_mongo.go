@@ -3,7 +3,7 @@ package servant
 import (
 	"github.com/funkygao/fae/servant/gen-go/fun/rpc"
 	"github.com/funkygao/fae/servant/mongo"
-	"github.com/funkygao/golib/trace"
+	"github.com/funkygao/golib/debug"
 	log "github.com/funkygao/log4go"
 	"github.com/funkygao/thrift/lib/go/thrift"
 	"labix.org/v2/mgo"
@@ -570,7 +570,7 @@ type mongoProtocolLogger struct {
 }
 
 func (this *mongoProtocolLogger) Output(calldepth int, s string) error {
-	log.Debug("(%s) %s", trace.CallerFuncName(calldepth), s)
+	log.Debug("(%s) %s", debug.CallerFuncName(calldepth), s)
 	return nil
 }
 
