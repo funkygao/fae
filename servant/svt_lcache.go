@@ -1,6 +1,3 @@
-/*
-local cache key:string, value:[]byte.
-*/
 package servant
 
 import (

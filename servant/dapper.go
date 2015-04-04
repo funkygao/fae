@@ -1,9 +1,9 @@
-// distributed tracing learned from google Dapper.
 package servant
 
 type Endpoint string
 
 // Trace of a RPC call.
+// distributed tracing learned from google Dapper.
 type Call struct {
 	Rid        int64 // request id
 	Reason     string
