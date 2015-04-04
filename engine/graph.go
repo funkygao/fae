@@ -16,22 +16,22 @@ import (
 
 type graphPoints [2]int
 
-type Uint64Slice []uint64
+type uint64Slice []uint64
 
-func (s Uint64Slice) Len() int {
+func (s uint64Slice) Len() int {
 	return len(s)
 }
 
-func (s Uint64Slice) Swap(i, j int) {
+func (s uint64Slice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (s Uint64Slice) Less(i, j int) bool {
+func (s uint64Slice) Less(i, j int) bool {
 	return s[i] < s[j]
 }
 
 // Dashboard data of engine.
-type Graph struct {
+type graph struct {
 	Title                                         string
 	Qps, ActiveSessions, Latencies, Errors, Slows []graphPoints
 	NumGC, HeapSys, HeapAlloc, HeapReleased       []graphPoints
@@ -46,9 +46,9 @@ type Graph struct {
 	port                                          string
 }
 
-func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
+func newGraph(title, tpl string, rpcServer *TFunServer) graph {
 	_, port, _ := net.SplitHostPort(config.Engine.DashboardListenAddr)
-	return Graph{
+	return graph{
 		Title:          title,
 		Tpl:            template.Must(template.New("vis").Parse(tpl)),
 		port:           port,
@@ -71,7 +71,7 @@ func NewGraph(title, tpl string, rpcServer *TFunServer) Graph {
 	}
 }
 
-func (g *Graph) write(w io.Writer) {
+func (g *graph) write(w io.Writer) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -136,7 +136,7 @@ func (g *Graph) write(w io.Writer) {
 		int(memStats.HeapObjects)})
 
 	// sort the GC pause array
-	gcPausesMs := make(Uint64Slice, 0, len(memStats.PauseNs))
+	gcPausesMs := make(uint64Slice, 0, len(memStats.PauseNs))
 	for _, pauseNs := range memStats.PauseNs {
 		if pauseNs == 0 {
 			continue
