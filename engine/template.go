@@ -1,7 +1,7 @@
 package engine
 
 const (
-	DASHBOARD_TPL = `
+	dashboard_tpl = `
 <html>
 <head>
 <title>{{ .Title }}</title>
