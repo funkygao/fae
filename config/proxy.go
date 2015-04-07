@@ -48,6 +48,10 @@ func (this *ConfigProxy) LoadConfig(selfAddr string, cf *conf.Conf) {
 	if parts[0] == "" {
 		// auto get local ip when self_addr like ":9001"
 		ips, _ := ip.LocalIpv4Addrs()
+		if len(ips) == 0 {
+			panic("cannot get local ip address")
+		}
+
 		this.SelfAddr = ips[0] + ":" + parts[1]
 	}
 
