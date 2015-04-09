@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"net"
 	"os"
 	"strings"
@@ -40,7 +41,8 @@ func doEcho(seq int) {
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	defer conn.Close()
 
@@ -49,13 +51,13 @@ func doEcho(seq int) {
 	for {
 		_, err = conn.Write(echoContent)
 		if err != nil {
-			println("Write to server failed:", err.Error())
+			log.Println("Write to server failed:", err.Error())
 			os.Exit(1)
 		}
 
 		_, err = conn.Read(reply)
 		if err != nil {
-			println("Write to server failed:", err.Error())
+			log.Println("Write to server failed:", err.Error())
 			os.Exit(1)
 		}
 
