@@ -36,3 +36,11 @@ net.ipv4.tcp_max_ssthresh = 0
 # ip route show
 
 net.core.rps_sock_flow_entries = 32768
+
+
+
+
+# ethtool -k eth0
+# If gso|tso are on, NIC will send packets larger than MTU
+# ethtool -K eth0 gso off
+# ethtool -K eth0 tso off
