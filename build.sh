@@ -7,7 +7,9 @@ if [[ $1 = "-loc" ]]; then
 fi
 
 VER=0.3.2stable
+# get the git commit
 GIT_ID=$(git rev-parse HEAD | cut -c1-7)
+GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 if [[ $1 = "-php" ]]; then
     cp -f servant/gen-php/fun/rpc/* /Users/gaopeng/myphp/fae
@@ -58,10 +60,10 @@ if [[ $1 = "-linux" ]]; then
     #cp -f ../../servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
     #cd $GOROOT/src 
     #sudo CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build $BUILD_FLAGS -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $GIT_ID"
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build $BUILD_FLAGS -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId ${GIT_ID}${GIT_DIRTY}"
     exit
 else
-    go build $BUILD_FLAGS -tags release -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId $GIT_ID -w"
+    go build $BUILD_FLAGS -tags release -ldflags "-X github.com/funkygao/golib/server.Version $VER -X github.com/funkygao/golib/server.BuildId ${GIT_ID}${GIT_DIRTY} -w"
 fi
 
 #---------
