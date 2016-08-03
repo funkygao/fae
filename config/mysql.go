@@ -1,10 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
+
 	conf "github.com/funkygao/jsconf"
 	log "github.com/funkygao/log4go"
-	"time"
 )
 
 type ConfigMysqlServer struct {
@@ -131,7 +133,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 }
 
 func (this *ConfigMysql) From(b []byte) error {
-	return nil
+	return json.Unmarshal(b, this)
 }
 
 func (this *ConfigMysql) Enabled() bool {
