@@ -36,11 +36,11 @@ if [[ $1 = "-gc" ]]; then
 fi
 
 if [[ $1 = "-cpu" ]]; then
-    go tool pprof ./daemon/faed/faed prof/cpu.pprof
+    go tool pprof ./cmd/faed/faed prof/cpu.pprof
     exit
 fi
 if [[ $1 = "-mem" ]]; then
-    #go tool pprof ./daemon/faed/faed prof/mem.pprof
+    #go tool pprof ./cmd/faed/faed prof/mem.pprof
     echo "================="
     echo "allocated objects"
     echo "================="
@@ -54,7 +54,7 @@ if [[ $1 = "-mem" ]]; then
 fi
 
 cd $(dirname $0)/servant; make
-cd ../daemon/faed
+cd ../cmd/faed
 
 if [[ $1 = "-linux" ]]; then
     #cp -f ../../servant/gen-php/fun/rpc/* /Users/gaopeng/fun/dragon-server-code/v2/fae
