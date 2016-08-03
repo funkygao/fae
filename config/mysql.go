@@ -37,6 +37,10 @@ func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
 		panic("required field missing")
 	}
 
+	this.fillDsn()
+}
+
+func (this *ConfigMysqlServer) fillDsn() {
 	this.dsn = ""
 	if this.User != "" {
 		this.dsn = this.User + ":"
@@ -58,16 +62,18 @@ func (this *ConfigMysqlServer) DSN() string {
 }
 
 type ConfigMysql struct {
-	ShardStrategy                string          `json:"shard_stategy"`
-	Timeout                      time.Duration   `json:"timeout"`
-	GlobalPools                  map[string]bool `json:"-"` // non-sharded pools
-	MaxIdleTime                  time.Duration   `json:"idle_timeout"`
-	MaxIdleConnsPerServer        int             `json:"max_idle_conns"`
-	MaxConnsPerServer            int             `json:"max_conns"`
-	HeartbeatInterval            int             `json:"heartbeat"`
-	JsonMergeMaxOutstandingItems int             `json:"-"`
-	CachePrepareStmtMaxItems     int             `json:"-"` // 0 means disabled
-	AllowNullableColumns         bool            `json:"nullable"`
+	ShardStrategy                string                        `json:"shard_stategy"`
+	Timeout                      time.Duration                 `json:"timeout"`
+	GlobalPools                  map[string]bool               `json:"-"` // non-sharded pools
+	MaxIdleTime                  time.Duration                 `json:"idle_timeout"`
+	MaxIdleConnsPerServer        int                           `json:"max_idle_conns"`
+	MaxConnsPerServer            int                           `json:"max_conns"`
+	HeartbeatInterval            int                           `json:"-"`
+	JsonMergeMaxOutstandingItems int                           `json:"-"`
+	CachePrepareStmtMaxItems     int                           `json:"-"` // 0 means disabled
+	AllowNullableColumns         bool                          `json:"-"`
+	Breaker                      ConfigBreaker                 `json:"breaker"`
+	Servers                      map[string]*ConfigMysqlServer `json:"pools"` // key is pool
 
 	// cache related
 	CacheStore            string `json:"-"`
@@ -75,13 +81,10 @@ type ConfigMysql struct {
 	CacheStoreMemMaxItems int    `json:"-"`
 	CacheKeyHash          bool   `json:"-"`
 
-	Breaker ConfigBreaker `json:"breaker"`
-
 	LookupCacheMaxItems int    `json:"-"`
 	LookupPool          string `json:"-"`
 
 	lookupTables conf.Conf
-	Servers      map[string]*ConfigMysqlServer `json:"pool"` // key is pool
 }
 
 func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
@@ -133,7 +136,21 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 }
 
 func (this *ConfigMysql) From(b []byte) error {
-	return json.Unmarshal(b, this)
+	err := json.Unmarshal(b, this)
+	if err != nil {
+		return err
+	}
+
+	// setup the internal structs
+	for _, server := range this.Servers {
+		server.conf = this
+		server.fillDsn()
+		if server.dsn == "" {
+			return fmt.Errorf("empty mysql DSN for server: %s/%s", server.Pool, server.DbName)
+		}
+	}
+
+	return nil
 }
 
 func (this *ConfigMysql) Enabled() bool {

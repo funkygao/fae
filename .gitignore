@@ -29,7 +29,8 @@ servant/gen-java/
 var/
 log/
 profiler/
-daemon/faed/faed
+cmd/faed/faed
+cmd/pingfae/pingfae
 client/go/stress/stress
 client/go/broken/broken
 faed.lock
