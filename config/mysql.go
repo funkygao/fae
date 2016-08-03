@@ -8,17 +8,16 @@ import (
 )
 
 type ConfigMysqlServer struct {
-	Pool    string
-	Host    string
-	Port    string
-	User    string
-	Pass    string
-	DbName  string
-	Charset string
+	Pool    string `json:"pool"`
+	Host    string `json:"host"`
+	Port    string `json:"port"`
+	User    string `json:"user"`
+	Pass    string `json:"pass"`
+	DbName  string `json:"db"`
+	Charset string `json:"charset"`
 
 	conf *ConfigMysql
-
-	dsn string // cache of op result
+	dsn  string // cache of op result
 }
 
 func (this *ConfigMysqlServer) loadConfig(section *conf.Conf) {
@@ -57,29 +56,30 @@ func (this *ConfigMysqlServer) DSN() string {
 }
 
 type ConfigMysql struct {
-	ShardStrategy                string
-	Timeout                      time.Duration
-	GlobalPools                  map[string]bool // non-sharded pools
-	MaxIdleTime                  time.Duration
-	MaxIdleConnsPerServer        int
-	MaxConnsPerServer            int
-	HeartbeatInterval            int // TODO
-	JsonMergeMaxOutstandingItems int
-	CachePrepareStmtMaxItems     int // 0 means disabled
-	AllowNullableColumns         bool
+	ShardStrategy                string          `json:"shard_stategy"`
+	Timeout                      time.Duration   `json:"timeout"`
+	GlobalPools                  map[string]bool `json:"-"` // non-sharded pools
+	MaxIdleTime                  time.Duration   `json:"idle_timeout"`
+	MaxIdleConnsPerServer        int             `json:"max_idle_conns"`
+	MaxConnsPerServer            int             `json:"max_conns"`
+	HeartbeatInterval            int             `json:"heartbeat"`
+	JsonMergeMaxOutstandingItems int             `json:"-"`
+	CachePrepareStmtMaxItems     int             `json:"-"` // 0 means disabled
+	AllowNullableColumns         bool            `json:"nullable"`
 
 	// cache related
-	CacheStore            string
-	CacheStoreRedisPool   string
-	CacheStoreMemMaxItems int
-	CacheKeyHash          bool
+	CacheStore            string `json:"-"`
+	CacheStoreRedisPool   string `json:"-"`
+	CacheStoreMemMaxItems int    `json:"-"`
+	CacheKeyHash          bool   `json:"-"`
 
-	Breaker ConfigBreaker
+	Breaker ConfigBreaker `json:"breaker"`
 
-	LookupCacheMaxItems int
-	LookupPool          string
-	lookupTables        conf.Conf
-	Servers             map[string]*ConfigMysqlServer // key is pool
+	LookupCacheMaxItems int    `json:"-"`
+	LookupPool          string `json:"-"`
+
+	lookupTables conf.Conf
+	Servers      map[string]*ConfigMysqlServer `json:"pool"` // key is pool
 }
 
 func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
@@ -128,6 +128,10 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	}
 
 	log.Debug("mysql conf: %+v", *this)
+}
+
+func (this *ConfigMysql) From(b []byte) error {
+	return nil
 }
 
 func (this *ConfigMysql) Enabled() bool {
