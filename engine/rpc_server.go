@@ -50,7 +50,7 @@ func NewTFunServer(engine *Engine,
 		stats:  newEngineStats(),
 		errors: make(map[string]int32, 1<<10),
 		leakyBucket: ratelimiter.NewLeakyBucket(
-			uint16(config.Engine.Rpc.HostMaxCallPerMinute), time.Minute),
+			int64(config.Engine.Rpc.HostMaxCallPerMinute), time.Minute),
 		processorFactory:       thrift.NewTProcessorFactory(processor),
 		serverTransport:        serverTransport,  // TServerSocket
 		inputTransportFactory:  transportFactory, // TBufferedTransportFactory
