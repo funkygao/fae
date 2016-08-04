@@ -70,6 +70,7 @@
 
             lookup_cache_max_items: 1048576
             lookup_pool: "ShardLookup"
+            default_lookup_table: "AppLookup"
             lookup_tables: {
                 "ShardLookup": "AppLookup"
             }

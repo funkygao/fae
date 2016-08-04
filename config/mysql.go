@@ -83,6 +83,7 @@ type ConfigMysql struct {
 
 	LookupCacheMaxItems int    `json:"lookup_cache_max_items"`
 	LookupPool          string `json:"lookup_pool"`
+	DefaultLookupTable  string `json:"default_lookup_table"`
 
 	lookupTables conf.Conf
 }
@@ -105,6 +106,7 @@ func (this *ConfigMysql) LoadConfig(cf *conf.Conf) {
 	this.CacheStoreMemMaxItems = cf.Int("cache_store_mem_max_items", 10<<20)
 	this.CacheStoreRedisPool = cf.String("cache_store_redis_pool", "db_cache")
 	this.CacheKeyHash = cf.Bool("cache_key_hash", false)
+	this.DefaultLookupTable = cf.String("default_lookup_table", "")
 	this.LookupPool = cf.String("lookup_pool", "ShardLookup")
 	this.JsonMergeMaxOutstandingItems = cf.Int("json_merge_max_outstanding_items", 8<<20)
 	this.LookupCacheMaxItems = cf.Int("lookup_cache_max_items", 1<<20)
@@ -169,5 +171,5 @@ func (this *ConfigMysql) Pools() (pools []string) {
 }
 
 func (this *ConfigMysql) LookupTable(pool string) (lookupTable string) {
-	return this.lookupTables.String(pool, "")
+	return this.lookupTables.String(pool, this.DefaultLookupTable)
 }
