@@ -9,7 +9,7 @@ import (
 
 func TestJsonizeConfigMysql(t *testing.T) {
 	s := server.NewServer("test")
-	s.LoadConfig("../etc/faed.cf")
+	s.LoadConfig("../etc/pubsub.cf")
 	section, _ := s.Conf.Section("servants.mysql")
 	cf := &ConfigMysql{}
 	cf.LoadConfig(section)

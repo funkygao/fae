@@ -64,7 +64,7 @@ func (this *ConfigMysqlServer) DSN() string {
 type ConfigMysql struct {
 	ShardStrategy                string                        `json:"shard_stategy"`
 	Timeout                      time.Duration                 `json:"timeout"`
-	GlobalPools                  map[string]bool               `json:"-"` // non-sharded pools
+	GlobalPools                  map[string]bool               `json:"global_pools"` // non-sharded pools
 	MaxIdleTime                  time.Duration                 `json:"idle_timeout"`
 	MaxIdleConnsPerServer        int                           `json:"max_idle_conns"`
 	MaxConnsPerServer            int                           `json:"max_conns"`
@@ -76,13 +76,13 @@ type ConfigMysql struct {
 	Servers                      map[string]*ConfigMysqlServer `json:"pools"` // key is pool
 
 	// cache related
-	CacheStore            string `json:"-"`
+	CacheStore            string `json:"cache_store"`
 	CacheStoreRedisPool   string `json:"-"`
-	CacheStoreMemMaxItems int    `json:"-"`
-	CacheKeyHash          bool   `json:"-"`
+	CacheStoreMemMaxItems int    `json:"cache_cap"`
+	CacheKeyHash          bool   `json:"cache_keyhash"`
 
-	LookupCacheMaxItems int    `json:"-"`
-	LookupPool          string `json:"-"`
+	LookupCacheMaxItems int    `json:"lookup_cache_max_items"`
+	LookupPool          string `json:"lookup_pool"`
 
 	lookupTables conf.Conf
 }

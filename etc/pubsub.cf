@@ -1,0 +1,207 @@
+{
+    etcd_servers: [
+        "127.0.0.1:2181"
+    ]
+
+    reload_watchdog_interval: "1s"
+    http_listen_addr: ":9101"
+    dashboard_listen_addr: ":8000"
+    pprof_listen_addr: ":9102"
+    cpu_num: "max"
+    metrics_logfile: "metrics.log"
+    server_mode: true
+
+    rpc: {
+        listen_addr: ":9001"
+        protocol: "binary"
+        buffer_size: 4096
+        prefork_mode: true
+        host_max_call_per_minute: 6000
+        max_outstanding_sessions: 50000
+        session_timeout: "0s"
+        io_timeout: "4s"
+        stats_output_interval: "1m"
+    }
+
+    plugin: {
+        plugins: [
+            {
+                name: "RateLimiter"
+            }
+        ]
+    }
+
+    servants: {
+        session_max_items: 20000
+        stats_output_interval: "1m"
+        call_slow_threshold: "1s"
+
+        // 100/10000 = 1%
+        profiler_rate: 100
+        profiler_max_body_size: 600
+
+        idgen_worker_id: 1
+
+        proxy: {
+            pool_capacity: 300
+            io_timeout: "0s"
+            idle_timeout: "0s"
+            diagnostic_interval: "5s"
+            borrow_timeout: "10s"
+            buffer_size: 4096
+            tcp_nodelay: true
+        }
+
+        mysql: {
+            timeout: "10s"
+            max_idle_time: "4h"
+            max_idle_conns_per_server: 5
+            max_conns_per_server: 50
+            cache_prepare_stmt_max_items: 1024
+            cache_store: "mem"
+            cache_key_hash: false
+            cache_store_mem_max_items: 1024
+            shard_strategy: "standard"
+
+            breaker: {
+                failure_allowance: 10
+                retry_interval: "5s"
+            }
+
+            lookup_cache_max_items: 1048576
+            lookup_pool: "ShardLookup"
+            lookup_tables: {
+                "ShardLookup": "AppLookup"
+            }
+
+            // non sharded pools
+            global_pools: [
+                "ShardLookup",
+            ]
+
+            servers: [
+                {
+                    pool: "ShardLookup"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "root"
+                    password: ""
+                    db: "pubsub"
+                }
+                {
+                    pool: "AppShard1"
+                    host: "127.0.0.1"
+                    port: 3306
+                    username: "root"
+                    password: ""
+                    db: "pubsub"
+                }
+            ]
+        }
+
+        mongodb_offline: {
+            debug_heartbeat: false
+            debug_protocol: false
+            shard_base_num: 100000
+            shard_strategy: "legacy"
+            connect_timeout: "4s"
+            io_timeout: "30s"
+            heartbeat_interval: 30
+            max_idle_conns_per_server: 20
+            max_conns_per_server: 50
+            breaker: {
+                failure_allowance: 10
+                retry_interval: "5s"
+            }
+            servers: [
+                {
+                    pool: "log"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "royal_log"
+                    replicaSet: ""
+                }
+                {
+                    pool: "default"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "royal_0"
+                }
+                {
+                    pool: "db1"
+                    host: "127.0.0.1"
+                    port: 27017
+                    db: "royal_1"
+                }
+            ]
+        }
+
+        lcache: {
+            max_items: 10485760
+        }
+
+        lock: {
+            max_items: 10485760
+            expires: "10s"
+        }
+
+        redis_: {
+            breaker: {
+                failure_allowance: 10
+                retry_interval: "5s"
+            }
+
+            pools: [
+                {
+                    name: "default"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 50
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
+                {
+                    name: "game"
+                    servers: [
+                        {
+                            addr: "127.0.0.1:6379"
+                            max_idle: 5
+                            max_active: 50
+                            idle_timeout: "0s"
+                        }
+                    ]
+                }
+            ]
+        }
+
+        memcache_: {
+            hash_strategy: "standard"
+            max_conns_per_server: 200
+            max_idle_conns_per_server: 20
+            timeout: "4s"
+            replica_num: 2
+            breaker: {
+                failure_allowance: 10
+                retry_interval: "5s"
+            }
+            servers: [
+                {
+                    pool: "default"
+                    host: "127.0.0.1"
+                    port: "11211"
+                }
+            ]
+        }
+
+        couchbase_offline: {
+            servers: [
+                "http://localhost:8091/",
+            ]
+        }
+
+    }
+
+}
