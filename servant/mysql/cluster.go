@@ -94,7 +94,7 @@ func (this *MysqlCluster) QueryShards(pool string, table string, sql string,
 }
 
 func (this *MysqlCluster) Query(pool string, table string, hintId int,
-	sql string, args []interface{}) (*sql_.Rows, error) {
+	sql string, args ...interface{}) (*sql_.Rows, error) {
 	my, err := this.selector.PickServer(pool, table, hintId)
 	if err != nil {
 		return nil, err
