@@ -5,9 +5,12 @@ import (
 	"testing"
 
 	"github.com/funkygao/golib/server"
+	log "github.com/funkygao/log4go"
 )
 
 func TestJsonizeConfigMysql(t *testing.T) {
+	log.Disable()
+
 	s := server.NewServer("test")
 	s.LoadConfig("../etc/pubsub.cf")
 	section, _ := s.Conf.Section("servants.mysql")
