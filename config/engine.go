@@ -71,7 +71,7 @@ func (this *ConfigEngine) LoadConfig(cf *conf.Conf) {
 
 func (this *ConfigEngine) watchReload() {
 	ch := make(chan *conf.Conf, 5)
-	go conf.Watch(this.Conf, this.ReloadWatchdogInterval, ch)
+	go this.Conf.Watch(this.ReloadWatchdogInterval, nil, ch)
 	for {
 		select {
 		case cf := <-ch:
